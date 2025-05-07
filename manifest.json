@@ -1,0 +1,33 @@
+{
+  "id": "bks-ai-assistant",
+  "name": "AI Assistant",
+  "version": "1.0.0",
+  "minAppVersion": "5",
+  "description": "AI Assistant for Beekeeper Studio",
+  "author": {
+    "name": "Beekeeper Studio",
+    "url": "https://beekeeperstudio.io"
+  },
+  "capabilities": {
+    "views": {
+      "sidebars": [
+        {
+          "id": "bks-ai-assistant",
+          "name": "AI Assistant",
+          "location": "secondary",
+          "entry": "dist/index.html"
+        }
+      ]
+    }
+  },
+  "settings": [
+    {
+      "id": "apiKey",
+      "name": "API Key",
+      "type": "string",
+      "description": "Your API key.",
+      "default": ""
+    }
+  ],
+  "permissions": []
+}
