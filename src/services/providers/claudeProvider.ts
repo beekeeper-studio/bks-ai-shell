@@ -1,49 +1,37 @@
-/**
- * Claude-specific implementation of the model provider
- */
-
 import { BaseModelProvider } from './baseProvider';
 import { ChatAnthropic, type AnthropicInput } from '@langchain/anthropic';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { HumanMessage, AIMessage, ToolMessage, MessageContent } from "@langchain/core/messages";
-import { 
-  generateDatabaseSchemaInfo, 
-  getConnectionInfoTool, 
-  getTablesTool, 
-  getTableColumnsTool 
+import {
+  generateDatabaseSchemaInfo,
+  getConnectionInfoTool,
+  getTablesTool,
+  getTableColumnsTool
 } from '../../tools/databaseTools';
 import { getActiveTabTool, updateQueryTextTool } from '../../tools/modelTools';
 import { IConversationMessage, IModel } from '../../types';
-import { CLAUDE_MODELS, DEFAULT_CONFIG } from '../../config';
-import { DynamicStructuredTool, DynamicTool } from 'langchain/tools';
 
 export class ClaudeProvider extends BaseModelProvider {
+  public static displayName = 'Claude';
+
   private anthropicClient: Anthropic | null = null;
   private langChainModel: ChatAnthropic | null = null;
   private llmWithTools: ReturnType<ChatAnthropic['bindTools']> | null = null;
-  private temperature: number;
-  private systemPrompt: string;
-  
-  constructor(config: any = {}) {
-    super(config);
-    this.temperature = config.temperature || DEFAULT_CONFIG.temperature;
-    this.systemPrompt = config.systemPrompt || DEFAULT_CONFIG.systemPrompt;
-  }
-  
+
   getProviderName(): string {
     return 'Claude';
   }
-  
+
   async initialize(): Promise<boolean> {
     try {
       this.validateConfig();
-      
+
       // Initialize the Anthropic client for API interactions
       this.anthropicClient = new Anthropic({
         apiKey: this.apiKey,
         dangerouslyAllowBrowser: true
       });
-      
+
       // Initialize LangChain's ChatAnthropic for the chat interface
       // Create config with proper type that includes dangerouslyAllowBrowser
       const chatConfig: AnthropicInput & {dangerouslyAllowBrowser?: boolean} = {
@@ -54,21 +42,21 @@ export class ClaudeProvider extends BaseModelProvider {
         dangerouslyAllowBrowser: true
       };
       this.langChainModel = new ChatAnthropic(chatConfig);
-      
+
       // Set up tool calling with LangChain - bind all available tools
       const tools = [
-        getActiveTabTool, 
+        getActiveTabTool,
         updateQueryTextTool,
         getConnectionInfoTool,
         getTablesTool,
         getTableColumnsTool
       ];
       this.llmWithTools = this.langChainModel.bindTools(tools);
-      
+
       // Get database schema information for the system prompt
       try {
         const schemaInfo = await generateDatabaseSchemaInfo();
-        
+
         // Enhanced system prompt with database schema
         this.systemPrompt = `${this.systemPrompt}
 
@@ -103,20 +91,20 @@ You have the following special tools available:
         console.error("Error fetching database schema:", schemaError);
         // Continue with original system prompt if there's an error
       }
-      
+
       return true;
     } catch (error) {
       console.error("Error initializing Claude provider:", error);
       throw error;
     }
   }
-  
+
   async getAvailableModels(): Promise<IModel[]> {
     try {
       if (!this.apiKey) {
         throw new Error('API key not provided');
       }
-      
+
       // Initialize the client if not already done
       if (!this.anthropicClient) {
         this.anthropicClient = new Anthropic({
@@ -124,10 +112,10 @@ You have the following special tools available:
           dangerouslyAllowBrowser: true
         });
       }
-      
+
       // Get available models
       const response = await this.anthropicClient.models.list();
-      
+
       // Filter for Claude models and sort by most recent/capable
       const claudeModels = response.data
         .filter(model => model.id.startsWith('claude'))
@@ -137,36 +125,23 @@ You have the following special tools available:
           if (!a.id.includes('opus') && b.id.includes('opus')) return 1;
           if (a.id.includes('sonnet') && !b.id.includes('sonnet')) return -1;
           if (!a.id.includes('sonnet') && b.id.includes('sonnet')) return 1;
-          
+
           // For models of the same tier, sort by date (convert string timestamps to numbers)
           const aTimestamp = typeof a.created_at === 'string' ? Date.parse(a.created_at) : (a.created_at || 0);
           const bTimestamp = typeof b.created_at === 'string' ? Date.parse(b.created_at) : (b.created_at || 0);
           return bTimestamp - aTimestamp;
         });
-        
+
       return claudeModels;
     } catch (error) {
       console.error('Error fetching Claude models:', error);
       throw error;
     }
   }
-  
-  getFallbackModels(): string[] {
-    return [
-      CLAUDE_MODELS.OPUS,
-      CLAUDE_MODELS.SONNET,
-      CLAUDE_MODELS.HAIKU,
-      CLAUDE_MODELS.SONNET_3_5,
-      CLAUDE_MODELS.CLAUDE_3,
-      CLAUDE_MODELS.CLAUDE_2_1,
-      CLAUDE_MODELS.CLAUDE_2_0,
-      CLAUDE_MODELS.CLAUDE_INSTANT
-    ];
-  }
-  
+
   formatModelName(modelId: string): string {
     let displayName = modelId;
-    
+
     // Extract model family and version for better display
     if (modelId.includes('-opus-')) {
       displayName = `Claude 3 Opus (${modelId.split('-').pop()})`;
@@ -185,32 +160,32 @@ You have the following special tools available:
     } else if (modelId.includes('instant')) {
       displayName = `Claude Instant (${modelId.split('-').pop()})`;
     }
-    
+
     return displayName;
   }
-  
+
   async sendMessage(message: string, conversationHistory: IConversationMessage[]): Promise<MessageContent> {
     try {
       if (!this.llmWithTools) {
         await this.initialize();
       }
-      
+
       // Convert conversation history to LangChain messages and add current message
       const historyWithoutLatest = conversationHistory.slice(0, -1);
-      const formattedMessages = historyWithoutLatest.map(msg => 
+      const formattedMessages = historyWithoutLatest.map(msg =>
         msg.type === "human" ? new HumanMessage(msg.content) : new AIMessage(msg.content)
       );
       const messages = [...formattedMessages, new HumanMessage(message)];
-      
+
       // Defined available tools
       const tools = [
-        getActiveTabTool, 
+        getActiveTabTool,
         updateQueryTextTool,
         getConnectionInfoTool,
-        getTablesTool, 
+        getTablesTool,
         getTableColumnsTool
       ];
-      
+
       // Process message with potential tool calls recursively
       return this.processMessageWithTools(messages, tools);
     } catch (error) {
@@ -218,7 +193,7 @@ You have the following special tools available:
       throw error;
     }
   }
-  
+
   /**
    * Helper method to process a message with potential tool calls recursively
    * @param messages Current conversation messages
@@ -227,7 +202,7 @@ You have the following special tools available:
    * @returns Final message content
    */
   private async processMessageWithTools(
-    messages: (HumanMessage | AIMessage | ToolMessage)[], 
+    messages: (HumanMessage | AIMessage | ToolMessage)[],
     tools: any[],
     depth: number = 0
   ): Promise<MessageContent> {
@@ -237,30 +212,30 @@ You have the following special tools available:
       const finalResponse = await this.llmWithTools!.invoke(messages);
       return finalResponse.content;
     }
-    
+
     // Get response from model
     const aiMessage = await this.llmWithTools!.invoke(messages);
     console.log(`Tool call depth ${depth} - AI response:`, JSON.stringify(aiMessage, null, 2));
-    
+
     // If no tool calls were made, return the content directly
     if (!aiMessage.tool_calls?.length) {
       return aiMessage.content;
     }
-    
+
     // Process tool calls
     console.log(`Tool calls at depth ${depth}:`, aiMessage.tool_calls);
     const updatedMessages = [...messages, aiMessage];
     const toolMessages: ToolMessage[] = [];
-    
+
     // Handle each tool call
     for (const toolCall of aiMessage.tool_calls) {
       const toolToUse = tools.find(t => t.name === toolCall.name);
-      
+
       try {
         if (!toolToUse) {
           throw new Error(`Unknown tool: ${toolCall.name}`);
         }
-        
+
         // Execute tool and collect result
         const toolResult = await toolToUse.invoke(toolCall);
         toolMessages.push(new ToolMessage(toolResult, toolCall.id || ""));
@@ -273,12 +248,12 @@ You have the following special tools available:
         ));
       }
     }
-    
+
     // Recursively process the messages with tool results
     const finalMessages = [...updatedMessages, ...toolMessages];
     return this.processMessageWithTools(finalMessages, tools, depth + 1);
   }
-  
+
   // Set a custom system prompt
   setSystemPrompt(prompt: string): Promise<boolean> {
     this.systemPrompt = prompt;
@@ -286,7 +261,7 @@ You have the following special tools available:
     this.llmWithTools = null;
     return this.initialize();
   }
-  
+
   // Set temperature
   setTemperature(temperature: number): Promise<boolean> {
     this.temperature = temperature;

@@ -1,0 +1,20 @@
+@use "./theme";
+@use "./base";
+@use "./components/all";
+@use "sass:color";
+
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.assistant-app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+}
+

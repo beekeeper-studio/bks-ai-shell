@@ -7,7 +7,14 @@ const pendingQueries = new Map<
 >();
 
 window.addEventListener("message", (event) => {
-  const { id, result, error } = event.data || {};
+  const { id, name, args, result, error } = event.data || {};
+
+  if (name) {
+    const handlers = notificationListeners.get(name);
+    if (handlers) {
+      handlers.forEach((handler) => handler(args));
+    }
+  }
 
   if (id && pendingQueries.has(id)) {
     const { resolve, reject } = pendingQueries.get(id)!;
@@ -32,4 +39,16 @@ export async function query(name: string, args?: any): Promise<any> {
       reject(e);
     }
   });
+}
+
+const notificationListeners = new Map<string, ((args: any) => void)[]>();
+
+export async function addNotificationListener(
+  name: string,
+  handler: (args: any) => void,
+) {
+  if (!notificationListeners.get(name)) {
+    notificationListeners.set(name, []);
+  }
+  notificationListeners.get(name)!.push(handler);
 }

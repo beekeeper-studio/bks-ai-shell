@@ -16,11 +16,14 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@langchain/anthropic": "^0.3.15",
     "@langchain/core": "^0.3.43",
+    "@material-symbols/font-400": "^0.31.2",
     "langchain": "^0.3.19",
+    "pinia": "^3.0.2",
     "vue": "^3.4.21"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
+    "sass": "^1.87.0",
     "vite": "^6.2.3"
   }
 }

@@ -1,0 +1,143 @@
+/* Chat Interface Styles */
+.chat-container {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  background-color: var(--theme-bg-light);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--theme-bg-chat);
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.message.user {
+  align-self: flex-end;
+}
+
+.message.assistant,
+.message.system {
+  align-self: flex-start;
+}
+
+.message-content {
+  padding: 0.75rem 0.9rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.user .message-content {
+  border-radius: 1rem;
+  background-color: var(--theme-bg-message-user);
+  color: var(--theme-text-dark);
+  border-bottom-right-radius: 4px;
+}
+
+.assistant,
+.system {
+  .message-content {
+    color: var(--theme-text-message-system);
+  }
+}
+
+.thinking {
+  display: flex;
+  gap: 4px;
+  padding: 0.9rem 1.2rem;
+  margin-left: 1rem;
+  background-color: var(--theme-thinking-bg);
+  border-radius: 18px;
+  align-self: flex-start;
+  width: fit-content;
+}
+
+.thinking-dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--theme-thinking-dot);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.chat-input-container {
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+
+  .actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    #model-selector {
+      padding: 0 0.3rem;
+      height: 2rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+
+      &:hover {
+        background-color: rgb(from var(--theme-base) r g b / 10%);
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    .submit-btn {
+      background-color: transparent;
+      color: var(--theme-text-dark);
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+
+      &:disabled {
+        color: rgb(from var(--theme-text-dark) r g b / 50%);
+      }
+
+      span {
+        font-variation-settings: "FILL" 1;
+        font-size: 1.4rem;
+      }
+    }
+  }
+}

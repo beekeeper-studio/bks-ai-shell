@@ -5,7 +5,7 @@
 import { tool } from "@langchain/core/tools";
 import { query } from "../services/databaseService";
 import { IActiveTab, IConnectionInfo, ITableColumn } from "../types";
-import { TOOLS } from "../config";
+import { TOOLS } from "../configs";
 
 /**
  * Get information about the user's currently active tab
@@ -61,7 +61,6 @@ export const getTablesTool = tool(async () => {
  */
 export const getTableColumnsTool = tool(async (input: { table: string }) => {
   try {
-    console.log("momo", input);
     if (!input || !input.table) {
       throw new Error("Table name is required");
     }

@@ -15,11 +15,12 @@
           "id": "bks-ai-assistant",
           "name": "AI Assistant",
           "location": "secondary",
-          "entry": "dist/index.html"
+          "entry": "index.html"
         }
       ]
     }
   },
+  "pluginEntryDir": "dist",
   "settings": [
     {
       "id": "apiKey",

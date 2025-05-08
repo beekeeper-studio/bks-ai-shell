@@ -5,7 +5,7 @@
 import { tool } from "@langchain/core/tools";
 import { query } from '../services/databaseService';
 import { IActiveTab } from '../types';
-import { TOOLS } from '../config';
+import { TOOLS } from '../configs';
 
 // Interface for updateQueryText parameters
 interface UpdateQueryParams {

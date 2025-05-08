@@ -3,19 +3,25 @@
  * Provides compatibility layer for the old api.js API
  */
 
+import { ProviderId } from './configs';
 import * as apiService from './services/apiService';
-import { IConversationMessage, IModel } from './types';
-import { BaseModelProvider } from './services/providers/baseProvider';
+// import { BaseModelProvider } from './services/providers/baseProvider';
+import { IConversationMessage, IModel, IModelConfig } from './types';
+// import { BaseModelProvider } from './services/providers/baseProvider';
 
-// Re-export functions from apiService with the same signatures as the old api.js
-export const initializeProvider = apiService.initializeProvider;
-export const switchProvider = apiService.switchProvider;
-export const setApiKey = apiService.setApiKey;
-export const setModel = apiService.setModel;
-export const getCurrentProvider = apiService.getCurrentProvider;
-export const getActiveProviderDetails = apiService.getActiveProviderDetails;
-export const getAvailableProviders = apiService.getAvailableProviders;
-export const formatModelName = apiService.formatModelName;
+// // Re-export functions from apiService with the same signatures as the old api.js
+// export const initializeProvider = apiService.initializeProvider;
+// export const switchProvider = apiService.switchProvider;
+// export const setApiKey = apiService.setApiKey;
+// export const setModel = apiService.setModel;
+// export const getCurrentProvider = apiService.getCurrentProvider;
+// export const getActiveProviderDetails = apiService.getActiveProviderDetails;
+// export const formatModelName = apiService.formatModelName;
+
+export type InitializeProviderConfig = {
+  provider: ProviderId;
+  apiKey: string;
+}
 
 /**
  * Fetch available models from current provider
@@ -29,22 +35,22 @@ export async function fetchAvailableModels(): Promise<{
   fallbackModels?: string[];
 }> {
   const response = await apiService.fetchAvailableModels();
-  
+
   if (response.success && response.data) {
     return {
       success: true,
       models: response.data.models,
-      provider: response.data.provider
+      provider: response.data.providerName
     };
   } else {
     // Handle error case
     const fallbackModels = response.data?.fallbackModels?.map(model => model.id) || [];
-    
+
     return {
       success: false,
       error: response.error || 'Failed to load models',
       fallbackModels,
-      provider: response.data?.provider
+      provider: response.data?.providerName
     };
   }
 }
@@ -54,7 +60,7 @@ export async function fetchAvailableModels(): Promise<{
  * (Adapted to match old return format)
  */
 export async function sendMessage(
-  message: string, 
+  message: string,
   conversationHistory: IConversationMessage[]
 ): Promise<{
   success: boolean;
@@ -63,7 +69,7 @@ export async function sendMessage(
   error?: string;
 }> {
   const response = await apiService.sendMessage(message, conversationHistory);
-  
+
   if (response.success && response.data) {
     return {
       success: true,
