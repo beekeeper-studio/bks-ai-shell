@@ -48,7 +48,10 @@ export abstract class BaseModelProvider {
    */
   abstract getAvailableModels(): Promise<IModel[]>;
 
-  abstract getDefaultModel(): Promise<IModel>;
+  async getDefaultModel(): Promise<IModel> {
+    const models = await this.getAvailableModels();
+    return models[0];
+  }
 
   /**
    * Format a model for display
@@ -76,9 +79,6 @@ export abstract class BaseModelProvider {
   validateConfig(): void {
     if (!this.apiKey) {
       throw new Error('API key not provided');
-    }
-    if (!this.model) {
-      throw new Error('Model name not provided');
     }
   }
 

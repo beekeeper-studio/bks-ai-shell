@@ -22,7 +22,7 @@
           :placeholder="`Enter your ${selectedProviderName} API key here`"
           :required="requireApiKey"
         />
-        <button type="submit">Start Chatting</button>
+        <button class="btn btn-primary" type="submit">Start Chatting</button>
       </form>
       <div class="api-info">
         <p>

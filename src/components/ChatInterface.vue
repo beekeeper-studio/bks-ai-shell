@@ -247,13 +247,8 @@ export default {
       this.isThinking = true;
 
       try {
-        // TODO remove the logs
-        console.log("Sending message to API:", message);
-        console.log("Conversation history:", this.conversationHistory);
-
         // Call the API using the current provider
         const result = await sendMessage(message, this.conversationHistory);
-        console.log("API response:", result);
 
         // const stream = streamMessage({
         //   onMessage: (message) => {
@@ -281,14 +276,12 @@ export default {
         if (result.success) {
           // Add the assistant message to the UI
           this.addMessage("assistant", result.data?.content);
-          console.log("Assistant response added to UI");
 
           // Add assistant response to conversation history
           this.conversationHistory.push({
             type: "ai",
             content: result.data?.content,
           });
-          console.log("Conversation history updated");
         } else {
           // Handle error
           const errorMessage = `Error: ${result.error || "Unknown error occurred"}`;
@@ -304,7 +297,6 @@ export default {
       } finally {
         // Clear thinking state
         this.isThinking = false;
-        console.log("Thinking state cleared");
       }
     },
   },

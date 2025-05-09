@@ -13,7 +13,7 @@ body {
   height: 100vh;
   overflow: hidden;
   background-color: var(--theme-bg);
-  color: var(--theme-text-dark);
+  color: var(--text-dark);
 }
 
 textarea {
@@ -24,8 +24,8 @@ textarea {
   font-size: 1rem;
   outline: none;
   transition: border-color 0.2s;
-  background-color: var(--theme-bg-light);
-  color: var(--theme-text-dark);
+  background-color: var(--theme-bg);
+  color: var(--text-dark);
   font-family: inherit;
 }
 
@@ -33,23 +33,9 @@ textarea:focus {
   border-color: var(--theme-primary);
 }
 
-button {
-  background-color: var(--theme-base);
-  color: var(--theme-text-light);
-  border: none;
-  border-radius: 8px;
-  padding: 0.8rem 1.2rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-button:hover {
-  background-color: var(--theme-primary-dark);
-}
-
-button:disabled {
-  background-color: var(--theme-base);
+a {
+  color: var(--link-color);
+  font-weight: 700;
 }
 
 /* Make the scrollbar look better */
@@ -64,8 +50,4 @@ button:disabled {
 ::-webkit-scrollbar-thumb {
   background: var(--theme-scrollbar-thumb);
   border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--theme-scrollbar-thumb-hover);
 }

@@ -1,6 +1,7 @@
-@use "./theme";
-@use "./base";
-@use "./components/all";
+@use "theme";
+@use "base";
+@use "components/all" as components;
+@use "pages/all" as pages;
 @use "sass:color";
 
 #app {

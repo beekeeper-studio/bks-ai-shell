@@ -30,11 +30,6 @@ export class MockProvider extends BaseModelProvider {
     return [{ id: "mock-standard" }, { id: "mock-pro" }];
   }
 
-  async getDefaultModel(): Promise<IModel> {
-    const models = await this.getAvailableModels();
-    return models[0];
-  }
-
   formatModelName(modelId: string): string {
     if (modelId === "mock-standard") {
       return "MockAI Standard";
@@ -75,15 +70,7 @@ export class MockProvider extends BaseModelProvider {
     let response = this.defaultResponse;
     response += `\n\nAs a database assistant, I can provide more detailed responses. Your conversation history has ${conversationHistory.length} messages.`;
 
-    console.log("response", response);
-
     return response;
-  }
-
-  // Set a custom system prompt
-  setSystemPrompt(prompt: string): Promise<boolean> {
-    this.systemPrompt = prompt;
-    return Promise.resolve(true);
   }
 
   validateConfig(): void {

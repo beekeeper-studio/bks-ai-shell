@@ -1,0 +1,14 @@
+@use "sass:color";
+
+:root {
+  --theme-bg-message-user: rgb(from var(--theme-primary) r g b / 50%);
+  --theme-fg-message-user: var(--theme-base);
+  --theme-bg-message-assistant: rgba(var(--theme-base), 0.05);
+  --theme-bg-message-system: rgba(var(--brand-info), 0.1);
+  --theme-text-message-system: var(--text-dark);
+  --theme-bg-chat: rgba(var(--theme-base), 0.01);
+  --theme-thinking-bg: rgba(var(--theme-base), 0.05);
+  --theme-thinking-dot: var(--text);
+  --theme-scrollbar-track: transparent;
+  --theme-scrollbar-thumb: color-mix(in srgb, var(--theme-base) 20%, var(--theme-bg) 80%);
+}

@@ -1,22 +1,24 @@
-import './assets/styles/_all.scss'
-import '@material-symbols/font-400/outlined.css';
+import "./assets/styles/main.scss";
+import "@material-symbols/font-400/outlined.css";
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-import { addNotificationListener, query } from './Comms'
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import App from "./App.vue";
+import { addNotificationListener, query } from "./Comms";
 
-addNotificationListener("themeChanged", ({ value }) => {
-    document.body.classList.toggle('dark-theme', value === 'dark');
-});
+function injectStyle() {
+  query("getTheme").then((theme) => {
+    document.querySelector("#injected-style")!.textContent =
+      `:root { ${theme.cssString} }`;
+  });
+}
 
-query("getTheme").then((theme) => {
-    document.body.classList.toggle('dark-theme', theme === 'dark');
-})
+addNotificationListener("themeChanged", () => injectStyle());
 
+injectStyle();
 
 // Create and mount the Vue app
-const app = createApp(App)
-const pinia = createPinia()
-app.use(pinia)
-app.mount('#app')
+const app = createApp(App);
+const pinia = createPinia();
+app.use(pinia);
+app.mount("#app");
