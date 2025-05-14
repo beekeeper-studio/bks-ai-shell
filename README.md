@@ -1,6 +1,6 @@
-# Claude AI Assistant with LangChain
+# AI Assistant 
 
-A browser-based AI assistant application built with Claude SDK and LangChain, featuring a modular architecture.
+A plugin for Beekeeper Studio
 
 ## Setup
 
