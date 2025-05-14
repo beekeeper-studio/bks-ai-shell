@@ -4,13 +4,12 @@ import "@material-symbols/font-400/outlined.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-import { addNotificationListener, query } from "./Comms";
+import { addNotificationListener, request } from "./Comms";
 
-function injectStyle() {
-  query("getTheme").then((theme) => {
-    document.querySelector("#injected-style")!.textContent =
-      `:root { ${theme.cssString} }`;
-  });
+async function injectStyle() {
+  const theme = await request("getTheme");
+  document.querySelector("#injected-style")!.textContent =
+    `:root { ${theme.cssString} }`;
 }
 
 addNotificationListener("themeChanged", () => injectStyle());

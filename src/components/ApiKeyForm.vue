@@ -12,7 +12,7 @@
               :key="provider.id"
               :value="provider.id"
             >
-              {{ provider.label }}
+              {{ provider.displayName }}
             </option>
           </select>
         </div>
@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { UIProviders, ProviderId } from "../configs";
+import { Providers, ProviderId } from "../providers";
 
 export default {
   name: "ApiKeyForm",
@@ -70,7 +70,7 @@ export default {
 
   computed: {
     providers() {
-      return UIProviders;
+      return Providers;
     },
     selectedProviderName() {
       return (

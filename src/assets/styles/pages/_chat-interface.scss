@@ -27,30 +27,26 @@
   word-wrap: break-word;
 }
 
-.message.user {
-  align-self: flex-end;
-}
-
-.message.assistant,
-.message.system {
-  align-self: flex-start;
-}
-
 .message-content {
   padding: 0.75rem 0.9rem;
   line-height: 1.4;
   white-space: pre-wrap;
 }
 
-.user .message-content {
-  border-radius: 1rem;
-  background-color: var(--theme-bg-message-user);
-  color: var(--text-dark);
-  border-bottom-right-radius: 4px;
+.message.human {
+  align-self: flex-end;
+
+  .message-content {
+    border-radius: 1rem;
+    background-color: var(--theme-bg-message-user);
+    color: var(--text-dark);
+    border-bottom-right-radius: 4px;
+  }
 }
 
-.assistant,
-.system {
+.message.ai,
+.message.system {
+  align-self: flex-start;
   .message-content {
     color: var(--theme-text-message-system);
   }

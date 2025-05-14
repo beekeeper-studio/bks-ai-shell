@@ -14,6 +14,5 @@ export const DEFAULT_CONFIG = {
 export const STORAGE_KEYS = {
   API_KEY: "chatbot_api_key",
   PROVIDER: "chatbot_provider",
-  MODEL: "chatbot_model",
 };
 

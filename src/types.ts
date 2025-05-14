@@ -22,13 +22,7 @@ export interface IActiveTab {
   };
 }
 
-// Chat message related types
 export interface IChatMessage {
-  role: string;
-  content: string;
-}
-
-export interface IConversationMessage {
   type: "human" | "ai" | "system";
   content: string;
 }
@@ -36,14 +30,15 @@ export interface IConversationMessage {
 // Model and provider related types
 export interface IModelConfig {
   apiKey: string;
-  modelName?: string;
+  /** If not provided, will use the default model */
   temperature?: number;
   systemPrompt?: string;
+  model: IModel;
 }
 
 export interface IModel {
   id: string;
-  created_at?: number | string;
+  displayName: string;
 }
 
 export interface IApiResponse<T> {

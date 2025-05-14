@@ -37,10 +37,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(useProviderStore, ["setApiKey", "setProvider"]),
+    ...mapActions(useProviderStore, ["setApiKey", "setProviderId"]),
     async handleApiKeySubmit(data) {
       this.setApiKey(data.key);
-      this.setProvider(data.provider);
+      this.setProviderId(data.provider);
       this.page = "chat-interface";
     },
   },

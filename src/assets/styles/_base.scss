@@ -27,10 +27,10 @@ textarea {
   background-color: var(--theme-bg);
   color: var(--text-dark);
   font-family: inherit;
-}
 
-textarea:focus {
-  border-color: var(--theme-primary);
+  &:focus {
+    border-color: var(--theme-primary);
+  }
 }
 
 a {
