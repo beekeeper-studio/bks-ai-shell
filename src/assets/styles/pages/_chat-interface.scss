@@ -20,14 +20,16 @@
 }
 
 .message {
-  margin-bottom: 10px;
-  padding: 8px 12px;
+  padding: 0.6rem 12px;
   border-radius: 16px;
   max-width: 80%;
   word-wrap: break-word;
 }
 
 .message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
   padding: 0.75rem 0.9rem;
   line-height: 1.4rem;
   white-space: pre-wrap;

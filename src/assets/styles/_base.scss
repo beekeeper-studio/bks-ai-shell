@@ -33,6 +33,16 @@ textarea {
   }
 }
 
+ol, ul {
+  margin-inline: 0;
+  margin-block: -0.6rem;
+  padding-inline-start: 1rem;
+  line-height: 0.5rem;
+  li {
+    line-height: 1.4rem;
+  }
+}
+
 a {
   color: var(--link-color);
   font-weight: 700;
