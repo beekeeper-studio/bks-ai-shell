@@ -7,6 +7,7 @@ import {
   ToolMessage,
   SystemMessage,
   AIMessageChunk,
+  BaseMessage,
 } from "@langchain/core/messages";
 import {
   getConnectionInfoTool,
@@ -15,7 +16,7 @@ import {
   getActiveTabTool,
   updateQueryTextTool,
 } from "../tools";
-import { IChatMessage, IModel, IModelConfig } from "../types";
+import { IModel, IModelConfig } from "../types";
 
 interface ClaudeProviderConfig {
   anthropicClient: Anthropic;
@@ -105,46 +106,13 @@ export class ClaudeProvider extends BaseModelProvider {
     throw new Error("Method not implemented.");
   }
 
-  async sendMessage(
-    message: string,
-    conversationHistory: IChatMessage[],
-  ): Promise<string> {
-    try {
-      // Convert conversation history to LangChain messages and add current message
-      const historyWithoutLatest = conversationHistory.slice(0, -1);
-      const formattedMessages = historyWithoutLatest.map((msg) =>
-        msg.type === "human"
-          ? new HumanMessage(msg.content)
-          : msg.type === "system"
-            ? new SystemMessage(msg.content)
-            : new AIMessage(msg.content),
-      );
-      const messages = [...formattedMessages, new HumanMessage(message)];
-
-      // Process message with potential tool calls recursively
-      return this.processMessageWithTools(messages);
-    } catch (error) {
-      console.error("Error in Claude message:", error);
-      throw error;
-    }
-  }
-
   async sendStreamMessage(
     message: string,
-    conversationHistory: IChatMessage[],
-    callbacks: Callbacks
+    conversationHistory: BaseMessage[],
+    callbacks: Callbacks,
   ): Promise<void> {
     try {
-      // Convert conversation history to LangChain messages and add current message
-      const historyWithoutLatest = conversationHistory.slice(0, -1);
-      const formattedMessages = historyWithoutLatest.map((msg) =>
-        msg.type === "human"
-          ? new HumanMessage(msg.content)
-          : msg.type === "system"
-            ? new SystemMessage(msg.content)
-            : new AIMessage(msg.content),
-      );
-      const messages = [...formattedMessages, new HumanMessage(message)];
+      const messages = [...conversationHistory, new HumanMessage(message)];
 
       // Process message with potential tool calls recursively
       this.processStreamMessageWithTools(messages, callbacks);
@@ -155,22 +123,22 @@ export class ClaudeProvider extends BaseModelProvider {
   }
 
   async processStreamMessageWithTools(
-    messages: (HumanMessage | AIMessage | ToolMessage)[],
+    messages: BaseMessage[],
     callbacks: Callbacks,
     depth: number = 0,
   ): Promise<void> {
-    // Safety check to prevent infinite tool calls (max 7 levels)
-    if (depth > 7) {
+    // Safety check to prevent infinite tool calls (max 10 levels)
+    if (depth > 10) {
       console.warn("Max tool call depth reached, stopping recursion");
       const stream = await this.llmWithTools!.stream(messages);
       const aiMessage = (await stream.next()).value as AIMessageChunk;
 
       for await (const chunk of stream) {
-        await callbacks.onStreamChunk(chunk.text);
         aiMessage.concat(chunk);
+        await callbacks.onStreamChunk(aiMessage);
       }
 
-      callbacks.onFinalized();
+      callbacks.onFinalized(messages);
 
       return;
     }
@@ -181,46 +149,53 @@ export class ClaudeProvider extends BaseModelProvider {
     await callbacks.onStart?.();
 
     for await (const chunk of stream) {
-      console.log(chunk.content)
-      await callbacks.onStreamChunk(chunk.text);
       aiMessage = aiMessage.concat(chunk);
+      await callbacks.onStreamChunk(aiMessage);
     }
 
     await callbacks.onComplete?.();
 
+    const updatedMessages = [...messages, aiMessage];
+
     // No tool calls. End stream.
     if (!aiMessage.tool_calls?.length) {
-      callbacks.onFinalized();
+      callbacks.onFinalized(updatedMessages);
       return;
     }
 
-    const updatedMessages = [...messages, aiMessage];
     const toolMessages: ToolMessage[] = [];
 
     // Handle each tool call
     for (const toolCall of aiMessage.tool_calls) {
       const toolToUse = tools.find((t) => t.name === toolCall.name);
+      const name = toolCall.name;
+      const id = toolCall.id || "";
+      let result: any;
+      let toolMessage = new ToolMessage("", id, name);
+
+      // Execute tool and collect result
+      await callbacks.onBeforeToolCall?.(toolMessage);
 
       try {
         if (!toolToUse) {
           throw new Error(`Unknown tool: ${toolCall.name}`);
         }
 
-        // Execute tool and collect result
-        await callbacks.onToolCall?.(toolCall.name);
         const toolResult = await toolToUse.invoke(toolCall);
-        toolMessages.push(new ToolMessage(toolResult, toolCall.id || ""));
+        result = toolResult.text;
+        toolMessage = new ToolMessage(toolResult, id, name);
       } catch (error) {
         console.error(`Error with tool ${toolCall.name}:`, error);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        toolMessages.push(
-          new ToolMessage(
-            JSON.stringify({ error: errorMessage }),
-            toolCall.id || "",
-          ),
-        );
+        result = JSON.stringify({ error: errorMessage });
+        toolMessage = new ToolMessage(result, id, name);
       }
+
+      toolMessages.push(toolMessage);
+
+      // Execute tool and collect result
+      await callbacks.onAfterToolCall?.(toolMessage);
     }
 
     // Recursively process the messages with tool results
@@ -230,65 +205,6 @@ export class ClaudeProvider extends BaseModelProvider {
       callbacks,
       depth + 1,
     );
-  }
-
-  /**
-   * Helper method to process a message with potential tool calls recursively
-   * @param messages Current conversation messages
-   * @param depth Current recursion depth (to prevent infinite loops)
-   * @returns Final message content
-   */
-  private async processMessageWithTools(
-    messages: (HumanMessage | AIMessage | ToolMessage)[],
-    depth: number = 0,
-  ): Promise<string> {
-    // Safety check to prevent infinite tool calls (max 3 levels)
-    if (depth > 7) {
-      console.warn("Max tool call depth reached, stopping recursion");
-      const finalResponse = await this.llmWithTools!.invoke(messages);
-      return finalResponse.text;
-    }
-
-    // Get response from model
-    const aiMessage = await this.llmWithTools!.invoke(messages);
-
-    // If no tool calls were made, return the content directly
-    if (!aiMessage.tool_calls?.length) {
-      return aiMessage.text;
-    }
-
-    // Process tool calls
-    const updatedMessages = [...messages, aiMessage];
-    const toolMessages: ToolMessage[] = [];
-
-    // Handle each tool call
-    for (const toolCall of aiMessage.tool_calls) {
-      const toolToUse = tools.find((t) => t.name === toolCall.name);
-
-      try {
-        if (!toolToUse) {
-          throw new Error(`Unknown tool: ${toolCall.name}`);
-        }
-
-        // Execute tool and collect result
-        const toolResult = await toolToUse.invoke(toolCall);
-        toolMessages.push(new ToolMessage(toolResult, toolCall.id || ""));
-      } catch (error) {
-        console.error(`Error with tool ${toolCall.name}:`, error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        toolMessages.push(
-          new ToolMessage(
-            JSON.stringify({ error: errorMessage }),
-            toolCall.id || "",
-          ),
-        );
-      }
-    }
-
-    // Recursively process the messages with tool results
-    const finalMessages = [...updatedMessages, ...toolMessages];
-    return this.processMessageWithTools(finalMessages, depth + 1);
   }
 
   async disconnect(): Promise<void> {

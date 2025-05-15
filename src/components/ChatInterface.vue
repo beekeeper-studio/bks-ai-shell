@@ -4,18 +4,24 @@
       <div
         v-for="(message, index) in messages"
         :key="index"
-        :class="['message', message.type]"
+        :class="['message', message.getType()]"
       >
-        <div
-          class="message-content"
-          v-if="message.html"
-          v-html="message.html"
-        />
-        <div class="message-content" v-else v-html="message.content" />
+        <!-- TODO put this in to the Message component -->
+        <div class="message-content">
+          <template v-if="message.getType() === 'tool'">
+            {{ message.name }}()
+            <div v-if="message.callingTool" class="spinner" />
+          </template>
+          <Message
+            v-else-if="message.getType() === 'ai'"
+            :content="message.text"
+          />
+          <template v-else>
+            {{ message.text }}
+          </template>
+        </div>
       </div>
-      <div v-if="isThinking" class="thinking">
-        <div v-for="i in 3" :key="i" class="thinking-dot"></div>
-      </div>
+      <div v-if="isThinking" class="spinner" />
     </div>
 
     <div class="chat-input-container">
@@ -61,14 +67,19 @@
 import { Providers as UIProviders } from "../providers";
 import { mapState, mapActions } from "pinia";
 import { useProviderStore } from "../store";
+import Message from "./Message.vue";
 
 const maxHistorySize = 50;
 
 export default {
   name: "ChatInterface",
 
+  components: {
+    Message,
+  },
+
   data() {
-    const inputHistoryStr = localStorage.getItem("inputHistory") || '[]';
+    const inputHistoryStr = localStorage.getItem("inputHistory") || "[]";
     const inputHistory = JSON.parse(inputHistoryStr);
     return {
       tempInput: "",
@@ -99,6 +110,7 @@ export default {
   watch: {
     messages: {
       handler() {
+        console.log(this.messages);
         this.$nextTick(() => {
           if (this.$refs.chatMessagesRef) {
             this.$refs.chatMessagesRef.scrollTop =
@@ -110,8 +122,8 @@ export default {
     },
     userInput() {
       if (this.historyIndex < this.inputHistory.length) {
-      this.inputHistory[this.historyIndex] = this.userInput;
-    }
+        this.inputHistory[this.historyIndex] = this.userInput;
+      }
     },
   },
 
@@ -183,7 +195,10 @@ export default {
 
       if (this.historyIndex === 0 && direction === -1) return;
 
-      if (this.historyIndex >= this.inputHistory.length - 1 && direction === 1) {
+      if (
+        this.historyIndex >= this.inputHistory.length - 1 &&
+        direction === 1
+      ) {
         // We are at the last history item
         this.historyIndex = this.inputHistory.length;
         this.userInput = this.tempInput;
@@ -230,11 +245,11 @@ export default {
     },
 
     addToHistory(input: string) {
-      const oldHistory = JSON.parse(localStorage.getItem("inputHistory")!)
+      const oldHistory = JSON.parse(localStorage.getItem("inputHistory")!);
 
-      let newHistory = [...this.inputHistory, input]
+      let newHistory = [...this.inputHistory, input];
       if (this.historyIndex < this.inputHistory.length) {
-        newHistory[this.historyIndex] = oldHistory[this.historyIndex]
+        newHistory[this.historyIndex] = oldHistory[this.historyIndex];
       }
 
       // Limit history size

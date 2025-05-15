@@ -22,12 +22,6 @@ export interface IActiveTab {
   };
 }
 
-export interface IChatMessage {
-  type: "human" | "ai" | "system";
-  content: string;
-  html?: string;
-}
-
 // Model and provider related types
 export interface IModelConfig {
   apiKey: string;

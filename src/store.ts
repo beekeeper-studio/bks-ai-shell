@@ -2,13 +2,19 @@ import { defineStore } from "pinia";
 import { ProviderId } from "./providers";
 import { STORAGE_KEYS } from "./config";
 import { BaseModelProvider } from "./providers/baseProvider";
-import { IChatMessage, IModel } from "./types";
+import { IModel } from "./types";
 import _ from "lodash";
 import { createModelProvider } from "./providers/modelFactory";
 import showdown from "showdown";
-import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript';
-import sql from 'highlight.js/lib/languages/sql';
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import sql from "highlight.js/lib/languages/sql";
+import {
+  AIMessage,
+  BaseMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
 
 interface ProviderState {
   providerId: ProviderId;
@@ -16,12 +22,13 @@ interface ProviderState {
   provider?: BaseModelProvider;
   model?: IModel;
   models: IModel[];
-  messages: IChatMessage[];
+  messages: BaseMessage[];
   isThinking: boolean;
+  isCallingTool: boolean;
 }
 
-hljs.registerLanguage('sql', sql);
-hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage("sql", sql);
+hljs.registerLanguage("javascript", javascript);
 
 showdown.extension("highlight", function () {
   return [
@@ -52,8 +59,6 @@ showdown.extension("highlight", function () {
   ];
 });
 
-const converter = new showdown.Converter({extensions: ["highlight"]});
-
 // the first argument is a unique id of the store across your application
 export const useProviderStore = defineStore("providers", {
   state: (): ProviderState => ({
@@ -65,6 +70,7 @@ export const useProviderStore = defineStore("providers", {
     models: [],
     messages: [],
     isThinking: false,
+    isCallingTool: false,
   }),
   actions: {
     async initializeProvider() {
@@ -81,47 +87,15 @@ export const useProviderStore = defineStore("providers", {
         this.models = models;
         this.provider = provider;
         if (this.messages.length === 0) {
-          this.messages.push({
-            type: "system",
-            content:
+          this.messages.push(
+            new SystemMessage(
               "Hi there! I'm your AI-powered assistant. How can I help you today?",
-          });
+            ),
+          );
         }
       } catch (e) {
         console.error(e);
-        this.messages.push({
-          type: "system",
-          content: `Something went wrong: ${e}`,
-        });
-        throw e;
-      } finally {
-        this.isThinking = false;
-      }
-    },
-    async sendMessage(message: string) {
-      if (!this.provider) {
-        throw new Error("No provider initialized");
-      }
-
-      this.isThinking = true;
-
-      try {
-        this.messages.push({ type: "human", content: message });
-        const response = await this.provider.sendMessage(
-          message,
-          this.messages,
-        );
-        const html = converter.makeHtml(response);
-        this.messages.push({
-          type: "ai",
-          content: html,
-        });
-      } catch (e) {
-        console.error(e);
-        this.messages.push({
-          type: "system",
-          content: `Something went wrong: ${e}`,
-        });
+        this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
         throw e;
       } finally {
         this.isThinking = false;
@@ -134,33 +108,51 @@ export const useProviderStore = defineStore("providers", {
 
       this.isThinking = true;
 
-      this.messages.push({ type: "human", content: message });
-      const responseMessage: IChatMessage = { type: "ai", content: "" };
-      this.messages.push(responseMessage);
+      this.messages.push(new HumanMessage(message));
+
+      let aiMessageIndex = -1;
+      let toolCallIndex = -1;
+
       return new Promise<void>((resolve, reject) => {
-        this.provider!.sendStreamMessage(message, this.messages, {
-          onStreamChunk: async (text) => {
-            responseMessage.content += text;
-            responseMessage.html = converter.makeHtml(responseMessage.content);
+        this.provider!.sendStreamMessage(message, this.messages.slice(0, -1), {
+          onStart: async () => {
+            this.isThinking = false;
+            aiMessageIndex = -1;
+          },
+          onStreamChunk: async (message) => {
+            this.isThinking = false;
+
+            if (aiMessageIndex === -1) {
+              this.messages.push(message);
+              aiMessageIndex = this.messages.length - 1;
+            } else {
+              this.messages[aiMessageIndex] = message;
+            }
+
             this.messages = [...this.messages];
           },
-          onToolCall: async (tool) => {
-            console.log("using tool:", tool);
-            // tell the user that a tool is being used
+          onBeforeToolCall: async (message) => {
+            this.messages.push(message);
+            toolCallIndex = this.messages.length - 1;
+            this.isCallingTool = true;
           },
-          onFinalized: () => resolve(),
-        })
-          .catch((e) => {
-            console.error(e);
-            this.messages.push({
-              type: "system",
-              content: `Something went wrong: ${e}`,
-            });
-            reject(e);
-          })
-          .finally(() => {
-            this.isThinking = false;
-          });
+          onAfterToolCall: async (message) => {
+            this.messages[toolCallIndex] = message;
+            this.messages = [...this.messages];
+            this.isCallingTool = false;
+            this.isThinking = true;
+          },
+          onFinalized: (messages) => {
+            this.messages = messages;
+            resolve();
+          },
+        }).catch((e) => {
+          console.error(e);
+          this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
+          this.isThinking = false;
+          this.isCallingTool = false;
+          reject(e);
+        });
       });
     },
     setProviderId(providerId: ProviderId) {
@@ -175,16 +167,12 @@ export const useProviderStore = defineStore("providers", {
       try {
         await this.provider?.switchModelById(modelId);
         this.model = this.provider?.getModel();
-        this.messages.push({
-          type: "system",
-          content: `Switched to ${this.model?.displayName}`,
-        });
+        this.messages.push(
+          new SystemMessage(`Switched to ${this.model?.displayName}`),
+        );
       } catch (e) {
         console.error(e);
-        this.messages.push({
-          type: "system",
-          content: `Something went wrong: ${e}`,
-        });
+        this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
         throw e;
       }
     },

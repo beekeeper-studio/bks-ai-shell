@@ -17,6 +17,10 @@
   background-color: var(--theme-bg-chat);
   display: flex;
   flex-direction: column;
+
+  > .spinner {
+    padding-inline: 1.8rem;
+  }
 }
 
 .message {
@@ -114,6 +118,10 @@
   .message-content {
     color: var(--theme-text-message-system);
   }
+}
+
+.message.tool .message-content {
+  padding-block: 0;
 }
 
 .thinking {

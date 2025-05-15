@@ -1,11 +1,13 @@
+import { AIMessage, BaseMessage, ToolMessage } from "@langchain/core/messages";
 import { IChatMessage, IModel, IModelConfig } from "../types";
 
 export interface Callbacks {
   onStart?: () => Promise<void>;
-  onStreamChunk: (text: string) => Promise<void>;
+  onStreamChunk: (message: AIMessage) => Promise<void>;
   onComplete?: () => Promise<void>;
-  onToolCall?: (tool: string) => Promise<void>;
-  onFinalized: () => void;
+  onBeforeToolCall?: (message: ToolMessage) => Promise<void>;
+  onAfterToolCall?: (message: ToolMessage) => Promise<void>;
+  onFinalized: (conversationHistory: BaseMessage[]) => void;
 }
 
 export abstract class BaseModelProvider {
@@ -37,11 +39,11 @@ export abstract class BaseModelProvider {
    */
   abstract sendMessage(
     message: string,
-    conversationHistory: IChatMessage[],
-  ): Promise<string>;
+    conversationHistory: BaseMessage[],
+  ): Promise<AIMessage>;
   abstract sendStreamMessage(
     message: string,
-    conversationHistory: IChatMessage[],
+    conversationHistory: BaseMessage[],
     callbacks: Callbacks,
   ): Promise<void>;
 
