@@ -1,0 +1,91 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Get project information
+        id: project_info
+        run: |
+          PROJECT_ID=$(jq -r '.id' manifest.json)
+          VERSION=$(jq -r '.version' manifest.json)
+          # Extract version from tag (removing the 'v' prefix if present)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Check version match
+        run: |
+          # Compare the manifest version with the tag version (without 'v' prefix)
+          if [ "${{ steps.project_info.outputs.version }}" != "${{ steps.project_info.outputs.tag_version }}" ]; then
+            echo "::error::Version mismatch! Tag version v${{ steps.project_info.outputs.tag_version }} doesn't match manifest.json version ${{ steps.project_info.outputs.version }}"
+            echo "Please update the version in manifest.json to match your tag or use the correct tag version"
+            exit 1
+          fi
+          
+      - name: Check for existing release
+        id: check_release
+        run: |
+          RELEASE_EXISTS=$(gh release view "v${{ steps.project_info.outputs.version }}" --json id 2>/dev/null || echo "")
+          if [ ! -z "$RELEASE_EXISTS" ]; then
+            echo "::error::A release with version v${{ steps.project_info.outputs.version }} already exists!"
+            echo "Please update the version in manifest.json before creating a new release"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+          
+      - name: Create zip archive
+        id: create_zip
+        run: |
+          ZIP_NAME="${{ steps.project_info.outputs.project_id }}-${{ steps.project_info.outputs.version }}.zip"
+          zip -r "$ZIP_NAME" dist/ manifest.json LICENSE README.md
+          echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.project_info.outputs.version }}"
+          if [ -f CHANGELOG.md ]; then
+            # Extract section for current version if possible
+            CHANGELOG=$(awk -v ver="## v$VERSION" 'BEGIN{flag=0} $0~ver{flag=1; next} /^## /{if(flag==1) exit} flag{print}' CHANGELOG.md)
+            if [ -z "$CHANGELOG" ]; then
+              CHANGELOG="Please add changelog details here."
+            fi
+          else
+            CHANGELOG="Please add changelog details here."
+          fi
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          name: "Release v${{ steps.project_info.outputs.version }}"
+          body: |
+            # Release v${{ steps.project_info.outputs.version }}
+            ${{ steps.changelog.outputs.CHANGELOG }}
+          files: ${{ steps.create_zip.outputs.zip_name }}
