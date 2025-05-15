@@ -5,6 +5,10 @@ import { BaseModelProvider } from "./providers/baseProvider";
 import { IChatMessage, IModel } from "./types";
 import _ from "lodash";
 import { createModelProvider } from "./providers/modelFactory";
+import showdown from "showdown";
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
+import sql from 'highlight.js/lib/languages/sql';
 
 interface ProviderState {
   providerId: ProviderId;
@@ -15,6 +19,40 @@ interface ProviderState {
   messages: IChatMessage[];
   isThinking: boolean;
 }
+
+hljs.registerLanguage('sql', sql);
+hljs.registerLanguage('javascript', javascript);
+
+showdown.extension("highlight", function () {
+  return [
+    {
+      type: "output",
+      filter: function (text, converter, options) {
+        var left = "<pre><code\\b[^>]*>",
+          right = "</code></pre>",
+          flags = "g";
+        var replacement = function (wholeMatch, match, left, right) {
+          var lang = (left.match(/class=\"([^ \"]+)/) || [])[1];
+          left = left.slice(0, -1) + ` data-lang="${lang}"` + left.slice(-1);
+          if (lang && hljs.getLanguage(lang)) {
+            return left + hljs.highlight(lang, match).value + right;
+          } else {
+            return left + hljs.highlightAuto(match).value + right;
+          }
+        };
+        return showdown.helper.replaceRecursiveRegExp(
+          text,
+          replacement,
+          left,
+          right,
+          flags,
+        );
+      },
+    },
+  ];
+});
+
+const converter = new showdown.Converter({extensions: ["highlight"]});
 
 // the first argument is a unique id of the store across your application
 export const useProviderStore = defineStore("providers", {
@@ -73,7 +111,11 @@ export const useProviderStore = defineStore("providers", {
           message,
           this.messages,
         );
-        this.messages.push({ type: "ai", content: response });
+        const html = converter.makeHtml(response);
+        this.messages.push({
+          type: "ai",
+          content: html,
+        });
       } catch (e) {
         console.error(e);
         this.messages.push({
@@ -97,15 +139,16 @@ export const useProviderStore = defineStore("providers", {
       this.messages.push(responseMessage);
       return new Promise<void>((resolve, reject) => {
         this.provider!.sendStreamMessage(message, this.messages, {
-          onChunk: async (text) => {
+          onStreamChunk: async (text) => {
             responseMessage.content += text;
+            responseMessage.html = converter.makeHtml(responseMessage.content);
             this.messages = [...this.messages];
           },
-          onTool: async (tool) => {
-            console.log('using tool:', tool)
+          onToolCall: async (tool) => {
+            console.log("using tool:", tool);
             // tell the user that a tool is being used
           },
-          onEnd: () => resolve(),
+          onFinalized: () => resolve(),
         })
           .catch((e) => {
             console.error(e);

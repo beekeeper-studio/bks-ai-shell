@@ -1,5 +1,13 @@
 import { IChatMessage, IModel, IModelConfig } from "../types";
 
+export interface Callbacks {
+  onStart?: () => Promise<void>;
+  onStreamChunk: (text: string) => Promise<void>;
+  onComplete?: () => Promise<void>;
+  onToolCall?: (tool: string) => Promise<void>;
+  onFinalized: () => void;
+}
+
 export abstract class BaseModelProvider {
   public static id: string;
   public static displayName: string;
@@ -34,11 +42,7 @@ export abstract class BaseModelProvider {
   abstract sendStreamMessage(
     message: string,
     conversationHistory: IChatMessage[],
-    callbacks: {
-      onChunk: (text: string) => Promise<void>;
-      onTool: (tool: string) => Promise<void>;
-      onEnd: () => void;
-    },
+    callbacks: Callbacks,
   ): Promise<void>;
 
   abstract disconnect(): Promise<void>;

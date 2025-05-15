@@ -29,8 +29,69 @@
 
 .message-content {
   padding: 0.75rem 0.9rem;
-  line-height: 1.4;
+  line-height: 1.4rem;
   white-space: pre-wrap;
+
+  p,
+  pre,
+  code {
+    margin: 0;
+  }
+
+  pre {
+    overflow-x: auto;
+    display: inline-block;
+    background-color: var(--bks-text-editor-bg-color);
+    color: var(--bks-text-editor-fg-color);
+    padding: 0.2rem 0.5rem 0.5rem 0.5rem;
+    width: 100%;
+  }
+
+  code[data-lang] {
+    &::before {
+      content: attr(data-lang);
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.5;
+      line-height: 1.25rem;
+    }
+  }
+
+  .hljs-keyword {
+    color: var(--bks-text-editor-keyword-fg-color);
+  }
+
+  .hljs-operator {
+    color: var(--bks-text-editor-operator-fg-color);
+  }
+
+  .hljs-comment {
+    color: var(--bks-text-editor-comment-fg-color);
+  }
+
+  .hljs-string {
+    color: var(--bks-text-editor-string-fg-color);
+  }
+
+  .hljs-title.class_ {
+    color: var(--bks-text-editor-class-fg-color);
+  }
+
+  .hljs-title.function_ {
+    color: var(--bks-text-editor-function-fg-color);
+  }
+
+  .hljs-number {
+    color: var(--bks-text-editor-number-fg-color);
+  }
+
+  .hljs-attr {
+    color: var(--bks-text-editor-attributeName-fg-color);
+  }
+
+  .hljs-built_in {
+    color: var(--bks-text-editor-builtin-fg-color);
+  }
 }
 
 .message.human {
@@ -46,7 +107,8 @@
 
 .message.ai,
 .message.system {
-  align-self: flex-start;
+  max-width: none;
+
   .message-content {
     color: var(--theme-text-message-system);
   }

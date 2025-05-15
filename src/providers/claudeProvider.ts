@@ -1,4 +1,4 @@
-import { BaseModelProvider } from "./baseProvider";
+import { BaseModelProvider, Callbacks } from "./baseProvider";
 import { ChatAnthropic, type AnthropicInput } from "@langchain/anthropic";
 import { Anthropic } from "@anthropic-ai/sdk";
 import {
@@ -132,11 +132,7 @@ export class ClaudeProvider extends BaseModelProvider {
   async sendStreamMessage(
     message: string,
     conversationHistory: IChatMessage[],
-    callbacks: {
-      onChunk: (text: string) => Promise<void>;
-      onTool: (tool: string) => Promise<void>;
-      onEnd: () => void;
-    }
+    callbacks: Callbacks
   ): Promise<void> {
     try {
       // Convert conversation history to LangChain messages and add current message
@@ -160,11 +156,7 @@ export class ClaudeProvider extends BaseModelProvider {
 
   async processStreamMessageWithTools(
     messages: (HumanMessage | AIMessage | ToolMessage)[],
-    callbacks: {
-      onChunk: (text: string) => Promise<void>;
-      onTool: (tool: string) => Promise<void>;
-      onEnd: () => void;
-    },
+    callbacks: Callbacks,
     depth: number = 0,
   ): Promise<void> {
     // Safety check to prevent infinite tool calls (max 7 levels)
@@ -174,11 +166,11 @@ export class ClaudeProvider extends BaseModelProvider {
       const aiMessage = (await stream.next()).value as AIMessageChunk;
 
       for await (const chunk of stream) {
-        await callbacks.onChunk(chunk.text);
+        await callbacks.onStreamChunk(chunk.text);
         aiMessage.concat(chunk);
       }
 
-      callbacks.onEnd();
+      callbacks.onFinalized();
 
       return;
     }
@@ -186,14 +178,19 @@ export class ClaudeProvider extends BaseModelProvider {
     const stream = await this.llmWithTools!.stream(messages);
     let aiMessage: AIMessageChunk = (await stream.next()).value;
 
+    await callbacks.onStart?.();
+
     for await (const chunk of stream) {
-      await callbacks.onChunk(chunk.text);
+      console.log(chunk.content)
+      await callbacks.onStreamChunk(chunk.text);
       aiMessage = aiMessage.concat(chunk);
     }
 
+    await callbacks.onComplete?.();
+
     // No tool calls. End stream.
     if (!aiMessage.tool_calls?.length) {
-      callbacks.onEnd();
+      callbacks.onFinalized();
       return;
     }
 
@@ -210,7 +207,7 @@ export class ClaudeProvider extends BaseModelProvider {
         }
 
         // Execute tool and collect result
-        await callbacks.onTool(toolCall.name);
+        await callbacks.onToolCall?.(toolCall.name);
         const toolResult = await toolToUse.invoke(toolCall);
         toolMessages.push(new ToolMessage(toolResult, toolCall.id || ""));
       } catch (error) {

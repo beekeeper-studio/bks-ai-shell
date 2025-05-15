@@ -6,9 +6,12 @@
         :key="index"
         :class="['message', message.type]"
       >
-        <div class="message-content">
-          {{ message.content }}
-        </div>
+        <div
+          class="message-content"
+          v-if="message.html"
+          v-html="message.html"
+        />
+        <div class="message-content" v-else v-html="message.content" />
       </div>
       <div v-if="isThinking" class="thinking">
         <div v-for="i in 3" :key="i" class="thinking-dot"></div>
@@ -19,6 +22,8 @@
       <textarea
         v-model="userInput"
         @keydown.enter="handleEnterKey"
+        @keydown.up="handleUpArrow"
+        @keydown.down="handleDownArrow"
         placeholder="Type your message here..."
         :disabled="isThinking"
         rows="1"
@@ -57,12 +62,20 @@ import { Providers as UIProviders } from "../providers";
 import { mapState, mapActions } from "pinia";
 import { useProviderStore } from "../store";
 
+const maxHistorySize = 50;
+
 export default {
   name: "ChatInterface",
 
   data() {
+    const inputHistoryStr = localStorage.getItem("inputHistory") || '[]';
+    const inputHistory = JSON.parse(inputHistoryStr);
     return {
+      tempInput: "",
       userInput: "",
+      inputHistory,
+      historyIndex: inputHistory.length,
+      isNavigatingHistory: false,
     };
   },
 
@@ -78,6 +91,9 @@ export default {
     providers() {
       return UIProviders;
     },
+    navigatingHistory() {
+      return this.historyIndex === this.inputHistory.length;
+    },
   },
 
   watch: {
@@ -91,6 +107,11 @@ export default {
         });
       },
       deep: true,
+    },
+    userInput() {
+      if (this.historyIndex < this.inputHistory.length) {
+      this.inputHistory[this.historyIndex] = this.userInput;
+    }
     },
   },
 
@@ -124,6 +145,75 @@ export default {
       }
     },
 
+    // Handle up/down arrow keys for history navigation
+    handleUpArrow(e) {
+      const textarea = e.target;
+      const text = textarea.value;
+
+      // Is cursor at first line?
+      const cursorPos = textarea.selectionStart;
+      const textBeforeCursor = text.substring(0, cursorPos);
+
+      // If there's no newline before cursor or cursor is at position 0, we're at the first line
+      if (cursorPos === 0 || textBeforeCursor.lastIndexOf("\n") === -1) {
+        e.preventDefault();
+        this.navigateHistory(-1); // Go back in history
+      }
+    },
+
+    handleDownArrow(e) {
+      const textarea = e.target;
+      const text = textarea.value;
+
+      // Is cursor at last line?
+      const cursorPos = textarea.selectionStart;
+      const textAfterCursor = text.substring(cursorPos);
+
+      // If there's no newline after cursor or cursor is at end of text, we're at the last line
+      if (cursorPos === text.length || textAfterCursor.indexOf("\n") === -1) {
+        e.preventDefault();
+        this.navigateHistory(1); // Go forward in history
+      }
+    },
+
+    // Navigate through input history
+    navigateHistory(direction) {
+      // If no history or navigating beyond bounds, do nothing
+      if (this.inputHistory.length === 0) return;
+
+      if (this.historyIndex === 0 && direction === -1) return;
+
+      if (this.historyIndex >= this.inputHistory.length - 1 && direction === 1) {
+        // We are at the last history item
+        this.historyIndex = this.inputHistory.length;
+        this.userInput = this.tempInput;
+        this.isNavigatingHistory = false;
+        return;
+      }
+
+      if (!this.isNavigatingHistory) {
+        // save current input before navigating
+        this.tempInput = this.userInput;
+        this.isNavigatingHistory = true;
+      }
+
+      // Calculate new index
+      const newIndex = this.historyIndex + direction;
+
+      this.userInput = this.inputHistory[newIndex];
+
+      this.historyIndex = newIndex;
+
+      // Place cursor at the end of the input text
+      this.$nextTick(() => {
+        const textarea = document.querySelector("textarea");
+        if (textarea) {
+          textarea.selectionStart = textarea.selectionEnd =
+            textarea.value.length;
+        }
+      });
+    },
+
     // Send message
     async send() {
       const message = this.userInput.trim();
@@ -131,124 +221,34 @@ export default {
       // Don't send empty messages
       if (!message || this.isThinking) return;
 
-      // Clear the input field
+      this.addToHistory(message);
+
+      this.tempInput = "";
       this.userInput = "";
 
-      try {
-        await this.sendStreamMessage(message);
-
-        // this.isThinking = false;
-        // const stream = streamMessage({
-        //   onMessage: (message) => {
-        //     this.addMessage("assistant", message);
-        //   },
-        //   onTool: async (tool, arg0) => {
-        //     let message = tool;
-        //     if (arg0) {
-        //       message += `(${arg0})`;
-        //     }
-        //     this.addMessage("system", message);
-        //     return await this.askPermission(tool) // "yes" or "no"
-        //   },
-        //   onComplete: () => {
-        //     this.isThinking = false
-        //   },
-        // })
-        //
-        // // TODO add cancel
-        // // stream.cancel()
-        //
-        // this.stream = stream
-
-        // // Process the response
-        // if (result.success) {
-        //   // Add the assistant message to the UI
-        //   this.addMessage("assistant", result.data?.content);
-        //
-        //   // Add assistant response to conversation history
-        //   this.conversationHistory.push({
-        //     type: "ai",
-        //     content: result.data?.content,
-        //   });
-        // } else {
-        //   // Handle error
-        //   const errorMessage = `Error: ${result.error || "Unknown error occurred"}`;
-        //   this.addMessage("system", errorMessage);
-        //   console.error("API error:", result.error);
-        // }
-      } catch (error) {
-        console.error("Error communicating with API:", error);
-        // this.addMessage(
-        //   "system",
-        //   `Error: ${error.message || "Failed to communicate with the API"}`,
-        // );
-      } finally {
-        // Clear thinking state
-      }
+      await this.sendStreamMessage(message);
     },
 
-    // // Send message
-    // async send() {
-    //   const message = this.userInput.trim();
-    //
-    //   // Don't send empty messages
-    //   if (!message || this.isThinking) return;
-    //
-    //   // Clear the input field
-    //   this.userInput = "";
-    //
-    //   try {
-    //     await this.sendMessage(message);
-    //
-    //     // this.isThinking = false;
-    //     // const stream = streamMessage({
-    //     //   onMessage: (message) => {
-    //     //     this.addMessage("assistant", message);
-    //     //   },
-    //     //   onTool: async (tool, arg0) => {
-    //     //     let message = tool;
-    //     //     if (arg0) {
-    //     //       message += `(${arg0})`;
-    //     //     }
-    //     //     this.addMessage("system", message);
-    //     //     return await this.askPermission(tool) // "yes" or "no"
-    //     //   },
-    //     //   onComplete: () => {
-    //     //     this.isThinking = false
-    //     //   },
-    //     // })
-    //     //
-    //     // // TODO add cancel
-    //     // // stream.cancel()
-    //     //
-    //     // this.stream = stream
-    //
-    //     // // Process the response
-    //     // if (result.success) {
-    //     //   // Add the assistant message to the UI
-    //     //   this.addMessage("assistant", result.data?.content);
-    //     //
-    //     //   // Add assistant response to conversation history
-    //     //   this.conversationHistory.push({
-    //     //     type: "ai",
-    //     //     content: result.data?.content,
-    //     //   });
-    //     // } else {
-    //     //   // Handle error
-    //     //   const errorMessage = `Error: ${result.error || "Unknown error occurred"}`;
-    //     //   this.addMessage("system", errorMessage);
-    //     //   console.error("API error:", result.error);
-    //     // }
-    //   } catch (error) {
-    //     console.error("Error communicating with API:", error);
-    //     // this.addMessage(
-    //     //   "system",
-    //     //   `Error: ${error.message || "Failed to communicate with the API"}`,
-    //     // );
-    //   } finally {
-    //     // Clear thinking state
-    //   }
-    // },
+    addToHistory(input: string) {
+      const oldHistory = JSON.parse(localStorage.getItem("inputHistory")!)
+
+      let newHistory = [...this.inputHistory, input]
+      if (this.historyIndex < this.inputHistory.length) {
+        newHistory[this.historyIndex] = oldHistory[this.historyIndex]
+      }
+
+      // Limit history size
+      if (newHistory.length > maxHistorySize) {
+        newHistory = newHistory.slice(-maxHistorySize);
+      }
+
+      localStorage.setItem("inputHistory", JSON.stringify(newHistory));
+
+      // Reset history navigation
+      this.inputHistory = newHistory;
+      this.historyIndex = newHistory.length;
+      this.isNavigatingHistory = false;
+    },
   },
 };
 </script>
