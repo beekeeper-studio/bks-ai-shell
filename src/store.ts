@@ -10,11 +10,18 @@ import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import sql from "highlight.js/lib/languages/sql";
 import {
-  AIMessage,
   BaseMessage,
   HumanMessage,
   SystemMessage,
 } from "@langchain/core/messages";
+
+interface Tool {
+  name: string;
+  args: any;
+  asksPermission: boolean;
+  permissionResponse?: "accept" | "reject";
+  permissionResolved: boolean;
+}
 
 interface ProviderState {
   providerId: ProviderId;
@@ -25,6 +32,8 @@ interface ProviderState {
   messages: BaseMessage[];
   isThinking: boolean;
   isCallingTool: boolean;
+  activeTool: Tool | null;
+  tools: Record<string, Tool>;
 }
 
 hljs.registerLanguage("sql", sql);
@@ -71,11 +80,11 @@ export const useProviderStore = defineStore("providers", {
     messages: [],
     isThinking: false,
     isCallingTool: false,
+    activeTool: null,
+    tools: {},
   }),
   actions: {
     async initializeProvider() {
-      this.isThinking = true;
-
       try {
         const provider = await createModelProvider(
           this.providerId,
@@ -97,8 +106,6 @@ export const useProviderStore = defineStore("providers", {
         console.error(e);
         this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
         throw e;
-      } finally {
-        this.isThinking = false;
       }
     },
     sendStreamMessage(message: string): Promise<void> {
@@ -111,17 +118,13 @@ export const useProviderStore = defineStore("providers", {
       this.messages.push(new HumanMessage(message));
 
       let aiMessageIndex = -1;
-      let toolCallIndex = -1;
 
       return new Promise<void>((resolve, reject) => {
         this.provider!.sendStreamMessage(message, this.messages.slice(0, -1), {
           onStart: async () => {
-            this.isThinking = false;
             aiMessageIndex = -1;
           },
           onStreamChunk: async (message) => {
-            this.isThinking = false;
-
             if (aiMessageIndex === -1) {
               this.messages.push(message);
               aiMessageIndex = this.messages.length - 1;
@@ -131,29 +134,60 @@ export const useProviderStore = defineStore("providers", {
 
             this.messages = [...this.messages];
           },
-          onBeforeToolCall: async (message) => {
-            this.messages.push(message);
-            toolCallIndex = this.messages.length - 1;
-            this.isCallingTool = true;
+          onBeforeToolCall: async (name, args) => {
+            this.activeTool = {
+              name,
+              args,
+              asksPermission: false,
+              permissionResolved: false,
+            }
           },
-          onAfterToolCall: async (message) => {
-            this.messages[toolCallIndex] = message;
-            this.messages = [...this.messages];
-            this.isCallingTool = false;
+          onRequestToolPermission: async () => {
+            this.activeTool!.asksPermission = true;
+            this.isThinking = false;
+            const permissionResponse = await new Promise<"accept" | "reject">((resolve) => {
+              const unsubscribe = this.$subscribe((_mutation, state) => {
+                if (state.activeTool?.permissionResponse) {
+                  unsubscribe();
+                  resolve(state.activeTool.permissionResponse);
+                }
+              });
+            });
+            this.activeTool!.permissionResponse = permissionResponse;
+            this.activeTool!.permissionResolved = true;
+            return permissionResponse === "accept";
+          },
+          onToolMessage: async (message) => {
+            this.messages.push(message);
+            this.tools[this.messages.length - 1] = this.activeTool!;
+            this.activeTool = null;
             this.isThinking = true;
           },
           onFinalized: (messages) => {
+            this.isThinking = false;
             this.messages = messages;
             resolve();
           },
-        }).catch((e) => {
-          console.error(e);
-          this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
-          this.isThinking = false;
-          this.isCallingTool = false;
-          reject(e);
-        });
+          onError: (error) => {
+            this.isThinking = false;
+            this.isCallingTool = false;
+            if (error instanceof Error && (error.message.startsWith("Aborted") || error.message.startsWith("AbortError"))) {
+              resolve();
+            } else {
+              console.error(error);
+              this.messages.push(new SystemMessage(`Something went wrong: ${error}`));
+              reject(error);
+            }
+          },
+        })
       });
+    },
+    stopStreamMessage(): void {
+      if (!this.provider) {
+        throw new Error("No provider initialized");
+      }
+
+      this.provider.abortStreamMessage();
     },
     setProviderId(providerId: ProviderId) {
       this.providerId = providerId;

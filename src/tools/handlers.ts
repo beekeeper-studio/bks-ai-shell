@@ -15,9 +15,6 @@ export async function getConnectionInfo() {
   }
 }
 
-/**
- * Tool for getting a list of all tables in the database
- */
 export async function getTables() {
   try {
     const result = await request("getTables");
@@ -30,9 +27,6 @@ export async function getTables() {
   }
 }
 
-/**
- * Tool for getting columns for a specific table
- */
 export async function getTableColumns(params: { table: string }) {
   try {
     if (!params || !params.table) {
@@ -49,12 +43,6 @@ export async function getTableColumns(params: { table: string }) {
   }
 }
 
-/**
- * Tool for getting information about the currently active tab
- *
- * Allows Claude to request information about what the user is
- * currently viewing in Beekeeper Studio
- */
 export async function getActiveTab() {
   try {
     const result = await request("getActiveTab");
@@ -68,11 +56,6 @@ export async function getActiveTab() {
   }
 }
 
-/**
- * Tool for updating the SQL query text in a specific tab
- *
- * Allows Claude to modify the content of SQL query editors
- */
 export async function updateQueryText(params: {
   tabId: number;
   query: string;

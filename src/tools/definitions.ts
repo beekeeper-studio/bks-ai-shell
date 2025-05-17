@@ -1,6 +1,7 @@
 import { z } from "zod";
 import * as handlers from "./handlers";
 import { tool } from "@langchain/core/tools";
+import { overArgs } from "lodash";
 
 export const getActiveTabTool = tool(handlers.getActiveTab, {
   name: "getActiveTab",
@@ -15,6 +16,7 @@ export const updateQueryTextTool = tool(handlers.updateQueryText, {
     tabId: z.number().describe("The ID of the tab containing the query to update"),
     query: z.string().describe("The new SQL query text"),
   }),
+  tags: ["write"]
 })
 
 export const getConnectionInfoTool = tool(handlers.getConnectionInfo, {
@@ -35,3 +37,11 @@ export const getTableColumnsTool = tool(handlers.getTableColumns, {
     table: z.string().describe("The name of the table to get columns for"),
   }),
 })
+
+export const tools = [
+  getActiveTabTool,
+  updateQueryTextTool,
+  getConnectionInfoTool,
+  getTablesTool,
+  getTableColumnsTool,
+];
