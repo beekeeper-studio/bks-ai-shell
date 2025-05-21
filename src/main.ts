@@ -4,7 +4,7 @@ import "@material-symbols/font-400/outlined.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-import { addNotificationListener, request } from "./Comms";
+import { addNotificationListener, request } from "./vendor/@beekeeperstudio/plugin/comms";
 
 async function injectStyle() {
   const theme = await request("getTheme");
