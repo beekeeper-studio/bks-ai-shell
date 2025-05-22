@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { DynamicTool, tool } from "@langchain/core/tools";
 import { request } from "../vendor/@beekeeperstudio/plugin/comms";
+import { safeJSONStringify } from "../utils";
 
 export const getActiveTabTool = new DynamicTool({
   name: "getActiveTab",
@@ -8,7 +9,7 @@ export const getActiveTabTool = new DynamicTool({
     "Get information about the user's currently active tab in Beekeeper Studio",
   func: async () => {
     const result = await request("getActiveTab");
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
 });
 
@@ -18,14 +19,14 @@ export const getConnectionInfoTool = new DynamicTool({
     "Get information about the current database connection including type, default database, and read-only status",
   func: async () => {
     const result = await request("getConnectionInfo");
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
 });
 
 export const getTablesTool = tool(
   async (params: { schema?: string }) => {
     const result = await request("getTables", { schema: params.schema });
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
   {
     name: "getTables",
@@ -42,7 +43,7 @@ export const getTablesTool = tool(
 export const getTableColumnsTool = tool(
   async (params: { table: string }) => {
     const result = await request("getColumns", { table: params.table });
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
   {
     name: "getTableColumns",
@@ -59,7 +60,7 @@ export const getAllTabsTool = new DynamicTool({
   description: "Get a list of all open query tabs in Beekeeper Studio",
   func: async () => {
     const result = await request("getAllTabs");
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
 });
 
@@ -69,7 +70,7 @@ export const createQueryTabTool = tool(
       query: params.query,
       title: params.title,
     });
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
   {
     name: "createQueryTab",
@@ -88,7 +89,7 @@ export const updateQueryTextTool = tool(
       tabId: params.tabId,
       query: params.query,
     });
-    return JSON.stringify({
+    return safeJSONStringify({
       success: true,
       message: "Query text updated successfully",
       tabId: params.tabId,
@@ -110,7 +111,7 @@ export const updateQueryTextTool = tool(
 export const runQueryTool = tool(
   async (params: { query: string }) => {
     const result = await request("runQuery", { query: params.query });
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
   {
     name: "runQuery",
@@ -125,7 +126,7 @@ export const runQueryTool = tool(
 export const runQueryTabTool = tool(
   async (params: { tabId: number }) => {
     const result = await request("runQueryTab", { tabId: params.tabId });
-    return JSON.stringify(result);
+    return safeJSONStringify(result);
   },
   {
     name: "runQueryTab",
