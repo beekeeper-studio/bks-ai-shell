@@ -1,10 +1,14 @@
 import { z } from "zod";
-import { DynamicTool, tool } from "@langchain/core/tools";
+import {
+  DynamicStructuredTool,
+  DynamicTool,
+  tool,
+} from "@langchain/core/tools";
 import { request } from "../vendor/@beekeeperstudio/plugin/comms";
 import { safeJSONStringify } from "../utils";
 
 export const getActiveTabTool = new DynamicTool({
-  name: "getActiveTab",
+  name: "get_active_tab",
   description:
     "Get information about the user's currently active tab in Beekeeper Studio",
   func: async () => {
@@ -14,7 +18,7 @@ export const getActiveTabTool = new DynamicTool({
 });
 
 export const getConnectionInfoTool = new DynamicTool({
-  name: "getConnectionInfo",
+  name: "get_connection_info",
   description:
     "Get information about the current database connection including type, default database, and read-only status",
   func: async () => {
@@ -23,22 +27,20 @@ export const getConnectionInfoTool = new DynamicTool({
   },
 });
 
-export const getTablesTool = tool(
-  async (params: { schema?: string }) => {
+export const getTablesTool = new DynamicStructuredTool({
+  name: "get_tables",
+  description: "Get a list of all tables in the current database",
+  schema: z.object({
+    schema: z
+      .string()
+      .optional()
+      .describe("The name of the schema to get tables for"),
+  }),
+  func: async (params: { schema?: string }) => {
     const result = await request("getTables", { schema: params.schema });
     return safeJSONStringify(result);
   },
-  {
-    name: "getTables",
-    description: "Get a list of all tables in the current database",
-    schema: z.object({
-      schema: z
-        .string()
-        .optional()
-        .describe("The name of the schema to get tables for"),
-    }),
-  },
-);
+});
 
 export const getTableColumnsTool = tool(
   async (params: { table: string }) => {
@@ -46,7 +48,7 @@ export const getTableColumnsTool = tool(
     return safeJSONStringify(result);
   },
   {
-    name: "getTableColumns",
+    name: "get_table_columns",
     description:
       "Get all columns for a specific table including name and data type",
     schema: z.object({
@@ -56,7 +58,7 @@ export const getTableColumnsTool = tool(
 );
 
 export const getAllTabsTool = new DynamicTool({
-  name: "getAllTabs",
+  name: "get_all_tabs",
   description: "Get a list of all open query tabs in Beekeeper Studio",
   func: async () => {
     const result = await request("getAllTabs");
@@ -73,7 +75,7 @@ export const createQueryTabTool = tool(
     return safeJSONStringify(result);
   },
   {
-    name: "createQueryTab",
+    name: "create_query_tab",
     description: "Create a new query tab with specified content",
     schema: z.object({
       query: z.string().describe("The SQL query text for the new tab"),
@@ -96,7 +98,7 @@ export const updateQueryTextTool = tool(
     });
   },
   {
-    name: "updateQueryText",
+    name: "update_query_text",
     description: "Update the SQL query text in a specific tab",
     schema: z.object({
       tabId: z
@@ -114,7 +116,7 @@ export const runQueryTool = tool(
     return safeJSONStringify(result);
   },
   {
-    name: "runQuery",
+    name: "run_query",
     description: "Run a SQL query and get the results",
     schema: z.object({
       query: z.string().describe("The SQL query to execute"),
@@ -129,7 +131,7 @@ export const runQueryTabTool = tool(
     return safeJSONStringify(result);
   },
   {
-    name: "runQueryTab",
+    name: "run_query_tab",
     description: "Run the query in a specific tab",
     schema: z.object({
       tabId: z

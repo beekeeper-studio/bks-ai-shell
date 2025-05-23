@@ -1,17 +1,37 @@
 <template>
   <div class="chat-container">
     <div class="chat-messages" ref="chatMessagesRef">
-      <div v-for="(message, index) in messages" :key="index" :class="['message', message.getType()]">
+      <div
+        v-for="(message, index) in messages"
+        :key="index"
+        :class="['message', message.getType()]"
+      >
         <!-- TODO put this in to the Message component -->
         <div class="message-content">
           <template v-if="message.getType() === 'tool'">
-            {{ message.name }}
-            <span v-if="tools[index]?.permissionResponse === 'reject'"
-              class="material-symbols-outlined reject-icon">close</span>
-            <span v-if="tools[index]?.permissionResponse === 'accept'"
-              class="material-symbols-outlined accept-icon">check</span>
+            <details>
+              <summary>{{ message.name }}</summary>
+              <Message
+                v-if="message.content"
+                :content="tryJSONParse(message.content)"
+              />
+            </details>
+
+            <span
+              v-if="tools[index]?.permissionResponse === 'reject'"
+              class="material-symbols-outlined reject-icon"
+              >close</span
+            >
+            <span
+              v-if="tools[index]?.permissionResponse === 'accept'"
+              class="material-symbols-outlined accept-icon"
+              >check</span
+            >
           </template>
-          <Message v-else-if="message.getType() === 'ai'" :content="message.text" />
+          <Message
+            v-else-if="message.getType() === 'ai'"
+            :content="message.text"
+          />
           <template v-else>
             {{ message.text }}
           </template>
@@ -21,35 +41,68 @@
         <div class="message-content">
           {{ activeTool.name }}
           <div class="tool-permission-buttons">
-            <button v-if="activeTool.permissionResponse !== 'accept'" class="reject-btn"
-              @click="activeTool.permissionResponse = 'reject'" :disabled="activeTool.permissionResolved">
+            <button
+              v-if="activeTool.permissionResponse !== 'accept'"
+              class="reject-btn"
+              @click="activeTool.permissionResponse = 'reject'"
+              :disabled="activeTool.permissionResolved"
+            >
               <span class="material-symbols-outlined reject-icon">close</span>
             </button>
-            <button v-if="activeTool.permissionResponse !== 'reject'" class="accept-btn"
-              @click="activeTool.permissionResponse = 'accept'" :disabled="activeTool.permissionResolved">
+            <button
+              v-if="activeTool.permissionResponse !== 'reject'"
+              class="accept-btn"
+              @click="activeTool.permissionResponse = 'accept'"
+              :disabled="activeTool.permissionResolved"
+            >
               <span class="material-symbols-outlined accept-icon">check</span>
             </button>
             <span v-if="activeTool.permissionResolved" class="spinner" />
           </div>
         </div>
       </div>
+      <div class="message error" v-if="error">
+        <div class="message-content">
+          Something went wrong. Please see the console for more details.
+        </div>
+      </div>
       <div v-if="isThinking" class="spinner" />
     </div>
 
     <div class="chat-input-container">
-      <textarea v-model="userInput" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
-        @keydown.down="handleDownArrow" placeholder="Type your message here..." :disabled="isThinking" rows="1"
-        v-autoresize></textarea>
+      <textarea
+        v-model="userInput"
+        @keydown.enter="handleEnterKey"
+        @keydown.up="handleUpArrow"
+        @keydown.down="handleDownArrow"
+        placeholder="Type your message here..."
+        :disabled="isThinking"
+        rows="1"
+        v-autoresize
+      ></textarea>
       <div class="actions">
-        <select id="model-selector" aria-label="Model" :value="isThinking ? 'loading' : model?.id" disabled
-          @change="handleModelChange">
+        <select
+          id="model-selector"
+          aria-label="Model"
+          :value="model?.id"
+          @change="handleModelChange"
+        >
           <option v-if="isThinking" value="loading">Loading models...</option>
-          <option v-else v-for="model in models" :key="model.id" :value="model.id">
-            {{ model.displayName }}
+          <option
+            v-else
+            v-for="model in models"
+            :key="model.id"
+            :value="model.id"
+          >
+            {{ model.id }}
           </option>
         </select>
-        <button v-if="!isThinking && !isCallingTool" @click="send" class="submit-btn"
-          :disabled="isThinking || !userInput.trim()">
+        <button
+          v-if="!isThinking && !isCallingTool"
+          @click="send"
+          class="submit-btn"
+          :disabled="isThinking || !userInput.trim()"
+        >
           <span class="material-symbols-outlined">send</span>
         </button>
         <button v-else @click="stop" class="stop-btn" />
@@ -59,10 +112,11 @@
 </template>
 
 <script lang="ts">
-import { Providers as UIProviders } from "../providers";
+import { Providers as UIProviders } from "../providers/modelFactory";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useProviderStore } from "../store";
 import Message from "./Message.vue";
+import { safeJSONStringify } from "../utils";
 
 const maxHistorySize = 50;
 
@@ -86,18 +140,18 @@ export default {
   },
 
   computed: {
-    ...mapWritableState(useProviderStore, [
-      "activeTool",
-    ]),
+    ...mapWritableState(useProviderStore, ["activeTool"]),
     ...mapState(useProviderStore, [
       "providerId",
+      "provider",
+      "model",
       "apiKey",
       "models",
       "messages",
       "isThinking",
-      "model",
       "isCallingTool",
       "tools",
+      "error",
     ]),
     providers() {
       return UIProviders;
@@ -138,14 +192,14 @@ export default {
 
   methods: {
     ...mapActions(useProviderStore, [
-      "switchModelById",
+      "setModel",
       "initializeProvider",
       "sendStreamMessage",
       "stopStreamMessage",
     ]),
 
     handleModelChange(event: Event) {
-      this.switchModelById((event.target as HTMLSelectElement).value);
+      this.setModel((event.target as HTMLSelectElement).value);
     },
 
     // Handle enter key (send on Enter, new line on Shift+Enter)
@@ -172,7 +226,10 @@ export default {
       const textBeforeCursor = text.substring(0, cursorPos);
 
       // If there's no newline before cursor or cursor is at position 0, we're at the first line
-      if ((cursorPos === 0 || textBeforeCursor.lastIndexOf("\n") === -1) && this.historyIndex > 0) {
+      if (
+        (cursorPos === 0 || textBeforeCursor.lastIndexOf("\n") === -1) &&
+        this.historyIndex > 0
+      ) {
         e.preventDefault();
         this.navigateHistory(-1); // Go back in history
       }
@@ -187,7 +244,10 @@ export default {
       const textAfterCursor = text.substring(cursorPos);
 
       // If there's no newline after cursor or cursor is at end of text, we're at the last line
-      if ((cursorPos === text.length || textAfterCursor.indexOf("\n") === -1) && this.historyIndex < this.inputHistory.length - 1) {
+      if (
+        (cursorPos === text.length || textAfterCursor.indexOf("\n") === -1) &&
+        this.historyIndex < this.inputHistory.length - 1
+      ) {
         e.preventDefault();
         this.navigateHistory(1); // Go forward in history
       }
@@ -249,8 +309,8 @@ export default {
       await this.sendStreamMessage(message);
     },
 
-    async stop() {
-      await this.stopStreamMessage();
+    stop() {
+      this.stopStreamMessage();
     },
 
     addToHistory(input: string) {
@@ -273,27 +333,40 @@ export default {
       this.historyIndex = newHistory.length;
       this.isNavigatingHistory = false;
     },
+
+    log(...args) {
+      console.log(...args);
+    },
+
+    tryJSONParse(str: string) {
+      try {
+        str = safeJSONStringify(JSON.parse(str), null, 2);
+      } catch (e) {
+        // do nothing
+      }
+      return "```json\n" + str + "\n```";
+    },
   },
   directives: {
     autoresize: {
       mounted(el: HTMLTextAreaElement) {
         const resize = () => {
-          el.style.height = 'auto'
-          el.style.height = el.scrollHeight + 'px'
-        }
+          el.style.height = "auto";
+          el.style.height = el.scrollHeight + "px";
+        };
 
-        el._resizeHandler = resize
+        el._resizeHandler = resize;
 
-        el.addEventListener('input', resize)
-        requestAnimationFrame(resize)
+        el.addEventListener("input", resize);
+        requestAnimationFrame(resize);
       },
       updated(el: HTMLTextAreaElement) {
-        el._resizeHandler()
+        el._resizeHandler();
       },
       unmounted(el: HTMLTextAreaElement) {
-        el.removeEventListener('input', el._resizeHandler)
-      }
-    }
-  }
+        el.removeEventListener("input", el._resizeHandler);
+      },
+    },
+  },
 };
 </script>

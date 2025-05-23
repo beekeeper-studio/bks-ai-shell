@@ -9,7 +9,7 @@ export interface GetThemeRequest extends BaseRequest {
 export interface GetTablesRequest extends BaseRequest {
   name: "getTables";
   args: {
-    schema: string;
+    schema?: string;
   };
 }
 

@@ -122,30 +122,45 @@
 }
 
 .message.tool {
+  margin-block: 0;
+
   .message-content {
-    padding-block: 0.3rem;
+    padding: 0;
     margin-inline: 1rem;
-    background-color: var(--bks-text-editor-bg-color);
     flex-direction: row;
     align-items: center;
     gap: 0.2rem;
-    border: 1px solid var(--border-color);
-  }
-}
 
-.message.tool {
+    details {
+      width: 100%;
+
+      &[open]>summary {
+        margin-bottom: 0.5rem;
+      }
+    }
+  }
 
   .accept-icon,
   .reject-icon {
     font-size: 1.2rem;
   }
 
-  :not(.accept-btn) > .accept-icon {
+  :not(.accept-btn)>.accept-icon {
     color: color-mix(in srgb, var(--brand-success) 70%, black);
   }
 
-  :not(.reject-btn) > .reject-icon {
+  :not(.reject-btn)>.reject-icon {
     color: color-mix(in srgb, var(--brand-danger) 90%, black);
+  }
+}
+
+.message.error {
+  background-color: rgb(from var(--brand-danger) r g b / 20%);
+  border: 1px solid rgb(from var(--brand-danger) r g b / 100%);
+  max-width: none;
+
+  .message-content {
+    white-space: normal;
   }
 }
 
@@ -213,8 +228,6 @@
       &:focus {
         outline: none;
       }
-
-
     }
 
     .submit-btn,

@@ -1,19 +1,19 @@
 import { defineStore } from "pinia";
-import { ProviderId } from "./providers";
 import { STORAGE_KEYS } from "./config";
-import { BaseModelProvider } from "./providers/baseProvider";
 import { IModel } from "./types";
 import _ from "lodash";
-import { createModelProvider } from "./providers/modelFactory";
+import { createProvider, ProviderId } from "./providers/modelFactory";
 import showdown from "showdown";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
+import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import {
   BaseMessage,
   HumanMessage,
   SystemMessage,
 } from "@langchain/core/messages";
+import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
 
 interface Tool {
   name: string;
@@ -26,18 +26,20 @@ interface Tool {
 interface ProviderState {
   providerId: ProviderId;
   apiKey: string;
-  provider?: BaseModelProvider;
-  model?: IModel;
+  provider?: BaseProvider;
+  model?: BaseModelProvider;
   models: IModel[];
   messages: BaseMessage[];
   isThinking: boolean;
   isCallingTool: boolean;
   activeTool: Tool | null;
   tools: Record<string, Tool>;
+  error: unknown;
 }
 
 hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("json", json);
 
 showdown.extension("highlight", function () {
   return [
@@ -75,26 +77,28 @@ export const useProviderStore = defineStore("providers", {
       (localStorage.getItem(STORAGE_KEYS.PROVIDER) as ProviderId) || "claude",
     apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY) || "",
     provider: undefined,
-    model: undefined,
     models: [],
     messages: [],
     isThinking: false,
     isCallingTool: false,
     activeTool: null,
     tools: {},
+    error: null,
   }),
   actions: {
     async initializeProvider() {
       try {
-        const provider = await createModelProvider(
+        this.provider = await createProvider(
           this.providerId,
           this.apiKey,
         );
-        await provider.initialize();
-        const models = await provider.getAvailableModels();
-        this.model = provider.getModel();
-        this.models = models;
-        this.provider = provider;
+        this.models = this.provider.models;
+        let modelId = this.models[0].id;
+        const storedModelId = localStorage.getItem(STORAGE_KEYS.MODEL);
+        if (storedModelId && storedModelId.startsWith(`${this.providerId}:`)) {
+          modelId = storedModelId.split(":")[1];
+        }
+        this.setModel(modelId);
         if (this.messages.length === 0) {
           this.messages.push(
             new SystemMessage(
@@ -104,7 +108,7 @@ export const useProviderStore = defineStore("providers", {
         }
       } catch (e) {
         console.error(e);
-        this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
+        this.error = e;
         throw e;
       }
     },
@@ -120,7 +124,7 @@ export const useProviderStore = defineStore("providers", {
       let aiMessageIndex = -1;
 
       return new Promise<void>((resolve, reject) => {
-        this.provider!.sendStreamMessage(message, this.messages.slice(0, -1), {
+        this.model!.sendStreamMessage(message, this.messages.slice(0, -1), {
           onStart: async () => {
             aiMessageIndex = -1;
           },
@@ -175,7 +179,7 @@ export const useProviderStore = defineStore("providers", {
               resolve();
             } else {
               console.error(error);
-              this.messages.push(new SystemMessage(`Something went wrong: ${error}`));
+              this.error = error;
               reject(error);
             }
           },
@@ -183,11 +187,11 @@ export const useProviderStore = defineStore("providers", {
       });
     },
     stopStreamMessage(): void {
-      if (!this.provider) {
-        throw new Error("No provider initialized");
+      if (!this.model) {
+        throw new Error("No model created");
       }
 
-      this.provider.abortStreamMessage();
+      this.model.abortStreamMessage();
     },
     setProviderId(providerId: ProviderId) {
       this.providerId = providerId;
@@ -197,16 +201,17 @@ export const useProviderStore = defineStore("providers", {
       this.apiKey = apiKey;
       localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
     },
-    async switchModelById(modelId: string) {
+    setModel(modelId: string) {
+      if (this.model?.isSendingMessage) {
+        throw new Error("Cannot switch model while a message is being sent.");
+      }
+
       try {
-        await this.provider?.switchModelById(modelId);
-        this.model = this.provider?.getModel();
-        this.messages.push(
-          new SystemMessage(`Switched to ${this.model?.displayName}`),
-        );
+        this.model = this.provider?.createModel({ modelId });
+        localStorage.setItem(STORAGE_KEYS.MODEL, `${this.providerId}:${modelId}`);
+        console.log(`Switched to model: ${modelId}`);
       } catch (e) {
         console.error(e);
-        this.messages.push(new SystemMessage(`Something went wrong: ${e}`));
         throw e;
       }
     },

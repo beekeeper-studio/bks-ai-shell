@@ -45,7 +45,7 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { Providers, ProviderId } from "../providers";
+import { Providers, ProviderId } from "../providers/modelFactory";
 
 export default {
   name: "ApiKeyForm",

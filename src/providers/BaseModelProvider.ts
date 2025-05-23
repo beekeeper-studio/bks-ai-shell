@@ -1,4 +1,10 @@
-import { AIMessage, AIMessageChunk, BaseMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  AIMessageChunk,
+  BaseMessage,
+  HumanMessage,
+  ToolMessage,
+} from "@langchain/core/messages";
 import { IModel, IModelConfig } from "../types";
 import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { tools } from "../tools";
@@ -15,35 +21,34 @@ export interface Callbacks extends ToolCallbacks {
 export interface ToolCallbacks {
   onBeforeToolCall?: (name: string, args: any) => Promise<void>;
   onToolMessage?: (message: ToolMessage) => Promise<void>;
-  onRequestToolPermission?: (toolName: string, toolArgs: any) => Promise<boolean>;
+  onRequestToolPermission?: (
+    toolName: string,
+    toolArgs: any,
+  ) => Promise<boolean>;
 }
 
-export abstract class BaseModelProvider {
+export abstract class BaseProvider {
   public static id: string;
   public static displayName: string;
 
-  protected config: IModelConfig;
-  protected abortController: AbortController;
-  protected llm: BaseChatModel | null = null;
+  public models: IModel[] = [];
 
-  constructor(config: IModelConfig) {
-    this.config = config;
-    this.abortController = new AbortController();
-  }
+  public abstract initialize(apiKey: string): Promise<void>;
+  public abstract createModel(config: IModelConfig): BaseModelProvider;
+}
 
-  static async create(apiKey: string): Promise<BaseModelProvider> {
-    throw new Error("Not implemented");
-  }
+export class BaseModelProvider {
+  private abortController: AbortController = new AbortController();
+  private sendingMessage = false;
 
-  abstract initialize(): Promise<void>;
+  constructor(
+    public readonly id: string,
+    public readonly displayName: string,
+    private readonly llm: BaseChatModel,
+  ) {}
 
-  abstract getModel(): IModel;
-  abstract getAvailableModels(): Promise<IModel[]>;
-  abstract switchModelById(modelId: string): Promise<void>;
-
-  async getDefaultModel(): Promise<IModel> {
-    const models = await this.getAvailableModels();
-    return models[0];
+  get isSendingMessage(): boolean {
+    return this.sendingMessage;
   }
 
   /**
@@ -54,11 +59,28 @@ export abstract class BaseModelProvider {
     conversationHistory: BaseMessage[],
     callbacks: Callbacks,
   ): void {
+    if (this.sendingMessage) {
+      throw new Error(
+        "A message is already being sent. Please wait or stop the current message.",
+      );
+    }
+
+    this.sendingMessage = true;
     this.abortController = new AbortController();
-    this.processStreamMessage([
-      ...conversationHistory,
-      new HumanMessage(message),
-    ], callbacks);
+    this.processStreamMessage(
+      [...conversationHistory, new HumanMessage(message)],
+      {
+        ...callbacks,
+        onFinalized: (...args) => {
+          this.sendingMessage = false;
+          callbacks.onFinalized(...args);
+        },
+        onError: (...args) => {
+          this.sendingMessage = false;
+          callbacks.onError?.(...args);
+        },
+      },
+    );
   }
 
   protected async processStreamMessage(
@@ -108,21 +130,23 @@ export abstract class BaseModelProvider {
         return;
       }
 
-      const toolMessages = await this.processToolCalls(aiMessage.tool_calls, callbacks);
+      const toolMessages = await this.processToolCalls(
+        aiMessage.tool_calls,
+        callbacks,
+      );
 
       const finalMessages = [...updatedMessages, ...toolMessages];
 
-      return this.processStreamMessage(
-        finalMessages,
-        callbacks,
-        depth + 1,
-      );
+      return this.processStreamMessage(finalMessages, callbacks, depth + 1);
     } catch (error) {
       callbacks.onError?.(error);
     }
   }
 
-  protected async processToolCalls(toolCalls: ToolCall[], callbacks: ToolCallbacks): Promise<ToolMessage[]> {
+  protected async processToolCalls(
+    toolCalls: ToolCall[],
+    callbacks: ToolCallbacks,
+  ): Promise<ToolMessage[]> {
     const toolMessages: ToolMessage[] = [];
     for (const toolCall of toolCalls) {
       this.abortController.signal.throwIfAborted();
@@ -140,9 +164,16 @@ export abstract class BaseModelProvider {
       await callbacks.onBeforeToolCall?.(name, toolCall.args);
 
       if (toolToUse.tags && toolToUse.tags.includes("write")) {
-        const granted = await callbacks.onRequestToolPermission?.(name, toolCall.args);
+        const granted = await callbacks.onRequestToolPermission?.(
+          name,
+          toolCall.args,
+        );
         if (!granted) {
-          const toolMessage = new ToolMessage("User rejected permission to use this tool.", id, name);
+          const toolMessage = new ToolMessage(
+            "User rejected permission to use this tool.",
+            id,
+            name,
+          );
           toolMessages.push(toolMessage);
           await callbacks.onToolMessage?.(toolMessage);
           continue;
@@ -173,6 +204,4 @@ export abstract class BaseModelProvider {
   abortStreamMessage(): void {
     this.abortController.abort();
   }
-
-  abstract disconnect(): Promise<void>;
 }
