@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@langchain/anthropic": "^0.3.15",
-    "@langchain/core": "^0.3.43",
+    "@langchain/anthropic": "^0.3.21",
+    "@langchain/core": "^0.3.48",
     "@material-symbols/font-400": "^0.31.2",
     "highlight.js": "^11.11.1",
     "langchain": "^0.3.19",

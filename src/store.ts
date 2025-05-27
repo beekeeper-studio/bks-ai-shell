@@ -16,7 +16,9 @@ import {
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
 
 interface Tool {
+  id: string;
   name: string;
+  displayName: string;
   args: any;
   asksPermission: boolean;
   permissionResponse?: "accept" | "reject";
@@ -33,6 +35,7 @@ interface ProviderState {
   isThinking: boolean;
   isCallingTool: boolean;
   activeTool: Tool | null;
+  activeToolId: string | null;
   tools: Record<string, Tool>;
   error: unknown;
 }
@@ -82,6 +85,7 @@ export const useProviderStore = defineStore("providers", {
     isThinking: false,
     isCallingTool: false,
     activeTool: null,
+    activeToolId: null,
     tools: {},
     error: null,
   }),
@@ -138,9 +142,12 @@ export const useProviderStore = defineStore("providers", {
 
             this.messages = [...this.messages];
           },
-          onBeforeToolCall: async (name, args) => {
+          onBeforeToolCall: async (id, name, args) => {
+            this.activeToolId = id;
             this.activeTool = {
+              id,
               name,
+              displayName: name.split("_").map(_.capitalize).join(" "),
               args,
               asksPermission: false,
               permissionResolved: false,
@@ -163,7 +170,8 @@ export const useProviderStore = defineStore("providers", {
           },
           onToolMessage: async (message) => {
             this.messages.push(message);
-            this.tools[this.messages.length - 1] = this.activeTool!;
+            this.tools[message.tool_call_id] = this.activeTool!;
+            this.activeToolId = null;
             this.activeTool = null;
             this.isThinking = true;
           },

@@ -8,57 +8,88 @@
       >
         <!-- TODO put this in to the Message component -->
         <div class="message-content">
-          <template v-if="message.getType() === 'tool'">
-            <details>
-              <summary>{{ message.name }}</summary>
-              <Message
-                v-if="message.content"
-                :content="tryJSONParse(message.content)"
-              />
-            </details>
-
-            <span
-              v-if="tools[index]?.permissionResponse === 'reject'"
-              class="material-symbols-outlined reject-icon"
-              >close</span
-            >
-            <span
-              v-if="tools[index]?.permissionResponse === 'accept'"
-              class="material-symbols-outlined accept-icon"
-              >check</span
-            >
-          </template>
-          <Message
-            v-else-if="message.getType() === 'ai'"
-            :content="message.text"
+          <tool-message
+            v-if="message.getType() === 'tool'"
+            :message="message"
           />
+          <template v-else-if="message.getType() === 'ai'">
+            <Message :content="message.text" />
+            <template v-if="message.tool_calls">
+              <div
+                class="tool-call"
+                :class="{ active: activeToolId === tool_call.id }"
+                v-for="tool_call in message.tool_calls"
+                :key="tool_call.id"
+              >
+                <div class="tool-call-name">
+                  {{ getDisplayNameOfTool(tool_call) }}
+                  <template v-if="tools[tool_call.id]?.permissionResolved">
+                    <span
+                      v-if="
+                        tools[tool_call.id]?.permissionResponse === 'reject'
+                      "
+                      class="material-symbols-outlined reject-icon"
+                      >close</span
+                    >
+                    <span
+                      v-if="
+                        tools[tool_call.id]?.permissionResponse === 'accept'
+                      "
+                      class="material-symbols-outlined accept-icon"
+                      >check</span
+                    >
+                  </template>
+                </div>
+                <Message
+                  v-if="tool_call.name === 'run_query'"
+                  :content="'```sql\n' + tool_call.args.query + '\n```'"
+                />
+                <div
+                  v-if="
+                    activeToolId === tool_call.id && activeTool?.asksPermission
+                  "
+                >
+                  <template v-if="!activeTool.permissionResolved">
+                    <template v-if="activeTool.name === 'run_query'">
+                      Do you want to run this query?
+                    </template>
+                    <template v-else>Do you want to proceed?</template>
+                  </template>
+                  <div class="tool-permission-buttons">
+                    <button
+                      v-if="activeTool.permissionResponse !== 'reject'"
+                      class="accept-btn"
+                      @click="activeTool.permissionResponse = 'accept'"
+                      :disabled="activeTool.permissionResolved"
+                    >
+                      Yes
+                      <span class="material-symbols-outlined accept-icon"
+                        >check</span
+                      >
+                    </button>
+                    <button
+                      v-if="activeTool.permissionResponse !== 'accept'"
+                      class="reject-btn"
+                      @click="activeTool.permissionResponse = 'reject'"
+                      :disabled="activeTool.permissionResolved"
+                    >
+                      No
+                      <span class="material-symbols-outlined reject-icon"
+                        >close</span
+                      >
+                    </button>
+                    <span
+                      v-if="activeTool.permissionResolved"
+                      class="spinner"
+                    />
+                  </div>
+                </div>
+              </div>
+            </template>
+          </template>
           <template v-else>
             {{ message.text }}
           </template>
-        </div>
-      </div>
-      <div v-if="activeTool" class="message tool active-tool">
-        <div class="message-content">
-          {{ activeTool.name }}
-          <div class="tool-permission-buttons">
-            <button
-              v-if="activeTool.permissionResponse !== 'accept'"
-              class="reject-btn"
-              @click="activeTool.permissionResponse = 'reject'"
-              :disabled="activeTool.permissionResolved"
-            >
-              <span class="material-symbols-outlined reject-icon">close</span>
-            </button>
-            <button
-              v-if="activeTool.permissionResponse !== 'reject'"
-              class="accept-btn"
-              @click="activeTool.permissionResponse = 'accept'"
-              :disabled="activeTool.permissionResolved"
-            >
-              <span class="material-symbols-outlined accept-icon">check</span>
-            </button>
-            <span v-if="activeTool.permissionResolved" class="spinner" />
-          </div>
         </div>
       </div>
       <div class="message error" v-if="error">
@@ -113,10 +144,12 @@
 
 <script lang="ts">
 import { Providers as UIProviders } from "../providers/modelFactory";
-import { mapState, mapWritableState, mapActions } from "pinia";
+import { mapState, mapActions } from "pinia";
 import { useProviderStore } from "../store";
 import Message from "./Message.vue";
+import ToolMessage from "./ToolMessage.vue";
 import { safeJSONStringify } from "../utils";
+import _ from "lodash";
 
 const maxHistorySize = 50;
 
@@ -125,6 +158,7 @@ export default {
 
   components: {
     Message,
+    ToolMessage,
   },
 
   data() {
@@ -140,8 +174,9 @@ export default {
   },
 
   computed: {
-    ...mapWritableState(useProviderStore, ["activeTool"]),
     ...mapState(useProviderStore, [
+      "activeTool",
+      "activeToolId",
       "providerId",
       "provider",
       "model",
@@ -336,6 +371,16 @@ export default {
 
     log(...args) {
       console.log(...args);
+    },
+
+    getDisplayNameOfTool(tool) {
+      if (tool.name === "get_columns") {
+        if (tool.args.schema) {
+          return `Get Columns (schema: ${tool.args.schema}, table: ${tool.args.table})`;
+        }
+        return `Get Columns (table: ${tool.args.table})`;
+      }
+      return tool.name.split("_").map(_.capitalize).join(" ");
     },
 
     tryJSONParse(str: string) {

@@ -19,7 +19,7 @@ export interface Callbacks extends ToolCallbacks {
 }
 
 export interface ToolCallbacks {
-  onBeforeToolCall?: (name: string, args: any) => Promise<void>;
+  onBeforeToolCall?: (id: string, name: string, args: any) => Promise<void>;
   onToolMessage?: (message: ToolMessage) => Promise<void>;
   onRequestToolPermission?: (
     toolName: string,
@@ -153,15 +153,14 @@ export class BaseModelProvider {
 
       const toolToUse = tools.find((t) => t.name === toolCall.name);
       const name = toolCall.name;
-      const id = toolCall.id || "";
-      let result: any;
+      const id = toolCall.id;
 
       if (!toolToUse) {
         toolMessages.push(new ToolMessage("Unknown tool", id, name));
         continue;
       }
 
-      await callbacks.onBeforeToolCall?.(name, toolCall.args);
+      await callbacks.onBeforeToolCall?.(id, name, toolCall.args);
 
       if (toolToUse.tags && toolToUse.tags.includes("write")) {
         const granted = await callbacks.onRequestToolPermission?.(
@@ -183,14 +182,12 @@ export class BaseModelProvider {
       let toolMessage: ToolMessage;
 
       try {
-        const toolResult = await toolToUse.invoke(toolCall);
-        result = toolResult.text;
-        toolMessage = new ToolMessage(toolResult, id, name);
+        toolMessage = await toolToUse.invoke(toolCall);
       } catch (error) {
         console.error(`Error with tool ${toolCall.name}:`, error);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        result = JSON.stringify({ error: errorMessage });
+        const result = JSON.stringify({ error: errorMessage });
         toolMessage = new ToolMessage(result, id, name);
       }
 

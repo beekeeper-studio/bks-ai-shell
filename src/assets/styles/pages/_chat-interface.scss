@@ -3,7 +3,7 @@
   width: 100%;
   height: 100%;
   max-width: 100%;
-  background-color: var(--theme-bg);
+  background-color: var(--query-editor-bg);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -125,14 +125,34 @@
   margin-block: 0;
 
   .message-content {
-    padding: 0;
+    padding: 0 0 0 1rem;
+    border-left: 2px solid var(--border-color);
     margin-inline: 1rem;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
     gap: 0.2rem;
 
     details {
       width: 100%;
+
+      summary {
+        .open-icon {
+          font-size: 1.1rem;
+        }
+
+        button {
+          cursor: pointer;
+          display: flex;
+          gap: 0.2rem;
+          padding: 0.2rem;
+          margin-top: 0.5rem;
+        }
+      }
+
+      summary::marker {
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: rgb(from var(--text-dark) r g b / 30%);
+      }
 
       &[open]>summary {
         margin-bottom: 0.5rem;
@@ -143,14 +163,6 @@
   .accept-icon,
   .reject-icon {
     font-size: 1.2rem;
-  }
-
-  :not(.accept-btn)>.accept-icon {
-    color: color-mix(in srgb, var(--brand-success) 70%, black);
-  }
-
-  :not(.reject-btn)>.reject-icon {
-    color: color-mix(in srgb, var(--brand-danger) 90%, black);
   }
 }
 
@@ -164,7 +176,25 @@
   }
 }
 
-.active-tool {
+.tool-call {
+  padding-left: 1rem;
+  border-left: 2px solid var(--border-color);
+
+  .tool-call-name {
+    display: flex;
+    align-items: center;
+
+    .accept-icon {
+      color: color-mix(in srgb, var(--brand-success) 70%, black);
+    }
+
+    .reject-icon {
+      color: color-mix(in srgb, var(--brand-danger) 90%, black);
+    }
+  }
+}
+
+.tool-call.active {
   justify-content: center;
   align-items: center;
 
@@ -180,12 +210,14 @@
       justify-content: center;
       color: currentColor;
 
-      .accept-icon:hover {
-        color: color-mix(in srgb, var(--brand-success) 70%, black);
-      }
+      &:hover {
+        .accept-icon {
+          color: color-mix(in srgb, var(--brand-success) 70%, black);
+        }
 
-      .reject-icon:hover {
-        color: color-mix(in srgb, var(--brand-danger) 90%, black);
+        .reject-icon {
+          color: color-mix(in srgb, var(--brand-danger) 90%, black);
+        }
       }
     }
   }
@@ -232,7 +264,7 @@
 
     .submit-btn,
     .stop-btn {
-      --color: var(--theme-bg);
+      --color: var(--query-editor-bg);
       color: var(--color);
       background-color: var(--theme-base);
       width: 1.7rem;

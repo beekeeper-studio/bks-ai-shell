@@ -49,12 +49,12 @@ $btn-border-radius:         8px;
 
 .btn-primary {
   background-color: var(--theme-base);
-  color: rgb(from var(--theme-bg) r g b / 87%);
+  color: rgb(from var(--query-editor-bg) r g b / 87%);
   transition: background-color 0.15s ease-in-out;
 
   &:hover,
   &:focus {
     background-color: rgb(from var(--theme-base) r g b / 87%);
-    color: var(--theme-bg);
+    color: var(--query-editor-bg);
   }
 }

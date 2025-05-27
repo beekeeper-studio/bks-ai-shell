@@ -10,11 +10,11 @@
   },
   "capabilities": {
     "views": {
-      "sidebars": [
+      "tabTypes": [
         {
           "id": "bks-ai-assistant",
           "name": "AI Assistant",
-          "location": "secondary",
+          "kind": "query",
           "entry": "index.html"
         }
       ]
