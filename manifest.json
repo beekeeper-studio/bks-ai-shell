@@ -1,7 +1,7 @@
 {
   "id": "bks-ai-assistant",
   "name": "AI Assistant",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "minAppVersion": "5",
   "description": "AI Assistant for Beekeeper Studio",
   "author": {
