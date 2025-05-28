@@ -6,12 +6,8 @@ import type {
   GetConnectionInfoRequest,
   GetActiveTabRequest,
   GetAllTabsRequest,
-  CreateQueryTabRequest,
-  UpdateQueryTextRequest,
   RunQueryRequest,
-  RunQueryTabRequest,
-  RunQueryTabPartiallyRequest,
-  InsertSuggestionRequest
+  ExpandTableResultRequest,
 } from "./requestTypes";
 import type {
   GetThemeResponse,
@@ -20,12 +16,8 @@ import type {
   GetConnectionInfoResponse,
   GetActiveTabResponse,
   GetAllTabsResponse,
-  CreateQueryTabResponse,
-  UpdateQueryTextResponse,
   RunQueryResponse,
-  RunQueryTabResponse,
-  RunQueryTabPartiallyResponse,
-  InsertSuggestionResponse
+  ExpandTableResultResponse,
 } from "./responseTypes";
 
 // Define a custom import.meta interface for TypeScript
@@ -45,12 +37,8 @@ export type RequestResponsePairs = {
   getConnectionInfo: { req: GetConnectionInfoRequest; res: GetConnectionInfoResponse };
   getActiveTab: { req: GetActiveTabRequest; res: GetActiveTabResponse };
   getAllTabs: { req: GetAllTabsRequest; res: GetAllTabsResponse };
-  createQueryTab: { req: CreateQueryTabRequest; res: CreateQueryTabResponse };
-  updateQueryText: { req: UpdateQueryTextRequest; res: UpdateQueryTextResponse };
   runQuery: { req: RunQueryRequest; res: RunQueryResponse };
-  runQueryTab: { req: RunQueryTabRequest; res: RunQueryTabResponse };
-  runQueryTabPartially: { req: RunQueryTabPartiallyRequest; res: RunQueryTabPartiallyResponse };
-  insertSuggestion: { req: InsertSuggestionRequest; res: InsertSuggestionResponse };
+  expandTableResult: { req: ExpandTableResultRequest; res: ExpandTableResultResponse };
 };
 
 // Create RequestMap from the pairs

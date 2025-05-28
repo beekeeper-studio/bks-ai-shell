@@ -53,13 +53,59 @@
     width: 100%;
   }
 
-  code[data-lang] {
-    &::before {
-      content: attr(data-lang);
-      display: block;
-      font-size: 0.7rem;
-      opacity: 0.5;
-      line-height: 1.25rem;
+  .markdown {
+    white-space: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+
+    ol,
+    ul {
+      margin-block-start: 0.8em;
+      margin-block-end: 0.8em;
+      padding-inline-start: 2rem;
+    }
+  }
+
+  .code-block {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    white-space: normal;
+
+    .header {
+      padding: 0.2rem 0.5rem 0;
+      display: flex;
+      justify-content: space-between;
+
+      .lang {
+        font-size: 0.7rem;
+        opacity: 0.5;
+        line-height: 1.25rem;
+      }
+
+      .copy-btn {
+        font-size: 0.7rem;
+
+        .material-symbols-outlined {
+          font-size: 0.9rem;
+        }
+
+        &.copied .copy-label,
+        &:not(.copied) .copied-label {
+          display: none;
+        }
+
+        .label {
+          content: "Copy";
+        }
+
+        padding: 0.3rem;
+        background-color: transparent;
+        gap: 0.2rem;
+        line-height: 1;
+        height: auto;
+        min-width: 0px;
+      }
     }
   }
 

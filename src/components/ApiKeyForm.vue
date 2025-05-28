@@ -70,7 +70,10 @@ export default {
 
   computed: {
     providers() {
-      return Providers;
+      if (import.meta.env.MODE === "development") {
+        return Providers;
+      }
+      return Providers.filter((p) => p.id !== "mock");
     },
     selectedProviderName() {
       return (

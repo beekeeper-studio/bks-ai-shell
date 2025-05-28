@@ -6,6 +6,9 @@ import { IChatMessage, IModel, IModelConfig } from "../types";
 import { BaseModelProvider, BaseProvider } from "./BaseModelProvider";
 
 export class MockProvider extends BaseProvider {
+  public static id = "mock" as const;
+  public static displayName = "Mock" as const;
+
     public initialize(apiKey: string): Promise<void> {
         throw new Error("Method not implemented.");
     }

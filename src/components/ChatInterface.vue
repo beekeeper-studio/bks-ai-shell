@@ -11,13 +11,14 @@
           <tool-message
             v-if="message.getType() === 'tool'"
             :message="message"
+            @result-click="handleResultClick"
           />
           <template v-else-if="message.getType() === 'ai'">
             <Message :content="message.text" />
             <template v-if="message.tool_calls">
               <div
                 class="tool-call"
-                :class="{ active: activeToolId === tool_call.id }"
+                :class="{ active: activeTool?.id === tool_call.id }"
                 v-for="tool_call in message.tool_calls"
                 :key="tool_call.id"
               >
@@ -29,24 +30,27 @@
                         tools[tool_call.id]?.permissionResponse === 'reject'
                       "
                       class="material-symbols-outlined reject-icon"
-                      >close</span
                     >
+                      close
+                    </span>
                     <span
                       v-if="
                         tools[tool_call.id]?.permissionResponse === 'accept'
                       "
                       class="material-symbols-outlined accept-icon"
-                      >check</span
                     >
+                      check
+                    </span>
                   </template>
                 </div>
                 <Message
                   v-if="tool_call.name === 'run_query'"
-                  :content="'```sql\n' + tool_call.args.query + '\n```'"
+                  :content="'```sql\n' + (tool_call.args.query || '') + '\n```'"
                 />
                 <div
                   v-if="
-                    activeToolId === tool_call.id && activeTool?.asksPermission
+                    activeTool?.id === tool_call.id &&
+                    activeTool?.asksPermission
                   "
                 >
                   <template v-if="!activeTool.permissionResolved">
@@ -63,9 +67,9 @@
                       :disabled="activeTool.permissionResolved"
                     >
                       Yes
-                      <span class="material-symbols-outlined accept-icon"
-                        >check</span
-                      >
+                      <span class="material-symbols-outlined accept-icon">
+                        check
+                      </span>
                     </button>
                     <button
                       v-if="activeTool.permissionResponse !== 'accept'"
@@ -74,9 +78,9 @@
                       :disabled="activeTool.permissionResolved"
                     >
                       No
-                      <span class="material-symbols-outlined reject-icon"
-                        >close</span
-                      >
+                      <span class="material-symbols-outlined reject-icon">
+                        close
+                      </span>
                     </button>
                     <span
                       v-if="activeTool.permissionResolved"
@@ -150,6 +154,7 @@ import Message from "./Message.vue";
 import ToolMessage from "./ToolMessage.vue";
 import { safeJSONStringify } from "../utils";
 import _ from "lodash";
+import { request, QueryResult } from "../vendor/@beekeeperstudio/plugin";
 
 const maxHistorySize = 50;
 
@@ -170,13 +175,13 @@ export default {
       inputHistory,
       historyIndex: inputHistory.length,
       isNavigatingHistory: false,
+      isAtBottom: true,
     };
   },
 
   computed: {
     ...mapState(useProviderStore, [
       "activeTool",
-      "activeToolId",
       "providerId",
       "provider",
       "model",
@@ -194,25 +199,24 @@ export default {
     navigatingHistory() {
       return this.historyIndex === this.inputHistory.length;
     },
+    messagesAndActiveTool() {
+      return {
+        messages: this.messages,
+        activeTool: this.activeTool,
+      };
+    },
   },
 
   watch: {
-    messages: {
+    messagesAndActiveTool: {
       async handler() {
         await this.$nextTick();
-        if (this.$refs.chatMessagesRef) {
+        if (this.$refs.chatMessagesRef && this.isAtBottom) {
           this.$refs.chatMessagesRef.scrollTop =
             this.$refs.chatMessagesRef.scrollHeight;
         }
       },
       deep: true,
-    },
-    async activeTool() {
-      await this.$nextTick();
-      if (this.$refs.chatMessagesRef) {
-        this.$refs.chatMessagesRef.scrollTop =
-          this.$refs.chatMessagesRef.scrollHeight;
-      }
     },
     userInput() {
       if (this.historyIndex < this.inputHistory.length) {
@@ -222,13 +226,21 @@ export default {
   },
 
   async mounted() {
-    await this.initializeProvider();
+    const chatMessages =  this.$refs.chatMessagesRef as HTMLElement;
+    chatMessages.addEventListener("scroll", () => {
+      // Calculate if we're near bottom (within 50px of bottom)
+      const isNearBottom =
+        (chatMessages.scrollHeight -
+          chatMessages.scrollTop -
+          chatMessages.clientHeight) < 50;
+
+      this.isAtBottom = isNearBottom;
+    });
   },
 
   methods: {
     ...mapActions(useProviderStore, [
       "setModel",
-      "initializeProvider",
       "sendStreamMessage",
       "stopStreamMessage",
     ]),
@@ -390,6 +402,12 @@ export default {
         // do nothing
       }
       return "```json\n" + str + "\n```";
+    },
+    async handleResultClick(result: QueryResult) {
+      await request("expandTableResult", { results: [result] })
+      await this.$nextTick();
+      this.$refs.chatMessagesRef!.scrollTop =
+        this.$refs.chatMessagesRef!.scrollHeight;
     },
   },
   directives: {

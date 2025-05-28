@@ -3,11 +3,6 @@ import { STORAGE_KEYS } from "./config";
 import { IModel } from "./types";
 import _ from "lodash";
 import { createProvider, ProviderId } from "./providers/modelFactory";
-import showdown from "showdown";
-import hljs from "highlight.js/lib/core";
-import javascript from "highlight.js/lib/languages/javascript";
-import json from "highlight.js/lib/languages/json";
-import sql from "highlight.js/lib/languages/sql";
 import {
   BaseMessage,
   HumanMessage,
@@ -40,39 +35,6 @@ interface ProviderState {
   error: unknown;
 }
 
-hljs.registerLanguage("sql", sql);
-hljs.registerLanguage("javascript", javascript);
-hljs.registerLanguage("json", json);
-
-showdown.extension("highlight", function () {
-  return [
-    {
-      type: "output",
-      filter: function (text, converter, options) {
-        var left = "<pre><code\\b[^>]*>",
-          right = "</code></pre>",
-          flags = "g";
-        var replacement = function (wholeMatch, match, left, right) {
-          var lang = (left.match(/class=\"([^ \"]+)/) || [])[1];
-          left = left.slice(0, -1) + ` data-lang="${lang}"` + left.slice(-1);
-          if (lang && hljs.getLanguage(lang)) {
-            return left + hljs.highlight(lang, match).value + right;
-          } else {
-            return left + hljs.highlightAuto(match).value + right;
-          }
-        };
-        return showdown.helper.replaceRecursiveRegExp(
-          text,
-          replacement,
-          left,
-          right,
-          flags,
-        );
-      },
-    },
-  ];
-});
-
 // the first argument is a unique id of the store across your application
 export const useProviderStore = defineStore("providers", {
   state: (): ProviderState => ({
@@ -92,10 +54,7 @@ export const useProviderStore = defineStore("providers", {
   actions: {
     async initializeProvider() {
       try {
-        this.provider = await createProvider(
-          this.providerId,
-          this.apiKey,
-        );
+        this.provider = await createProvider(this.providerId, this.apiKey);
         this.models = this.provider.models;
         let modelId = this.models[0].id;
         const storedModelId = localStorage.getItem(STORAGE_KEYS.MODEL);
@@ -151,19 +110,21 @@ export const useProviderStore = defineStore("providers", {
               args,
               asksPermission: false,
               permissionResolved: false,
-            }
+            };
           },
           onRequestToolPermission: async () => {
             this.activeTool!.asksPermission = true;
             this.isThinking = false;
-            const permissionResponse = await new Promise<"accept" | "reject">((resolve) => {
-              const unsubscribe = this.$subscribe((_mutation, state) => {
-                if (state.activeTool?.permissionResponse) {
-                  unsubscribe();
-                  resolve(state.activeTool.permissionResponse);
-                }
-              });
-            });
+            const permissionResponse = await new Promise<"accept" | "reject">(
+              (resolve) => {
+                const unsubscribe = this.$subscribe((_mutation, state) => {
+                  if (state.activeTool?.permissionResponse) {
+                    unsubscribe();
+                    resolve(state.activeTool.permissionResponse);
+                  }
+                });
+              },
+            );
             this.activeTool!.permissionResponse = permissionResponse;
             this.activeTool!.permissionResolved = true;
             return permissionResponse === "accept";
@@ -183,7 +144,11 @@ export const useProviderStore = defineStore("providers", {
           onError: (error) => {
             this.isThinking = false;
             this.isCallingTool = false;
-            if (error instanceof Error && (error.message.startsWith("Aborted") || error.message.startsWith("AbortError"))) {
+            if (
+              error instanceof Error &&
+              (error.message.startsWith("Aborted") ||
+                error.message.startsWith("AbortError"))
+            ) {
               resolve();
             } else {
               console.error(error);
@@ -191,7 +156,7 @@ export const useProviderStore = defineStore("providers", {
               reject(error);
             }
           },
-        })
+        });
       });
     },
     stopStreamMessage(): void {
@@ -216,7 +181,10 @@ export const useProviderStore = defineStore("providers", {
 
       try {
         this.model = this.provider?.createModel({ modelId });
-        localStorage.setItem(STORAGE_KEYS.MODEL, `${this.providerId}:${modelId}`);
+        localStorage.setItem(
+          STORAGE_KEYS.MODEL,
+          `${this.providerId}:${modelId}`,
+        );
         console.log(`Switched to model: ${modelId}`);
       } catch (e) {
         console.error(e);

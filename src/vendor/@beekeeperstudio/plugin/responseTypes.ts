@@ -1,5 +1,6 @@
 import { TabType } from "@/common/transport/TransportOpenTab";
 import { TableFilter, TableOrView } from "@/lib/db/models";
+import { QueryResult } from "./commonTypes";
 
 export type ThemeType = "dark" | "light";
 
@@ -11,7 +12,10 @@ export type GetThemeResponse = {
 };
 
 /** The list of table names */
-export type GetTablesResponse = string[];
+export type GetTablesResponse = {
+  name: string;
+  schema?: string;
+}[];
 
 /** The list of columns */
 export type GetColumnsResponse = {
@@ -19,7 +23,7 @@ export type GetColumnsResponse = {
   type: string;
 }[];
 
-export interface GetConnectionInfoResponse {
+export type GetConnectionInfoResponse = {
   connectionType: string;
   defaultDatabase?: string;
   readOnlyMode: boolean;
@@ -31,39 +35,12 @@ export type GetActiveTabResponse = TabResponse;
 
 export type GetAllTabsResponse = TabResponse[];
 
-export interface CreateQueryTabResponse {
-  id: number;
-}
-
-export type UpdateQueryTextResponse = void;
-
-export interface QueryResult {
-  fields: {
-    id: string;
-    name: string;
-    dataType?: string;
-  }[];
-  rows: Record<string, unknown>[];
-}
-
-export interface RunQueryResponse {
+export type RunQueryResponse = {
   results: QueryResult[];
   error?: unknown;
 }
 
-export interface RunQueryTabResponse {
-  results: QueryResult[];
-  error?: unknown;
-}
-
-export interface RunQueryTabPartiallyResponse {
-  result: QueryResult;
-  error?: unknown;
-}
-
-export interface InsertSuggestionResponse {
-  suggestionId: number;
-}
+export type ExpandTableResultResponse = void;
 
 export interface PluginResponseData {
   id: string;
@@ -74,12 +51,15 @@ export interface PluginResponseData {
     | GetConnectionInfoResponse
     | GetActiveTabResponse
     | GetAllTabsResponse
-    | CreateQueryTabResponse
-    | UpdateQueryTextResponse
     | RunQueryResponse
-    | RunQueryTabResponse
-    | RunQueryTabPartiallyResponse;
+    | ExpandTableResultResponse;
   error?: Error;
+}
+
+interface BaseTabResponse {
+  type: TabType;
+  id: number;
+  title: string;
 }
 
 interface QueryTabResponse extends BaseTabResponse {
@@ -97,10 +77,4 @@ interface TableTabResponse extends BaseTabResponse {
     filters: TableFilter[] | string;
     result: unknown;
   };
-}
-
-interface BaseTabResponse {
-  type: TabType;
-  id: number;
-  title: string;
 }

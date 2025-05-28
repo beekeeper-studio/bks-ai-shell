@@ -8,7 +8,9 @@
         </template>
         <template v-if="message.name === 'get_tables'">
           {{ data.length }} table{{ data.length > 1 ? "s" : "" }} (
-          <code>{{ truncateAtWord(data.join(", "), 50) }}</code>
+          <code>{{
+            truncateAtWord(data.map((t) => t.name).join(", "), 50)
+          }}</code>
           )
         </template>
         <template v-if="message.name === 'get_columns'">
@@ -29,9 +31,14 @@
             class="btn"
             v-for="(result, index) in data.results"
             :key="index"
+            @click="$emit('result-click', result)"
           >
-            <div class="label">Result{{ data.results.length > 1 ? ` ${index + 1}` : `` }}</div>
-            <span class="material-symbols-outlined open-icon">keyboard_double_arrow_down</span>
+            <div class="label">
+              Result{{ data.results.length > 1 ? ` ${index + 1}` : `` }}
+            </div>
+            <span class="material-symbols-outlined open-icon">
+              keyboard_double_arrow_down
+            </span>
           </button>
         </template>
       </template>
