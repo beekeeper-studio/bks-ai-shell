@@ -406,8 +406,10 @@ export default {
     async handleResultClick(result: QueryResult) {
       await request("expandTableResult", { results: [result] })
       await this.$nextTick();
-      this.$refs.chatMessagesRef!.scrollTop =
-        this.$refs.chatMessagesRef!.scrollHeight;
+      if (this.isAtBottom) {
+        this.$refs.chatMessagesRef!.scrollTop =
+          this.$refs.chatMessagesRef!.scrollHeight;
+      }
     },
   },
   directives: {
