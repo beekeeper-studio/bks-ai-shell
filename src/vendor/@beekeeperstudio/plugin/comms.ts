@@ -7,6 +7,7 @@ import type {
   GetAllTabsRequest,
   RunQueryRequest,
   ExpandTableResultRequest,
+  SetTabTitleRequest,
 } from "./requestTypes";
 import type {
   GetTablesResponse,
@@ -16,6 +17,7 @@ import type {
   GetAllTabsResponse,
   RunQueryResponse,
   ExpandTableResultResponse,
+  SetTabTitleResponse,
 } from "./responseTypes";
 
 // Define a custom import.meta interface for TypeScript
@@ -36,6 +38,7 @@ export type RequestResponsePairs = {
   getAllTabs: { req: GetAllTabsRequest; res: GetAllTabsResponse };
   runQuery: { req: RunQueryRequest; res: RunQueryResponse };
   expandTableResult: { req: ExpandTableResultRequest; res: ExpandTableResultResponse };
+  setTabTitle: { req: SetTabTitleRequest; res: SetTabTitleResponse };
 };
 
 // Create RequestMap from the pairs

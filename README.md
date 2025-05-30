@@ -1,4 +1,4 @@
-# AI Assistant 
+# AI Shell
 
 A plugin for Beekeeper Studio
 

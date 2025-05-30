@@ -39,9 +39,16 @@ export interface RunQueryRequest extends BaseRequest {
 }
 
 export interface ExpandTableResultRequest extends BaseRequest {
-  name: "expandQueryResult";
+  name: "expandTableResult";
   args: {
     results: QueryResult[];
+  };
+}
+
+export interface SetTabTitleRequest extends BaseRequest {
+  name: "setTabTitle";
+  args: {
+    title: string;
   };
 }
 
@@ -52,4 +59,5 @@ export type PluginRequestData =
   | GetActiveTabRequest
   | GetAllTabsRequest
   | RunQueryRequest
-  | ExpandTableResultRequest;
+  | ExpandTableResultRequest
+  | SetTabTitleRequest;

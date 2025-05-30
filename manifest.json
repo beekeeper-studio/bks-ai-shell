@@ -1,6 +1,6 @@
 {
-  "id": "bks-ai-assistant",
-  "name": "AI Assistant",
+  "id": "bks-ai-shell",
+  "name": "AI Shell",
   "version": "1.0.9",
   "minAppVersion": "5",
   "description": "AI Assistant for Beekeeper Studio",
@@ -12,8 +12,8 @@
     "views": {
       "tabTypes": [
         {
-          "id": "bks-ai-assistant",
-          "name": "AI Assistant",
+          "id": "bks-ai-shell",
+          "name": "AI Shell",
           "kind": "query",
           "entry": "index.html"
         }

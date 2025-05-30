@@ -1,5 +1,5 @@
 <template>
-  <div class="assistant-app">
+  <div class="shell-app">
     <!-- API Key Form -->
     <ApiKeyForm
       v-if="page === 'api-key-form'"

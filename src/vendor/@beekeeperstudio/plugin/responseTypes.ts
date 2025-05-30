@@ -2,7 +2,7 @@ import { TabType } from "@/common/transport/TransportOpenTab";
 import { TableFilter, TableOrView } from "@/lib/db/models";
 import { QueryResult } from "./commonTypes";
 
-/** The list of table names */
+/** The list of tables */
 export type GetTablesResponse = {
   name: string;
   schema?: string;
@@ -29,9 +29,11 @@ export type GetAllTabsResponse = TabResponse[];
 export type RunQueryResponse = {
   results: QueryResult[];
   error?: unknown;
-}
+};
 
 export type ExpandTableResultResponse = void;
+
+export type SetTabTitleResponse = void;
 
 export interface PluginResponseData {
   id: string;
@@ -42,14 +44,9 @@ export interface PluginResponseData {
     | GetActiveTabResponse
     | GetAllTabsResponse
     | RunQueryResponse
-    | ExpandTableResultResponse;
+    | ExpandTableResultResponse
+    | SetTabTitleResponse;
   error?: Error;
-}
-
-interface BaseTabResponse {
-  type: TabType;
-  id: number;
-  title: string;
 }
 
 interface QueryTabResponse extends BaseTabResponse {
@@ -67,4 +64,10 @@ interface TableTabResponse extends BaseTabResponse {
     filters: TableFilter[] | string;
     result: unknown;
   };
+}
+
+interface BaseTabResponse {
+  type: TabType;
+  id: number;
+  title: string;
 }

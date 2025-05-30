@@ -1,5 +1,5 @@
 {
-  "name": "bks-ai-assistant",
+  "name": "bks-ai-shell",
   "version": "1.0.0",
   "description": "AI Assistant for Beekeeper Studio using Claude API with LangChain",
   "license": "MIT",

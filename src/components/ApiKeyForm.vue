@@ -1,7 +1,7 @@
 <template>
   <div class="api-key-container">
     <div class="api-key-form-wrapper">
-      <h1>AI Assistant</h1>
+      <h1>AI Shell</h1>
       <p>Enter your API key below to start chatting with the AI:</p>
       <form class="api-key-form" @submit.prevent.stop="submitApiKey">
         <div class="provider-selection">
