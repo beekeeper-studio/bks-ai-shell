@@ -4,7 +4,10 @@ import "@material-symbols/font-400/outlined.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
-import { addNotificationListener, request } from "./vendor/@beekeeperstudio/plugin/comms";
+import {
+  addNotificationListener,
+  setDebugComms,
+} from "./vendor/@beekeeperstudio/plugin/comms";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
@@ -14,15 +17,10 @@ hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("json", json);
 
-async function injectStyle() {
-  const theme = await request("getTheme");
+addNotificationListener("themeChanged", (args) => {
   document.querySelector("#injected-style")!.textContent =
-    `:root { ${theme.cssString} }`;
-}
-
-addNotificationListener("themeChanged", () => injectStyle());
-
-injectStyle();
+    `:root { ${args.cssString} }`;
+});
 
 // Create and mount the Vue app
 const app = createApp(App);

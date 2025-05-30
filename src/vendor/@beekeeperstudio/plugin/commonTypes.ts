@@ -1,3 +1,5 @@
+export type ThemeType = "dark" | "light";
+
 export interface QueryResult {
   fields: {
     id: string;

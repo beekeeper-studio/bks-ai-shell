@@ -1,3 +1,4 @@
+import { safeJSONStringify } from "../../../utils";
 import { requestDevMode } from "./devComms";
 import type {
   GetThemeRequest,
@@ -52,15 +53,29 @@ export type RequestMap = {
 const pendingRequests = new Map<
   string,
   {
+    name: string;
     resolve: (value: any) => void;
     reject: (reason?: any) => void;
   }
 >();
 
+let debugComms = false;
+
+export function setDebugComms(value: boolean) {
+  debugComms = value;
+}
+
 window.addEventListener("message", (event) => {
   const { id, name, args, result, error } = event.data || {};
 
   if (name) {
+    if (debugComms) {
+      const time = new Date().toLocaleTimeString('en-GB');
+      console.groupCollapsed(`${time} [NOTIFICATION] ${name}`);
+      console.log('Args:', args);
+      console.groupEnd();
+    }
+
     const handlers = notificationListeners.get(name);
     if (handlers) {
       handlers.forEach((handler) => handler(args));
@@ -68,8 +83,16 @@ window.addEventListener("message", (event) => {
   }
 
   if (id && pendingRequests.has(id)) {
-    const { resolve, reject } = pendingRequests.get(id)!;
+    const { resolve, reject, name } = pendingRequests.get(id)!;
     pendingRequests.delete(id);
+
+    if (debugComms) {
+      const time = new Date().toLocaleTimeString('en-GB');
+      console.groupCollapsed(`${time} [RESPONSE] ${name}`);
+      console.log('Result:', result);
+      if (error) console.error('Error:', error);
+      console.groupEnd();
+    }
 
     if (error) {
       reject(error);
@@ -91,11 +114,18 @@ export async function request<K extends keyof RequestMap>(
     return result;
   }
 
+  if (debugComms) {
+    const time = new Date().toLocaleTimeString('en-GB');
+    console.groupCollapsed(`${time} [REQUEST] ${name}`);
+    console.log('Args:', args);
+    console.groupEnd();
+  }
+
   return new Promise<any>((resolve, reject) => {
     try {
       const id = crypto.randomUUID();
       const data = { id, name, args };
-      pendingRequests.set(id, { resolve, reject });
+      pendingRequests.set(id, { name, resolve, reject });
       window.parent.postMessage(data, "*");
     } catch (e) {
       reject(e);
