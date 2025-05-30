@@ -9,3 +9,13 @@ export interface QueryResult {
   rows: Record<string, unknown>[];
 }
 
+export type WindowEventClass =
+  | "MouseEvent"
+  | "KeyboardEvent"
+  | "PointerEvent"
+  | "Event";
+
+export type WindowEventInits =
+  | MouseEventInit
+  | KeyboardEventInit
+  | PointerEventInit;

@@ -1,7 +1,5 @@
-import { safeJSONStringify } from "../../../utils";
 import { requestDevMode } from "./devComms";
 import type {
-  GetThemeRequest,
   GetTablesRequest,
   GetColumnsRequest,
   GetConnectionInfoRequest,
@@ -11,7 +9,6 @@ import type {
   ExpandTableResultRequest,
 } from "./requestTypes";
 import type {
-  GetThemeResponse,
   GetTablesResponse,
   GetColumnsResponse,
   GetConnectionInfoResponse,
@@ -32,7 +29,6 @@ declare global {
 
 // Direct mapping approach for better type inference
 export type RequestResponsePairs = {
-  getTheme: { req: GetThemeRequest; res: GetThemeResponse };
   getTables: { req: GetTablesRequest; res: GetTablesResponse };
   getColumns: { req: GetColumnsRequest; res: GetColumnsResponse };
   getConnectionInfo: { req: GetConnectionInfoRequest; res: GetConnectionInfoResponse };
@@ -131,6 +127,16 @@ export async function request<K extends keyof RequestMap>(
       reject(e);
     }
   });
+}
+
+export function notify(name: string, args: any) {
+  if (debugComms) {
+    const time = new Date().toLocaleTimeString('en-GB');
+    console.groupCollapsed(`${time} [NOTIFICATION] ${name}`);
+    console.log('Args:', args);
+    console.groupEnd();
+  }
+  window.parent.postMessage({ name, args }, "*");
 }
 
 const notificationListeners = new Map<string, ((args: any) => void)[]>();
