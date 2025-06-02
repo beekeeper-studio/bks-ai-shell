@@ -3,6 +3,7 @@ import {
   AIMessageChunk,
   BaseMessage,
   HumanMessage,
+  SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
 import { IModel, IModelConfig } from "../types";
@@ -14,7 +15,7 @@ export interface Callbacks extends ToolCallbacks {
   onStart?: () => Promise<void>;
   onStreamChunk: (message: AIMessage) => Promise<void>;
   onComplete?: () => Promise<void>;
-  onFinalized: (conversationHistory: BaseMessage[]) => void;
+  onFinalized: (conversationHistory: BaseMessage[]) => Promise<void>;
   onError?: (error: unknown) => void;
 }
 
@@ -71,9 +72,9 @@ export class BaseModelProvider {
       [...conversationHistory, new HumanMessage(message)],
       {
         ...callbacks,
-        onFinalized: (...args) => {
+        onFinalized: async (...args) => {
           this.sendingMessage = false;
-          callbacks.onFinalized(...args);
+          await callbacks.onFinalized(...args);
         },
         onError: (...args) => {
           this.sendingMessage = false;
@@ -81,6 +82,14 @@ export class BaseModelProvider {
         },
       },
     );
+  }
+
+  async generateConversationTitle(messages: BaseMessage[]): Promise<string> {
+    const response = await this.llm.invoke([
+      ...messages.slice(1),
+      new HumanMessage("Generate a concise title for this conversation — ideally under 30 characters and preferably two words."),
+    ]);
+    return response.text;
   }
 
   protected async processStreamMessage(
@@ -103,11 +112,11 @@ export class BaseModelProvider {
           await callbacks.onStreamChunk(aiMessage);
         }
 
-        callbacks.onFinalized(messages);
+        await callbacks.onFinalized(messages);
         return;
       }
 
-      const stream = await this.llm!.bindTools(tools).stream(messages, {
+      const stream = await this.llm.bindTools!(tools).stream(messages, {
         signal: this.abortController.signal,
       });
       let aiMessage: AIMessageChunk = (await stream.next()).value;
@@ -126,7 +135,7 @@ export class BaseModelProvider {
 
       // No tool calls. End stream.
       if (!aiMessage.tool_calls?.length) {
-        callbacks.onFinalized(updatedMessages);
+        await callbacks.onFinalized(updatedMessages);
         return;
       }
 

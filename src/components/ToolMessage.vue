@@ -24,8 +24,8 @@
           {{ data.length }} tab{{ data.length > 1 ? "s" : "" }}
         </template>
         <template v-else-if="message.name === 'run_query'">
-          Query returned {{ data.results.length }} result{{
-            data.results.length > 1 ? "s" : ""
+          Query returned {{ data.results[0].rows.length }} row{{
+            data.results[0].rows.length > 1 ? "s" : ""
           }}
           <button
             class="btn"
@@ -34,7 +34,7 @@
             @click="$emit('result-click', result)"
           >
             <div class="label">
-              Result{{ data.results.length > 1 ? ` ${index + 1}` : `` }}
+              Show Result
             </div>
             <span class="material-symbols-outlined open-icon">
               keyboard_double_arrow_down

@@ -8,8 +8,9 @@
       >
         <!-- TODO put this in to the Message component -->
         <div class="message-content">
+          <template v-if="index === 0"></template>
           <tool-message
-            v-if="message.getType() === 'tool'"
+            v-else-if="message.getType() === 'tool'"
             :message="message"
             @result-click="handleResultClick"
           />

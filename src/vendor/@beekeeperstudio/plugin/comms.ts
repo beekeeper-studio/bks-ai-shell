@@ -2,9 +2,6 @@ import { requestDevMode } from "./devComms";
 import type {
   GetTablesRequest,
   GetColumnsRequest,
-  GetConnectionInfoRequest,
-  GetActiveTabRequest,
-  GetAllTabsRequest,
   RunQueryRequest,
   ExpandTableResultRequest,
   SetTabTitleRequest,
@@ -13,7 +10,6 @@ import type {
   GetTablesResponse,
   GetColumnsResponse,
   GetConnectionInfoResponse,
-  GetActiveTabResponse,
   GetAllTabsResponse,
   RunQueryResponse,
   ExpandTableResultResponse,
@@ -28,26 +24,6 @@ declare global {
     };
   }
 }
-
-// Direct mapping approach for better type inference
-export type RequestResponsePairs = {
-  getTables: { req: GetTablesRequest; res: GetTablesResponse };
-  getColumns: { req: GetColumnsRequest; res: GetColumnsResponse };
-  getConnectionInfo: { req: GetConnectionInfoRequest; res: GetConnectionInfoResponse };
-  getActiveTab: { req: GetActiveTabRequest; res: GetActiveTabResponse };
-  getAllTabs: { req: GetAllTabsRequest; res: GetAllTabsResponse };
-  runQuery: { req: RunQueryRequest; res: RunQueryResponse };
-  expandTableResult: { req: ExpandTableResultRequest; res: ExpandTableResultResponse };
-  setTabTitle: { req: SetTabTitleRequest; res: SetTabTitleResponse };
-};
-
-// Create RequestMap from the pairs
-export type RequestMap = {
-  [K in keyof RequestResponsePairs]: {
-    args: RequestResponsePairs[K]["req"] extends { args: infer A } ? A : undefined;
-    return: RequestResponsePairs[K]["res"];
-  }
-};
 
 const pendingRequests = new Map<
   string,
@@ -69,9 +45,9 @@ window.addEventListener("message", (event) => {
 
   if (name) {
     if (debugComms) {
-      const time = new Date().toLocaleTimeString('en-GB');
+      const time = new Date().toLocaleTimeString("en-GB");
       console.groupCollapsed(`${time} [NOTIFICATION] ${name}`);
-      console.log('Args:', args);
+      console.log("Args:", args);
       console.groupEnd();
     }
 
@@ -86,10 +62,10 @@ window.addEventListener("message", (event) => {
     pendingRequests.delete(id);
 
     if (debugComms) {
-      const time = new Date().toLocaleTimeString('en-GB');
+      const time = new Date().toLocaleTimeString("en-GB");
       console.groupCollapsed(`${time} [RESPONSE] ${name}`);
-      console.log('Result:', result);
-      if (error) console.error('Error:', error);
+      console.log("Result:", result);
+      if (error) console.error("Error:", error);
       console.groupEnd();
     }
 
@@ -101,22 +77,24 @@ window.addEventListener("message", (event) => {
   }
 });
 
-export async function request<K extends keyof RequestMap>(
-  name: K,
-  ...args: RequestMap[K]["args"] extends undefined
-    ? []
-    : [RequestMap[K]["args"]]
-): Promise<RequestMap[K]["return"]> {
+export async function request(name: "getTables", args?: GetTablesRequest["args"]): Promise<GetTablesResponse>;
+export async function request(name: "getColumns", args: GetColumnsRequest["args"]): Promise<GetColumnsResponse>;
+export async function request(name: "getConnectionInfo"): Promise<GetConnectionInfoResponse>;
+export async function request(name: "getAllTabs"): Promise<GetAllTabsResponse>;
+export async function request(name: "runQuery", args: RunQueryRequest["args"]): Promise<RunQueryResponse>;
+export async function request(name: "expandTableResult", args: ExpandTableResultRequest["args"]): Promise<ExpandTableResultResponse>;
+export async function request(name: "setTabTitle", args: SetTabTitleRequest["args"]): Promise<SetTabTitleResponse>;
+export async function request(name: unknown, args?: unknown): Promise<unknown> {
   if (import.meta.env.MODE === "development") {
-    const result = await requestDevMode(name, ...args);
+    const result = await requestDevMode(name, args);
     // console.log("result", result);
     return result;
   }
 
   if (debugComms) {
-    const time = new Date().toLocaleTimeString('en-GB');
+    const time = new Date().toLocaleTimeString("en-GB");
     console.groupCollapsed(`${time} [REQUEST] ${name}`);
-    console.log('Args:', args);
+    console.log("Args:", args);
     console.groupEnd();
   }
 
@@ -134,9 +112,9 @@ export async function request<K extends keyof RequestMap>(
 
 export function notify(name: string, args: any) {
   if (debugComms) {
-    const time = new Date().toLocaleTimeString('en-GB');
+    const time = new Date().toLocaleTimeString("en-GB");
     console.groupCollapsed(`${time} [NOTIFICATION] ${name}`);
-    console.log('Args:', args);
+    console.log("Args:", args);
     console.groupEnd();
   }
   window.parent.postMessage({ name, args }, "*");

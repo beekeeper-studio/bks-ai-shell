@@ -21,14 +21,12 @@ export interface GetColumnsRequest extends BaseRequest {
 
 export interface GetConnectionInfoRequest extends BaseRequest {
   name: "getConnectionInfo";
-}
-
-export interface GetActiveTabRequest extends BaseRequest {
-  name: "getActiveTab";
+  args: void;
 }
 
 export interface GetAllTabsRequest extends BaseRequest {
   name: "getAllTabs";
+  args: void;
 }
 
 export interface RunQueryRequest extends BaseRequest {
@@ -56,7 +54,6 @@ export type PluginRequestData =
   | GetTablesRequest
   | GetColumnsRequest
   | GetConnectionInfoRequest
-  | GetActiveTabRequest
   | GetAllTabsRequest
   | RunQueryRequest
   | ExpandTableResultRequest

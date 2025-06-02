@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { STORAGE_KEYS } from "./config";
+import { getDefaultInstructions, STORAGE_KEYS } from "./config";
 import { IModel } from "./types";
 import _ from "lodash";
 import { createProvider, ProviderId } from "./providers/modelFactory";
@@ -9,6 +9,7 @@ import {
   SystemMessage,
 } from "@langchain/core/messages";
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
+import { request } from "./vendor/@beekeeperstudio/plugin";
 
 interface Tool {
   id: string;
@@ -33,6 +34,7 @@ interface ProviderState {
   activeToolId: string | null;
   tools: Record<string, Tool>;
   error: unknown;
+  conversationTitleIsSet: boolean;
 }
 
 // the first argument is a unique id of the store across your application
@@ -50,6 +52,7 @@ export const useProviderStore = defineStore("providers", {
     activeToolId: null,
     tools: {},
     error: null,
+    conversationTitleIsSet: false,
   }),
   actions: {
     async initializeProvider() {
@@ -63,11 +66,7 @@ export const useProviderStore = defineStore("providers", {
         }
         this.setModel(modelId);
         if (this.messages.length === 0) {
-          this.messages.push(
-            new SystemMessage(
-              "Hi there! I'm your AI-powered assistant. How can I help you today?",
-            ),
-          );
+          this.messages.push(new SystemMessage(await getDefaultInstructions()));
         }
       } catch (e) {
         console.error(e);
@@ -136,9 +135,14 @@ export const useProviderStore = defineStore("providers", {
             this.activeTool = null;
             this.isThinking = true;
           },
-          onFinalized: (messages) => {
+          onFinalized: async (messages) => {
             this.isThinking = false;
             this.messages = messages;
+            if (!this.conversationTitleIsSet) {
+              const title = await this.model!.generateConversationTitle(this.messages);
+              request("setTabTitle", { title });
+              this.conversationTitleIsSet = true;
+            }
             resolve();
           },
           onError: (error) => {

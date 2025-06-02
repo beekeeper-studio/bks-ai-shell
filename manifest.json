@@ -8,6 +8,7 @@
     "name": "Beekeeper Studio",
     "url": "https://beekeeperstudio.io"
   },
+  "icon": "auto_awesome",
   "capabilities": {
     "views": {
       "tabTypes": [

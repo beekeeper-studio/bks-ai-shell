@@ -8,6 +8,12 @@ import { parseMarkdownToHTML } from "../markdownParser";
 export default {
   props: ["content"],
 
+  data() {
+    return {
+      copyTimeout: null as NodeJS.Timeout | null,
+    };
+  },
+
   computed: {
     html() {
       return parseMarkdownToHTML(this.content);
@@ -47,11 +53,18 @@ export default {
         case "copy": {
           navigator.clipboard.writeText(text);
           target.classList.add("copied");
+          if (this.copyTimeout) {
+            clearTimeout(this.copyTimeout);
+          }
+          this.copyTimeout = setTimeout(
+            () => target.classList.remove("copied"),
+            3000,
+          );
           break;
         }
         case "run": {
           target.classList.add("running");
-          // TODO run here
+          // TODO call request("runQuery") here
           target.classList.remove("running");
           break;
         }

@@ -16,13 +16,12 @@ export type GetColumnsResponse = {
 
 export type GetConnectionInfoResponse = {
   connectionType: string;
-  defaultDatabase?: string;
+  databaseName: string;
+  defaultSchema?: string;
   readOnlyMode: boolean;
 }
 
 export type TabResponse = BaseTabResponse | QueryTabResponse | TableTabResponse;
-
-export type GetActiveTabResponse = TabResponse;
 
 export type GetAllTabsResponse = TabResponse[];
 
@@ -41,7 +40,6 @@ export interface PluginResponseData {
     | GetTablesResponse
     | GetColumnsResponse
     | GetConnectionInfoResponse
-    | GetActiveTabResponse
     | GetAllTabsResponse
     | RunQueryResponse
     | ExpandTableResultResponse
