@@ -1,7 +1,7 @@
 {
   "id": "bks-ai-shell",
   "name": "AI Shell",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "minAppVersion": "5",
   "description": "AI Assistant for Beekeeper Studio",
   "author": {
