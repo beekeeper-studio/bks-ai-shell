@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
-import { request } from "../vendor/@beekeeperstudio/plugin";
+import { request } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "../utils";
 
 const getTablesInputSchema = z.object({

@@ -1,5 +1,5 @@
 import instructions from "../instructions.txt?raw";
-import { request } from "./vendor/@beekeeperstudio/plugin";
+import { request } from "@beekeeperstudio/plugin";
 
 export async function getDefaultInstructions() {
   const response = await request("getConnectionInfo");

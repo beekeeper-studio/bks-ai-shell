@@ -8,12 +8,12 @@ import {
   addNotificationListener,
   notify,
   setDebugComms,
-} from "./vendor/@beekeeperstudio/plugin/comms";
+} from "@beekeeperstudio/plugin";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
-import "./vendor/@beekeeperstudio/plugin/eventForwarder";
+import "@beekeeperstudio/plugin/dist/eventForwarder";
 
 setDebugComms(false);
 

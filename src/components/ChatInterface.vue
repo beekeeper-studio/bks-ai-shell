@@ -155,7 +155,7 @@ import Message from "./Message.vue";
 import ToolMessage from "./ToolMessage.vue";
 import { safeJSONStringify } from "../utils";
 import _ from "lodash";
-import { request, QueryResult } from "../vendor/@beekeeperstudio/plugin";
+import { request, QueryResult } from "@beekeeperstudio/plugin";
 
 const maxHistorySize = 50;
 

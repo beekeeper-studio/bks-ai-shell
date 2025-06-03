@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@beekeeperstudio/plugin": "github:beekeeper-studio/plugin",
     "@langchain/anthropic": "^0.3.21",
     "@langchain/core": "^0.3.48",
     "@material-symbols/font-400": "^0.31.2",

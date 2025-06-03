@@ -9,7 +9,7 @@ import {
   SystemMessage,
 } from "@langchain/core/messages";
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
-import { request } from "./vendor/@beekeeperstudio/plugin";
+import { request } from "@beekeeperstudio/plugin";
 
 interface Tool {
   id: string;
