@@ -22,14 +22,5 @@
     }
   },
   "pluginEntryDir": "dist",
-  "settings": [
-    {
-      "id": "apiKey",
-      "name": "API Key",
-      "type": "string",
-      "description": "Your API key.",
-      "default": ""
-    }
-  ],
   "permissions": []
 }
