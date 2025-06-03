@@ -1,6 +1,6 @@
 # AI Shell
 
-A plugin for Beekeeper Studio
+Ask AI to analyze your database and generate SQL queries.
 
 ## Setup
 
