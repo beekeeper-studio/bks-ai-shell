@@ -7,6 +7,9 @@ import {
   BaseMessage,
   HumanMessage,
   SystemMessage,
+  StoredMessage,
+  mapChatMessagesToStoredMessages,
+  mapStoredMessagesToChatMessages,
 } from "@langchain/core/messages";
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
 import { request } from "@beekeeperstudio/plugin";
@@ -63,6 +66,15 @@ export const useProviderStore = defineStore("providers", {
   }),
   actions: {
     async initializeProvider() {
+      const state = await request<{ messages: StoredMessage[] }>("getState");
+      if (state?.messages) {
+        try {
+          this.messages = mapStoredMessagesToChatMessages(state.messages);
+        } catch (e) {
+          console.error(e);
+          this.error = `Failed to load messages: ${e}`;
+        }
+      }
       this.provider = await createProvider(this.providerId, this.apiKey);
       this.models = this.provider.models;
       let modelId = this.models[0].id;
@@ -142,6 +154,9 @@ export const useProviderStore = defineStore("providers", {
             this.isThinking = false;
             this.isProcessing = false;
             this.messages = messages;
+            request("setState", {
+              state: { messages: mapChatMessagesToStoredMessages(messages) },
+            });
             this.switchModel();
             if (!this.conversationTitleIsSet) {
               const title = await this.model!.generateConversationTitle(

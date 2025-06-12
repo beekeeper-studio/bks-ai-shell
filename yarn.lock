@@ -41,8 +41,8 @@
     "@babel/helper-validator-identifier" "^7.25.9"
 
 "@beekeeperstudio/plugin@github:beekeeper-studio/plugin":
-  version "1.0.6"
-  resolved "https://codeload.github.com/beekeeper-studio/plugin/tar.gz/4d114f2be0d5e59e75c19271a1f372e305940995"
+  version "1.0.8"
+  resolved "https://codeload.github.com/beekeeper-studio/plugin/tar.gz/c4988193f2bc378ca10ecf251c87a955a50eddf6"
 
 "@cfworker/json-schema@^4.0.2":
   version "4.1.1"
