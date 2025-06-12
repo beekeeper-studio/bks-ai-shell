@@ -1,0 +1,67 @@
+<template>
+  Query returned {{ rows.length }} row{{ rows.length > 1 ? "s" : "" }}
+  <div class="preview-table-container" v-if="rows.length > 0">
+    <table class="preview-table">
+      <thead>
+        <tr>
+          <th v-for="column in columns" :key="column">
+            {{ column }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, index) in limitedRows" :key="index">
+          <td v-for="column in columns" :key="column">
+            {{ row[column] }}
+          </td>
+        </tr>
+        <tr v-if="remainingRows > 0" class="remaining-rows">
+          <td :colspan="columns.length">
+            ... {{ remainingRows }} more row{{ remainingRows > 1 ? 's' : '' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <button
+    class="btn"
+    v-for="(result, index) in data.results"
+    :key="index"
+    @click="$emit('result-click', result)"
+  >
+    <div class="label">Show more</div>
+    <span class="material-symbols-outlined open-icon">
+      keyboard_double_arrow_down
+    </span>
+  </button>
+</template>
+
+<script lang="ts">
+import { PropType } from "vue";
+import { RunQueryResponse } from "@beekeeperstudio/plugin";
+
+const TABLE_MAX_ROWS = 5;
+
+export default {
+  props: {
+    data: {
+      type: Object as PropType<RunQueryResponse>,
+      required: true,
+    },
+  },
+  computed: {
+    columns() {
+      return this.data.results[0].fields.map((field) => field.name);
+    },
+    rows() {
+      return this.data.results[0].rows;
+    },
+    limitedRows() {
+      return this.rows.slice(0, TABLE_MAX_ROWS);
+    },
+    remainingRows() {
+      return Math.max(0, this.rows.length - TABLE_MAX_ROWS);
+    },
+  },
+};
+</script>

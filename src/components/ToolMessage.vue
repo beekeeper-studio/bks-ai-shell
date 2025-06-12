@@ -25,24 +25,11 @@
         <template v-else-if="message.name === 'get_all_tabs'">
           {{ data.length }} tab{{ data.length > 1 ? "s" : "" }}
         </template>
-        <template v-else-if="message.name === 'run_query'">
-          Query returned {{ data.results[0].rows.length }} row{{
-            data.results[0].rows.length > 1 ? "s" : ""
-          }}
-          <button
-            class="btn"
-            v-for="(result, index) in data.results"
-            :key="index"
-            @click="$emit('result-click', result)"
-          >
-            <div class="label">
-              Show Result
-            </div>
-            <span class="material-symbols-outlined open-icon">
-              keyboard_double_arrow_down
-            </span>
-          </button>
-        </template>
+        <run-query-message
+          v-else-if="message.name === 'run_query'"
+          :data="data"
+          @result-click="$emit('result-click', $event)"
+        />
       </template>
     </summary>
     <message v-if="content" :content="content" />
@@ -54,9 +41,10 @@ import Message from "./Message.vue";
 import { ToolMessage } from "@langchain/core/messages";
 import { PropType } from "vue";
 import { safeJSONStringify } from "../utils";
+import RunQueryMessage from "./toolMessage/RunQueryMessage.vue";
 
 export default {
-  components: { Message },
+  components: { Message, RunQueryMessage },
   props: {
     message: {
       type: Object as PropType<ToolMessage>,
