@@ -9,21 +9,21 @@
           {{ data.connectionType }}
         </template>
         <template v-if="message.name === 'get_tables'">
-          {{ data.length }} table{{ data.length > 1 ? "s" : "" }} (
+          {{ data.length }} {{ $pluralize('table', data.length) }} (
           <code>{{
             truncateAtWord(data.map((t) => t.name).join(", "), 50)
           }}</code>
           )
         </template>
         <template v-if="message.name === 'get_columns'">
-          {{ data.length }} column{{ data.length > 1 ? "s" : "" }} (
+          {{ data.length }} {{ $pluralize('column', data.length) }} (
           <code>
             {{ truncateAtWord(data.map((c) => c.name).join(", "), 50) }}
           </code>
           )
         </template>
         <template v-else-if="message.name === 'get_all_tabs'">
-          {{ data.length }} tab{{ data.length > 1 ? "s" : "" }}
+          {{ data.length }} {{ $pluralize('tab', data.length) }}
         </template>
         <run-query-message
           v-else-if="message.name === 'run_query'"

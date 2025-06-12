@@ -3,6 +3,7 @@ import "@material-symbols/font-400/outlined.css";
 
 import { createApp } from "vue";
 import { createPinia } from "pinia";
+import pluralize from "pluralize";
 import App from "./App.vue";
 import {
   addNotificationListener,
@@ -29,4 +30,5 @@ addNotificationListener("themeChanged", (args) => {
 const app = createApp(App);
 const pinia = createPinia();
 app.use(pinia);
+app.config.globalProperties.$pluralize = pluralize;
 app.mount("#app");

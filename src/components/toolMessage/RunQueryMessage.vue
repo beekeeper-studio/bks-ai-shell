@@ -1,5 +1,5 @@
 <template>
-  Query returned {{ rows.length }} row{{ rows.length > 1 ? "s" : "" }}
+  Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
   <div class="preview-table-container" v-if="rows.length > 0">
     <table class="preview-table">
       <thead>
@@ -17,7 +17,7 @@
         </tr>
         <tr v-if="remainingRows > 0" class="remaining-rows">
           <td :colspan="columns.length">
-            ... {{ remainingRows }} more row{{ remainingRows > 1 ? 's' : '' }}
+            ... {{ remainingRows }} more {{ $pluralize('row', remainingRows) }}
           </td>
         </tr>
       </tbody>
