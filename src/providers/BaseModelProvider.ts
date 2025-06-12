@@ -9,6 +9,7 @@ import { IModel, IModelConfig } from "../types";
 import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { tools } from "../tools";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { z } from "zod";
 
 export interface Callbacks extends ToolCallbacks {
   onStart?: () => Promise<void>;
@@ -45,7 +46,7 @@ export class BaseModelProvider {
     public readonly id: string,
     public readonly displayName: string,
     private readonly llm: BaseChatModel,
-  ) {}
+  ) { }
 
   get isSendingMessage(): boolean {
     return this.sendingMessage;
@@ -84,11 +85,19 @@ export class BaseModelProvider {
   }
 
   async generateConversationTitle(messages: BaseMessage[]): Promise<string> {
-    const response = await this.llm.invoke([
-      ...messages.slice(1),
-      new HumanMessage("Generate a concise title for this conversation — ideally under 30 characters and preferably two words."),
-    ]);
-    return response.text;
+    const response = await this.llm
+      .withStructuredOutput(
+        z.object({
+          title: z.string().describe("The title of the conversation"),
+        }),
+      )
+      .invoke([
+        ...messages.slice(1), // exclude system message
+        new HumanMessage(
+          "Generate a concise title for this conversation — ideally under 30 characters and preferably two words.",
+        ),
+      ]);
+    return response.title;
   }
 
   protected async processStreamMessage(
