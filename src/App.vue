@@ -11,7 +11,10 @@
     />
 
     <!-- Chat Interface -->
-    <ChatInterface v-else-if="page === 'chat-interface'" />
+    <ChatInterface 
+      v-else-if="page === 'chat-interface'" 
+      @navigate-to-api-form="page = 'api-key-form'"
+    />
   </div>
 </template>
 
@@ -29,10 +32,26 @@ export default {
 
   data() {
     return {
-      page: "api-key-form", // 'api-key-form' or 'chat-interface'
+      page: "", // Will be set in mounted based on API key availability
       disabledApiKeyForm: false,
       error: "",
     };
+  },
+
+  async mounted() {
+    // Check if API key exists and auto-navigate to appropriate page
+    if (this.apiKey && this.providerId) {
+      try {
+        await this.initializeProvider();
+        this.page = "chat-interface";
+      } catch (e) {
+        // If initialization fails, go to API key form
+        this.page = "api-key-form";
+        this.error = e;
+      }
+    } else {
+      this.page = "api-key-form";
+    }
   },
 
   computed: {

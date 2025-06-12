@@ -188,7 +188,7 @@ export class BaseModelProvider {
           const toolMessage = new ToolMessage({
             tool_call_id: id!,
             status: "error",
-            content: "No - Do something differently.",
+            content: "No - tell the AI what to do differently.",
           });
           toolMessages.push(toolMessage);
           await callbacks.onToolMessage?.(toolMessage);

@@ -117,22 +117,25 @@
         v-autoresize
       ></textarea>
       <div class="actions">
-        <select
-          id="model-selector"
+        <Dropdown
+          :model-value="pendingModelId"
+          placeholder="Select Model"
           aria-label="Model"
-          :value="model?.id"
-          @change="handleModelChange"
+          @update:model-value="setModel"
         >
-          <option v-if="isThinking" value="loading">Loading models...</option>
-          <option
-            v-else
-            v-for="model in models"
-            :key="model.id"
-            :value="model.id"
-          >
-            {{ model.id }}
-          </option>
-        </select>
+          <DropdownOption
+            v-for="modelOption in models"
+            :key="modelOption.id"
+            :value="modelOption.id"
+            :text="modelOption.id"
+            :selected="modelOption.id === pendingModelId"
+            @select="setModel"
+          />
+          <div class="dropdown-separator"></div>
+          <button class="dropdown-action" @click="handleManageModels">
+            Manage models
+          </button>
+        </Dropdown>
         <button
           v-if="!isThinking && !isCallingTool"
           @click="send"
@@ -153,6 +156,8 @@ import { mapState, mapActions } from "pinia";
 import { useProviderStore } from "../store";
 import Message from "./Message.vue";
 import ToolMessage from "./ToolMessage.vue";
+import Dropdown from "./common/Dropdown.vue";
+import DropdownOption from "./common/DropdownOption.vue";
 import { safeJSONStringify } from "../utils";
 import _ from "lodash";
 import { request, QueryResult } from "@beekeeperstudio/plugin";
@@ -165,6 +170,8 @@ export default {
   components: {
     Message,
     ToolMessage,
+    Dropdown,
+    DropdownOption,
   },
 
   data() {
@@ -186,6 +193,7 @@ export default {
       "providerId",
       "provider",
       "model",
+      "pendingModelId",
       "apiKey",
       "models",
       "messages",
@@ -237,6 +245,7 @@ export default {
 
       this.isAtBottom = isNearBottom;
     });
+
   },
 
   methods: {
@@ -246,8 +255,9 @@ export default {
       "stopStreamMessage",
     ]),
 
-    handleModelChange(event: Event) {
-      this.setModel((event.target as HTMLSelectElement).value);
+    handleManageModels() {
+      // Navigate back to API key form to manage models/providers
+      this.$emit('navigate-to-api-form');
     },
 
     // Handle enter key (send on Enter, new line on Shift+Enter)

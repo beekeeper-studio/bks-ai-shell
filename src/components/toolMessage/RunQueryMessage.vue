@@ -27,7 +27,7 @@
     class="btn"
     v-for="(result, index) in data.results"
     :key="index"
-    @click="$emit('result-click', result)"
+    @click="() => $emit('result-click', result)"
   >
     <div class="label">Show more</div>
     <span class="material-symbols-outlined open-icon">
@@ -49,6 +49,7 @@ export default {
       required: true,
     },
   },
+  emits: ['result-click'],
   computed: {
     columns() {
       return this.data.results[0].fields.map((field) => field.name);

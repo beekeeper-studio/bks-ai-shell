@@ -28,13 +28,19 @@ interface ProviderState {
   model?: BaseModelProvider;
   models: IModel[];
   messages: BaseMessage[];
-  isThinking: boolean;
   isCallingTool: boolean;
   activeTool: Tool | null;
   activeToolId: string | null;
   tools: Record<string, Tool>;
   error: unknown;
   conversationTitleIsSet: boolean;
+
+  /** Is the model processing a message? */
+  isProcessing: boolean;
+  /** Same like `isProcessing` but `false` when waiting for user permission. */
+  isThinking: boolean;
+  /** Useful when user switches models while a message is being sent. */
+  pendingModelId?: string;
 }
 
 // the first argument is a unique id of the store across your application
@@ -53,6 +59,7 @@ export const useProviderStore = defineStore("providers", {
     tools: {},
     error: null,
     conversationTitleIsSet: false,
+    isProcessing: false,
   }),
   actions: {
     async initializeProvider() {
@@ -64,22 +71,24 @@ export const useProviderStore = defineStore("providers", {
         modelId = storedModelId.split(":")[1];
       }
       this.setModel(modelId);
+      this.switchModel();
       if (this.messages.length === 0) {
         this.messages.push(new SystemMessage(await getDefaultInstructions()));
       }
     },
-    sendStreamMessage(message: string): Promise<void> {
+    async sendStreamMessage(message: string): Promise<void> {
       if (!this.provider) {
         throw new Error("No provider initialized");
       }
 
       this.isThinking = true;
+      this.isProcessing = true;
 
       this.messages.push(new HumanMessage(message));
 
       let aiMessageIndex = -1;
 
-      return new Promise<void>((resolve, reject) => {
+      return await new Promise<void>((resolve, reject) => {
         this.model!.sendStreamMessage(message, this.messages.slice(0, -1), {
           onStart: async () => {
             aiMessageIndex = -1;
@@ -131,9 +140,13 @@ export const useProviderStore = defineStore("providers", {
           },
           onFinalized: async (messages) => {
             this.isThinking = false;
+            this.isProcessing = false;
             this.messages = messages;
+            this.switchModel();
             if (!this.conversationTitleIsSet) {
-              const title = await this.model!.generateConversationTitle(this.messages);
+              const title = await this.model!.generateConversationTitle(
+                this.messages,
+              );
               request("setTabTitle", { title });
               this.conversationTitleIsSet = true;
             }
@@ -141,7 +154,9 @@ export const useProviderStore = defineStore("providers", {
           },
           onError: (error) => {
             this.isThinking = false;
+            this.isProcessing = false;
             this.isCallingTool = false;
+            this.switchModel();
             if (
               error instanceof Error &&
               (error.message.startsWith("Aborted") ||
@@ -173,10 +188,19 @@ export const useProviderStore = defineStore("providers", {
       localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
     },
     setModel(modelId: string) {
-      if (this.model?.isSendingMessage) {
-        throw new Error("Cannot switch model while a message is being sent.");
+      this.pendingModelId = modelId;
+    },
+    switchModel() {
+      if (this.isProcessing) {
+        throw new Error("Cannot switch model while processing a message.");
       }
-
+      if (!this.pendingModelId) {
+        throw new Error("No model selected.");
+      }
+      const modelId = this.pendingModelId;
+      if (modelId === this.model?.id) {
+        return;
+      }
       try {
         this.model = this.provider?.createModel({ modelId });
         localStorage.setItem(
