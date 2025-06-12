@@ -26,11 +26,19 @@
     font-size: 0.85rem;
     background-color: var(--query-editor-bg);
     color: var(--text-dark);
+
+    &:disabled {
+      opacity: 0.6;
+    }
   }
 
   button[type="submit"] {
     padding-block: 1.15rem;
     font-size: 0.85rem;
+
+    &:disabled {
+      opacity: 0.6;
+    }
   }
 
   .api-info {
@@ -41,6 +49,17 @@
     p {
       margin-bottom: 0.5rem;
     }
+  }
+
+  .error-message {
+    background-color: rgb(from var(--brand-danger) r g b / 20%);
+    border: 1px solid rgb(from var(--brand-danger) r g b / 100%);
+    color: var(--text-dark);
+    padding: 0.75rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin: 0.5rem 0;
+    text-align: left;
   }
 }
 

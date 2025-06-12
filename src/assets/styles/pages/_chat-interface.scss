@@ -193,6 +193,11 @@
           padding: 0.2rem;
           margin-top: 0.5rem;
         }
+
+        &.error {
+          display: block;
+          color: color-mix(in srgb, var(--brand-danger) 80%, var(--text-dark));
+        }
       }
 
       summary::marker {

@@ -56,22 +56,16 @@ export const useProviderStore = defineStore("providers", {
   }),
   actions: {
     async initializeProvider() {
-      try {
-        this.provider = await createProvider(this.providerId, this.apiKey);
-        this.models = this.provider.models;
-        let modelId = this.models[0].id;
-        const storedModelId = localStorage.getItem(STORAGE_KEYS.MODEL);
-        if (storedModelId && storedModelId.startsWith(`${this.providerId}:`)) {
-          modelId = storedModelId.split(":")[1];
-        }
-        this.setModel(modelId);
-        if (this.messages.length === 0) {
-          this.messages.push(new SystemMessage(await getDefaultInstructions()));
-        }
-      } catch (e) {
-        console.error(e);
-        this.error = e;
-        throw e;
+      this.provider = await createProvider(this.providerId, this.apiKey);
+      this.models = this.provider.models;
+      let modelId = this.models[0].id;
+      const storedModelId = localStorage.getItem(STORAGE_KEYS.MODEL);
+      if (storedModelId && storedModelId.startsWith(`${this.providerId}:`)) {
+        modelId = storedModelId.split(":")[1];
+      }
+      this.setModel(modelId);
+      if (this.messages.length === 0) {
+        this.messages.push(new SystemMessage(await getDefaultInstructions()));
       }
     },
     sendStreamMessage(message: string): Promise<void> {

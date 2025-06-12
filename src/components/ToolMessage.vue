@@ -1,7 +1,9 @@
 <template>
   <details>
-    <summary>
-      <template v-if="data.error"> Error encountered </template>
+    <summary :class="message.status">
+      <template v-if="message.status === 'error'">
+        {{ message.text }}
+      </template>
       <template v-else>
         <template v-if="message.name === 'get_connection_info'">
           {{ data.connectionType }}

@@ -3,7 +3,6 @@ import {
   AIMessageChunk,
   BaseMessage,
   HumanMessage,
-  SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
 import { IModel, IModelConfig } from "../types";
@@ -177,13 +176,14 @@ export class BaseModelProvider {
           toolCall.args,
         );
         if (!granted) {
-          const toolMessage = new ToolMessage(
-            "User rejected permission to use this tool.",
-            id,
-            name,
-          );
+          const toolMessage = new ToolMessage({
+            tool_call_id: id!,
+            status: "error",
+            content: "No - Do something differently.",
+          });
           toolMessages.push(toolMessage);
           await callbacks.onToolMessage?.(toolMessage);
+          this.abortStreamMessage(new Error("Aborted: tool permission denied"));
           continue;
         }
       }
@@ -193,11 +193,14 @@ export class BaseModelProvider {
       try {
         toolMessage = await toolToUse.invoke(toolCall);
       } catch (error) {
-        console.error(`Error with tool ${toolCall.name}:`, error);
+        console.error(`Error invoking tool ${toolCall.name}:`, error);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
-        const result = JSON.stringify({ error: errorMessage });
-        toolMessage = new ToolMessage(result, id, name);
+        toolMessage = new ToolMessage({
+          tool_call_id: id!,
+          status: "error",
+          content: `Error: ${errorMessage}`,
+        });
       }
 
       toolMessages.push(toolMessage);
@@ -207,7 +210,7 @@ export class BaseModelProvider {
     return toolMessages;
   }
 
-  abortStreamMessage(): void {
-    this.abortController.abort();
+  abortStreamMessage(reason?: any): void {
+    this.abortController.abort(reason);
   }
 }

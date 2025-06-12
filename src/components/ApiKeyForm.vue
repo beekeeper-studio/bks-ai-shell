@@ -6,7 +6,11 @@
       <form class="api-key-form" @submit.prevent.stop="submitApiKey">
         <div class="provider-selection">
           <label for="provider-select">Choose your AI provider:</label>
-          <select id="provider-select" v-model="selectedProviderId">
+          <select
+            id="provider-select"
+            v-model="selectedProviderId"
+            :disabled="disabled"
+          >
             <option
               v-for="provider in providers"
               :key="provider.id"
@@ -19,10 +23,16 @@
         <input
           type="password"
           v-model="apiKey"
+          :disabled="disabled"
           :placeholder="`Enter your ${selectedProviderName} API key here`"
           :required="requireApiKey"
         />
-        <button class="btn btn-primary" type="submit">Start Chatting</button>
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+        <button class="btn btn-primary" type="submit" :disabled="disabled">
+          Start Chatting
+        </button>
       </form>
       <div class="api-info">
         <p>
@@ -56,6 +66,14 @@ export default {
       default: "",
     },
     initialApiKey: {
+      type: String,
+      default: "",
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    error: {
       type: String,
       default: "",
     },

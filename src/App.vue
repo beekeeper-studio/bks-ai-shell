@@ -6,6 +6,8 @@
       :initial-provider-id="providerId"
       :initial-api-key="apiKey"
       @submit="handleApiKeySubmit"
+      :disabled="disabledApiKeyForm"
+      :error="error"
     />
 
     <!-- Chat Interface -->
@@ -28,7 +30,8 @@ export default {
   data() {
     return {
       page: "api-key-form", // 'api-key-form' or 'chat-interface'
-      // page: "chat-interface", // 'api-key-form' or 'chat-interface'
+      disabledApiKeyForm: false,
+      error: "",
     };
   },
 
@@ -43,10 +46,18 @@ export default {
       "initializeProvider",
     ]),
     async handleApiKeySubmit(data) {
+      this.error = "";
+      this.disabledApiKeyForm = true;
+      await this.$nextTick()
       this.setApiKey(data.key);
       this.setProviderId(data.provider);
-      this.page = "chat-interface";
-      this.initializeProvider();
+      try {
+        await this.initializeProvider();
+        this.page = "chat-interface";
+      } catch (e) {
+        this.error = e;
+      }
+      this.disabledApiKeyForm = false;
     },
   },
 };

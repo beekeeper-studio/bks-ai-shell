@@ -99,7 +99,7 @@
       </div>
       <div class="message error" v-if="error">
         <div class="message-content">
-          Something went wrong. Please see the console for more details.
+          Something went wrong. {{ error }}
         </div>
       </div>
       <div v-if="isThinking" class="spinner" />
