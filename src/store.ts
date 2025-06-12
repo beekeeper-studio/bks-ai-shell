@@ -66,7 +66,7 @@ export const useProviderStore = defineStore("providers", {
   }),
   actions: {
     async initializeProvider() {
-      const state = await request<{ messages: StoredMessage[] }>("getState");
+      const state = await request<{ messages: StoredMessage[] }>("getViewState");
       if (state?.messages) {
         try {
           this.messages = mapStoredMessagesToChatMessages(state.messages);
@@ -154,7 +154,7 @@ export const useProviderStore = defineStore("providers", {
             this.isThinking = false;
             this.isProcessing = false;
             this.messages = messages;
-            request("setState", {
+            request("setViewState", {
               state: { messages: mapChatMessagesToStoredMessages(messages) },
             });
             this.switchModel();
