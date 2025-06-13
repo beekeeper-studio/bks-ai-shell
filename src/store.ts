@@ -40,8 +40,8 @@ interface ProviderState {
 
   /** Is the model processing a message? */
   isProcessing: boolean;
-  /** Same like `isProcessing` but `false` when waiting for user permission. */
-  isThinking: boolean;
+  /** The model is asking for permission to call a tool. */
+  isAskingPermission: boolean;
   /** Useful when user switches models while a message is being sent. */
   pendingModelId?: string;
 }
@@ -55,7 +55,6 @@ export const useProviderStore = defineStore("providers", {
     provider: undefined,
     models: [],
     messages: [],
-    isThinking: false,
     isCallingTool: false,
     activeTool: null,
     activeToolId: null,
@@ -63,7 +62,15 @@ export const useProviderStore = defineStore("providers", {
     error: null,
     conversationTitleIsSet: false,
     isProcessing: false,
+    isAskingPermission: false,
   }),
+  getters: {
+    // Can send a message when the model is not processing or while the model
+    // is processing, it is waiting for user permission.
+    canSendMessage(): boolean {
+      return !this.isProcessing || this.isAskingPermission;
+    },
+  },
   actions: {
     async initializeProvider() {
       const state = await request<{ messages: StoredMessage[] }>("getViewState");
@@ -93,8 +100,8 @@ export const useProviderStore = defineStore("providers", {
         throw new Error("No provider initialized");
       }
 
-      this.isThinking = true;
       this.isProcessing = true;
+      this.isAskingPermission = false;
 
       this.messages.push(new HumanMessage(message));
 
@@ -127,8 +134,8 @@ export const useProviderStore = defineStore("providers", {
             };
           },
           onRequestToolPermission: async () => {
+            this.isAskingPermission = true;
             this.activeTool!.asksPermission = true;
-            this.isThinking = false;
             const permissionResponse = await new Promise<"accept" | "reject">(
               (resolve) => {
                 const unsubscribe = this.$subscribe((_mutation, state) => {
@@ -141,6 +148,7 @@ export const useProviderStore = defineStore("providers", {
             );
             this.activeTool!.permissionResponse = permissionResponse;
             this.activeTool!.permissionResolved = true;
+            this.isAskingPermission = false;
             return permissionResponse === "accept";
           },
           onToolMessage: async (message) => {
@@ -148,10 +156,8 @@ export const useProviderStore = defineStore("providers", {
             this.tools[message.tool_call_id] = this.activeTool!;
             this.activeToolId = null;
             this.activeTool = null;
-            this.isThinking = true;
           },
           onFinalized: async (messages) => {
-            this.isThinking = false;
             this.isProcessing = false;
             this.messages = messages;
             request("setViewState", {
@@ -168,7 +174,6 @@ export const useProviderStore = defineStore("providers", {
             resolve();
           },
           onError: (error) => {
-            this.isThinking = false;
             this.isProcessing = false;
             this.isCallingTool = false;
             this.switchModel();

@@ -102,7 +102,7 @@
           Something went wrong. {{ error }}
         </div>
       </div>
-      <div v-if="isThinking" class="spinner" />
+      <div v-if="isProcessing && !isAskingPermission" class="spinner" />
     </div>
 
     <div class="chat-input-container">
@@ -112,7 +112,6 @@
         @keydown.up="handleUpArrow"
         @keydown.down="handleDownArrow"
         placeholder="Type your message here..."
-        :disabled="isThinking"
         rows="1"
         v-autoresize
       ></textarea>
@@ -137,10 +136,10 @@
           </button>
         </Dropdown>
         <button
-          v-if="!isThinking && !isCallingTool"
+          v-if="canSendMessage"
           @click="send"
           class="submit-btn"
-          :disabled="isThinking || !userInput.trim()"
+          :disabled="!userInput.trim()"
         >
           <span class="material-symbols-outlined">send</span>
         </button>
@@ -152,7 +151,7 @@
 
 <script lang="ts">
 import { Providers as UIProviders } from "../providers/modelFactory";
-import { mapState, mapActions } from "pinia";
+import { mapState, mapActions, mapGetters } from "pinia";
 import { useProviderStore } from "../store";
 import Message from "./Message.vue";
 import ToolMessage from "./ToolMessage.vue";
@@ -197,11 +196,13 @@ export default {
       "apiKey",
       "models",
       "messages",
-      "isThinking",
       "isCallingTool",
       "tools",
       "error",
+      "isProcessing",
+      "isAskingPermission",
     ]),
+    ...mapGetters(useProviderStore, ["canSendMessage"]),
     providers() {
       return UIProviders;
     },
@@ -267,7 +268,7 @@ export default {
         return;
       }
 
-      if (!this.isThinking) {
+      if (this.canSendMessage) {
         e.preventDefault();
         e.stopPropagation();
         this.send();
@@ -357,7 +358,7 @@ export default {
       const message = this.userInput.trim();
 
       // Don't send empty messages
-      if (!message || this.isThinking) return;
+      if (!message) return;
 
       this.addToHistory(message);
 
