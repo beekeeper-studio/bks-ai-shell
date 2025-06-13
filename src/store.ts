@@ -10,6 +10,7 @@ import {
   StoredMessage,
   mapChatMessagesToStoredMessages,
   mapStoredMessagesToChatMessages,
+  ToolMessage,
 } from "@langchain/core/messages";
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
 import { request } from "@beekeeperstudio/plugin";
@@ -24,6 +25,13 @@ interface Tool {
   permissionResolved: boolean;
 }
 
+interface ToolExtra {
+  /** Defined if the model asks for permission to call this tool. */
+  permission?: {
+    response: "pending" | "accept" | "reject";
+  };
+}
+
 interface ProviderState {
   providerId: ProviderId;
   apiKey: string;
@@ -31,16 +39,17 @@ interface ProviderState {
   model?: BaseModelProvider;
   models: IModel[];
   messages: BaseMessage[];
-  activeTool: Tool | null;
-  activeToolId: string | null;
   tools: Record<string, Tool>;
   error: unknown;
   conversationTitleIsSet: boolean;
 
+  queuedMessages: string[];
+  /** Any info that ToolMessage does not cover. */
+  toolExtras: { [toolId: string]: ToolExtra };
   /** Is the model processing a message? */
   isProcessing: boolean;
-  /** The model is asking for permission to call a tool. */
-  isAskingPermission: boolean;
+  /** The model is waiting for user permission to call a tool. */
+  isWaitingPermission: boolean;
   /** Useful when user switches models while a message is being sent. */
   pendingModelId?: string;
 }
@@ -54,24 +63,26 @@ export const useProviderStore = defineStore("providers", {
     provider: undefined,
     models: [],
     messages: [],
-    activeTool: null,
-    activeToolId: null,
     tools: {},
     error: null,
     conversationTitleIsSet: false,
     isProcessing: false,
-    isAskingPermission: false,
+    isWaitingPermission: false,
+    toolExtras: {},
+    queuedMessages: [],
   }),
   getters: {
-    // Can send a message when the model is not processing or while the model
-    // is processing, it is waiting for user permission.
+    /** Can send a message when the model is not processing or while the model
+     * is processing, it is waiting for user permission. */
     canSendMessage(): boolean {
-      return !this.isProcessing || this.isAskingPermission;
+      return !this.isProcessing || this.isWaitingPermission;
     },
   },
   actions: {
     async initializeProvider() {
-      const state = await request<{ messages: StoredMessage[] }>("getViewState");
+      const state = await request<{ messages: StoredMessage[] }>(
+        "getViewState",
+      );
       if (state?.messages) {
         try {
           this.messages = mapStoredMessagesToChatMessages(state.messages);
@@ -93,19 +104,43 @@ export const useProviderStore = defineStore("providers", {
         this.messages.push(new SystemMessage(await getDefaultInstructions()));
       }
     },
-    async sendStreamMessage(message: string): Promise<void> {
+    /** Queue a message and send it immediately if it's possible. */
+    queueMessage(message: string) {
+      this.queuedMessages.push(message);
+
+      // If the model is not processing, start a new stream
+      if (!this.isProcessing) {
+        this.stream();
+        return;
+      }
+
+      // If the model is processing and waiting for permission to call a tool, reject.
+      if (this.isProcessing && this.isWaitingPermission) {
+        this.rejectAllPendingTools();
+        return;
+      }
+    },
+    /** Send queued messages to the model, and call `.stream()` recursively if there are more. Typically, you don't need to call this. Instead, call `queueMessage`. */
+    async stream(): Promise<void> {
       if (!this.provider) {
         throw new Error("No provider initialized");
       }
 
-      this.isProcessing = true;
-      this.isAskingPermission = false;
+      if (this.queuedMessages.length === 0) {
+        throw new Error("No message to send");
+      }
+
+      let aiMessageIndex = -1;
+      const message = this.queuedMessages.join("\n");
 
       this.messages.push(new HumanMessage(message));
 
-      let aiMessageIndex = -1;
+      this.switchModel();
 
-      return await new Promise<void>((resolve, reject) => {
+      this.queuedMessages = [];
+      this.isProcessing = true;
+
+      await new Promise<void>((resolve, reject) => {
         this.model!.sendStreamMessage(message, this.messages.slice(0, -1), {
           onStart: async () => {
             aiMessageIndex = -1;
@@ -120,48 +155,37 @@ export const useProviderStore = defineStore("providers", {
 
             this.messages = [...this.messages];
           },
-          onBeforeToolCall: async (id, name, args) => {
-            this.activeToolId = id;
-            this.activeTool = {
-              id,
-              name,
-              displayName: name.split("_").map(_.capitalize).join(" "),
-              args,
-              asksPermission: false,
-              permissionResolved: false,
+          onBeforeToolCall: (toolMessage) => {
+            this.toolExtras = {
+              ...this.toolExtras,
+              [toolMessage.tool_call_id]: {},
             };
           },
-          onRequestToolPermission: async () => {
-            this.isAskingPermission = true;
-            this.activeTool!.asksPermission = true;
-            const permissionResponse = await new Promise<"accept" | "reject">(
-              (resolve) => {
-                const unsubscribe = this.$subscribe((_mutation, state) => {
-                  if (state.activeTool?.permissionResponse) {
-                    unsubscribe();
-                    resolve(state.activeTool.permissionResponse);
-                  }
-                });
+          onRequestToolPermission: async (toolMessage) => {
+            this.isWaitingPermission = true;
+
+            this.toolExtras[toolMessage.tool_call_id] = {
+              ...this.toolExtras[toolMessage.tool_call_id],
+              permission: {
+                response: "pending",
               },
-            );
-            this.activeTool!.permissionResponse = permissionResponse;
-            this.activeTool!.permissionResolved = true;
-            this.isAskingPermission = false;
-            return permissionResponse === "accept";
+            };
+
+            const accepted = await this.waitForPermission(toolMessage);
+
+            this.isWaitingPermission = false;
+
+            return accepted;
           },
-          onToolMessage: async (message) => {
+          onToolMessage: (message) => {
             this.messages.push(message);
-            this.tools[message.tool_call_id] = this.activeTool!;
-            this.activeToolId = null;
-            this.activeTool = null;
           },
           onFinalized: async (messages) => {
-            this.isProcessing = false;
+            // Make sure that we use the true final messages
             this.messages = messages;
             request("setViewState", {
               state: { messages: mapChatMessagesToStoredMessages(messages) },
             });
-            this.switchModel();
             if (!this.conversationTitleIsSet) {
               const title = await this.model!.generateConversationTitle(
                 this.messages,
@@ -172,8 +196,6 @@ export const useProviderStore = defineStore("providers", {
             resolve();
           },
           onError: (error) => {
-            this.isProcessing = false;
-            this.switchModel();
             if (
               error instanceof Error &&
               (error.message.startsWith("Aborted") ||
@@ -188,13 +210,49 @@ export const useProviderStore = defineStore("providers", {
           },
         });
       });
+
+      this.isProcessing = false;
+
+      if (this.queuedMessages.length > 0) {
+        await this.stream();
+      }
     },
-    stopStreamMessage(): void {
+    acceptTool(toolId: string) {
+      this.toolExtras[toolId].permission!.response = "accept";
+    },
+    rejectTool(toolId: string) {
+      this.toolExtras[toolId].permission!.response = "reject";
+      this.abortStream();
+    },
+    rejectAllPendingTools() {
+      Object.keys(this.toolExtras).forEach((toolId) => {
+        if (this.toolExtras[toolId].permission?.response === "pending") {
+          this.toolExtras[toolId].permission!.response = "reject";
+        }
+      });
+      this.abortStream();
+    },
+    waitForPermission(toolMessage: ToolMessage): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+        const unsubscribe = this.$onAction(({ name, args, after }) => {
+          if (name === "acceptTool" && args[0] === toolMessage.tool_call_id) {
+            unsubscribe();
+            after(() => resolve(true));
+          } else if (
+            (name === "rejectTool" && args[0] === toolMessage.tool_call_id) ||
+            name === "rejectAllPendingTools"
+          ) {
+            unsubscribe();
+            after(() => resolve(false));
+          }
+        });
+      });
+    },
+    abortStream(): void {
       if (!this.model) {
         throw new Error("No model created");
       }
-
-      this.model.abortStreamMessage();
+      this.model.abortStreamMessage(new Error("Aborted: user interrupted"));
     },
     setProviderId(providerId: ProviderId) {
       this.providerId = providerId;

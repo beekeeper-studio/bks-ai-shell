@@ -10,6 +10,7 @@ import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { tools } from "../tools";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { z } from "zod";
+import { buildErrorContent } from "../utils";
 
 export interface Callbacks extends ToolCallbacks {
   onStart?: () => Promise<void>;
@@ -20,12 +21,11 @@ export interface Callbacks extends ToolCallbacks {
 }
 
 export interface ToolCallbacks {
-  onBeforeToolCall?: (id: string, name: string, args: any) => Promise<void>;
-  onToolMessage?: (message: ToolMessage) => Promise<void>;
+  onBeforeToolCall?: (message: ToolMessage) => void | Promise<void>;
+  onToolMessage?: (message: ToolMessage) => void | Promise<void>;
   onRequestToolPermission?: (
-    toolName: string,
-    toolArgs: any,
-  ) => Promise<boolean>;
+    message: ToolMessage,
+  ) => boolean | Promise<boolean>;
 }
 
 export abstract class BaseProvider {
@@ -168,48 +168,50 @@ export class BaseModelProvider {
     for (const toolCall of toolCalls) {
       this.abortController.signal.throwIfAborted();
 
+      let toolMessage: ToolMessage = new ToolMessage({
+        tool_call_id: toolCall.id!,
+        content: "Running tool...",
+        name: toolCall.name,
+      });
+
       const toolToUse = tools.find((t) => t.name === toolCall.name);
-      const name = toolCall.name;
-      const id = toolCall.id;
 
       if (!toolToUse) {
-        toolMessages.push(new ToolMessage("Unknown tool", id, name));
+        toolMessage.status = "error";
+        toolMessage.content = buildErrorContent(
+          new Error("Unknown tool - tell the AI what to do differently."),
+        );
+        toolMessages.push(toolMessage);
         continue;
       }
 
-      await callbacks.onBeforeToolCall?.(id, name, toolCall.args);
+      await callbacks.onBeforeToolCall?.(toolMessage);
 
       if (toolToUse.tags && toolToUse.tags.includes("write")) {
-        const granted = await callbacks.onRequestToolPermission?.(
-          name,
-          toolCall.args,
-        );
+        const granted = await callbacks.onRequestToolPermission?.(toolMessage);
         if (!granted) {
-          const toolMessage = new ToolMessage({
-            tool_call_id: id!,
-            status: "error",
-            content: "No - tell the AI what to do differently.",
-          });
+          toolMessage.status = "error";
+          toolMessage.content = buildErrorContent(
+            new Error("No - tell the AI what to do differently."),
+          );
           toolMessages.push(toolMessage);
           await callbacks.onToolMessage?.(toolMessage);
-          this.abortStreamMessage(new Error("Aborted: tool permission denied"));
           continue;
         }
       }
 
-      let toolMessage: ToolMessage;
-
       try {
-        toolMessage = await toolToUse.invoke(toolCall);
+        const result = await toolToUse.invoke(toolCall);
+        toolMessage = result;
       } catch (error) {
-        console.error(`Error invoking tool ${toolCall.name}:`, error);
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        toolMessage = new ToolMessage({
-          tool_call_id: id!,
-          status: "error",
-          content: `Error: ${errorMessage}`,
-        });
+        console.error(`Error invoking tool - ${toolCall.name}:`, error);
+        const errorMessage = error instanceof Error ? error.message : error;
+        toolMessage.status = "error";
+        toolMessage.content = buildErrorContent(
+          new Error(`Error invoking tool ${toolCall.name} - ${errorMessage}`, {
+            cause: error,
+          }),
+        );
       }
 
       toolMessages.push(toolMessage);

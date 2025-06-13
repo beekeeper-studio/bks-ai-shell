@@ -19,30 +19,30 @@
             <template v-if="message.tool_calls">
               <div
                 class="tool-call"
-                :class="{ active: activeTool?.id === tool_call.id }"
+                :class="{
+                  active: toolExtras[tool_call.id]?.permission?.response === 'pending',
+                }"
                 v-for="tool_call in message.tool_calls"
                 :key="tool_call.id"
               >
                 <div class="tool-call-name">
                   {{ getDisplayNameOfTool(tool_call) }}
-                  <template v-if="tools[tool_call.id]?.permissionResolved">
-                    <span
-                      v-if="
-                        tools[tool_call.id]?.permissionResponse === 'reject'
-                      "
-                      class="material-symbols-outlined reject-icon"
-                    >
-                      close
-                    </span>
-                    <span
-                      v-if="
-                        tools[tool_call.id]?.permissionResponse === 'accept'
-                      "
-                      class="material-symbols-outlined accept-icon"
-                    >
-                      check
-                    </span>
-                  </template>
+                  <span
+                    v-if="
+                      toolExtras[tool_call.id]?.permission?.response === 'reject'
+                    "
+                    class="material-symbols-outlined reject-icon"
+                  >
+                    close
+                  </span>
+                  <span
+                    v-if="
+                      toolExtras[tool_call.id]?.permission?.response === 'accept'
+                    "
+                    class="material-symbols-outlined accept-icon"
+                  >
+                    check
+                  </span>
                 </div>
                 <Message
                   v-if="tool_call.name === 'run_query'"
@@ -50,22 +50,17 @@
                 />
                 <div
                   v-if="
-                    activeTool?.id === tool_call.id &&
-                    activeTool?.asksPermission
+                    toolExtras[tool_call.id]?.permission?.response === 'pending'
                   "
                 >
-                  <template v-if="!activeTool.permissionResolved">
-                    <template v-if="activeTool.name === 'run_query'">
-                      Do you want to run this query?
-                    </template>
-                    <template v-else>Do you want to proceed?</template>
+                  <template v-if="tool_call.name === 'run_query'">
+                    Do you want to run this query?
                   </template>
+                  <template v-else>Do you want to proceed?</template>
                   <div class="tool-permission-buttons">
                     <button
-                      v-if="activeTool.permissionResponse !== 'reject'"
                       class="accept-btn"
-                      @click="activeTool.permissionResponse = 'accept'"
-                      :disabled="activeTool.permissionResolved"
+                      @click="acceptTool(tool_call.id)"
                     >
                       Yes
                       <span class="material-symbols-outlined accept-icon">
@@ -73,20 +68,18 @@
                       </span>
                     </button>
                     <button
-                      v-if="activeTool.permissionResponse !== 'accept'"
                       class="reject-btn"
-                      @click="activeTool.permissionResponse = 'reject'"
-                      :disabled="activeTool.permissionResolved"
+                      @click="rejectTool(tool_call.id)"
                     >
                       No
                       <span class="material-symbols-outlined reject-icon">
                         close
                       </span>
                     </button>
-                    <span
-                      v-if="activeTool.permissionResolved"
-                      class="spinner"
-                    />
+                    <!-- <span -->
+                    <!--   v-if="activeTool.permissionResolved" -->
+                    <!--   class="spinner" -->
+                    <!-- /> -->
                   </div>
                 </div>
               </div>
@@ -98,11 +91,9 @@
         </div>
       </div>
       <div class="message error" v-if="error">
-        <div class="message-content">
-          Something went wrong. {{ error }}
-        </div>
+        <div class="message-content">Something went wrong. {{ error }}</div>
       </div>
-      <div v-if="isProcessing && !isAskingPermission" class="spinner" />
+      <div v-if="isProcessing && !isWaitingPermission" class="spinner" />
     </div>
 
     <div class="chat-input-container">
@@ -145,6 +136,7 @@
         </button>
         <button v-else @click="stop" class="stop-btn" />
       </div>
+      <div ref="bottomMarker"></div>
     </div>
   </div>
 </template>
@@ -199,9 +191,12 @@ export default {
       "tools",
       "error",
       "isProcessing",
-      "isAskingPermission",
+      "toolExtras",
     ]),
-    ...mapGetters(useProviderStore, ["canSendMessage"]),
+    ...mapGetters(useProviderStore, [
+      "canSendMessage",
+      "isWaitingPermission",
+    ]),
     providers() {
       return UIProviders;
     },
@@ -235,29 +230,33 @@ export default {
   },
 
   async mounted() {
-    const chatMessages =  this.$refs.chatMessagesRef as HTMLElement;
+    const chatMessages = this.$refs.chatMessagesRef as HTMLElement;
     chatMessages.addEventListener("scroll", () => {
       // Calculate if we're near bottom (within 50px of bottom)
       const isNearBottom =
-        (chatMessages.scrollHeight -
+        chatMessages.scrollHeight -
           chatMessages.scrollTop -
-          chatMessages.clientHeight) < 50;
+          chatMessages.clientHeight <
+        50;
 
       this.isAtBottom = isNearBottom;
     });
-
+    await this.$nextTick();
+    this.scrollToBottom();
   },
 
   methods: {
     ...mapActions(useProviderStore, [
       "setModel",
-      "sendStreamMessage",
-      "stopStreamMessage",
+      "queueMessage",
+      "abortStream",
+      "acceptTool",
+      "rejectTool",
     ]),
 
     handleManageModels() {
       // Navigate back to API key form to manage models/providers
-      this.$emit('navigate-to-api-form');
+      this.$emit("navigate-to-api-form");
     },
 
     // Handle enter key (send on Enter, new line on Shift+Enter)
@@ -353,7 +352,7 @@ export default {
     },
 
     // Send message
-    async send() {
+    send() {
       const message = this.userInput.trim();
 
       // Don't send empty messages
@@ -364,11 +363,11 @@ export default {
       this.tempInput = "";
       this.userInput = "";
 
-      await this.sendStreamMessage(message);
+      this.queueMessage(message);
     },
 
     stop() {
-      this.stopStreamMessage();
+      this.abortStream();
     },
 
     addToHistory(input: string) {
@@ -415,12 +414,15 @@ export default {
       return "```json\n" + str + "\n```";
     },
     async handleResultClick(result: QueryResult) {
-      await request("expandTableResult", { results: [result] })
+      await request("expandTableResult", { results: [result] });
       await this.$nextTick();
       if (this.isAtBottom) {
-        this.$refs.chatMessagesRef!.scrollTop =
-          this.$refs.chatMessagesRef!.scrollHeight;
+        this.scrollToBottom();
       }
+    },
+    scrollToBottom() {
+      this.$refs.chatMessagesRef!.scrollTop =
+        this.$refs.chatMessagesRef!.scrollHeight;
     },
   },
   directives: {

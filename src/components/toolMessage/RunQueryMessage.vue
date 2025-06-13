@@ -29,7 +29,7 @@
     :key="index"
     @click="() => $emit('result-click', result)"
   >
-    <div class="label">Show more</div>
+    <div class="label">View more</div>
     <span class="material-symbols-outlined open-icon">
       keyboard_double_arrow_down
     </span>
