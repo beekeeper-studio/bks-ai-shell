@@ -196,7 +196,6 @@ export default {
       "apiKey",
       "models",
       "messages",
-      "isCallingTool",
       "tools",
       "error",
       "isProcessing",

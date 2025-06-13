@@ -31,7 +31,6 @@ interface ProviderState {
   model?: BaseModelProvider;
   models: IModel[];
   messages: BaseMessage[];
-  isCallingTool: boolean;
   activeTool: Tool | null;
   activeToolId: string | null;
   tools: Record<string, Tool>;
@@ -55,7 +54,6 @@ export const useProviderStore = defineStore("providers", {
     provider: undefined,
     models: [],
     messages: [],
-    isCallingTool: false,
     activeTool: null,
     activeToolId: null,
     tools: {},
@@ -175,7 +173,6 @@ export const useProviderStore = defineStore("providers", {
           },
           onError: (error) => {
             this.isProcessing = false;
-            this.isCallingTool = false;
             this.switchModel();
             if (
               error instanceof Error &&
