@@ -2,6 +2,8 @@
 
 Ask AI to analyze your database and generate SQL queries.
 
+![top-5-most-rented-films](https://github.com/user-attachments/assets/d9346b69-f298-4fbc-b725-f731b2c41a64)
+
 ## Setup
 
 1. Install dependencies:
