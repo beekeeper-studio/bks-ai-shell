@@ -9,6 +9,22 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+
+  &.empty-chat {
+    justify-content: center;
+
+    .plugin-title {
+      text-align: center;
+    }
+
+    .chat-messages {
+      flex: 0;
+    }
+  }
+
+  &:not(.empty-chat) .plugin-title {
+    display: none;
+  }
 }
 
 .chat-messages {
@@ -315,8 +331,7 @@
 
     .submit-btn,
     .stop-btn {
-      --color: var(--query-editor-bg);
-      color: var(--color);
+      color: var(--query-editor-bg);
       background-color: var(--theme-base);
       width: 1.7rem;
       height: 1.7rem;
@@ -340,7 +355,8 @@
     .stop-btn {
       &::after {
         content: "";
-        background-color: rgb(from var(--color) r g b / 90%);
+        background-color: currentcolor;
+        opacity: 0.9;
         width: 0.7em;
         height: 0.7em;
       }

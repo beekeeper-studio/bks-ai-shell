@@ -42,9 +42,8 @@
         <p v-if="selectedProviderId === 'claude'">
           Don't have a Claude API key?
           <a
-            href="https://console.anthropic.com/keys"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="https://docs.anthropic.com/en/api/overview#accessing-the-api"
+            @click.prevent="$request('openExternal', { link: $event.target.href })"
             >Get one here</a
           >.
         </p>

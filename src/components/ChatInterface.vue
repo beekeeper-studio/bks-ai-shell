@@ -1,5 +1,6 @@
 <template>
-  <div class="chat-container">
+  <div class="chat-container" :class="{ 'empty-chat': messages.length <= 1 }">
+    <h1 class="plugin-title">AI Shell</h1>
     <div class="chat-messages" ref="chatMessagesRef">
       <div
         v-for="(message, index) in messages"
