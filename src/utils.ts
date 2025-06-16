@@ -29,3 +29,12 @@ export function isErrorContent(str: string) {
     return false;
   }
 }
+
+export function tryJSONParse(str: string) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return str;
+  }
+
+}

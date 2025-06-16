@@ -10,7 +10,7 @@ import { ToolCall } from "@langchain/core/dist/messages/tool";
 import { tools } from "../tools";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { z } from "zod";
-import { buildErrorContent } from "../utils";
+import { buildErrorContent, tryJSONParse } from "../utils";
 
 export interface Callbacks extends ToolCallbacks {
   onStart?: () => Promise<void>;
@@ -20,11 +20,33 @@ export interface Callbacks extends ToolCallbacks {
   onError?: (error: unknown) => void;
 }
 
+type InputToolContext = {
+  name: string;
+  args: Record<string, unknown>;
+}
+
+type SuccessOutputToolContext = {
+  name: string
+  args: Record<string, unknown>;
+  status: "success";
+  result: unknown;
+}
+
+type ErrorOutputToolContext = {
+  name: string;
+  args: Record<string, unknown>;
+  status: "error";
+  error: unknown;
+}
+
+type OutputToolContext = SuccessOutputToolContext | ErrorOutputToolContext;
+
 export interface ToolCallbacks {
-  onBeforeToolCall?: (message: ToolMessage) => void | Promise<void>;
-  onToolMessage?: (message: ToolMessage) => void | Promise<void>;
+  onBeforeToolCall?: (message: ToolMessage, context: InputToolContext) => void | Promise<void>;
+  onToolMessage?: (message: ToolMessage, context: OutputToolContext) => void | Promise<void>;
   onRequestToolPermission?: (
     message: ToolMessage,
+    context: InputToolContext
   ) => boolean | Promise<boolean>;
 }
 
@@ -171,7 +193,6 @@ export class BaseModelProvider {
       let toolMessage: ToolMessage = new ToolMessage({
         tool_call_id: toolCall.id!,
         content: "Running tool...",
-        name: toolCall.name,
       });
 
       const toolToUse = tools.find((t) => t.name === toolCall.name);
@@ -185,37 +206,67 @@ export class BaseModelProvider {
         continue;
       }
 
-      await callbacks.onBeforeToolCall?.(toolMessage);
+      const inputToolContext: InputToolContext = {
+        name: toolCall.name,
+        args: toolCall.args,
+      };
+
+      await callbacks.onBeforeToolCall?.(toolMessage, inputToolContext);
 
       if (toolToUse.tags && toolToUse.tags.includes("write")) {
-        const granted = await callbacks.onRequestToolPermission?.(toolMessage);
+        const granted = await callbacks.onRequestToolPermission?.(
+          toolMessage,
+          inputToolContext
+        );
         if (!granted) {
+          const error = new Error("No - tell the AI what to do differently.");
+
           toolMessage.status = "error";
-          toolMessage.content = buildErrorContent(
-            new Error("No - tell the AI what to do differently."),
-          );
+          toolMessage.content = buildErrorContent(error);
+
           toolMessages.push(toolMessage);
-          await callbacks.onToolMessage?.(toolMessage);
+
+          const outputToolContext: ErrorOutputToolContext = {
+            name: toolCall.name,
+            args: toolCall.args,
+            status: "error",
+            error,
+          }
+          await callbacks.onToolMessage?.(toolMessage, outputToolContext);
           continue;
         }
       }
 
+      let outputToolContext: OutputToolContext;
+
       try {
         const result = await toolToUse.invoke(toolCall);
         toolMessage = result;
+        outputToolContext = {
+          name: toolCall.name,
+          args: toolCall.args,
+          status: "success",
+          result: tryJSONParse(toolMessage.content as string),
+        }
       } catch (error) {
         console.error(`Error invoking tool - ${toolCall.name}:`, error);
         const errorMessage = error instanceof Error ? error.message : error;
-        toolMessage.status = "error";
-        toolMessage.content = buildErrorContent(
-          new Error(`Error invoking tool ${toolCall.name} - ${errorMessage}`, {
-            cause: error,
-          }),
+        const newError = new Error(
+          `Error invoking tool ${toolCall.name} - ${errorMessage}`,
+          { cause: error }
         );
+        toolMessage.status = "error";
+        toolMessage.content = buildErrorContent(newError);
+        outputToolContext = {
+          name: toolCall.name,
+          args: toolCall.args,
+          status: "error",
+          error: newError,
+        }
       }
 
       toolMessages.push(toolMessage);
-      await callbacks.onToolMessage?.(toolMessage);
+      await callbacks.onToolMessage?.(toolMessage, outputToolContext);
     }
 
     return toolMessages;

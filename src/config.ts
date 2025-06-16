@@ -29,4 +29,5 @@ export const STORAGE_KEYS = {
   API_KEY: "chatbot_api_key",
   PROVIDER: "chatbot_provider",
   MODEL: "chatbot_model",
+  HAS_OPENED_TABLE_RESULT: "chatbot_has_opened_table_result",
 };

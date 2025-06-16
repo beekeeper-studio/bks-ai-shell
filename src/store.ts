@@ -32,6 +32,11 @@ interface ToolExtra {
   };
 }
 
+interface ViewState {
+  messages: StoredMessage[];
+  conversationTitle: string;
+}
+
 interface ProviderState {
   providerId: ProviderId;
   apiKey: string;
@@ -41,8 +46,8 @@ interface ProviderState {
   messages: BaseMessage[];
   tools: Record<string, Tool>;
   error: unknown;
-  conversationTitleIsSet: boolean;
 
+  conversationTitle: string;
   queuedMessages: string[];
   /** Any info that ToolMessage does not cover. */
   toolExtras: { [toolId: string]: ToolExtra };
@@ -65,7 +70,7 @@ export const useProviderStore = defineStore("providers", {
     messages: [],
     tools: {},
     error: null,
-    conversationTitleIsSet: false,
+    conversationTitle: "",
     isProcessing: false,
     isWaitingPermission: false,
     toolExtras: {},
@@ -80,7 +85,7 @@ export const useProviderStore = defineStore("providers", {
   },
   actions: {
     async initializeProvider() {
-      const state = await request<{ messages: StoredMessage[] }>(
+      const state = await request<ViewState>(
         "getViewState",
       );
       if (state?.messages) {
@@ -91,6 +96,7 @@ export const useProviderStore = defineStore("providers", {
           this.error = `Failed to load messages: ${e}`;
         }
       }
+      this.conversationTitle = state?.conversationTitle || "";
       this.provider = await createProvider(this.providerId, this.apiKey);
       this.models = this.provider.models;
       let modelId = this.models[0].id;
@@ -177,22 +183,48 @@ export const useProviderStore = defineStore("providers", {
 
             return accepted;
           },
-          onToolMessage: (message) => {
+          onToolMessage: (message, context) => {
+            if (context.name === "run_query" && context.status === "success") {
+              if (localStorage.getItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT)) {
+                return;
+              }
+
+              const results = context.result!.results
+              if (results.length > 0 && results[0].rows.length > 0) {
+                localStorage.setItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT, "1")
+                request("expandTableResult", { results: [results[0]] })
+              }
+            }
+
             this.messages.push(message);
           },
           onFinalized: async (messages) => {
             // Make sure that we use the true final messages
             this.messages = messages;
+
             request("setViewState", {
-              state: { messages: mapChatMessagesToStoredMessages(messages) },
+              state: {
+                messages: mapChatMessagesToStoredMessages(messages),
+                conversationTitle: this.conversationTitle,
+              },
             });
-            if (!this.conversationTitleIsSet) {
+
+            if (!this.conversationTitle) {
               const title = await this.model!.generateConversationTitle(
                 this.messages,
               );
+
               request("setTabTitle", { title });
-              this.conversationTitleIsSet = true;
+              this.conversationTitle = title;
+
+              request("setViewState", {
+                state: {
+                  messages: mapChatMessagesToStoredMessages(messages),
+                  conversationTitle: this.conversationTitle,
+                },
+              });
             }
+
             resolve();
           },
           onError: (error) => {

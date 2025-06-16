@@ -77,10 +77,6 @@
                         close
                       </span>
                     </button>
-                    <!-- <span -->
-                    <!--   v-if="activeTool.permissionResolved" -->
-                    <!--   class="spinner" -->
-                    <!-- /> -->
                   </div>
                 </div>
               </div>
@@ -181,7 +177,6 @@ export default {
 
   computed: {
     ...mapState(useProviderStore, [
-      "activeTool",
       "providerId",
       "provider",
       "model",
@@ -193,10 +188,10 @@ export default {
       "error",
       "isProcessing",
       "toolExtras",
+      "isWaitingPermission",
     ]),
     ...mapGetters(useProviderStore, [
       "canSendMessage",
-      "isWaitingPermission",
     ]),
     providers() {
       return UIProviders;
@@ -204,21 +199,20 @@ export default {
     navigatingHistory() {
       return this.historyIndex === this.inputHistory.length;
     },
-    messagesAndActiveTool() {
+    messagesAndToolExtras() {
       return {
         messages: this.messages,
-        activeTool: this.activeTool,
+        toolExtras: this.toolExtras,
       };
     },
   },
 
   watch: {
-    messagesAndActiveTool: {
+    messagesAndToolExtras: {
       async handler() {
         await this.$nextTick();
         if (this.$refs.chatMessagesRef && this.isAtBottom) {
-          this.$refs.chatMessagesRef.scrollTop =
-            this.$refs.chatMessagesRef.scrollHeight;
+          this.scrollToBottom()
         }
       },
       deep: true,

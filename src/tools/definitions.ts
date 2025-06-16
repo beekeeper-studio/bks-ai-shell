@@ -19,10 +19,6 @@ const runQueryInputSchema = z.object({
   query: z.string().describe("The SQL query to execute"),
 });
 
-const setTabTitleSchema = z.object({
-  title: z.string().describe("The title of the tab"),
-})
-
 export const getConnectionInfoTool = tool(
   async () => {
     const result = await request("getConnectionInfo");
