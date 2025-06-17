@@ -25,9 +25,7 @@
   </div>
   <button
     class="btn"
-    v-for="(result, index) in data.results"
-    :key="index"
-    @click="() => $emit('result-click', result)"
+    @click="() => $emit('result-click', data.results)"
   >
     <div class="label">View more</div>
     <span class="material-symbols-outlined open-icon">

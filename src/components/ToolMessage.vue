@@ -26,7 +26,7 @@
         <run-query-message
           v-else-if="message.name === 'run_query'"
           :data="data"
-          @result-click="() => $emit('result-click', $event)"
+          @result-click="$emit('result-click', $event)"
         />
       </template>
     </summary>

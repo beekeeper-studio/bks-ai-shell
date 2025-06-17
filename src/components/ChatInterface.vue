@@ -408,8 +408,8 @@ export default {
       }
       return "```json\n" + str + "\n```";
     },
-    async handleResultClick(result: QueryResult) {
-      await request("expandTableResult", { results: [result] });
+    async handleResultClick(results: QueryResult[]) {
+      await request("expandTableResult", { results });
       await this.$nextTick();
       if (this.isAtBottom) {
         this.scrollToBottom();
