@@ -16,7 +16,7 @@ import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
 
-setDebugComms(false);
+setDebugComms(true);
 
 hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("javascript", javascript);

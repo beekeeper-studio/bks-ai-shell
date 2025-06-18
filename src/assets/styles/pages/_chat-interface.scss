@@ -40,154 +40,31 @@
 }
 
 .message {
-  margin: 0.6rem 12px;
-  border-radius: 16px;
-  max-width: 80%;
-  word-wrap: break-word;
-}
-
-.message-content {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  margin: 0.6rem 12px;
+  border-radius: 1rem;
   padding: 0.75rem 0.9rem;
   line-height: 1.4rem;
   white-space: pre-wrap;
 
-  p,
-  pre,
-  code {
-    margin: 0;
-  }
-
-  pre {
-    overflow-x: auto;
-    display: inline-block;
-    background-color: var(--bks-text-editor-bg-color);
-    color: var(--bks-text-editor-fg-color);
-    padding: 0.2rem 0.5rem 0.5rem 0.5rem;
-    width: 100%;
-  }
-
-  .markdown {
-    white-space: normal;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-
-    ol,
-    ul {
-      margin-block-start: 0.8em;
-      margin-block-end: 0.8em;
-      padding-inline-start: 2rem;
-    }
-  }
-
-  .code-block {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    white-space: normal;
-
-    .header {
-      padding: 0.2rem 0.5rem 0;
-      display: flex;
-      justify-content: space-between;
-
-      .lang {
-        font-size: 0.7rem;
-        opacity: 0.5;
-        line-height: 1.25rem;
-      }
-
-      .copy-btn {
-        font-size: 0.7rem;
-        color: var(--text-dark);
-
-        .material-symbols-outlined {
-          font-size: 0.9rem;
-        }
-
-        &.copied .copy-label,
-        &:not(.copied) .copied-label {
-          display: none;
-        }
-
-        .label {
-          content: "Copy";
-        }
-
-        padding: 0.3rem;
-        background-color: transparent;
-        gap: 0.2rem;
-        line-height: 1;
-        height: auto;
-        min-width: 0px;
-      }
-    }
-  }
-
-  .hljs-keyword {
-    color: var(--bks-text-editor-keyword-fg-color);
-  }
-
-  .hljs-operator {
-    color: var(--bks-text-editor-operator-fg-color);
-  }
-
-  .hljs-comment {
-    color: var(--bks-text-editor-comment-fg-color);
-  }
-
-  .hljs-string {
-    color: var(--bks-text-editor-string-fg-color);
-  }
-
-  .hljs-title.class_ {
-    color: var(--bks-text-editor-class-fg-color);
-  }
-
-  .hljs-title.function_ {
-    color: var(--bks-text-editor-function-fg-color);
-  }
-
-  .hljs-number {
-    color: var(--bks-text-editor-number-fg-color);
-  }
-
-  .hljs-attr {
-    color: var(--bks-text-editor-attributeName-fg-color);
-  }
-
-  .hljs-built_in {
-    color: var(--bks-text-editor-builtin-fg-color);
-  }
-}
-
-.message.human {
-  align-self: flex-end;
-
-  .message-content {
-    border-radius: 1rem;
+  .human {
+    max-width: 80%;
+    align-self: flex-end;
     background-color: var(--theme-bg-message-user);
     color: var(--text-dark);
     border-bottom-right-radius: 4px;
   }
-}
 
-.message.ai,
-.message.system,
-.message.tool {
-  max-width: none;
-
-  .message-content {
+  .ai,
+  .tool {
     color: var(--theme-text-message-system);
   }
-}
 
-.message.tool {
-  margin-block: 0;
+  .tool {
+    margin-block: 0;
 
-  .message-content {
     padding: 0 0 0 1rem;
     border-left: 2px solid var(--border-color);
     margin-inline: 1rem;
@@ -226,20 +103,89 @@
         margin-bottom: 0.5rem;
       }
     }
+
+    .accept-icon,
+    .reject-icon {
+      font-size: 1.2rem;
+    }
+
+    p,
+    pre,
+    code {
+      margin: 0;
+    }
+
+    pre {
+      overflow-x: auto;
+      display: inline-block;
+      background-color: var(--bks-text-editor-bg-color);
+      color: var(--bks-text-editor-fg-color);
+      padding: 0.2rem 0.5rem 0.5rem 0.5rem;
+      width: 100%;
+    }
+
+    .markdown {
+      white-space: normal;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+
+      ol,
+      ul {
+        margin-block-start: 0.8em;
+        margin-block-end: 0.8em;
+        padding-inline-start: 2rem;
+      }
+    }
+
+    .code-block {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      white-space: normal;
+
+      .header {
+        padding: 0.2rem 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+
+        .lang {
+          font-size: 0.7rem;
+          opacity: 0.5;
+          line-height: 1.25rem;
+        }
+
+        .copy-btn {
+          font-size: 0.7rem;
+          color: var(--text-dark);
+
+          .material-symbols-outlined {
+            font-size: 0.9rem;
+          }
+
+          &.copied .copy-label,
+          &:not(.copied) .copied-label {
+            display: none;
+          }
+
+          .label {
+            content: "Copy";
+          }
+
+          padding: 0.3rem;
+          background-color: transparent;
+          gap: 0.2rem;
+          line-height: 1;
+          height: auto;
+          min-width: 0px;
+        }
+      }
+    }
   }
 
-  .accept-icon,
-  .reject-icon {
-    font-size: 1.2rem;
-  }
-}
-
-.message.error {
-  background-color: rgb(from var(--brand-danger) r g b / 20%);
-  border: 1px solid rgb(from var(--brand-danger) r g b / 100%);
-  max-width: none;
-
-  .message-content {
+  .error {
+    background-color: rgb(from var(--brand-danger) r g b / 20%);
+    border: 1px solid rgb(from var(--brand-danger) r g b / 100%);
+    max-width: none;
     white-space: normal;
   }
 }
@@ -410,4 +356,40 @@
   cursor: not-allowed;
   color: var(--text-dark);
   font-size: 0.85rem;
+}
+
+.hljs-keyword {
+  color: var(--bks-text-editor-keyword-fg-color);
+}
+
+.hljs-operator {
+  color: var(--bks-text-editor-operator-fg-color);
+}
+
+.hljs-comment {
+  color: var(--bks-text-editor-comment-fg-color);
+}
+
+.hljs-string {
+  color: var(--bks-text-editor-string-fg-color);
+}
+
+.hljs-title.class_ {
+  color: var(--bks-text-editor-class-fg-color);
+}
+
+.hljs-title.function_ {
+  color: var(--bks-text-editor-function-fg-color);
+}
+
+.hljs-number {
+  color: var(--bks-text-editor-number-fg-color);
+}
+
+.hljs-attr {
+  color: var(--bks-text-editor-attributeName-fg-color);
+}
+
+.hljs-built_in {
+  color: var(--bks-text-editor-builtin-fg-color);
 }

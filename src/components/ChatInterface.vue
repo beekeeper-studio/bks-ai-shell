@@ -2,13 +2,9 @@
   <div class="chat-container" :class="{ 'empty-chat': messages.length <= 1 }">
     <h1 class="plugin-title">AI Shell</h1>
     <div class="chat-messages" ref="chatMessagesRef">
-      <div
-        v-for="(message, index) in messages"
-        :key="index"
-        :class="['message', message.getType()]"
-      >
-        <!-- TODO put this in to the Message component -->
-        <div class="message-content">
+      <template v-for="(message, index) in messages" :key="index">
+        <message2 v-if="index !== 0" :message="message" />
+        <div v-if="false" class="message-content">
           <template v-if="index === 0"></template>
           <tool-message
             v-else-if="message.getType() === 'tool'"
@@ -21,7 +17,9 @@
               <div
                 class="tool-call"
                 :class="{
-                  active: toolExtras[tool_call.id]?.permission?.response === 'pending',
+                  active:
+                    toolExtras[tool_call.id]?.permission?.response ===
+                    'pending',
                 }"
                 v-for="tool_call in message.tool_calls"
                 :key="tool_call.id"
@@ -30,7 +28,8 @@
                   {{ getDisplayNameOfTool(tool_call) }}
                   <span
                     v-if="
-                      toolExtras[tool_call.id]?.permission?.response === 'reject'
+                      toolExtras[tool_call.id]?.permission?.response ===
+                      'reject'
                     "
                     class="material-symbols-outlined reject-icon"
                   >
@@ -38,7 +37,8 @@
                   </span>
                   <span
                     v-if="
-                      toolExtras[tool_call.id]?.permission?.response === 'accept'
+                      toolExtras[tool_call.id]?.permission?.response ===
+                      'accept'
                     "
                     class="material-symbols-outlined accept-icon"
                   >
@@ -86,7 +86,7 @@
             {{ message.text }}
           </template>
         </div>
-      </div>
+      </template>
       <div class="message error" v-if="error">
         <div class="message-content">Something went wrong. {{ error }}</div>
       </div>
@@ -143,6 +143,7 @@ import { Providers as UIProviders } from "../providers/modelFactory";
 import { mapState, mapActions, mapGetters } from "pinia";
 import { useProviderStore } from "../store";
 import Message from "./Message.vue";
+import Message2 from "./Message2.vue";
 import ToolMessage from "./ToolMessage.vue";
 import Dropdown from "./common/Dropdown.vue";
 import DropdownOption from "./common/DropdownOption.vue";
@@ -157,6 +158,7 @@ export default {
 
   components: {
     Message,
+    Message2,
     ToolMessage,
     Dropdown,
     DropdownOption,
@@ -190,9 +192,7 @@ export default {
       "toolExtras",
       "isWaitingPermission",
     ]),
-    ...mapGetters(useProviderStore, [
-      "canSendMessage",
-    ]),
+    ...mapGetters(useProviderStore, ["canSendMessage"]),
     providers() {
       return UIProviders;
     },
@@ -212,7 +212,7 @@ export default {
       async handler() {
         await this.$nextTick();
         if (this.$refs.chatMessagesRef && this.isAtBottom) {
-          this.scrollToBottom()
+          this.scrollToBottom();
         }
       },
       deep: true,

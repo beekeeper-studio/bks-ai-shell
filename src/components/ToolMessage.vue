@@ -1,37 +1,39 @@
 <template>
-  <details>
-    <summary :class="{ error }">
-      <template v-if="error">{{ error }}</template>
-      <template v-else>
-        <template v-if="message.name === 'get_connection_info'">
-          {{ data.connectionType }}
+  <div class="tool">
+    <details>
+      <summary :class="{ error }">
+        <template v-if="error">{{ error }}</template>
+        <template v-else>
+          <template v-if="message.name === 'get_connection_info'">
+            {{ data.connectionType }}
+          </template>
+          <template v-if="message.name === 'get_tables'">
+            {{ data.length }} {{ $pluralize("table", data.length) }} (
+            <code>{{
+              truncateAtWord(data.map((t) => t.name).join(", "), 50)
+            }}</code>
+            )
+          </template>
+          <template v-if="message.name === 'get_columns'">
+            {{ data.length }} {{ $pluralize("column", data.length) }} (
+            <code>
+              {{ truncateAtWord(data.map((c) => c.name).join(", "), 50) }}
+            </code>
+            )
+          </template>
+          <template v-else-if="message.name === 'get_all_tabs'">
+            {{ data.length }} {{ $pluralize("tab", data.length) }}
+          </template>
+          <run-query-message
+            v-else-if="message.name === 'run_query'"
+            :data="data"
+            @result-click="$emit('result-click', $event)"
+          />
         </template>
-        <template v-if="message.name === 'get_tables'">
-          {{ data.length }} {{ $pluralize("table", data.length) }} (
-          <code>{{
-            truncateAtWord(data.map((t) => t.name).join(", "), 50)
-          }}</code>
-          )
-        </template>
-        <template v-if="message.name === 'get_columns'">
-          {{ data.length }} {{ $pluralize("column", data.length) }} (
-          <code>
-            {{ truncateAtWord(data.map((c) => c.name).join(", "), 50) }}
-          </code>
-          )
-        </template>
-        <template v-else-if="message.name === 'get_all_tabs'">
-          {{ data.length }} {{ $pluralize("tab", data.length) }}
-        </template>
-        <run-query-message
-          v-else-if="message.name === 'run_query'"
-          :data="data"
-          @result-click="$emit('result-click', $event)"
-        />
-      </template>
-    </summary>
-    <message v-if="content" :content="content" />
-  </details>
+      </summary>
+      <message v-if="content" :content="content" />
+    </details>
+  </div>
 </template>
 
 <script lang="ts">

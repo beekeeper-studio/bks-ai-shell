@@ -196,6 +196,7 @@ export const useProviderStore = defineStore("providers", {
               }
             }
 
+            console.log(message)
             this.messages.push(message);
           },
           onFinalized: async (messages) => {
