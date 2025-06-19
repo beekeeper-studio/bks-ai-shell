@@ -145,6 +145,7 @@ export const useProviderStore = defineStore("providers", {
 
       this.queuedMessages = [];
       this.isProcessing = true;
+      this.error = null;
 
       await new Promise<void>((resolve, reject) => {
         this.model!.sendStreamMessage(message, this.messages.slice(0, -1), {
@@ -233,12 +234,12 @@ export const useProviderStore = defineStore("providers", {
               (error.message.startsWith("Aborted") ||
                 error.message.startsWith("AbortError"))
             ) {
-              resolve();
+              // if abort error - do nothing
             } else {
               console.error(error);
               this.error = error;
-              reject(error);
             }
+            resolve();
           },
         });
       });
