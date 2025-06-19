@@ -182,6 +182,8 @@ export const useProviderStore = defineStore("providers", {
             return accepted;
           },
           onToolMessage: (message, context) => {
+            this.messages.push(message);
+
             if (context.name === "run_query" && context.status === "success") {
               if (localStorage.getItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT)) {
                 return;
@@ -194,7 +196,6 @@ export const useProviderStore = defineStore("providers", {
               }
             }
 
-            this.messages.push(message);
           },
           onError: (error) => {
             if (!isAbortError(error)) {

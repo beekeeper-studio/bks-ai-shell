@@ -123,7 +123,7 @@ export class BaseModelProvider {
         }),
       )
       .invoke([
-        ...messages.slice(1), // exclude system message
+        ...messages, // exclude system message
         new HumanMessage(
           "Generate a concise title for this conversation — ideally under 30 characters and preferably two words.",
         ),
@@ -192,7 +192,9 @@ export class BaseModelProvider {
           depth + 1,
         );
 
-        fullMessages.push(...updatedMessages);
+        // Only push the new messages that were added during recursion
+        const newMessages = updatedMessages.slice(fullMessages.length);
+        fullMessages.push(...newMessages);
       }
     } catch (error) {
       if (streaming) {
@@ -291,8 +293,8 @@ export class BaseModelProvider {
         };
       }
 
-      toolMessages.push(toolMessage);
       await callbacks.onToolMessage?.(toolMessage, outputToolContext);
+      toolMessages.push(toolMessage);
     }
 
     return toolMessages;
