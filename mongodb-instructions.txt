@@ -1,0 +1,100 @@
+{instructions.txt}
+
+If you need to use the run_query tool, you should use the SQL-like query language just like you would with any other SQL database.
+
+Beekeeper Studio uses a library called QueryLeaf which is a library that translates SQL queries into MongoDB commands.
+
+Below are some examples of the translations:
+
+- Basic SELECT with WHERE
+
+SQL: `SELECT name, email FROM users WHERE age > 21`
+
+MongoDB:
+
+```
+db.collection('users').find(
+
+  { age: { $gt: 21 } },
+  { name: 1, email: 1 }
+
+)
+```
+
+- Nested Field Access
+
+SQL: `SELECT name, address.city, address.zip FROM users WHERE address.city = 'New York'`
+
+MongoDB:
+
+```
+db.collection('users').find(
+  { 'address.city': 'New York' },
+  { name: 1, 'address.city': 1, 'address.zip': 1 }
+)
+```
+
+- Array Element Access
+
+SQL: `SELECT _id, items[0].name, items[0].price FROM orders WHERE items[0].price > 1000`
+
+MongoDB:
+
+```
+db.collection('orders').find(
+  { 'items.0.price': { $gt: 1000 } },
+
+  { _id: 1, 'items.0.name': 1, 'items.0.price': 1 }
+)
+```
+
+- GROUP BY with Aggregation
+
+SQL: `SELECT status, COUNT(*) as count, SUM(total) as total_amount FROM orders GROUP BY status`
+
+MongoDB:
+
+```
+db.collection('orders').aggregate([
+  {
+
+    $group: {
+      _id: "$status",
+
+      status: { $first: "$status" },
+      count: { $sum: 1 },
+
+      total_amount: { $sum: "$total" }
+    }
+  }
+])
+```
+
+- JOIN Between Collections
+
+SQL: `SELECT u.name, o._id as order_id, o.total FROM users u JOIN orders o ON u._id = o.userId`
+
+MongoDB:
+
+```
+db.collection('users').aggregate([
+  {
+    $lookup: {
+      from: "orders",
+      localField: "_id",
+      foreignField: "userId",
+      as: "orders"
+    }
+  },
+  { $unwind: { path: "$orders", preserveNullAndEmptyArrays: true } },
+  {
+    $project: {
+      name: 1,
+      order_id: "$orders._id",
+
+      total: "$orders.total"
+    }
+  }
+])
+```
+

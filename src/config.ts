@@ -1,4 +1,5 @@
 import instructions from "../instructions.txt?raw";
+import mongodbInstructions from "../mongodb-instructions.txt?raw";
 import { request } from "@beekeeperstudio/plugin";
 
 export async function getDefaultInstructions() {
@@ -19,6 +20,11 @@ export async function getDefaultInstructions() {
   result = result.replace("{database_name}", response.databaseName);
   result = result.replace("{default_schema}", response.defaultSchema || "");
   result = result.replace("{tables}", JSON.stringify(tables));
+
+  if (response.connectionType === "mongodb") {
+    result = mongodbInstructions.replace("{instructions.txt}", result);
+  }
+
   return result;
 }
 
