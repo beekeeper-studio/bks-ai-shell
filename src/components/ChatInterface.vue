@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-container" :class="{ 'empty-chat': messages.length <= 1 }">
+  <div class="chat-container" :class="{ 'empty-chat': messages.length === 0 }">
     <h1 class="plugin-title">AI Shell</h1>
     <div class="chat-messages" ref="chatMessagesRef">
       <div
@@ -9,7 +9,7 @@
       >
         <!-- TODO put this in to the Message component -->
         <div class="message-content">
-          <template v-if="index === 0"></template>
+          <template v-if="message.getType() === 'system'" />
           <tool-message
             v-else-if="message.getType() === 'tool'"
             :message="message"

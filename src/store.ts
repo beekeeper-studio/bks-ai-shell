@@ -1,12 +1,11 @@
 import { defineStore } from "pinia";
-import { getDefaultInstructions, STORAGE_KEYS } from "./config";
+import { STORAGE_KEYS } from "./config";
 import { IModel } from "./types";
 import _ from "lodash";
 import { createProvider, ProviderId } from "./providers/modelFactory";
 import {
   BaseMessage,
   HumanMessage,
-  SystemMessage,
   StoredMessage,
   mapChatMessagesToStoredMessages,
   mapStoredMessagesToChatMessages,
@@ -14,6 +13,7 @@ import {
 } from "@langchain/core/messages";
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
 import { request } from "@beekeeperstudio/plugin";
+import { isAbortError } from "./utils";
 
 interface Tool {
   id: string;
@@ -85,9 +85,7 @@ export const useProviderStore = defineStore("providers", {
   },
   actions: {
     async initializeProvider() {
-      const state = await request<ViewState>(
-        "getViewState",
-      );
+      const state = await request<ViewState>("getViewState");
       if (state?.messages) {
         try {
           this.messages = mapStoredMessagesToChatMessages(state.messages);
@@ -106,9 +104,6 @@ export const useProviderStore = defineStore("providers", {
       }
       this.setModel(modelId);
       this.switchModel();
-      if (this.messages.length === 0) {
-        this.messages.push(new SystemMessage(await getDefaultInstructions()));
-      }
     },
     /** Queue a message and send it immediately if it's possible. */
     queueMessage(message: string) {
@@ -147,9 +142,11 @@ export const useProviderStore = defineStore("providers", {
       this.isProcessing = true;
       this.error = null;
 
-      await new Promise<void>((resolve, reject) => {
-        this.model!.sendStreamMessage(message, this.messages.slice(0, -1), {
-          onStart: async () => {
+      const messages = await this.model!.sendStreamMessage(
+        message,
+        this.messages.slice(0, -1),
+        {
+          onCreatedStream: async () => {
             aiMessageIndex = -1;
           },
           onStreamChunk: async (message) => {
@@ -190,59 +187,53 @@ export const useProviderStore = defineStore("providers", {
                 return;
               }
 
-              const results = context.result!.results
+              const results = context.result!.results;
               if (results.length > 0 && results[0].rows.length > 0) {
-                localStorage.setItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT, "1")
-                request("expandTableResult", { results: [results[0]] })
+                localStorage.setItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT, "1");
+                request("expandTableResult", { results: [results[0]] });
               }
             }
 
             this.messages.push(message);
           },
-          onFinalized: async (messages) => {
-            // Make sure that we use the true final messages
-            this.messages = messages;
-
-            request("setViewState", {
-              state: {
-                messages: mapChatMessagesToStoredMessages(messages),
-                conversationTitle: this.conversationTitle,
-              },
-            });
-
-            if (!this.conversationTitle) {
-              const title = await this.model!.generateConversationTitle(
-                this.messages,
-              );
-
-              request("setTabTitle", { title });
-              this.conversationTitle = title;
-
-              request("setViewState", {
-                state: {
-                  messages: mapChatMessagesToStoredMessages(messages),
-                  conversationTitle: this.conversationTitle,
-                },
-              });
-            }
-
-            resolve();
-          },
           onError: (error) => {
-            if (
-              error instanceof Error &&
-              (error.message.startsWith("Aborted") ||
-                error.message.startsWith("AbortError"))
-            ) {
-              // if abort error - do nothing
-            } else {
+            if (!isAbortError(error)) {
               console.error(error);
               this.error = error;
             }
-            resolve();
           },
-        });
+        },
+      );
+
+      this.messages = messages;
+
+      request("setViewState", {
+        state: {
+          messages: mapChatMessagesToStoredMessages(messages),
+          conversationTitle: this.conversationTitle,
+        },
       });
+
+      if (!this.conversationTitle) {
+        try {
+          const title = await this.model!.generateConversationTitle(
+            this.messages,
+          );
+
+          request("setTabTitle", { title });
+          this.conversationTitle = title;
+
+          request("setViewState", {
+            state: {
+              messages: mapChatMessagesToStoredMessages(messages),
+              conversationTitle: this.conversationTitle,
+            },
+          });
+        } catch (e) {
+          // If error occurs when generating title, do nothing
+          console.error(e);
+        }
+      }
 
       this.isProcessing = false;
 

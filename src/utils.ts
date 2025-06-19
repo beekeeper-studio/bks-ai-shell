@@ -36,5 +36,12 @@ export function tryJSONParse(str: string) {
   } catch (e) {
     return str;
   }
+}
 
+export function isAbortError(error: unknown) {
+  return (
+    error instanceof Error &&
+    (error.message.startsWith("Aborted") ||
+      error.message.startsWith("AbortError"))
+  );
 }

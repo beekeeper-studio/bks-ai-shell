@@ -3,6 +3,9 @@ import {
   AIMessageChunk,
   BaseMessage,
   HumanMessage,
+  isAIMessage,
+  isSystemMessage,
+  SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
 import { IModel, IModelConfig } from "../types";
@@ -11,42 +14,50 @@ import { tools } from "../tools";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { z } from "zod";
 import { buildErrorContent, tryJSONParse } from "../utils";
+import { getDefaultInstructions } from "../config";
 
-export interface Callbacks extends ToolCallbacks {
-  onStart?: () => Promise<void>;
+export interface SendStreamMessageCallbacks extends ToolCallbacks {
+  /** When a new message stream is created. */
+  onCreatedStream?: () => Promise<void>;
+  /** When a new chunk of the message stream is received. */
   onStreamChunk: (message: AIMessage) => Promise<void>;
-  onComplete?: () => Promise<void>;
-  onFinalized: (conversationHistory: BaseMessage[]) => Promise<void>;
+  /** When an error occurs. */
   onError?: (error: unknown) => void;
 }
 
 type InputToolContext = {
   name: string;
   args: Record<string, unknown>;
-}
+};
 
 type SuccessOutputToolContext = {
-  name: string
+  name: string;
   args: Record<string, unknown>;
   status: "success";
   result: unknown;
-}
+};
 
 type ErrorOutputToolContext = {
   name: string;
   args: Record<string, unknown>;
   status: "error";
   error: unknown;
-}
+};
 
 type OutputToolContext = SuccessOutputToolContext | ErrorOutputToolContext;
 
 export interface ToolCallbacks {
-  onBeforeToolCall?: (message: ToolMessage, context: InputToolContext) => void | Promise<void>;
-  onToolMessage?: (message: ToolMessage, context: OutputToolContext) => void | Promise<void>;
+  onBeforeToolCall?: (
+    message: ToolMessage,
+    context: InputToolContext,
+  ) => void | Promise<void>;
+  onToolMessage?: (
+    message: ToolMessage,
+    context: OutputToolContext,
+  ) => void | Promise<void>;
   onRequestToolPermission?: (
     message: ToolMessage,
-    context: InputToolContext
+    context: InputToolContext,
   ) => boolean | Promise<boolean>;
 }
 
@@ -75,13 +86,13 @@ export class BaseModelProvider {
   }
 
   /**
-   * Send a message to the model and get a response
+   * Send a message to the model and get the response recursively.
    */
-  sendStreamMessage(
+  async sendStreamMessage(
     message: string,
     conversationHistory: BaseMessage[],
-    callbacks: Callbacks,
-  ): void {
+    callbacks: SendStreamMessageCallbacks,
+  ): Promise<BaseMessage[]> {
     if (this.sendingMessage) {
       throw new Error(
         "A message is already being sent. Please wait or stop the current message.",
@@ -90,20 +101,18 @@ export class BaseModelProvider {
 
     this.sendingMessage = true;
     this.abortController = new AbortController();
-    this.processStreamMessage(
-      [...conversationHistory, new HumanMessage(message)],
-      {
-        ...callbacks,
-        onFinalized: async (...args) => {
-          this.sendingMessage = false;
-          await callbacks.onFinalized(...args);
-        },
-        onError: (...args) => {
-          this.sendingMessage = false;
-          callbacks.onError?.(...args);
-        },
-      },
-    );
+
+    const input = [...conversationHistory, new HumanMessage(message)];
+
+    if (!isSystemMessage(input[0])) {
+      input.unshift(new SystemMessage(await getDefaultInstructions()));
+    }
+
+    const output = await this.processStreamMessage(input, callbacks);
+
+    this.sendingMessage = false;
+
+    return output;
   }
 
   async generateConversationTitle(messages: BaseMessage[]): Promise<string> {
@@ -124,13 +133,17 @@ export class BaseModelProvider {
 
   protected async processStreamMessage(
     messages: BaseMessage[],
-    callbacks: Callbacks,
+    callbacks: SendStreamMessageCallbacks,
     depth: number = 0,
-  ): Promise<void> {
+  ): Promise<BaseMessage[]> {
+    const fullMessages = [...messages];
+    let streaming = false;
+
     try {
       this.abortController.signal.throwIfAborted();
 
       // Safety check to prevent infinite tool calls (max 10 levels)
+      // TODO: make this configurable
       if (depth > 10) {
         console.warn("Max tool call depth reached, stopping recursion");
         const stream = await this.llm!.bindTools(tools).stream(messages);
@@ -142,44 +155,63 @@ export class BaseModelProvider {
           await callbacks.onStreamChunk(aiMessage);
         }
 
-        await callbacks.onFinalized(messages);
-        return;
+        fullMessages.push(aiMessage);
+        return fullMessages;
       }
 
       const stream = await this.llm.bindTools!(tools).stream(messages, {
         signal: this.abortController.signal,
       });
       let aiMessage: AIMessageChunk = (await stream.next()).value;
+      fullMessages.push(aiMessage);
 
-      await callbacks.onStart?.();
+      streaming = true;
+
+      await callbacks.onCreatedStream?.();
 
       for await (const chunk of stream) {
         this.abortController.signal.throwIfAborted();
         aiMessage = aiMessage.concat(chunk);
+        fullMessages[fullMessages.length - 1] = aiMessage;
         await callbacks.onStreamChunk(aiMessage);
       }
 
-      await callbacks.onComplete?.();
+      streaming = false;
 
-      const updatedMessages = [...messages, aiMessage];
+      if (aiMessage.tool_calls?.length) {
+        const toolMessages = await this.processToolCalls(
+          aiMessage.tool_calls,
+          callbacks,
+        );
 
-      // No tool calls. End stream.
-      if (!aiMessage.tool_calls?.length) {
-        await callbacks.onFinalized(updatedMessages);
-        return;
+        fullMessages.push(...toolMessages);
+
+        const updatedMessages = await this.processStreamMessage(
+          fullMessages,
+          callbacks,
+          depth + 1,
+        );
+
+        fullMessages.push(...updatedMessages);
+      }
+    } catch (error) {
+      if (streaming) {
+        // When error occurs and the last message has called , it means
+        // that the tools have not resolved. We should tell the AI that the
+        // tool call failed unless Claude won't like it.
+        const lastAIMessage = fullMessages.findLast((m) => isAIMessage(m))!;
+        if (lastAIMessage.tool_calls?.length) {
+          const messages = lastAIMessage.tool_calls.map((toolCall) =>
+            this.buildErrorToolMessage(toolCall, error),
+          );
+          fullMessages.push(...messages);
+        }
       }
 
-      const toolMessages = await this.processToolCalls(
-        aiMessage.tool_calls,
-        callbacks,
-      );
-
-      const finalMessages = [...updatedMessages, ...toolMessages];
-
-      return this.processStreamMessage(finalMessages, callbacks, depth + 1);
-    } catch (error) {
       callbacks.onError?.(error);
     }
+
+    return fullMessages;
   }
 
   protected async processToolCalls(
@@ -216,7 +248,7 @@ export class BaseModelProvider {
       if (toolToUse.tags && toolToUse.tags.includes("write")) {
         const granted = await callbacks.onRequestToolPermission?.(
           toolMessage,
-          inputToolContext
+          inputToolContext,
         );
         if (!granted) {
           const error = new Error("No - tell the AI what to do differently.");
@@ -231,7 +263,7 @@ export class BaseModelProvider {
             args: toolCall.args,
             status: "error",
             error,
-          }
+          };
           await callbacks.onToolMessage?.(toolMessage, outputToolContext);
           continue;
         }
@@ -247,22 +279,16 @@ export class BaseModelProvider {
           args: toolCall.args,
           status: "success",
           result: tryJSONParse(toolMessage.content as string),
-        }
+        };
       } catch (error) {
         console.error(`Error invoking tool - ${toolCall.name}:`, error);
-        const errorMessage = error instanceof Error ? error.message : error;
-        const newError = new Error(
-          `Error invoking tool ${toolCall.name} - ${errorMessage}`,
-          { cause: error }
-        );
-        toolMessage.status = "error";
-        toolMessage.content = buildErrorContent(newError);
+        toolMessage = this.buildErrorToolMessage(toolCall, error);
         outputToolContext = {
           name: toolCall.name,
           args: toolCall.args,
           status: "error",
-          error: newError,
-        }
+          error,
+        };
       }
 
       toolMessages.push(toolMessage);
@@ -270,6 +296,22 @@ export class BaseModelProvider {
     }
 
     return toolMessages;
+  }
+
+  private buildErrorToolMessage(
+    toolCall: ToolCall,
+    error: unknown,
+  ): ToolMessage {
+    const errorMessage = error instanceof Error ? error.message : error;
+    const newError = new Error(
+      `Error invoking tool ${toolCall.name} - ${errorMessage}`,
+      { cause: error },
+    );
+    return new ToolMessage({
+      tool_call_id: toolCall.id!,
+      content: buildErrorContent(newError),
+      status: "error",
+    });
   }
 
   abortStreamMessage(reason?: any): void {
