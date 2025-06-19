@@ -40,11 +40,11 @@
           any server except the selected AI provider.
         </p>
         <p v-if="selectedProviderId === 'claude'">
-          Don't have a Claude API key?
+          Need a Claude API key?
           <a
             href="https://docs.anthropic.com/en/api/overview#accessing-the-api"
             @click.prevent="$request('openExternal', { link: $event.target.href })"
-            >Get one here</a
+            >See the docs</a
           >.
         </p>
       </div>
