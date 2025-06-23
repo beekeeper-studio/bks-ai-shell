@@ -90,7 +90,14 @@
       <div class="message error" v-if="error">
         <div class="message-content">Something went wrong. {{ error }}</div>
       </div>
-      <div v-if="isProcessing && !isWaitingPermission" class="spinner" />
+      <div class="message" v-if="(isProcessing && !isWaitingPermission) || isAborting">
+        <div class="message-content">
+          <span>
+            <span class="spinner" />
+            <template v-if="isAborting"> - Aborting</template>
+          </span>
+        </div>
+      </div>
     </div>
 
     <div class="chat-input-container">
@@ -189,6 +196,7 @@ export default {
       "isProcessing",
       "toolExtras",
       "isWaitingPermission",
+      "isAborting",
     ]),
     ...mapGetters(useProviderStore, [
       "canSendMessage",
@@ -384,10 +392,6 @@ export default {
       this.inputHistory = newHistory;
       this.historyIndex = newHistory.length;
       this.isNavigatingHistory = false;
-    },
-
-    log(...args) {
-      console.log(...args);
     },
 
     getDisplayNameOfTool(tool) {

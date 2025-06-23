@@ -47,7 +47,9 @@ interface ProviderState {
   tools: Record<string, Tool>;
   error: unknown;
 
+  /** The title of the conversation. */
   conversationTitle: string;
+  /** Queued messages to send to the model. */
   queuedMessages: string[];
   /** Any info that ToolMessage does not cover. */
   toolExtras: { [toolId: string]: ToolExtra };
@@ -57,6 +59,10 @@ interface ProviderState {
   isWaitingPermission: boolean;
   /** Useful when user switches models while a message is being sent. */
   pendingModelId?: string;
+  /** Indicates that the stream is being aborted. Use `abortStream()` to abort. */
+  isAborting: boolean;
+  /** The model is generating a title for the conversation. */
+  isGeneratingConversationTitle: boolean;
 }
 
 // the first argument is a unique id of the store across your application
@@ -75,6 +81,8 @@ export const useProviderStore = defineStore("providers", {
     isWaitingPermission: false,
     toolExtras: {},
     queuedMessages: [],
+    isAborting: false,
+    isGeneratingConversationTitle: false,
   }),
   getters: {
     /** Can send a message when the model is not processing or while the model
@@ -95,6 +103,9 @@ export const useProviderStore = defineStore("providers", {
         }
       }
       this.conversationTitle = state?.conversationTitle || "";
+      if (this.conversationTitle) {
+        this.isGeneratingConversationTitle = true;
+      }
       this.provider = await createProvider(this.providerId, this.apiKey);
       this.models = this.provider.models;
       let modelId = this.models[0].id;
@@ -141,6 +152,7 @@ export const useProviderStore = defineStore("providers", {
       this.queuedMessages = [];
       this.isProcessing = true;
       this.error = null;
+      this.isAborting = false;
 
       const messages = await this.model!.sendStreamMessage(
         message,
@@ -207,6 +219,8 @@ export const useProviderStore = defineStore("providers", {
       );
 
       this.messages = messages;
+      this.isAborting = false;
+      this.isProcessing = false;
 
       request("setViewState", {
         state: {
@@ -215,7 +229,9 @@ export const useProviderStore = defineStore("providers", {
         },
       });
 
-      if (!this.conversationTitle) {
+      if (!this.conversationTitle && !this.isGeneratingConversationTitle) {
+        this.isGeneratingConversationTitle = true;
+
         try {
           const title = await this.model!.generateConversationTitle(
             this.messages,
@@ -234,9 +250,9 @@ export const useProviderStore = defineStore("providers", {
           // If error occurs when generating title, do nothing
           console.error(e);
         }
-      }
 
-      this.isProcessing = false;
+        this.isGeneratingConversationTitle = false;
+      }
 
       if (this.queuedMessages.length > 0) {
         await this.stream();
@@ -278,6 +294,7 @@ export const useProviderStore = defineStore("providers", {
         throw new Error("No model created");
       }
       this.model.abortStreamMessage(new Error("Aborted: user interrupted"));
+      this.isAborting = true;
     },
     setProviderId(providerId: ProviderId) {
       this.providerId = providerId;
