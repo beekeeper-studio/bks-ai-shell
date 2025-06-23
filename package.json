@@ -25,6 +25,7 @@
     "marked-highlight": "^2.2.1",
     "pinia": "^3.0.2",
     "pluralize": "^8.0.0",
+    "typeface-roboto": "^0.0.75",
     "vue": "^3.4.21",
     "zod": "^3.22.4"
   },
