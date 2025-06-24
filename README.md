@@ -4,28 +4,19 @@ Ask AI to analyze your database and generate SQL queries.
 
 ![top-5-most-rented-films](https://github.com/user-attachments/assets/d9346b69-f298-4fbc-b725-f731b2c41a64)
 
-## Setup
+## Development
 
-1. Install dependencies:
-   ```
-   yarn install
-   ```
+Run the commands below, and then open Beekeeper Studio.
 
-2. Start the development server:
-   ```
-   yarn dev
-   ```
+```bash
+cd ~/.config/beekeeper-studio/plugins
+git clone git@github.com:beekeeper-studio/bks-ai-shell.git
+cd ./bks-ai-shell
+yarn install
+yarn build # or yarn build --watch
+```
 
-3. Open your browser at http://localhost:5173
-
-4. Enter your Claude API key when prompted (get one from https://console.anthropic.com/keys)
-
-## Usage
-
-1. Enter your API key on the first screen
-2. Choose your preferred AI model provider (Claude is the default)
-3. Start chatting with your selected AI model!
-4. Your API key and preferences are stored locally in your browser
+If you run Beekeeper Studio project locally, you can right click the AI Shell tab header > `[DEV] Reload Plugin View` to reload the iframe.
 
 ## Deployment
 
