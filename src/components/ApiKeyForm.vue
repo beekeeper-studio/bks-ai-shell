@@ -31,7 +31,7 @@
           {{ error }}
         </div>
         <button class="btn btn-primary" type="submit" :disabled="disabled">
-          Start Chatting
+          {{ messages.length > 0 ? "Continue Chatting" : "Start Chatting" }}
         </button>
       </form>
       <div class="api-info">
@@ -55,6 +55,8 @@
 <script lang="ts">
 import { PropType } from "vue";
 import { Providers, ProviderId } from "../providers/modelFactory";
+import { mapState } from "pinia";
+import { useProviderStore } from "../store";
 
 export default {
   name: "ApiKeyForm",
@@ -86,6 +88,9 @@ export default {
   },
 
   computed: {
+    ...mapState(useProviderStore, [
+      'messages',
+    ]),
     providers() {
       if (import.meta.env.MODE === "development") {
         return Providers;
