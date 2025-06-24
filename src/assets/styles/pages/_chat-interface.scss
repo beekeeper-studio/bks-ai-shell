@@ -338,27 +338,31 @@
 }
 
 .preview-table {
-  width: 100%;
+  width: auto;
   border-collapse: collapse;
   margin: 0.5rem 0;
+  table-layout: auto;
 
   th,
   td {
     border: 1px solid var(--border-color);
     padding: 0 0.7rem;
     text-align: left;
-    word-break: break-all;
+    white-space: nowrap;
     max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+  }
+
+  th {
+    width: auto;
   }
 
   th {
     background-color: rgb(from var(--theme-base) r g b / 5%);
     font-weight: 600;
     font-size: 0.68rem;
-    line-height: 1.2rem;
+    line-height: 1.7rem;
   }
 
   td {
