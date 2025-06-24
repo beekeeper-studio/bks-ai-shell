@@ -90,13 +90,12 @@
       <div class="message error" v-if="error">
         <div class="message-content">Something went wrong. {{ error }}</div>
       </div>
-      <div class="message" v-if="(isProcessing && !isWaitingPermission) || isAborting">
-        <div class="message-content">
-          <span>
-            <span class="spinner" />
-            <template v-if="isAborting"> - Aborting</template>
-          </span>
-        </div>
+      <div
+        class="spinner-container"
+        :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
+      >
+        <span class="spinner" />
+        <span v-show="isAborting"> - Aborting</span>
       </div>
     </div>
 
@@ -212,6 +211,9 @@ export default {
         messages: this.messages,
         toolExtras: this.toolExtras,
       };
+    },
+    showSpinner() {
+      return (this.isProcessing && !this.isWaitingPermission) || this.isAborting;
     },
   },
 
