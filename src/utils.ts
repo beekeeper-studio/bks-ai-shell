@@ -1,7 +1,7 @@
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
     value,
-    (_key, val) => (typeof val === "bigint" ? `${val}n` : val),
+    (_key, val) => (typeof val === "bigint" ? val.toString() : val),
     args[1],
   );
 }
