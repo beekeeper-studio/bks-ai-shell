@@ -1,37 +1,41 @@
 <template>
-  Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
-  <div class="preview-table-container" v-if="rows.length > 0">
-    <table class="preview-table">
-      <thead>
-        <tr>
-          <th v-for="column in columns" :key="column">
-            {{ column }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, index) in limitedRows" :key="index">
-          <td v-for="column in columns" :key="column">
-            {{ row[column] }}
-          </td>
-        </tr>
-        <tr v-if="remainingRows > 0" class="remaining-rows">
-          <td :colspan="columns.length">
-            ... {{ remainingRows }} more {{ $pluralize('row', remainingRows) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <button
-    class="btn"
-    @click="() => $emit('result-click', data.results)"
-  >
-    <div class="label">View more</div>
-    <span class="material-symbols-outlined open-icon">
-      keyboard_double_arrow_down
+  <div class="run-query-message">
+    <span>
+      Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
     </span>
-  </button>
+    <div class="preview-table-container" v-if="rows.length > 0">
+      <table class="preview-table">
+        <thead>
+          <tr>
+            <th v-for="column in columns" :key="column">
+              {{ column }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, index) in limitedRows" :key="index">
+            <td v-for="column in columns" :key="column">
+              {{ row[column] }}
+            </td>
+          </tr>
+          <tr v-if="remainingRows > 0" class="remaining-rows">
+            <td :colspan="columns.length">
+              ... {{ remainingRows }} more {{ $pluralize('row', remainingRows) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button
+      class="btn view-more-btn"
+      @click="() => $emit('result-click', data.results)"
+    >
+      <div class="label">View more</div>
+      <span class="material-symbols-outlined open-icon">
+        keyboard_double_arrow_down
+      </span>
+    </button>
+  </div>
 </template>
 
 <script lang="ts">
