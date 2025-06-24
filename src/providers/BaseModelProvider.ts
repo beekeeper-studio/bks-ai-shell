@@ -2,8 +2,10 @@ import {
   AIMessage,
   AIMessageChunk,
   BaseMessage,
+  BaseMessageChunk,
   HumanMessage,
   isAIMessage,
+  isAIMessageChunk,
   isSystemMessage,
   SystemMessage,
   ToolMessage,
@@ -155,7 +157,12 @@ export class BaseModelProvider {
           await callbacks.onStreamChunk(aiMessage);
         }
 
-        fullMessages.push(aiMessage);
+        // don't push empty messages at the end of the stream
+        // FIXME: this is duplicated code. The end of stream also happens somewhere below
+        if (aiMessage.text.trim().length > 0) {
+          fullMessages.push(aiMessage);
+        }
+
         return fullMessages;
       }
 
@@ -211,6 +218,15 @@ export class BaseModelProvider {
       }
 
       callbacks.onError?.(error);
+    }
+
+    const lastMessage = fullMessages[fullMessages.length - 1];
+    if (isAIMessage(lastMessage) || isAIMessageChunk(lastMessage as BaseMessageChunk)) {
+      if (lastMessage.text.trim().length === 0) {
+        // don't push empty messages at the end of the stream
+        // FIXME: this is duplicated code. The end of stream also happens somewhere above
+        fullMessages.pop();
+      }
     }
 
     return fullMessages;
