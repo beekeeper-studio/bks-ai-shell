@@ -2,7 +2,7 @@
 
 Ask AI to analyze your database and generate SQL queries.
 
-![top-5-most-rented-films](https://github.com/user-attachments/assets/d9346b69-f298-4fbc-b725-f731b2c41a64)
+![ai-shell-demo](https://github.com/user-attachments/assets/95efa8e4-b9ce-4bff-ac11-46a960812ca8)
 
 ## Development
 
