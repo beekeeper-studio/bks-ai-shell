@@ -91,8 +91,6 @@ function migrateConfigFromV1_0_X() {
     configuration = _.merge({}, configuration, migration);
 
     localStorage.setItem("configuration", JSON.stringify(configuration));
-    localStorage.removeItem(STORAGE_KEYS.PROVIDER);
-    localStorage.removeItem(STORAGE_KEYS.API_KEY);
   }
 
   if (localStorage.getItem(STORAGE_KEYS.MODEL)) {
@@ -107,7 +105,6 @@ function migrateConfigFromV1_0_X() {
     configuration = _.merge({}, configuration, migration);
 
     localStorage.setItem("configuration", JSON.stringify(configuration));
-    localStorage.removeItem(STORAGE_KEYS.MODEL);
   }
 }
 
