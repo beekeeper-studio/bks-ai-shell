@@ -1,5 +1,8 @@
 .run-query-message {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   .view-more-btn {
-    margin-top: 0.5rem;
+    width: max-content;
   }
 }

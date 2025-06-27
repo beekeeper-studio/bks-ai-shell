@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { STORAGE_KEYS } from "./config";
 import { IModel } from "./types";
 import _ from "lodash";
-import { createProvider, ProviderId } from "./providers/modelFactory";
+import { ProviderId, Providers } from "./providers";
 import {
   BaseMessage,
   HumanMessage,
@@ -106,7 +106,12 @@ export const useProviderStore = defineStore("providers", {
       if (this.conversationTitle) {
         this.isGeneratingConversationTitle = true;
       }
-      this.provider = await createProvider(this.providerId, this.apiKey);
+      const providerClass = Providers[this.providerId];
+      if (!providerClass) {
+        throw new Error(`Unknown provider: ${this.providerId}`);
+      }
+      this.provider = new providerClass();
+      await this.provider.initialize(this.apiKey);
       this.models = this.provider.models;
       let modelId = this.models[0].id;
       const storedModelId = localStorage.getItem(STORAGE_KEYS.MODEL);

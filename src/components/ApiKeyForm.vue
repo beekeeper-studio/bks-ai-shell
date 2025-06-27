@@ -54,7 +54,7 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { Providers, ProviderId } from "../providers/modelFactory";
+import { Providers, ProviderId, BaseProvider } from "../providers";
 import { mapState } from "pinia";
 import { useProviderStore } from "../store";
 
@@ -91,15 +91,16 @@ export default {
     ...mapState(useProviderStore, [
       'messages',
     ]),
-    providers() {
+    providers(): (typeof BaseProvider)[] {
+      const providers = Object.keys(Providers).map((key) => Providers[key]);
       if (import.meta.env.MODE === "development") {
-        return Providers;
+        return providers;
       }
-      return Providers.filter((p) => p.id !== "mock");
+      return providers.filter((p) => p.id !== "mock");
     },
     selectedProviderName() {
       return (
-        this.providers.find((p) => p.id === this.selectedProviderId)?.label ||
+        this.providers.find((p) => p.id === this.selectedProviderId)?.displayName ||
         ""
       );
     },

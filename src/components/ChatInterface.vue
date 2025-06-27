@@ -145,7 +145,6 @@
 </template>
 
 <script lang="ts">
-import { Providers as UIProviders } from "../providers/modelFactory";
 import { mapState, mapActions, mapGetters } from "pinia";
 import { useProviderStore } from "../store";
 import Message from "./Message.vue";
@@ -200,9 +199,6 @@ export default {
     ...mapGetters(useProviderStore, [
       "canSendMessage",
     ]),
-    providers() {
-      return UIProviders;
-    },
     navigatingHistory() {
       return this.historyIndex === this.inputHistory.length;
     },
