@@ -21,7 +21,7 @@
 <script>
 import ApiKeyForm from "./components/ApiKeyForm.vue";
 import ChatInterface from "./components/ChatInterface.vue";
-import { useProviderStore } from "./store";
+import { useProviderStore } from "@/stores/provider";
 import { mapState, mapActions } from "pinia";
 
 export default {

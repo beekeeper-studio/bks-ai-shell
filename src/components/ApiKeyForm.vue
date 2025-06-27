@@ -57,7 +57,7 @@ import { PropType } from "vue";
 import { Providers, ProviderId } from "@/providers";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { mapState } from "pinia";
-import { useProviderStore } from "@/store";
+import { useProviderStore } from "@/stores/provider";
 
 export default {
   name: "ApiKeyForm",

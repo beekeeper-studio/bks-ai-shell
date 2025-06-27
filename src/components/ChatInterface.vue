@@ -146,7 +146,7 @@
 
 <script lang="ts">
 import { mapState, mapActions, mapGetters } from "pinia";
-import { useProviderStore } from "../store";
+import { useProviderStore } from "@/stores/provider";
 import Message from "./Message.vue";
 import ToolMessage from "./ToolMessage.vue";
 import Dropdown from "./common/Dropdown.vue";
