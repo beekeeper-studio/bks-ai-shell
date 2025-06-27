@@ -29,7 +29,7 @@ interface ViewState {
   conversationTitle: string;
 }
 
-interface ProviderState {
+interface ChatState {
   /** The active provider. E.g. Anthropic, OpenAI */
   provider?: BaseProvider;
 
@@ -71,8 +71,8 @@ interface ProviderState {
 }
 
 // the first argument is a unique id of the store across your application
-export const useProviderStore = defineStore("provider", {
-  state: (): ProviderState => ({
+export const useChatStore = defineStore("chat", {
+  state: (): ChatState => ({
     models: [],
     messages: [],
     error: null,

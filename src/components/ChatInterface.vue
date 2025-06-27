@@ -146,7 +146,7 @@
 
 <script lang="ts">
 import { mapState, mapActions, mapGetters } from "pinia";
-import { useProviderStore } from "@/stores/provider";
+import { useChatStore } from "@/stores/chat";
 import Message from "./Message.vue";
 import ToolMessage from "./ToolMessage.vue";
 import Dropdown from "./common/Dropdown.vue";
@@ -181,7 +181,7 @@ export default {
   },
 
   computed: {
-    ...mapState(useProviderStore, [
+    ...mapState(useChatStore, [
       "pendingModelId",
       "models",
       "messages",
@@ -191,7 +191,7 @@ export default {
       "isWaitingPermission",
       "isAborting",
     ]),
-    ...mapGetters(useProviderStore, [
+    ...mapGetters(useChatStore, [
       "canSendMessage",
     ]),
     navigatingHistory() {
@@ -242,7 +242,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(useProviderStore, [
+    ...mapActions(useChatStore, [
       "setModel",
       "queueMessage",
       "abortStream",

@@ -21,7 +21,7 @@
 <script lang="ts">
 import ApiKeyForm from "./components/ApiKeyForm.vue";
 import ChatInterface from "./components/ChatInterface.vue";
-import { useProviderStore } from "@/stores/provider";
+import { useChatStore } from "@/stores/chat";
 import { useConfigurationStore } from "@/stores/configuration";
 import { mapState, mapActions } from "pinia";
 import { ProviderId } from "@/providers";
@@ -62,7 +62,7 @@ export default {
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
-    ...mapActions(useProviderStore, ["initializeProvider"]),
+    ...mapActions(useChatStore, ["initializeProvider"]),
     async handleApiKeySubmit(data: { key: string; provider: ProviderId }) {
       this.error = "";
       this.disabledApiKeyForm = true;

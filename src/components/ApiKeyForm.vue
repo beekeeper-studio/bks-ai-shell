@@ -57,7 +57,7 @@ import { PropType } from "vue";
 import { Providers, ProviderId } from "@/providers";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { mapState } from "pinia";
-import { useProviderStore } from "@/stores/provider";
+import { useChatStore } from "@/stores/chat";
 
 export default {
   name: "ApiKeyForm",
@@ -89,7 +89,7 @@ export default {
   },
 
   computed: {
-    ...mapState(useProviderStore, [
+    ...mapState(useChatStore, [
       'messages',
     ]),
     providers(): (typeof BaseProvider)[] {
