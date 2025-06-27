@@ -69,6 +69,11 @@
     width: 100%;
     line-height: 1.07rem;
     font-size: 0.765rem;
+    code {
+      &::selection, *::selection {
+        background-color: var(--bks-text-editor-selected-bg-color);
+      }
+    }
   }
 
   .markdown {

@@ -10,13 +10,12 @@ import {
   SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
-import { IModel, IModelConfig } from "../types";
 import { ToolCall } from "@langchain/core/dist/messages/tool";
-import { tools } from "../tools";
+import { tools } from "@/tools";
 import { BaseChatModel } from "@langchain/core/language_models/chat_models";
 import { z } from "zod";
-import { buildErrorContent, tryJSONParse } from "../utils";
-import { getDefaultInstructions } from "../config";
+import { buildErrorContent, tryJSONParse } from "@/utils";
+import { getDefaultInstructions } from "@/config";
 
 export interface SendStreamMessageCallbacks extends ToolCallbacks {
   /** When a new message stream is created. */
@@ -63,17 +62,7 @@ export interface ToolCallbacks {
   ) => boolean | Promise<boolean>;
 }
 
-export abstract class BaseProvider {
-  public static id: string;
-  public static displayName: string;
-
-  public models: IModel[] = [];
-
-  public abstract initialize(apiKey: string): Promise<void>;
-  public abstract createModel(config: IModelConfig): BaseModelProvider;
-}
-
-export class BaseModelProvider {
+export class BaseModel {
   private abortController: AbortController = new AbortController();
   private sendingMessage = false;
 

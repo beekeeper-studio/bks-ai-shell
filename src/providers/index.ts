@@ -1,15 +1,20 @@
-import { ClaudeProvider } from "./ClaudeProvider";
-import { MockProvider } from "./MockProvider";
-
-export type { BaseProvider } from "./BaseModelProvider";
+import { ClaudeProvider } from "@/providers/anthropic";
+import { MockProvider } from "@/providers/mock";
 
 export type ProviderId = keyof typeof Providers;
+
+export interface ModelConfig {
+  /** If not provided, will use the default model */
+  temperature?: number;
+  modelId: string;
+}
+
+export interface IModel {
+  id: string;
+  displayName: string;
+}
 
 export const Providers = {
   claude: ClaudeProvider,
   mock: MockProvider,
-}
-
-export function getProviderIds() {
-
 }

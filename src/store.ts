@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
-import { STORAGE_KEYS } from "./config";
-import { IModel } from "./types";
+import { STORAGE_KEYS } from "@/config";
 import _ from "lodash";
-import { ProviderId, Providers } from "./providers";
+import { ProviderId, Providers, IModel } from "@/providers";
 import {
   BaseMessage,
   HumanMessage,
@@ -11,9 +10,10 @@ import {
   mapStoredMessagesToChatMessages,
   ToolMessage,
 } from "@langchain/core/messages";
-import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
+import { BaseModel } from "@/providers/BaseModel";
+import { BaseProvider } from "@/providers/BaseProvider";
 import { request } from "@beekeeperstudio/plugin";
-import { isAbortError } from "./utils";
+import { isAbortError } from "@/utils";
 
 interface Tool {
   id: string;
@@ -41,7 +41,7 @@ interface ProviderState {
   providerId: ProviderId;
   apiKey: string;
   provider?: BaseProvider;
-  model?: BaseModelProvider;
+  model?: BaseModel;
   models: IModel[];
   messages: BaseMessage[];
   tools: Record<string, Tool>;

@@ -1,7 +1,8 @@
-import { BaseModelProvider, BaseProvider } from "./BaseModelProvider";
+import { ModelConfig } from "@/providers";
+import { BaseModel } from "@/providers/BaseModel";
+import { BaseProvider } from "@/providers/BaseProvider";
 import { ChatAnthropic, type AnthropicInput } from "@langchain/anthropic";
 import { Anthropic } from "@anthropic-ai/sdk";
-import { IModelConfig } from "../types";
 
 export class ClaudeProvider extends BaseProvider {
   public static id = "claude" as const;
@@ -23,7 +24,7 @@ export class ClaudeProvider extends BaseProvider {
     this.apiKey = apiKey;
   }
 
-  public createModel(config: IModelConfig): BaseModelProvider {
+  public createModel(config: ModelConfig): BaseModel {
     const model = this.models.find((m) => m.id === config.modelId);
 
     if (!model) {
@@ -39,7 +40,7 @@ export class ClaudeProvider extends BaseProvider {
           dangerouslyAllowBrowser: true,
         };
       const llm = new ChatAnthropic(chatConfig);
-      return new BaseModelProvider(model.id, model.displayName, llm);
+      return new BaseModel(model.id, model.displayName, llm);
     } catch (error) {
       console.error("Error initializing Claude model:", error);
       throw error;

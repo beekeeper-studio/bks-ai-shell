@@ -54,9 +54,10 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { Providers, ProviderId, BaseProvider } from "../providers";
+import { Providers, ProviderId } from "@/providers";
+import { BaseProvider } from "@/providers/BaseProvider";
 import { mapState } from "pinia";
-import { useProviderStore } from "../store";
+import { useProviderStore } from "@/store";
 
 export default {
   name: "ApiKeyForm",
