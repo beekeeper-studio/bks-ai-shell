@@ -1,5 +1,6 @@
 import { ClaudeProvider } from "@/providers/anthropic";
 import { MockProvider } from "@/providers/mock";
+import type { ChatAnthropic } from "@langchain/anthropic";
 
 export type ProviderId = keyof typeof Providers;
 

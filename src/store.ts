@@ -320,7 +320,7 @@ export const useProviderStore = defineStore("providers", {
         throw new Error("No model selected.");
       }
       const modelId = this.pendingModelId;
-      if (modelId === this.model?.id) {
+      if (modelId === this.model?.modelId) {
         return;
       }
       try {

@@ -40,7 +40,7 @@ export class ClaudeProvider extends BaseProvider {
           dangerouslyAllowBrowser: true,
         };
       const llm = new ChatAnthropic(chatConfig);
-      return new BaseModel(model.id, model.displayName, llm);
+      return new BaseModel(model.id, llm);
     } catch (error) {
       console.error("Error initializing Claude model:", error);
       throw error;
