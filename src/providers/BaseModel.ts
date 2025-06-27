@@ -10,13 +10,12 @@ import {
   SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
-import { IModel, IModelConfig } from "../types";
 import { ToolCall } from "@langchain/core/dist/messages/tool";
-import { tools } from "../tools";
-import { BaseChatModel } from "@langchain/core/language_models/chat_models";
+import { tools } from "@/tools";
 import { z } from "zod";
-import { buildErrorContent, tryJSONParse } from "../utils";
-import { getDefaultInstructions } from "../config";
+import { buildErrorContent, tryJSONParse } from "@/utils";
+import { getDefaultInstructions } from "@/config";
+import type { ChatAnthropic } from "@langchain/anthropic";
 
 export interface SendStreamMessageCallbacks extends ToolCallbacks {
   /** When a new message stream is created. */
@@ -63,28 +62,20 @@ export interface ToolCallbacks {
   ) => boolean | Promise<boolean>;
 }
 
-export abstract class BaseProvider {
-  public static id: string;
-  public static displayName: string;
+type SupportedChatModel = ChatAnthropic;
 
-  public models: IModel[] = [];
-
-  public abstract initialize(apiKey: string): Promise<void>;
-  public abstract createModel(config: IModelConfig): BaseModelProvider;
-}
-
-export class BaseModelProvider {
+export class BaseModel {
   private abortController: AbortController = new AbortController();
   private sendingMessage = false;
 
-  constructor(
-    public readonly id: string,
-    public readonly displayName: string,
-    private readonly llm: BaseChatModel,
-  ) { }
+  constructor(private readonly llm: SupportedChatModel) { }
 
   get isSendingMessage(): boolean {
     return this.sendingMessage;
+  }
+
+  get modelId(): string {
+    return this.llm.model;
   }
 
   /**
@@ -148,7 +139,7 @@ export class BaseModelProvider {
       // TODO: make this configurable
       if (depth > 10) {
         console.warn("Max tool call depth reached, stopping recursion");
-        const stream = await this.llm!.bindTools(tools).stream(messages);
+        const stream = await this.llm.bindTools(tools).stream(messages);
         let aiMessage = (await stream.next()).value as AIMessageChunk;
 
         for await (const chunk of stream) {

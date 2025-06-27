@@ -5,7 +5,7 @@ import "@material-symbols/font-400/outlined.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import pluralize from "pluralize";
-import App from "./App.vue";
+import App from "@/App.vue";
 import {
   addNotificationListener,
   setDebugComms,

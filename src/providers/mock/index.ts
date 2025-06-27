@@ -2,8 +2,9 @@
  * Mock provider for testing and demonstration purposes
  */
 
-import { IChatMessage, IModel, IModelConfig } from "../types";
-import { BaseModelProvider, BaseProvider } from "./BaseModelProvider";
+import { IModel, ModelConfig } from "@/providers";
+import { BaseModel } from "@/providers/BaseModel";
+import { BaseProvider } from "@/providers/BaseProvider";
 
 export class MockProvider extends BaseProvider {
   public static id = "mock" as const;
@@ -12,12 +13,12 @@ export class MockProvider extends BaseProvider {
     public initialize(apiKey: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    public createModel(config: IModelConfig): BaseModelProvider {
+    public createModel(config: ModelConfig): BaseModel {
         throw new Error("Method not implemented.");
     }
 }
 
-export class MockModelProvider extends BaseModelProvider {
+export class MockModelProvider extends BaseModel {
   public static id = "mock" as const;
   public static displayName = "Mock" as const;
 
