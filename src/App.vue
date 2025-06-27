@@ -3,26 +3,28 @@
     <!-- API Key Form -->
     <ApiKeyForm
       v-if="page === 'api-key-form'"
-      :initial-provider-id="providerId"
-      :initial-api-key="apiKey"
+      :initial-provider-id="activeProviderId"
+      :initial-api-key="providers[activeProviderId].apiKey"
       @submit="handleApiKeySubmit"
       :disabled="disabledApiKeyForm"
       :error="error"
     />
 
     <!-- Chat Interface -->
-    <ChatInterface 
-      v-else-if="page === 'chat-interface'" 
+    <ChatInterface
+      v-else-if="page === 'chat-interface'"
       @navigate-to-api-form="page = 'api-key-form'"
     />
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import ApiKeyForm from "./components/ApiKeyForm.vue";
 import ChatInterface from "./components/ChatInterface.vue";
 import { useProviderStore } from "@/stores/provider";
+import { useConfigurationStore } from "@/stores/configuration";
 import { mapState, mapActions } from "pinia";
+import { ProviderId } from "@/providers";
 
 export default {
   components: {
@@ -34,13 +36,13 @@ export default {
     return {
       page: "", // Will be set in mounted based on API key availability
       disabledApiKeyForm: false,
-      error: "",
+      error: "" as unknown,
     };
   },
 
   async mounted() {
     // Check if API key exists and auto-navigate to appropriate page
-    if (this.apiKey && this.providerId) {
+    if (this.providers[this.activeProviderId].apiKey) {
       try {
         await this.initializeProvider();
         this.page = "chat-interface";
@@ -55,21 +57,18 @@ export default {
   },
 
   computed: {
-    ...mapState(useProviderStore, ["providerId", "apiKey"]),
+    ...mapState(useConfigurationStore, ["activeProviderId", "providers"]),
   },
 
   methods: {
-    ...mapActions(useProviderStore, [
-      "setApiKey",
-      "setProviderId",
-      "initializeProvider",
-    ]),
-    async handleApiKeySubmit(data) {
+    ...mapActions(useConfigurationStore, ["configure"]),
+    ...mapActions(useProviderStore, ["initializeProvider"]),
+    async handleApiKeySubmit(data: { key: string; provider: ProviderId }) {
       this.error = "";
       this.disabledApiKeyForm = true;
-      await this.$nextTick()
-      this.setApiKey(data.key);
-      this.setProviderId(data.provider);
+      await this.$nextTick();
+      this.configure(`providers.${data.provider}.apiKey` as const, data.key);
+      this.configure("activeProviderId", data.provider);
       try {
         await this.initializeProvider();
         this.page = "chat-interface";

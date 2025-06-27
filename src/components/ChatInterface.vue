@@ -182,14 +182,9 @@ export default {
 
   computed: {
     ...mapState(useProviderStore, [
-      "providerId",
-      "provider",
-      "model",
       "pendingModelId",
-      "apiKey",
       "models",
       "messages",
-      "tools",
       "error",
       "isProcessing",
       "toolExtras",

@@ -9,21 +9,13 @@ import {
   mapChatMessagesToStoredMessages,
   mapStoredMessagesToChatMessages,
   ToolMessage,
+  SystemMessage,
 } from "@langchain/core/messages";
 import { BaseModel } from "@/providers/BaseModel";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { request } from "@beekeeperstudio/plugin";
 import { isAbortError } from "@/utils";
-
-interface Tool {
-  id: string;
-  name: string;
-  displayName: string;
-  args: any;
-  asksPermission: boolean;
-  permissionResponse?: "accept" | "reject";
-  permissionResolved: boolean;
-}
+import { useConfigurationStore } from "./configuration";
 
 interface ToolExtra {
   /** Defined if the model asks for permission to call this tool. */
@@ -38,43 +30,51 @@ interface ViewState {
 }
 
 interface ProviderState {
-  providerId: ProviderId;
-  apiKey: string;
+  /** The active provider. E.g. Anthropic, OpenAI */
   provider?: BaseProvider;
+
+  /** The active model. E.g. Claude 4 Sonnet, Claude 3.5, etc. */
   model?: BaseModel;
+
+  /** The available models returned by the active provider. */
   models: IModel[];
+
+  /** All messages are here a.k.a "conversation". */
   messages: BaseMessage[];
-  tools: Record<string, Tool>;
+
+  /** If error happens, this is set. */
   error: unknown;
 
   /** The title of the conversation. */
   conversationTitle: string;
+
   /** Queued messages to send to the model. */
   queuedMessages: string[];
-  /** Any info that ToolMessage does not cover. */
+
+  /** Any info that LangChain's ToolMessage does not have. */
   toolExtras: { [toolId: string]: ToolExtra };
+
   /** Is the model processing a message? */
   isProcessing: boolean;
+
   /** The model is waiting for user permission to call a tool. */
   isWaitingPermission: boolean;
+
   /** Useful when user switches models while a message is being sent. */
   pendingModelId?: string;
+
   /** Indicates that the stream is being aborted. Use `abortStream()` to abort. */
   isAborting: boolean;
+
   /** The model is generating a title for the conversation. */
   isGeneratingConversationTitle: boolean;
 }
 
 // the first argument is a unique id of the store across your application
-export const useProviderStore = defineStore("providers", {
+export const useProviderStore = defineStore("provider", {
   state: (): ProviderState => ({
-    providerId:
-      (localStorage.getItem(STORAGE_KEYS.PROVIDER) as ProviderId) || "claude",
-    apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY) || "",
-    provider: undefined,
     models: [],
     messages: [],
-    tools: {},
     error: null,
     conversationTitle: "",
     isProcessing: false,
@@ -106,18 +106,17 @@ export const useProviderStore = defineStore("providers", {
       if (this.conversationTitle) {
         this.isGeneratingConversationTitle = true;
       }
-      const providerClass = Providers[this.providerId];
+      const config = useConfigurationStore();
+      const providerClass = Providers[config.activeProviderId];
       if (!providerClass) {
-        throw new Error(`Unknown provider: ${this.providerId}`);
+        throw new Error(`Unknown provider: ${config.activeProviderId}`);
       }
       this.provider = new providerClass();
-      await this.provider.initialize(this.apiKey);
+      await this.provider.initialize(
+        config.providers[config.activeProviderId].apiKey,
+      );
       this.models = this.provider.models;
-      let modelId = this.models[0].id;
-      const storedModelId = localStorage.getItem(STORAGE_KEYS.MODEL);
-      if (storedModelId && storedModelId.startsWith(`${this.providerId}:`)) {
-        modelId = storedModelId.split(":")[1];
-      }
+      const modelId = config.activeModelId || this.models[0].id;
       this.setModel(modelId);
       this.switchModel();
     },
@@ -159,9 +158,22 @@ export const useProviderStore = defineStore("providers", {
       this.error = null;
       this.isAborting = false;
 
+      let conversation = this.messages.slice(0, -1);
+      const config = useConfigurationStore();
+
+      if (config.summarization && this.summary) {
+        const systemMessage = this.messages[0];
+        const summaryMessage = new SystemMessage(
+          `Continue the conversation based on this summary: ${this.summary.content}`,
+        );
+        const keptMessages = this.messages.slice(this.summary.startIndex + 1);
+
+        conversation = [systemMessage, summaryMessage, ...keptMessages];
+      }
+
       const messages = await this.model!.sendStreamMessage(
         message,
-        this.messages.slice(0, -1),
+        conversation,
         {
           onCreatedStream: async () => {
             aiMessageIndex = -1;
@@ -212,7 +224,9 @@ export const useProviderStore = defineStore("providers", {
                 request("expandTableResult", { results: [results[0]] });
               }
             }
-
+          },
+          onSummary: (summary) => {
+            this.summary = summary;
           },
           onError: (error) => {
             if (!isAbortError(error)) {
@@ -301,14 +315,6 @@ export const useProviderStore = defineStore("providers", {
       this.model.abortStreamMessage(new Error("Aborted: user interrupted"));
       this.isAborting = true;
     },
-    setProviderId(providerId: ProviderId) {
-      this.providerId = providerId;
-      localStorage.setItem(STORAGE_KEYS.PROVIDER, providerId);
-    },
-    setApiKey(apiKey: string) {
-      this.apiKey = apiKey;
-      localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
-    },
     setModel(modelId: string) {
       this.pendingModelId = modelId;
     },
@@ -325,10 +331,7 @@ export const useProviderStore = defineStore("providers", {
       }
       try {
         this.model = this.provider?.createModel({ modelId });
-        localStorage.setItem(
-          STORAGE_KEYS.MODEL,
-          `${this.providerId}:${modelId}`,
-        );
+        useConfigurationStore().configure("activeModelId", modelId);
         console.log(`Switched to model: ${modelId}`);
       } catch (e) {
         console.error(e);
