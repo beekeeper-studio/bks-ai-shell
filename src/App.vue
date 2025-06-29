@@ -11,8 +11,8 @@
     />
 
     <!-- Chat Interface -->
-    <ChatInterface 
-      v-else-if="page === 'chat-interface'" 
+    <ChatInterface
+      v-else-if="page === 'chat-interface'"
       @navigate-to-api-form="page = 'api-key-form'"
     />
   </div>
@@ -39,6 +39,7 @@ export default {
   },
 
   async mounted() {
+    await this.initializeChat();
     // Check if API key exists and auto-navigate to appropriate page
     if (this.apiKey && this.providerId) {
       try {
@@ -62,6 +63,7 @@ export default {
     ...mapActions(useProviderStore, [
       "setApiKey",
       "setProviderId",
+      "initializeChat",
       "initializeProvider",
     ]),
     async handleApiKeySubmit(data) {

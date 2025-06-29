@@ -37,6 +37,10 @@ interface ViewState {
   conversationTitle: string;
 }
 
+interface EncryptedData {
+  anthropicApiKey: string;
+}
+
 interface ProviderState {
   providerId: ProviderId;
   apiKey: string;
@@ -68,9 +72,8 @@ interface ProviderState {
 // the first argument is a unique id of the store across your application
 export const useProviderStore = defineStore("providers", {
   state: (): ProviderState => ({
-    providerId:
-      (localStorage.getItem(STORAGE_KEYS.PROVIDER) as ProviderId) || "claude",
-    apiKey: localStorage.getItem(STORAGE_KEYS.API_KEY) || "",
+    providerId:"claude",
+    apiKey: "",
     provider: undefined,
     models: [],
     messages: [],
@@ -92,6 +95,12 @@ export const useProviderStore = defineStore("providers", {
     },
   },
   actions: {
+    async initializeChat() {
+      const data = await request<EncryptedData>("getEncryptedData");
+      if (data) {
+        this.apiKey = data.anthropicApiKey;
+      }
+    },
     async initializeProvider() {
       const state = await request<ViewState>("getViewState");
       if (state?.messages) {
@@ -305,9 +314,9 @@ export const useProviderStore = defineStore("providers", {
       this.providerId = providerId;
       localStorage.setItem(STORAGE_KEYS.PROVIDER, providerId);
     },
-    setApiKey(apiKey: string) {
+    async setApiKey(apiKey: string) {
       this.apiKey = apiKey;
-      localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
+      await request("setEncryptedData", { anthropicApiKey: apiKey });
     },
     setModel(modelId: string) {
       this.pendingModelId = modelId;
