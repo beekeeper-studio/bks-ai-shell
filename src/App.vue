@@ -41,6 +41,7 @@ export default {
   },
 
   async mounted() {
+    await this.initializeChat();
     // Check if API key exists and auto-navigate to appropriate page
     if (this.providers[this.activeProviderId].apiKey) {
       try {
@@ -62,7 +63,7 @@ export default {
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
-    ...mapActions(useChatStore, ["initializeProvider"]),
+    ...mapActions(useChatStore, ["initializeChat", "initializeProvider"]),
     async handleApiKeySubmit(data: { key: string; provider: ProviderId }) {
       this.error = "";
       this.disabledApiKeyForm = true;

@@ -92,6 +92,10 @@ export const useChatStore = defineStore("chat", {
     },
   },
   actions: {
+    async initializeChat() {
+      const configuration = useConfigurationStore();
+      await configuration.sync();
+    },
     async initializeProvider() {
       const state = await getViewState<ViewState>();
       if (state?.messages) {
