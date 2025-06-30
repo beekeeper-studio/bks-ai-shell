@@ -12,7 +12,7 @@ import {
   ToolMessage,
 } from "@langchain/core/messages";
 import { BaseModelProvider, BaseProvider } from "./providers/BaseModelProvider";
-import { request } from "@beekeeperstudio/plugin";
+import { expandTableResult, getEncryptedData, getViewState, setEncryptedData, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
 import { isAbortError } from "./utils";
 
 interface Tool {
@@ -35,10 +35,6 @@ interface ToolExtra {
 interface ViewState {
   messages: StoredMessage[];
   conversationTitle: string;
-}
-
-interface EncryptedData {
-  anthropicApiKey: string;
 }
 
 interface ProviderState {
@@ -96,13 +92,13 @@ export const useProviderStore = defineStore("providers", {
   },
   actions: {
     async initializeChat() {
-      const data = await request<EncryptedData>("getEncryptedData");
-      if (data) {
-        this.apiKey = data.anthropicApiKey;
+      const apiKey = await getEncryptedData("providers.anthropic.apiKey") as string;
+      if (apiKey) {
+        this.apiKey = apiKey;
       }
     },
     async initializeProvider() {
-      const state = await request<ViewState>("getViewState");
+      const state = await getViewState<ViewState>();
       if (state?.messages) {
         try {
           this.messages = mapStoredMessagesToChatMessages(state.messages);
@@ -218,7 +214,7 @@ export const useProviderStore = defineStore("providers", {
               const results = context.result!.results;
               if (results.length > 0 && results[0].rows.length > 0) {
                 localStorage.setItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT, "1");
-                request("expandTableResult", { results: [results[0]] });
+                expandTableResult([results[0]]);
               }
             }
 
@@ -236,11 +232,9 @@ export const useProviderStore = defineStore("providers", {
       this.isAborting = false;
       this.isProcessing = false;
 
-      request("setViewState", {
-        state: {
-          messages: mapChatMessagesToStoredMessages(messages),
-          conversationTitle: this.conversationTitle,
-        },
+      setViewState({
+        messages: mapChatMessagesToStoredMessages(messages),
+        conversationTitle: this.conversationTitle,
       });
 
       if (!this.conversationTitle && !this.isGeneratingConversationTitle) {
@@ -251,14 +245,12 @@ export const useProviderStore = defineStore("providers", {
             this.messages,
           );
 
-          request("setTabTitle", { title });
+          setTabTitle(title);
           this.conversationTitle = title;
 
-          request("setViewState", {
-            state: {
-              messages: mapChatMessagesToStoredMessages(messages),
-              conversationTitle: this.conversationTitle,
-            },
+          setViewState({
+            messages: mapChatMessagesToStoredMessages(messages),
+            conversationTitle: this.conversationTitle,
           });
         } catch (e) {
           // If error occurs when generating title, do nothing
@@ -316,7 +308,7 @@ export const useProviderStore = defineStore("providers", {
     },
     async setApiKey(apiKey: string) {
       this.apiKey = apiKey;
-      await request("setEncryptedData", { anthropicApiKey: apiKey });
+      await setEncryptedData("providers.anthropic.apiKey", apiKey);
     },
     setModel(modelId: string) {
       this.pendingModelId = modelId;

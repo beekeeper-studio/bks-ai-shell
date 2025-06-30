@@ -47,7 +47,7 @@ const TABLE_MAX_ROWS = 5;
 export default {
   props: {
     data: {
-      type: Object as PropType<RunQueryResponse>,
+      type: Object as PropType<RunQueryResponse['result']>,
       required: true,
     },
   },
