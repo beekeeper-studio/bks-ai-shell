@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { STORAGE_KEYS } from "@/config";
 import _ from "lodash";
-import { ProviderId, Providers, IModel } from "@/providers";
+import { Providers, IModel } from "@/providers";
 import {
   BaseMessage,
   HumanMessage,
@@ -13,7 +13,7 @@ import {
 } from "@langchain/core/messages";
 import { BaseModel } from "@/providers/BaseModel";
 import { BaseProvider } from "@/providers/BaseProvider";
-import { request } from "@beekeeperstudio/plugin";
+import { expandTableResult, getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
 import { isAbortError } from "@/utils";
 import { useConfigurationStore } from "./configuration";
 
@@ -93,7 +93,7 @@ export const useChatStore = defineStore("chat", {
   },
   actions: {
     async initializeProvider() {
-      const state = await request<ViewState>("getViewState");
+      const state = await getViewState<ViewState>();
       if (state?.messages) {
         try {
           this.messages = mapStoredMessagesToChatMessages(state.messages);
@@ -221,7 +221,7 @@ export const useChatStore = defineStore("chat", {
               const results = context.result!.results;
               if (results.length > 0 && results[0].rows.length > 0) {
                 localStorage.setItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT, "1");
-                request("expandTableResult", { results: [results[0]] });
+                expandTableResult({ results: [results[0]] });
               }
             }
           },
@@ -241,7 +241,7 @@ export const useChatStore = defineStore("chat", {
       this.isAborting = false;
       this.isProcessing = false;
 
-      request("setViewState", {
+      setViewState({
         state: {
           messages: mapChatMessagesToStoredMessages(messages),
           conversationTitle: this.conversationTitle,
@@ -256,10 +256,10 @@ export const useChatStore = defineStore("chat", {
             this.messages,
           );
 
-          request("setTabTitle", { title });
+          setTabTitle({ title });
           this.conversationTitle = title;
 
-          request("setViewState", {
+          setViewState({
             state: {
               messages: mapChatMessagesToStoredMessages(messages),
               conversationTitle: this.conversationTitle,

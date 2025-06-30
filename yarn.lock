@@ -40,10 +40,10 @@
     "@babel/helper-string-parser" "^7.25.9"
     "@babel/helper-validator-identifier" "^7.25.9"
 
-"@beekeeperstudio/plugin@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.0.10.tgz#9885a66ec7ad49e6af541eb1ac360213c6ba4e8f"
-  integrity sha512-fKpKYvBUb6uZbPgmz1V+M2eZrL9pvK3oJ3K+b+xN9Wl/BJp8AsQsNePyL5fSX7FgvHn0ic0+5oY13y+pKwEj0Q==
+"@beekeeperstudio/plugin@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.1.0.tgz#01c0353b2ae93efa7eb3173d21130d9ee9a147c2"
+  integrity sha512-AVi5UxYqZpXJ5qIWiQ2GC1SaSANThK2dB+7X8IOyX9TnyRqh/wn3o54b5e5w9l6qnYlDA8AYvQ4xGKB5HGh1Sw==
 
 "@cfworker/json-schema@^4.0.2":
   version "4.1.1"

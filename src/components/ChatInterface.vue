@@ -153,7 +153,7 @@ import Dropdown from "./common/Dropdown.vue";
 import DropdownOption from "./common/DropdownOption.vue";
 import { safeJSONStringify } from "../utils";
 import _ from "lodash";
-import { request, QueryResult } from "@beekeeperstudio/plugin";
+import { expandTableResult, QueryResult } from "@beekeeperstudio/plugin";
 
 const maxHistorySize = 50;
 
@@ -406,7 +406,7 @@ export default {
       return "```json\n" + str + "\n```";
     },
     async handleResultClick(results: QueryResult[]) {
-      await request("expandTableResult", { results });
+      await expandTableResult({ results });
       await this.$nextTick();
       if (this.isAtBottom) {
         this.scrollToBottom();

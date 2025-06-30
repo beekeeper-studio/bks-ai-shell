@@ -19,9 +19,6 @@
         </code>
         )
       </template>
-      <template v-else-if="message.name === 'get_all_tabs'">
-        {{ data.length }} {{ $pluralize("tab", data.length) }}
-      </template>
       <run-query-message
         v-else-if="message.name === 'run_query'"
         :data="data"

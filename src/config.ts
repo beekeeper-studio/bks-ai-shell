@@ -1,10 +1,10 @@
 import instructions from "../instructions.txt?raw";
 import mongodbInstructions from "../mongodb-instructions.txt?raw";
-import { request } from "@beekeeperstudio/plugin";
+import { getConnectionInfo, getTables } from "@beekeeperstudio/plugin";
 
 export async function getDefaultInstructions() {
-  const response = await request("getConnectionInfo");
-  const tables = await request("getTables").then((tables) =>
+  const response = await getConnectionInfo();
+  const tables = await getTables().then((tables) =>
     tables.filter(
       (table) =>
         table.schema !== "information_schema" &&

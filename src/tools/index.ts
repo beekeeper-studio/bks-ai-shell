@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
-import { request } from "@beekeeperstudio/plugin";
+import { getColumns, getConnectionInfo, getTables, runQuery } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
 
 const getTablesInputSchema = z.object({
@@ -21,7 +21,7 @@ const runQueryInputSchema = z.object({
 
 export const getConnectionInfoTool = tool(
   async () => {
-    const result = await request("getConnectionInfo");
+    const result = await getConnectionInfo();
     return safeJSONStringify(result);
   },
   {
@@ -33,7 +33,7 @@ export const getConnectionInfoTool = tool(
 
 export const getTablesTool = tool(
   async (params) => {
-    const result = await request("getTables", { schema: params.schema });
+    const result = await getTables({ schema: params.schema });
     return safeJSONStringify(result);
   },
   {
@@ -45,7 +45,7 @@ export const getTablesTool = tool(
 
 export const getColumnsTool = tool(
   async (params) => {
-    const result = await request("getColumns", {
+    const result = await getColumns({
       table: params.table,
       schema: params.schema,
     });
@@ -59,20 +59,9 @@ export const getColumnsTool = tool(
   },
 );
 
-export const getAllTabsTool = tool(
-  async () => {
-    const result = await request("getAllTabs");
-    return safeJSONStringify(result);
-  },
-  {
-    name: "get_all_tabs",
-    description: "Get a list of all open query tabs in Beekeeper Studio",
-  },
-);
-
 export const runQueryTool = tool(
   async (params) => {
-    const result = await request("runQuery", { query: params.query });
+    const result = await runQuery({ query: params.query });
     return safeJSONStringify(result);
   },
   {
@@ -87,7 +76,6 @@ export const tools = [
   getConnectionInfoTool,
   getTablesTool,
   getColumnsTool,
-  getAllTabsTool,
   runQueryTool,
 ];
 

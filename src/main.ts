@@ -9,7 +9,7 @@ import App from "@/App.vue";
 import {
   addNotificationListener,
   setDebugComms,
-  request,
+  openExternal,
 } from "@beekeeperstudio/plugin";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
@@ -33,5 +33,5 @@ const app = createApp(App);
 const pinia = createPinia();
 app.use(pinia);
 app.config.globalProperties.$pluralize = pluralize;
-app.config.globalProperties.$request = request;
+app.config.globalProperties.$openExternal = openExternal;
 app.mount("#app");
