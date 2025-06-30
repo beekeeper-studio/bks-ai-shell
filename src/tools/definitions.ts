@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 import { getColumns, getConnectionInfo, getTables, runQuery } from "@beekeeperstudio/plugin";
-import { safeJSONStringify } from "@/utils";
+import { safeJSONStringify } from "../utils";
 
 const getTablesInputSchema = z.object({
   schema: z
@@ -75,4 +75,3 @@ export const tools = [
   getColumnsTool,
   runQueryTool,
 ];
-

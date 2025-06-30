@@ -74,16 +74,16 @@ export const useConfigurationStore = defineStore("configuration", {
 
       this.$patch(configuration);
     },
-    async configure<T extends keyof ConfigurationState>(
+    configure<T extends keyof ConfigurationState>(
       config: T,
       value: ConfigurationState[T],
     ) {
       this.$patch({ [config]: value });
 
       if (isEncryptedConfig(config)) {
-        await setEncryptedData(config, value);
+        setEncryptedData(config, value);
       } else {
-        await setData(config, value);
+        setData(config, value);
       }
     },
   },

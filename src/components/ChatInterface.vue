@@ -406,7 +406,7 @@ export default {
       return "```json\n" + str + "\n```";
     },
     async handleResultClick(results: QueryResult[]) {
-      await expandTableResult({ results });
+      await expandTableResult(results);
       await this.$nextTick();
       if (this.isAtBottom) {
         this.scrollToBottom();

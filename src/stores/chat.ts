@@ -117,7 +117,7 @@ export const useChatStore = defineStore("chat", {
       }
       this.provider = new providerClass();
       await this.provider.initialize(
-        config.providers[config.activeProviderId].apiKey,
+        config[`providers.${config.activeProviderId}.apiKey`]
       );
       this.models = this.provider.models;
       const modelId = config.activeModelId || this.models[0].id;
@@ -225,7 +225,7 @@ export const useChatStore = defineStore("chat", {
               const results = context.result!.results;
               if (results.length > 0 && results[0].rows.length > 0) {
                 localStorage.setItem(STORAGE_KEYS.HAS_OPENED_TABLE_RESULT, "1");
-                expandTableResult({ results: [results[0]] });
+                expandTableResult(results);
               }
             }
           },
@@ -246,10 +246,8 @@ export const useChatStore = defineStore("chat", {
       this.isProcessing = false;
 
       setViewState({
-        state: {
-          messages: mapChatMessagesToStoredMessages(messages),
-          conversationTitle: this.conversationTitle,
-        },
+        messages: mapChatMessagesToStoredMessages(messages),
+        conversationTitle: this.conversationTitle,
       });
 
       if (!this.conversationTitle && !this.isGeneratingConversationTitle) {
@@ -260,7 +258,7 @@ export const useChatStore = defineStore("chat", {
             this.messages,
           );
 
-          setTabTitle({ title });
+          setTabTitle(title);
           this.conversationTitle = title;
 
           setViewState({

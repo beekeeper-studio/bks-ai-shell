@@ -1,4 +1,22 @@
-import 'typeface-roboto';
+import { notify } from "@beekeeperstudio/plugin";
+// FIXME move this to Beekeeper Studio as injected script
+window.addEventListener("error", (e) => {
+  notify("pluginError", {
+    message: e.message,
+    name: e.name,
+    stack: e.stack,
+  });
+});
+window.addEventListener("unhandledrejection", (e) => {
+  notify("pluginError", {
+    message: e.reason?.message,
+    name: e.reason?.name,
+    stack: e.reason?.stack,
+  });
+});
+// -------------------
+
+import "typeface-roboto";
 import "./assets/styles/main.scss";
 import "@material-symbols/font-400/outlined.css";
 
