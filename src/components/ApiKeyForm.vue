@@ -47,7 +47,7 @@
           Need a Claude API key?
           <a
             href="https://docs.anthropic.com/en/api/overview#accessing-the-api"
-            @click.prevent="$openExternal({ link: $event.target.href })"
+            @click.prevent="$openExternal($event.target.href)"
             >See the docs</a
           >.
         </p>
