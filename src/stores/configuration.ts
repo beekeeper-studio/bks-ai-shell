@@ -26,20 +26,17 @@ type Configurable = {
 
 type EncryptedConfigurable = {
   "providers.anthropic.apiKey": string;
-  "providers.mock.apiKey": string;
 };
 
 type ConfigurationState = Configurable & EncryptedConfigurable;
 
 const encryptedConfigKeys = [
   "providers.anthropic.apiKey",
-  "providers.mock.apiKey",
 ];
 
 const defaultConfiguration: ConfigurationState = {
   summarization: true,
   "providers.anthropic.apiKey": "",
-  "providers.mock.apiKey": "",
 };
 
 function isEncryptedConfig(
