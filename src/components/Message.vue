@@ -3,6 +3,7 @@
 </template>
 
 <script lang="ts">
+import { clipboard } from "@beekeeperstudio/plugin";
 import { parseMarkdownToHTML } from "../markdownParser";
 
 export default {
@@ -51,7 +52,12 @@ export default {
 
       switch (action) {
         case "copy": {
-          navigator.clipboard.writeText(text);
+          if (navigator.clipboard) {
+            // FIXME remove this
+            navigator.clipboard.writeText(text);
+          } else {
+            clipboard.writeText(text);
+          }
           target.classList.add("copied");
           if (this.copyTimeout) {
             clearTimeout(this.copyTimeout);
