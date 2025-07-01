@@ -3,8 +3,6 @@
     <!-- API Key Form -->
     <ApiKeyForm
       v-if="page === 'api-key-form'"
-      :initial-provider-id="activeProviderId"
-      :initial-api-key="providers[activeProviderId].apiKey"
       @submit="handleApiKeySubmit"
       :disabled="disabledApiKeyForm"
       :error="error"
@@ -23,6 +21,7 @@ import ApiKeyForm from "./components/ApiKeyForm.vue";
 import ChatInterface from "./components/ChatInterface.vue";
 import { useChatStore } from "@/stores/chat";
 import { useConfigurationStore } from "@/stores/configuration";
+import { useInternalDataStore } from "@/stores/internalData";
 import { mapState, mapActions } from "pinia";
 import { ProviderId } from "@/providers";
 
@@ -42,8 +41,12 @@ export default {
 
   async mounted() {
     await this.initializeChat();
+
+    const configuration = useConfigurationStore()
+    const apiKey = configuration[`providers.${this.lastUsedProviderId}.apiKey`] ?? "";
+
     // Check if API key exists and auto-navigate to appropriate page
-    if (this.providers[this.activeProviderId].apiKey) {
+    if (this.lastUsedProviderId && apiKey) {
       try {
         await this.initializeProvider();
         this.page = "chat-interface";
@@ -58,18 +61,19 @@ export default {
   },
 
   computed: {
-    ...mapState(useConfigurationStore, ["activeProviderId", "providers"]),
+    ...mapState(useInternalDataStore, ["lastUsedProviderId"]),
   },
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
+    ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initializeChat", "initializeProvider"]),
     async handleApiKeySubmit(data: { key: string; provider: ProviderId }) {
       this.error = "";
       this.disabledApiKeyForm = true;
       await this.$nextTick();
       this.configure(`providers.${data.provider}.apiKey` as const, data.key);
-      this.configure("activeProviderId", data.provider);
+      this.setInternal("lastUsedProviderId", data.provider);
       try {
         await this.initializeProvider();
         this.page = "chat-interface";

@@ -16,6 +16,7 @@ import { BaseProvider } from "@/providers/BaseProvider";
 import { expandTableResult, getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
 import { isAbortError } from "@/utils";
 import { useConfigurationStore } from "./configuration";
+import { useInternalDataStore } from "./internalData";
 
 interface ToolExtra {
   /** Defined if the model asks for permission to call this tool. */
@@ -93,8 +94,8 @@ export const useChatStore = defineStore("chat", {
   },
   actions: {
     async initializeChat() {
-      const configuration = useConfigurationStore();
-      await configuration.sync();
+      await useInternalDataStore().sync();
+      await useConfigurationStore().sync();
     },
     async initializeProvider() {
       const state = await getViewState<ViewState>();
@@ -110,17 +111,18 @@ export const useChatStore = defineStore("chat", {
       if (this.conversationTitle) {
         this.isGeneratingConversationTitle = true;
       }
+      const internal = useInternalDataStore();
       const config = useConfigurationStore();
-      const providerClass = Providers[config.activeProviderId];
+      const providerClass = Providers.find((p) => p.id === internal.lastUsedProviderId)?.class;
       if (!providerClass) {
-        throw new Error(`Unknown provider: ${config.activeProviderId}`);
+        throw new Error(`Unknown provider: ${internal.lastUsedProviderId}`);
       }
       this.provider = new providerClass();
       await this.provider.initialize(
-        config[`providers.${config.activeProviderId}.apiKey`]
+        config[`providers.${internal.lastUsedProviderId}.apiKey`]
       );
       this.models = this.provider.models;
-      const modelId = config.activeModelId || this.models[0].id;
+      const modelId = internal.lastUsedModelId || this.models[0].id;
       this.setModel(modelId);
       this.switchModel();
     },

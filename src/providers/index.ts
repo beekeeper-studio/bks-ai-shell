@@ -1,8 +1,7 @@
 import { ClaudeProvider } from "@/providers/anthropic";
 import { MockProvider } from "@/providers/mock";
-import type { ChatAnthropic } from "@langchain/anthropic";
 
-export type ProviderId = keyof typeof Providers;
+export type ProviderId = typeof Providers[number]['id'];
 
 export interface ModelConfig {
   /** If not provided, will use the default model */
@@ -15,7 +14,10 @@ export interface IModel {
   displayName: string;
 }
 
-export const Providers = {
-  claude: ClaudeProvider,
-  mock: MockProvider,
-}
+export const Providers = [
+  {
+    id: "anthropic" as const,
+    displayName: "Claude" as const,
+    class: ClaudeProvider,
+  },
+];

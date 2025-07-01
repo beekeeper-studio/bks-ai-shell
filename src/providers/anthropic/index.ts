@@ -5,9 +5,6 @@ import { ChatAnthropic, type AnthropicInput } from "@langchain/anthropic";
 import { Anthropic } from "@anthropic-ai/sdk";
 
 export class ClaudeProvider extends BaseProvider {
-  public static id = "claude" as const;
-  public static displayName = "Claude" as const;
-
   private apiKey = "";
 
   public async initialize(apiKey: string): Promise<void> {

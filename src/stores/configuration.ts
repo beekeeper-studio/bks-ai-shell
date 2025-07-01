@@ -2,12 +2,12 @@
  *
  * 1. Call `sync()` if it hasn't been called yet.
  * 2. Read the state by accessing it normally.
- * 2. Use `configure()` to update the state.
+ * 3. Use `configure()` to update the state.
  *
  * FUTURE PLAN (probably):
  *
  * - Save configuration to .ini config files via Beekeeper Studio API
- *   instead of local storage?
+ *   instead of using setData?
  */
 import { ProviderId } from "@/providers";
 import { defineStore } from "pinia";
@@ -22,27 +22,23 @@ import {
 type Configurable = {
   /** Enable summarization. */
   summarization: boolean;
-  activeProviderId: ProviderId;
-  activeModelId: string;
 };
 
 type EncryptedConfigurable = {
-  "providers.claude.apiKey": string;
+  "providers.anthropic.apiKey": string;
   "providers.mock.apiKey": string;
 };
 
 type ConfigurationState = Configurable & EncryptedConfigurable;
 
 const encryptedConfigKeys = [
-  "providers.claude.apiKey",
+  "providers.anthropic.apiKey",
   "providers.mock.apiKey",
 ];
 
-export const defaultConfiguration: ConfigurationState = {
+const defaultConfiguration: ConfigurationState = {
   summarization: true,
-  activeProviderId: "claude",
-  activeModelId: "",
-  "providers.claude.apiKey": "",
+  "providers.anthropic.apiKey": "",
   "providers.mock.apiKey": "",
 };
 
