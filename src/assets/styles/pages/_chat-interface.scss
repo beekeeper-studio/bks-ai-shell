@@ -229,7 +229,7 @@
       align-self: flex-start;
       border: 1px solid rgb(from var(--brand-danger) r g b / 30%);
       background-color: rgb(from var(--brand-danger) r g b / 5%);
-      color: color-mix(in srgb, var(--brand-danger) 50%, black);
+      color: var(--text-dark);
 
       &:hover {
         background-color: rgb(from var(--brand-danger) r g b / 10%);
