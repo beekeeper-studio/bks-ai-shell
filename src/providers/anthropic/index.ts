@@ -22,25 +22,15 @@ export class ClaudeProvider extends BaseProvider {
   }
 
   public createModel(config: ModelConfig): BaseModel {
-    const model = this.models.find((m) => m.id === config.modelId);
-
-    if (!model) {
-      throw new Error(`Unknown Claude model: ${config.modelId}`);
-    }
-
-    try {
-      const chatConfig: AnthropicInput & { dangerouslyAllowBrowser?: boolean } =
-        {
-          apiKey: this.apiKey,
-          model: model.id,
-          temperature: config.temperature,
-          dangerouslyAllowBrowser: true,
-        };
-      const llm = new ChatAnthropic(chatConfig);
-      return new BaseModel(llm);
-    } catch (error) {
-      console.error("Error initializing Claude model:", error);
-      throw error;
-    }
+    const model = this.findModelAndThrow(config.modelId);
+    const chatConfig: AnthropicInput & { dangerouslyAllowBrowser?: boolean } =
+      {
+        apiKey: this.apiKey,
+        model: model.id,
+        temperature: config.temperature,
+        dangerouslyAllowBrowser: true,
+      };
+    const llm = new ChatAnthropic(chatConfig);
+    return new BaseModel(llm);
   }
 }

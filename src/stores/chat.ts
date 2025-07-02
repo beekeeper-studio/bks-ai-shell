@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { STORAGE_KEYS } from "@/config";
 import _ from "lodash";
-import { Providers, IModel } from "@/providers";
+import { Providers, IModel, ProviderId } from "@/providers";
 import {
   BaseMessage,
   HumanMessage,
@@ -97,7 +97,7 @@ export const useChatStore = defineStore("chat", {
       await useInternalDataStore().sync();
       await useConfigurationStore().sync();
     },
-    async initializeProvider() {
+    async initializeProvider(providerId: ProviderId, apiKey: string) {
       const state = await getViewState<ViewState>();
       if (state?.messages) {
         try {
@@ -107,24 +107,29 @@ export const useChatStore = defineStore("chat", {
           this.error = `Failed to load messages: ${e}`;
         }
       }
+
       this.conversationTitle = state?.conversationTitle || "";
       if (this.conversationTitle) {
         this.isGeneratingConversationTitle = true;
       }
+
       const internal = useInternalDataStore();
       const config = useConfigurationStore();
-      const providerClass = Providers.find((p) => p.id === internal.lastUsedProviderId)?.class;
+
+      const providerClass = Providers.find((p) => p.id === providerId)?.class;
       if (!providerClass) {
         throw new Error(`Unknown provider: ${internal.lastUsedProviderId}`);
       }
+
       this.provider = new providerClass();
-      await this.provider.initialize(
-        config[`providers.${internal.lastUsedProviderId}.apiKey`]
-      );
+      await this.provider.initialize(apiKey);
       this.models = this.provider.models;
+
+      await internal.setInternal("lastUsedProviderId", providerId);
+      await config.configure(`providers.${providerId}.apiKey`, apiKey);
+
       const modelId = internal.lastUsedModelId || this.models[0].id;
       this.setModel(modelId);
-      this.switchModel();
     },
     /** Queue a message and send it immediately if it's possible. */
     queueMessage(message: string) {
@@ -319,10 +324,13 @@ export const useChatStore = defineStore("chat", {
       this.model.abortStreamMessage(new Error("Aborted: user interrupted"));
       this.isAborting = true;
     },
-    setModel(modelId: string) {
+    async setModel(modelId: string) {
       this.pendingModelId = modelId;
+      if (!this.isProcessing) {
+        await this.switchModel();
+      }
     },
-    switchModel() {
+    async switchModel() {
       if (this.isProcessing) {
         throw new Error("Cannot switch model while processing a message.");
       }
@@ -335,7 +343,7 @@ export const useChatStore = defineStore("chat", {
       }
       try {
         this.model = this.provider?.createModel({ modelId });
-        useConfigurationStore().configure("activeModelId", modelId);
+        await useInternalDataStore().setInternal("lastUsedModelId", modelId);
         console.log(`Switched to model: ${modelId}`);
       } catch (e) {
         console.error(e);

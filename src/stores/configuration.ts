@@ -9,7 +9,6 @@
  * - Save configuration to .ini config files via Beekeeper Studio API
  *   instead of using setData?
  */
-import { ProviderId } from "@/providers";
 import { defineStore } from "pinia";
 import _ from "lodash";
 import {
@@ -26,17 +25,20 @@ type Configurable = {
 
 type EncryptedConfigurable = {
   "providers.anthropic.apiKey": string;
+  "providers.google.apiKey": string;
 };
 
 type ConfigurationState = Configurable & EncryptedConfigurable;
 
-const encryptedConfigKeys = [
+const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
   "providers.anthropic.apiKey",
+  "providers.google.apiKey",
 ];
 
 const defaultConfiguration: ConfigurationState = {
   summarization: true,
   "providers.anthropic.apiKey": "",
+  "providers.google.apiKey": "",
 };
 
 function isEncryptedConfig(
@@ -67,16 +69,16 @@ export const useConfigurationStore = defineStore("configuration", {
 
       this.$patch(configuration);
     },
-    configure<T extends keyof ConfigurationState>(
+    async configure<T extends keyof ConfigurationState>(
       config: T,
       value: ConfigurationState[T],
     ) {
       this.$patch({ [config]: value });
 
       if (isEncryptedConfig(config)) {
-        setEncryptedData(config, value);
+        await setEncryptedData(config, value);
       } else {
-        setData(config, value);
+        await setData(config, value);
       }
     },
   },

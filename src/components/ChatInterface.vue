@@ -114,7 +114,6 @@
           :model-value="pendingModelId"
           placeholder="Select Model"
           aria-label="Model"
-          @update:model-value="setModel"
         >
           <DropdownOption
             v-for="modelOption in models"

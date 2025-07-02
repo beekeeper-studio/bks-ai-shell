@@ -57,20 +57,16 @@
 </template>
 
 <script lang="ts">
-import { PropType } from "vue";
 import { Providers, ProviderId } from "@/providers";
-import { mapState, mapWritableState } from "pinia";
+import { mapState } from "pinia";
 import { useChatStore } from "@/stores/chat";
 import { useInternalDataStore } from "@/stores/internalData";
+import { useConfigurationStore } from "@/stores/configuration";
 
 export default {
   name: "ApiKeyForm",
 
   props: {
-    initialApiKey: {
-      type: String,
-      default: "",
-    },
     disabled: {
       type: Boolean,
       default: false,
@@ -83,14 +79,18 @@ export default {
 
   data() {
     return {
-      apiKey: this.initialApiKey,
-      selectedProviderId: "",
+      apiKey: "",
+      selectedProviderId: "" as ProviderId | "",
     };
   },
 
   computed: {
     ...mapState(useChatStore, ["messages"]),
     ...mapState(useInternalDataStore, ["lastUsedProviderId"]),
+    ...mapState(useConfigurationStore, [
+      "providers.anthropic.apiKey",
+      "providers.google.apiKey",
+    ]),
     providers() {
       return Providers;
     },
@@ -102,10 +102,15 @@ export default {
     },
   },
 
-  methods: {
-    mounted() {
-      this.selectedProviderId = this.lastUsedProviderId;
+  watch: {
+    selectedProviderId() {
+      if (this.selectedProviderId) {
+        this.apiKey = this[`providers.${this.selectedProviderId}.apiKey`];
+      }
     },
+  },
+
+  methods: {
     submitApiKey() {
       if (this.apiKey.trim()) {
         this.$emit("submit", {
@@ -114,6 +119,10 @@ export default {
         });
       }
     },
+  },
+
+  mounted() {
+    this.selectedProviderId = this.lastUsedProviderId;
   },
 };
 </script>

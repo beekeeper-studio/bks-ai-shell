@@ -46,9 +46,9 @@ export default {
     const apiKey = configuration[`providers.${this.lastUsedProviderId}.apiKey`] ?? "";
 
     // Check if API key exists and auto-navigate to appropriate page
-    if (this.lastUsedProviderId && apiKey) {
+    if (apiKey && this.lastUsedProviderId) {
       try {
-        await this.initializeProvider();
+        await this.initializeProvider(this.lastUsedProviderId, apiKey);
         this.page = "chat-interface";
       } catch (e) {
         // If initialization fails, go to API key form
@@ -72,10 +72,8 @@ export default {
       this.error = "";
       this.disabledApiKeyForm = true;
       await this.$nextTick();
-      this.configure(`providers.${data.provider}.apiKey` as const, data.key);
-      this.setInternal("lastUsedProviderId", data.provider);
       try {
-        await this.initializeProvider();
+        await this.initializeProvider(data.provider, data.key);
         this.page = "chat-interface";
       } catch (e) {
         this.error = e;

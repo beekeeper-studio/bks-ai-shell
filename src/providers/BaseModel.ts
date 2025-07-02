@@ -16,6 +16,7 @@ import { z } from "zod";
 import { buildErrorContent, tryJSONParse } from "@/utils";
 import { getDefaultInstructions } from "@/config";
 import type { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 
 export interface SendStreamMessageCallbacks extends ToolCallbacks {
   /** When a new message stream is created. */
@@ -62,7 +63,7 @@ export interface ToolCallbacks {
   ) => boolean | Promise<boolean>;
 }
 
-type SupportedChatModel = ChatAnthropic;
+type SupportedChatModel = ChatAnthropic | ChatGoogleGenerativeAI;
 
 export class BaseModel {
   private abortController: AbortController = new AbortController();

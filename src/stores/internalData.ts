@@ -59,6 +59,10 @@ export const useInternalDataStore = defineStore("pluginData", {
       key: T,
       value: InternalData[T],
     ) {
+      // If we change the provider, reset the model
+      if (key === "lastUsedProviderId" && value !== this.lastUsedProviderId) {
+        this.lastUsedModelId = undefined;
+      }
       this.$patch({ [key]: value });
       await setData(key, value);
     },

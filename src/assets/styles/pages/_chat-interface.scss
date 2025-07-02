@@ -215,6 +215,31 @@
 
   .message-content {
     white-space: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    pre {
+      background-color: rgb(from var(--brand-danger) r g b / 10%);
+      border-radius: 8px;
+      text-wrap: wrap;
+    }
+
+    .show-more-btn {
+      align-self: flex-start;
+      border: 1px solid rgb(from var(--brand-danger) r g b / 30%);
+      background-color: rgb(from var(--brand-danger) r g b / 5%);
+      color: color-mix(in srgb, var(--brand-danger) 50%, black);
+
+      &:hover {
+        background-color: rgb(from var(--brand-danger) r g b / 10%);
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgb(from var(--brand-danger) r g b / 20%);
+      }
+    }
   }
 }
 

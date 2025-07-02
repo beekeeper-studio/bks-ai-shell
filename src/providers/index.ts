@@ -1,5 +1,5 @@
 import { ClaudeProvider } from "@/providers/anthropic";
-import { MockProvider } from "@/providers/mock";
+import { GoogleProvider } from "@/providers/google";
 
 export type ProviderId = typeof Providers[number]['id'];
 
@@ -20,4 +20,9 @@ export const Providers = [
     displayName: "Claude" as const,
     class: ClaudeProvider,
   },
+  {
+    id: "google" as const,
+    displayName: "Google" as const,
+    class: GoogleProvider,
+  }
 ];
