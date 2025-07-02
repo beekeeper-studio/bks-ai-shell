@@ -88,7 +88,17 @@
         </div>
       </div>
       <div class="message error" v-if="error">
-        <div class="message-content">Something went wrong. {{ error }}</div>
+        <div class="message-content">Something went wrong.
+        <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
+        <pre v-else v-text="truncatedError" />
+        <button
+          v-if="isErrorTruncated"
+          @click="showFullError = !showFullError"
+          class="btn show-more-btn"
+        >
+          {{ showFullError ? 'Show less' : 'Show more' }}
+        </button>
+        </div>
       </div>
       <div
         class="spinner-container"
@@ -176,6 +186,7 @@ export default {
       historyIndex: inputHistory.length,
       isNavigatingHistory: false,
       isAtBottom: true,
+      showFullError: false,
     };
   },
 
@@ -205,6 +216,12 @@ export default {
     showSpinner() {
       return (this.isProcessing && !this.isWaitingPermission) || this.isAborting;
     },
+    isErrorTruncated() {
+      return this.error && this.error.toString().length > 300;
+    },
+    truncatedError() {
+      return this.error ? this.error.toString().substring(0, 300) + '...' : '';
+    },
   },
 
   watch: {
@@ -221,6 +238,9 @@ export default {
       if (this.historyIndex < this.inputHistory.length) {
         this.inputHistory[this.historyIndex] = this.userInput;
       }
+    },
+    error() {
+      this.showFullError = false;
     },
   },
 
