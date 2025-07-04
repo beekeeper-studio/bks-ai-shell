@@ -3,101 +3,41 @@
     <h1 class="plugin-title">AI Shell</h1>
     <div class="chat-messages" ref="chatMessagesRef">
       <div
-        v-for="(message, index) in messages"
-        :key="index"
-        :class="['message', message.getType()]"
+        v-for="message in messages"
+        :key="message.id"
+        :class="['message', message.role]"
       >
-        <!-- TODO put this in to the Message component -->
+        <!-- TODO put this at the Message component -->
         <div class="message-content">
-          <template v-if="message.getType() === 'system'" />
-          <tool-message
-            v-else-if="message.getType() === 'tool'"
-            :message="message"
-            @result-click="handleResultClick"
-          />
-          <template v-else-if="message.getType() === 'ai'">
-            <Message :content="message.text" />
-            <template v-if="message.tool_calls">
-              <div
-                class="tool-call"
-                :class="{
-                  active: toolExtras[tool_call.id]?.permission?.response === 'pending',
-                }"
-                v-for="tool_call in message.tool_calls"
-                :key="tool_call.id"
-              >
-                <div class="tool-call-name">
-                  {{ getDisplayNameOfTool(tool_call) }}
-                  <span
-                    v-if="
-                      toolExtras[tool_call.id]?.permission?.response === 'reject'
-                    "
-                    class="material-symbols-outlined reject-icon"
-                  >
-                    close
-                  </span>
-                  <span
-                    v-if="
-                      toolExtras[tool_call.id]?.permission?.response === 'accept'
-                    "
-                    class="material-symbols-outlined accept-icon"
-                  >
-                    check
-                  </span>
-                </div>
-                <Message
-                  v-if="tool_call.name === 'run_query'"
-                  :content="'```sql\n' + (tool_call.args.query || '') + '\n```'"
-                />
-                <div
-                  v-if="
-                    toolExtras[tool_call.id]?.permission?.response === 'pending'
-                  "
-                >
-                  <template v-if="tool_call.name === 'run_query'">
-                    Do you want to run this query?
-                  </template>
-                  <template v-else>Do you want to proceed?</template>
-                  <div class="tool-permission-buttons">
-                    <button
-                      class="accept-btn"
-                      @click="acceptTool(tool_call.id)"
-                    >
-                      Yes
-                      <span class="material-symbols-outlined accept-icon">
-                        check
-                      </span>
-                    </button>
-                    <button
-                      class="reject-btn"
-                      @click="rejectTool(tool_call.id)"
-                    >
-                      No
-                      <span class="material-symbols-outlined reject-icon">
-                        close
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </template>
-          <template v-else>
-            {{ message.text }}
+          <template v-if="message.role === 'system'" />
+          <template v-else v-for="(part, index) of message.parts" :key="index">
+            <Message v-if="part.type === 'text'" :content="part.text" />
+            <tool-message
+              v-else-if="part.type === 'tool-invocation'"
+              :toolCall="part.toolInvocation"
+              :askingPermission="askingPermission"
+              @result-click="handleResultClick"
+              @accept="acceptPermission"
+              @reject="rejectPermission"
+            />
           </template>
         </div>
       </div>
-      <div class="message error" v-if="error">
-        <div class="message-content">Something went wrong.
-        <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
-        <pre v-else v-text="truncatedError" />
-        <button
-          v-if="isErrorTruncated"
-          @click="showFullError = !showFullError"
-          class="btn show-more-btn"
-        >
-          {{ showFullError ? 'Show less' : 'Show more' }}
-        </button>
+      <div
+        class="message error"
+        v-if="error && !error.message.includes('User rejected tool call')"
+      >
+        <div class="message-content">
+          Something went wrong.
+          <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
+          <pre v-else v-text="truncatedError" />
+          <button
+            v-if="isErrorTruncated"
+            @click="showFullError = !showFullError"
+            class="btn show-more-btn"
+          >
+            {{ showFullError ? "Show less" : "Show more" }}
+          </button>
         </div>
       </div>
       <div
@@ -105,13 +45,12 @@
         :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
       >
         <span class="spinner" />
-        <span v-show="isAborting"> - Aborting</span>
       </div>
     </div>
 
     <div class="chat-input-container">
       <textarea
-        v-model="userInput"
+        v-model="input"
         @keydown.enter="handleEnterKey"
         @keydown.up="handleUpArrow"
         @keydown.down="handleDownArrow"
@@ -121,28 +60,28 @@
       ></textarea>
       <div class="actions">
         <Dropdown
-          :model-value="pendingModelId"
+          :model-value="model"
           placeholder="Select Model"
           aria-label="Model"
         >
           <DropdownOption
-            v-for="modelOption in models"
-            :key="modelOption.id"
-            :value="modelOption.id"
-            :text="modelOption.id"
-            :selected="modelOption.id === pendingModelId"
-            @select="setModel"
+            v-for="optionModel in models"
+            :key="optionModel.id"
+            :value="optionModel.id"
+            :text="optionModel.id"
+            :selected="optionModel === model"
+            @select="selectModel(optionModel)"
           />
           <div class="dropdown-separator"></div>
-          <button class="dropdown-action" @click="handleManageModels">
+          <button class="dropdown-action" @click="$emit('manage-models')">
             Manage models
           </button>
         </Dropdown>
         <button
           v-if="canSendMessage"
-          @click="send"
+          @click="submit"
           class="submit-btn"
-          :disabled="!userInput.trim()"
+          :disabled="!input.trim()"
         >
           <span class="material-symbols-outlined">send</span>
         </button>
@@ -154,14 +93,16 @@
 </template>
 
 <script lang="ts">
-import { mapState, mapActions, mapGetters } from "pinia";
-import { useChatStore } from "@/stores/chat";
-import Message from "./Message.vue";
-import ToolMessage from "./ToolMessage.vue";
+import { useAI } from "@/composables/ai";
+import { useChatStore, Model } from "@/stores/chat";
 import Dropdown from "./common/Dropdown.vue";
 import DropdownOption from "./common/DropdownOption.vue";
-import { safeJSONStringify } from "../utils";
 import _ from "lodash";
+import ToolMessage from "@/components/ToolMessage.vue";
+import Message from "@/components/Message.vue";
+import { Message as MessageType } from "ai";
+import { PropType } from "vue";
+import { mapState, mapWritableState } from "pinia";
 import { expandTableResult, QueryResult } from "@beekeeperstudio/plugin";
 
 const maxHistorySize = 50;
@@ -170,10 +111,43 @@ export default {
   name: "ChatInterface",
 
   components: {
-    Message,
-    ToolMessage,
     Dropdown,
     DropdownOption,
+    ToolMessage,
+    Message,
+  },
+
+  props: {
+    initialMessages: {
+      type: Array as PropType<MessageType[]>,
+      required: true,
+    },
+    anthropicApiKey: String,
+    openaiApiKey: String,
+    googleApiKey: String,
+  },
+
+  setup(props) {
+    const ai = useAI({
+      initialMessages: props.initialMessages,
+      anthropicApiKey: props.anthropicApiKey,
+      openaiApiKey: props.openaiApiKey,
+      googleApiKey: props.googleApiKey,
+    });
+
+    return {
+      send: ai.send,
+      abort: ai.abort,
+      messages: ai.messages,
+      provider: ai.provider,
+      input: ai.input,
+      error: ai.error,
+      status: ai.status,
+      setModel: ai.setModel,
+      askingPermission: ai.askingPermission,
+      acceptPermission: ai.acceptPermission,
+      rejectPermission: ai.rejectPermission,
+    };
   },
 
   data() {
@@ -181,7 +155,6 @@ export default {
     const inputHistory = JSON.parse(inputHistoryStr);
     return {
       tempInput: "",
-      userInput: "",
       inputHistory,
       historyIndex: inputHistory.length,
       isNavigatingHistory: false,
@@ -191,60 +164,42 @@ export default {
   },
 
   computed: {
-    ...mapState(useChatStore, [
-      "pendingModelId",
-      "models",
-      "messages",
-      "error",
-      "isProcessing",
-      "toolExtras",
-      "isWaitingPermission",
-      "isAborting",
-    ]),
-    ...mapGetters(useChatStore, [
-      "canSendMessage",
-    ]),
-    navigatingHistory() {
-      return this.historyIndex === this.inputHistory.length;
-    },
-    messagesAndToolExtras() {
-      return {
-        messages: this.messages,
-        toolExtras: this.toolExtras,
-      };
+    ...mapWritableState(useChatStore, ["model"]),
+    ...mapState(useChatStore, ["models", "isAborting"]),
+    canSendMessage() {
+      if (this.askingPermission && this.input.trim().length > 0) return true;
+      return this.status === "ready" || this.status === "error";
     },
     showSpinner() {
-      return (this.isProcessing && !this.isWaitingPermission) || this.isAborting;
+      return (
+        !this.askingPermission &&
+        (this.status === "submitted" || this.status === "streaming")
+      );
     },
     isErrorTruncated() {
       return this.error && this.error.toString().length > 300;
     },
     truncatedError() {
-      return this.error ? this.error.toString().substring(0, 300) + '...' : '';
+      return this.error ? this.error.toString().substring(0, 300) + "..." : "";
     },
   },
 
   watch: {
-    messagesAndToolExtras: {
+    messages: {
       async handler() {
         await this.$nextTick();
         if (this.$refs.chatMessagesRef && this.isAtBottom) {
-          this.scrollToBottom()
+          this.scrollToBottom();
         }
       },
       deep: true,
     },
-    userInput() {
-      if (this.historyIndex < this.inputHistory.length) {
-        this.inputHistory[this.historyIndex] = this.userInput;
-      }
-    },
-    error() {
-      this.showFullError = false;
-    },
   },
 
   async mounted() {
+    if (this.model) {
+      this.setModel(this.model.provider, this.model.id);
+    }
     const chatMessages = this.$refs.chatMessagesRef as HTMLElement;
     chatMessages.addEventListener("scroll", () => {
       // Calculate if we're near bottom (within 50px of bottom)
@@ -261,20 +216,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(useChatStore, [
-      "setModel",
-      "queueMessage",
-      "abortStream",
-      "acceptTool",
-      "rejectTool",
-    ]),
-
-    handleManageModels() {
-      // Navigate back to API key form to manage models/providers
-      this.$emit("navigate-to-api-form");
-    },
-
-    // Handle enter key (send on Enter, new line on Shift+Enter)
     handleEnterKey(e) {
       if (e.shiftKey) {
         // Allow default behavior (new line) when Shift+Enter is pressed
@@ -284,7 +225,7 @@ export default {
       if (this.canSendMessage) {
         e.preventDefault();
         e.stopPropagation();
-        this.send();
+        this.submit();
       }
     },
 
@@ -338,21 +279,21 @@ export default {
       ) {
         // We are at the last history item
         this.historyIndex = this.inputHistory.length;
-        this.userInput = this.tempInput;
+        this.input = this.tempInput;
         this.isNavigatingHistory = false;
         return;
       }
 
       if (!this.isNavigatingHistory) {
         // save current input before navigating
-        this.tempInput = this.userInput;
+        this.tempInput = this.input;
         this.isNavigatingHistory = true;
       }
 
       // Calculate new index
       const newIndex = this.historyIndex + direction;
 
-      this.userInput = this.inputHistory[newIndex];
+      this.input = this.inputHistory[newIndex];
 
       this.historyIndex = newIndex;
 
@@ -366,9 +307,8 @@ export default {
       });
     },
 
-    // Send message
-    send() {
-      const message = this.userInput.trim();
+    submit() {
+      const message = this.input.trim();
 
       // Don't send empty messages
       if (!message) return;
@@ -376,13 +316,13 @@ export default {
       this.addToHistory(message);
 
       this.tempInput = "";
-      this.userInput = "";
+      this.input = "";
 
-      this.queueMessage(message);
-    },
-
-    stop() {
-      this.abortStream();
+      if (this.askingPermission) {
+        this.rejectPermission(message);
+      } else {
+        this.send(message);
+      }
     },
 
     addToHistory(input: string) {
@@ -406,24 +346,14 @@ export default {
       this.isNavigatingHistory = false;
     },
 
-    getDisplayNameOfTool(tool) {
-      if (tool.name === "get_columns") {
-        if (tool.args.schema) {
-          return `Get Columns (schema: ${tool.args.schema}, table: ${tool.args.table})`;
-        }
-        return `Get Columns (table: ${tool.args.table})`;
+    stop() {
+      if (this.askingPermission) {
+        this.rejectPermission();
+      } else {
+        this.abort()
       }
-      return tool.name.split("_").map(_.capitalize).join(" ");
     },
 
-    tryJSONParse(str: string) {
-      try {
-        str = safeJSONStringify(JSON.parse(str), null, 2);
-      } catch (e) {
-        // do nothing
-      }
-      return "```json\n" + str + "\n```";
-    },
     async handleResultClick(results: QueryResult[]) {
       await expandTableResult(results);
       await this.$nextTick();
@@ -434,6 +364,10 @@ export default {
     scrollToBottom() {
       this.$refs.chatMessagesRef!.scrollTop =
         this.$refs.chatMessagesRef!.scrollHeight;
+    },
+    selectModel(model: Model) {
+      this.setModel(model.provider, model.id);
+      this.model = model;
     },
   },
   directives: {

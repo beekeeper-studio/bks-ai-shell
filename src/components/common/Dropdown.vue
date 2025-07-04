@@ -22,11 +22,14 @@
 </template>
 
 <script lang="ts">
+import { PropType } from "vue";
+import { Model } from "@/stores/chat";
+
 export default {
   name: "Dropdown",
   props: {
     modelValue: {
-      type: [String, Number, Object],
+      type: Object as PropType<Model>,
       default: null,
     },
     placeholder: {
@@ -40,7 +43,7 @@ export default {
   },
   computed: {
     displayText() {
-      return this.modelValue || this.placeholder;
+      return this.modelValue.id || this.placeholder;
     },
   },
   data() {

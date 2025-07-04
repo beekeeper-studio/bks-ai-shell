@@ -1,78 +1,90 @@
 import { z } from "zod";
-import { tool } from "@langchain/core/tools";
-import { getColumns, getConnectionInfo, getTables, runQuery } from "@beekeeperstudio/plugin";
+import { Tool, tool, ToolSet } from "ai";
+import {
+  getColumns,
+  getConnectionInfo,
+  getTables,
+  runQuery,
+} from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
 
-const getTablesInputSchema = z.object({
-  schema: z
-    .string()
-    .optional()
-    .describe("The name of the schema to get tables for"),
+export const get_connection_info = tool({
+  description:
+    "Get information about the current database connection including type, default database, and read-only status",
+  parameters: z.object({}),
+  execute: async () => {
+    return safeJSONStringify(await getConnectionInfo());
+  },
 });
 
-const getColumnsInputSchema = z.object({
-  table: z.string().describe("The name of the table to get columns for"),
-  schema: z.string().optional().describe("The name of the schema of the table"),
+export const get_tables = tool({
+  description: "Get a list of all tables in the current database",
+  parameters: z.object({
+    schema: z
+      .string()
+      .nullish()
+      .describe("The name of the schema to get tables for"),
+  }),
+  execute: async (params) => {
+    return safeJSONStringify(await getTables(params.schema ?? undefined));
+  },
 });
 
-const runQueryInputSchema = z.object({
-  query: z.string().describe("The SQL query to execute"),
+export const get_columns = tool({
+  description:
+    "Get all columns for a specific table including name and data type",
+  parameters: z.object({
+    table: z.string().describe("The name of the table to get columns for"),
+    schema: z
+      .string()
+      .nullish()
+      .describe("The name of the schema of the table"),
+  }),
+  execute: async (params) => {
+    return safeJSONStringify(
+      await getColumns(params.table, params.schema ?? undefined),
+    );
+  },
 });
 
-export const getConnectionInfoTool = tool(
-  async () => {
-    const result = await getConnectionInfo();
-    return safeJSONStringify(result);
-  },
-  {
-    name: "get_connection_info",
-    description:
-      "Get information about the current database connection including type, default database, and read-only status",
-  },
-);
-
-export const getTablesTool = tool(
-  async (params) => {
-    const result = await getTables(params.schema);
-    return safeJSONStringify(result);
-  },
-  {
-    name: "get_tables",
-    description: "Get a list of all tables in the current database",
-    schema: getTablesInputSchema,
-  },
-);
-
-export const getColumnsTool = tool(
-  async (params) => {
-    const result = await getColumns(params.table, params.schema);
-    return safeJSONStringify(result);
-  },
-  {
-    name: "get_columns",
-    description:
-      "Get all columns for a specific table including name and data type",
-    schema: getColumnsInputSchema,
-  },
-);
-
-export const runQueryTool = tool(
-  async (params) => {
-    const result = await runQuery(params.query);
-    return safeJSONStringify(result);
-  },
-  {
-    name: "run_query",
+export const run_query = (onAskPermission: (toolCallId: string, params: any) => Promise<void>) =>
+  tool({
     description: "Run a SQL query and get the results",
-    schema: runQueryInputSchema,
-    tags: ["write"],
-  },
-);
+    parameters: z.object({
+      query: z.string().describe("The SQL query to execute"),
+    }),
+    execute: async (params, options) => {
+      await onAskPermission(options.toolCallId, params);
+      return safeJSONStringify(await runQuery(params.query));
+    },
+  });
 
-export const tools = [
-  getConnectionInfoTool,
-  getTablesTool,
-  getColumnsTool,
-  runQueryTool,
-];
+export function getTools(
+  onAskPermission: (name: string, params: any) => Promise<boolean>,
+): ToolSet {
+  const toolSet: ToolSet = {
+    get_connection_info,
+    get_tables,
+    get_columns,
+  };
+  toolSet["run_query"] = run_query(
+    async (toolCallId, params) => {
+      const permitted = await onAskPermission("run_query", params)
+      if (!permitted) {
+        throw new UserRejectedError(toolCallId);
+      }
+    },
+  );
+  return toolSet;
+}
 
+export class UserRejectedError extends Error {
+  constructor(public toolCallId: string) {
+    super();
+    this.name = "UserRejectedError";
+  }
+
+  static isInstance(error: any): error is UserRejectedError {
+    return error && error.name === "UserRejectedError";
+  }
+}

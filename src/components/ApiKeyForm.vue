@@ -2,127 +2,128 @@
   <div class="api-key-container">
     <div class="api-key-form-wrapper">
       <h1>AI Shell</h1>
-      <p>Enter your API key below to start chatting with the AI:</p>
-      <form class="api-key-form" @submit.prevent.stop="submitApiKey">
-        <div class="provider-selection">
-          <label for="provider-select">Choose your AI provider:</label>
-          <select
-            id="provider-select"
-            v-model="selectedProviderId"
-            :disabled="disabled"
-            required
+      <p>Enter at least one API key to get started</p>
+      <form @submit.prevent="submitApiKey" class="api-key-form">
+        <div class="input-group">
+          <label for="openaiApiKey">
+            {{ providerConfigs["openai"].displayName }}
+          </label>
+          <input
+            type="password"
+            id="openaiApiKey"
+            :placeholder="`Your ${providerConfigs['openai'].displayName} API key`"
+            v-model="openaiApiKey"
+          />
+        </div>
+        <div class="input-group">
+          <label for="anthropicApiKey">
+            {{ providerConfigs["anthropic"].displayName }}
+          </label>
+          <input
+            type="password"
+            id="anthropicApiKey"
+            :placeholder="`Your ${providerConfigs['anthropic'].displayName} API key`"
+            v-model="anthropicApiKey"
+          />
+        </div>
+        <div class="input-group">
+          <label for="googleApiKey">
+            {{ providerConfigs["google"].displayName }}
+          </label>
+          <input
+            type="password"
+            for="googleApiKey"
+            :placeholder="`Your ${providerConfigs['google'].displayName} API key`"
+            v-model="googleApiKey"
+          />
+        </div>
+        <p class="api-info">
+          Your API keys are stored only on your device and are never shared with
+          any server except the selected AI providers.
+        </p>
+        <div class="actions">
+          <button
+            class="btn"
+            v-if="cancelable"
+            type="button"
+            @click.prevent="$emit('cancel')"
           >
-            <option value="" disabled selected hidden>
-              Please choose an AI provider
-            </option>
-            <option
-              v-for="provider in providers"
-              :key="provider.id"
-              :value="provider.id"
-            >
-              {{ provider.displayName }}
-            </option>
-          </select>
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary"
+            type="submit"
+            :disabled="cancelable && !dirty"
+          >
+            Save
+          </button>
         </div>
-        <input
-          type="password"
-          v-model="apiKey"
-          :disabled="disabled"
-          :placeholder="`Enter your ${selectedProviderName} API key here`"
-          required
-        />
-        <div v-if="error" class="error-message">
-          {{ error }}
-        </div>
-        <button class="btn btn-primary" type="submit" :disabled="disabled">
-          {{ messages.length > 0 ? "Continue Chatting" : "Start Chatting" }}
-        </button>
       </form>
-      <div class="api-info">
-        <p>
-          Your API key is stored only on your device and is never shared with
-          any server except the selected AI provider.
-        </p>
-        <p v-if="selectedProviderId === 'anthropic'">
-          Need a Claude API key?
-          <a
-            href="https://docs.anthropic.com/en/api/overview#accessing-the-api"
-            @click.prevent="$openExternal($event.target.href)"
-            >See the docs</a
-          >.
-        </p>
-      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Providers, ProviderId } from "@/providers";
-import { mapState } from "pinia";
-import { useChatStore } from "@/stores/chat";
+import { mapState, mapActions } from "pinia";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useConfigurationStore } from "@/stores/configuration";
+import { providerConfigs } from "@/config";
 
 export default {
   name: "ApiKeyForm",
 
   props: {
-    disabled: {
+    cancelable: {
       type: Boolean,
       default: false,
-    },
-    error: {
-      type: String,
-      default: "",
     },
   },
 
   data() {
     return {
-      apiKey: "",
-      selectedProviderId: "" as ProviderId | "",
+      openaiApiKey: "",
+      anthropicApiKey: "",
+      googleApiKey: "",
     };
   },
 
   computed: {
-    ...mapState(useChatStore, ["messages"]),
     ...mapState(useInternalDataStore, ["lastUsedProviderId"]),
     ...mapState(useConfigurationStore, [
+      "providers.openai.apiKey",
       "providers.anthropic.apiKey",
       "providers.google.apiKey",
     ]),
-    providers() {
-      return Providers;
-    },
-    selectedProviderName() {
+    dirty() {
       return (
-        this.providers.find((p) => p.id === this.selectedProviderId)
-          ?.displayName || ""
+        this.openaiApiKey !== this["providers.openai.apiKey"] ||
+        this.anthropicApiKey !== this["providers.anthropic.apiKey"] ||
+        this.googleApiKey !== this["providers.google.apiKey"]
       );
     },
-  },
-
-  watch: {
-    selectedProviderId() {
-      if (this.selectedProviderId) {
-        this.apiKey = this[`providers.${this.selectedProviderId}.apiKey`];
-      }
+    providerConfigs() {
+      return providerConfigs;
     },
   },
 
   methods: {
-    submitApiKey() {
-      if (this.apiKey.trim()) {
-        this.$emit("submit", {
-          key: this.apiKey.trim(),
-          provider: this.selectedProviderId,
-        });
-      }
+    ...mapActions(useConfigurationStore, ["configure"]),
+    handleInput(e) {
+      this.dirty = true;
+    },
+    async submitApiKey() {
+      await this.configure("providers.openai.apiKey", this.openaiApiKey);
+      await this.configure("providers.anthropic.apiKey", this.anthropicApiKey);
+      await this.configure("providers.google.apiKey", this.googleApiKey);
+      this.dirty = false;
+      this.$emit("submit");
     },
   },
 
   mounted() {
-    this.selectedProviderId = this.lastUsedProviderId;
+    this.openaiApiKey = this["providers.openai.apiKey"];
+    this.anthropicApiKey = this["providers.anthropic.apiKey"];
+    this.googleApiKey = this["providers.google.apiKey"];
   },
 };
 </script>
