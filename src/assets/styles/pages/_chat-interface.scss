@@ -69,6 +69,14 @@
     width: 100%;
     line-height: 1.07rem;
     font-size: 0.765rem;
+
+    code {
+
+      &::selection,
+      *::selection {
+        background-color: var(--bks-text-editor-selected-bg-color);
+      }
+    }
   }
 
   .markdown {
@@ -165,7 +173,7 @@
   }
 }
 
-.message.human {
+.message.user {
   align-self: flex-end;
 
   .message-content {
@@ -176,7 +184,7 @@
   }
 }
 
-.message.ai,
+.message.assistant,
 .message.system,
 .message.tool {
   max-width: none;
@@ -186,16 +194,13 @@
   }
 }
 
-.message.tool {
-  margin-block: 0;
-
-  .message-content {
-    padding: 0 0 0 1rem;
-    border-left: 2px solid var(--border-color);
-    margin-inline: 1rem;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
+.tool {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1rem;
+  border-left: 2px solid var(--border-color);
+  gap: 0.2rem;
+  width: 100%;
 
   .accept-icon,
   .reject-icon {
@@ -210,6 +215,31 @@
 
   .message-content {
     white-space: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    pre {
+      background-color: rgb(from var(--brand-danger) r g b / 10%);
+      border-radius: 8px;
+      text-wrap: wrap;
+    }
+
+    .show-more-btn {
+      align-self: flex-start;
+      border: 1px solid rgb(from var(--brand-danger) r g b / 30%);
+      background-color: rgb(from var(--brand-danger) r g b / 5%);
+      color: var(--text-dark);
+
+      &:hover {
+        background-color: rgb(from var(--brand-danger) r g b / 10%);
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgb(from var(--brand-danger) r g b / 20%);
+      }
+    }
   }
 }
 
@@ -234,27 +264,30 @@
 .tool-call.active {
   justify-content: center;
   align-items: center;
+}
 
-  .tool-permission-buttons {
+.tool-permission-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+
+  button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    padding: 0;
 
-    button {
-      border: none;
-      background-color: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: currentColor;
+    &:hover {
+      .accept-icon {
+        color: color-mix(in srgb, var(--brand-success) 70%, black);
+      }
 
-      &:hover {
-        .accept-icon {
-          color: color-mix(in srgb, var(--brand-success) 70%, black);
-        }
-
-        .reject-icon {
-          color: color-mix(in srgb, var(--brand-danger) 90%, black);
-        }
+      .reject-icon {
+        color: color-mix(in srgb, var(--brand-danger) 90%, black);
       }
     }
   }

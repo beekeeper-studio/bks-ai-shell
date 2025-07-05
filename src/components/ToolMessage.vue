@@ -1,49 +1,71 @@
 <template>
-  <div :class="{ error }">
-    <template v-if="error">{{ error }}</template>
-    <template v-else>
-      <template v-if="message.name === 'get_connection_info'">
-        {{ data.connectionType }}
+  <div class="tool">
+    <div>{{ displayName }}</div>
+    <Message
+      v-if="toolCall.toolName === 'run_query'"
+      :content="'```sql\n' + toolCall.args.query + '\n```'"
+    />
+    <div v-if="askingPermission">
+      {{
+        toolCall.toolName === "run_query"
+          ? "Do you want to run this query?"
+          : "Do you want to proceed?"
+      }}
+      <div class="tool-permission-buttons">
+        <button class="accept-btn" @click="$emit('accept')">
+          Yes
+          <span class="material-symbols-outlined accept-icon"> check </span>
+        </button>
+        <button class="reject-btn" @click="$emit('reject')">
+          No
+          <span class="material-symbols-outlined reject-icon"> close </span>
+        </button>
+      </div>
+    </div>
+    <div :class="{ error }">
+      <template v-if="error">{{ error }}</template>
+      <template v-else-if="data">
+        <template v-if="toolCall.toolName === 'get_connection_info'">
+          {{ data.connectionType }}
+        </template>
+        <template v-if="toolCall.toolName === 'get_tables'">
+          {{ data.length }}
+          {{ $pluralize("table", data.length) }}
+          (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
+        </template>
+        <template v-if="toolCall.toolName === 'get_columns'">
+          {{ data.length }}
+          {{ $pluralize("column", data.length) }}
+          (<code
+            v-if="data.length < 5"
+            v-text="data.map((c) => c.name).join(', ')"
+          />)
+        </template>
+        <run-query-message
+          v-else-if="toolCall.toolName === 'run_query' && data"
+          :data="data"
+          @result-click="$emit('result-click', $event)"
+        />
       </template>
-      <template v-if="message.name === 'get_tables'">
-        {{ data.length }} {{ $pluralize("table", data.length) }} (
-        <code>{{
-          truncateAtWord(data.map((t) => t.name).join(", "), 50)
-          }}</code>
-        )
-      </template>
-      <template v-if="message.name === 'get_columns'">
-        {{ data.length }} {{ $pluralize("column", data.length) }} (
-        <code>
-          {{ truncateAtWord(data.map((c) => c.name).join(", "), 50) }}
-        </code>
-        )
-      </template>
-      <template v-else-if="message.name === 'get_all_tabs'">
-        {{ data.length }} {{ $pluralize("tab", data.length) }}
-      </template>
-      <run-query-message
-        v-else-if="message.name === 'run_query'"
-        :data="data"
-        @result-click="$emit('result-click', $event)"
-      />
-    </template>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import Message from "./Message.vue";
-import { ToolMessage } from "@langchain/core/messages";
+import { ToolCall } from "ai";
 import { PropType } from "vue";
 import { safeJSONStringify } from "../utils";
 import RunQueryMessage from "./toolMessage/RunQueryMessage.vue";
 import { isErrorContent, parseErrorContent } from "../utils";
+import _ from "lodash";
 
 export default {
   components: { Message, RunQueryMessage },
   props: {
-    message: {
-      type: Object as PropType<ToolMessage>,
+    askingPermission: Boolean,
+    toolCall: {
+      type: Object as PropType<ToolCall<string, any>>,
       required: true,
     },
   },
@@ -65,19 +87,25 @@ export default {
     },
     data() {
       try {
-        return JSON.parse(this.message.text);
+        return JSON.parse(this.toolCall.result);
       } catch (e) {
         return null;
       }
     },
     error() {
-      if (
-        this.message.status === "error" ||
-        isErrorContent(this.message.content)
-      ) {
-        const err = parseErrorContent(this.message.content);
+      if (isErrorContent(this.toolCall.result)) {
+        const err = parseErrorContent(this.toolCall.result);
         return err.message ?? err;
       }
+    },
+    displayName() {
+      if (this.toolCall.toolName === "get_columns") {
+        if (this.toolCall.args.schema) {
+          return `Get Columns (schema: ${this.toolCall.args.schema}, table: ${this.toolCall.args.table})`;
+        }
+        return `Get Columns (table: ${this.toolCall.args.table})`;
+      }
+      return this.toolCall.toolName.split("_").map(_.capitalize).join(" ");
     },
   },
   methods: {
