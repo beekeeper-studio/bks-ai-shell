@@ -11,7 +11,7 @@
  *
  **/
 
-import { getViewState, setViewState } from "@beekeeperstudio/plugin";
+import { getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
 import { Message } from "ai";
 import { defineStore } from "pinia";
 import { StoredMessage } from "@langchain/core/messages";
@@ -59,6 +59,10 @@ export const useTabState = defineStore("tabState", {
         messages: _.cloneDeep(this.messages),
         conversationTitle: this.conversationTitle,
       });
+    },
+    async setTabTitle(title: string) {
+      this.setTabState("conversationTitle", title);
+      await setTabTitle(title);
     },
   },
 });

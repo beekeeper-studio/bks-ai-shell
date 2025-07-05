@@ -1,8 +1,8 @@
 import {
   InvalidToolArgumentsError,
-  LanguageModelV1,
   NoSuchToolError,
   streamText,
+  generateObject,
   ToolExecutionError,
 } from "ai";
 import { useChat } from "@ai-sdk/vue";
@@ -20,6 +20,7 @@ import { getTools, UserRejectedError } from "@/tools";
 import { Message } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { notify } from "@beekeeperstudio/plugin";
+import { z } from "zod";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -39,33 +40,11 @@ export function useAI(options: AIOptions) {
   const { messages, input, append, error, status, addToolResult, stop } =
     useChat({
       fetch: async (url, fetchOptions) => {
-        if (!providerId.value || !modelId.value) {
+        if (!modelId.value) {
           throw new Error("No provider or model selected.");
         }
+        const model = createProvider().chat(modelId.value);
         const m = JSON.parse(fetchOptions.body) as any;
-        let provider: ReturnType<
-          | typeof createOpenAI
-          | typeof createAnthropic
-          | typeof createGoogleGenerativeAI
-        >;
-        let model: LanguageModelV1;
-        if (providerId.value === "google") {
-          provider = createGoogleGenerativeAI({
-            apiKey: options.googleApiKey,
-          });
-        } else if (providerId.value === "anthropic") {
-          provider = createAnthropic({
-            apiKey: options.anthropicApiKey,
-          });
-        } else if (providerId.value === "openai") {
-          provider = createOpenAI({
-            compatibility: "strict",
-            apiKey: options.openaiApiKey,
-          });
-        } else {
-          throw new Error("Unknown provider");
-        }
-        model = provider!.chat(modelId.value);
         const result = streamText({
           model,
           messages: m.messages,
@@ -126,14 +105,39 @@ export function useAI(options: AIOptions) {
               content: followupAfterRejected.value,
             });
             followupAfterRejected.value = "";
+            fillTitle();
           }
         }
       },
       onFinish: () => {
         saveMessages();
+        fillTitle();
       },
       initialMessages: options.initialMessages,
     });
+
+  function createProvider() {
+    if (!providerId.value) {
+      throw new Error("No provider selected.");
+    }
+
+    if (providerId.value === "google") {
+      return createGoogleGenerativeAI({
+        apiKey: options.googleApiKey,
+      });
+    } else if (providerId.value === "anthropic") {
+      return createAnthropic({
+        apiKey: options.anthropicApiKey,
+      });
+    } else if (providerId.value === "openai") {
+      return createOpenAI({
+        compatibility: "strict",
+        apiKey: options.openaiApiKey,
+      });
+    }
+
+    throw new Error("Unknown provider");
+  }
 
   function saveMessages() {
     useTabState().setTabState("messages", messages.value);
@@ -159,6 +163,28 @@ export function useAI(options: AIOptions) {
     }
     permitted = false;
     askingPermission.value = false;
+  }
+
+  async function fillTitle() {
+    if (!modelId.value) {
+      throw new Error("No provider or model selected.");
+    }
+    if (useTabState().conversationTitle) {
+      // Skip generation if title is already set
+      return;
+    }
+    const model = createProvider().languageModel(modelId.value);
+    const res = await generateObject({
+      model,
+      schema: z.object({
+        title: z.string().describe("The title of the conversation"),
+      }),
+      prompt:
+        "Name this conversation in less than 30 characters.\n```" +
+        messages.value.map((m) => `${m.role}: ${m.content}`).join("\n") +
+        "\n```",
+    });
+    await useTabState().setTabTitle(res.object.title);
   }
 
   /** Send a message to the AI */
