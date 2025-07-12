@@ -1,6 +1,6 @@
 <template>
   <div class="shell-app">
-    <div v-if="!appReady && showLoading" class="not-ready">
+    <div v-if="!appReady" v-show="showLoading" class="not-ready">
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
@@ -58,6 +58,7 @@ export default {
 
     try {
       await this.initialize();
+      await this.$nextTick();
 
       const configuration = useConfigurationStore();
       const apiKey =

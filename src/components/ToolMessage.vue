@@ -41,7 +41,7 @@
             v-text="data.map((c) => c.name).join(', ')"
           />)
         </template>
-        <run-query-message
+        <run-query-message-result
           v-else-if="toolCall.toolName === 'run_query' && data"
           :data="data"
           @result-click="$emit('result-click', $event)"
@@ -56,12 +56,12 @@ import Message from "./Message.vue";
 import { ToolCall } from "ai";
 import { PropType } from "vue";
 import { safeJSONStringify } from "../utils";
-import RunQueryMessage from "./toolMessage/RunQueryMessage.vue";
+import RunQueryMessageResult from "./toolMessage/RunQueryMessageResult.vue";
 import { isErrorContent, parseErrorContent } from "../utils";
 import _ from "lodash";
 
 export default {
-  components: { Message, RunQueryMessage },
+  components: { Message, RunQueryMessageResult },
   props: {
     askingPermission: Boolean,
     toolCall: {

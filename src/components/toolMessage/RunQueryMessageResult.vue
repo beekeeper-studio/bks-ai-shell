@@ -1,5 +1,5 @@
 <template>
-  <div class="run-query-message">
+  <div class="run-query-message-result">
     <span>
       Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
     </span>
@@ -14,8 +14,17 @@
         </thead>
         <tbody>
           <tr v-for="(row, index) in limitedRows" :key="index">
-            <td v-for="column in columns" :key="column">
-              {{ row[column] }}
+            <td
+              v-for="column in columns"
+              :key="column"
+              :class="{
+                'null-cell': row[column] === null,
+                'empty-cell': row[column] === '',
+              }"
+            >
+              <template v-if="row[column] === ''">(EMPTY)</template>
+              <template v-else-if="row[column] === null">(NULL)</template>
+              <template v-else>{{ row[column] }}</template>
             </td>
           </tr>
           <tr v-if="remainingRows > 0" class="remaining-rows">

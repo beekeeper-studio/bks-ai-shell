@@ -1,53 +1,55 @@
 <template>
   <div class="chat-container" :class="{ 'empty-chat': messages.length === 0 }">
-    <h1 class="plugin-title">AI Shell</h1>
-    <div class="chat-messages" ref="chatMessagesRef">
-      <div
-        v-for="message in messages"
-        :key="message.id"
-        :class="['message', message.role]"
-      >
-        <!-- TODO put this at the Message component -->
-        <div class="message-content">
-          <template v-if="message.role === 'system'" />
-          <template v-else v-for="(part, index) of message.parts" :key="index">
-            <Message v-if="part.type === 'text'" :content="part.text" />
-            <tool-message
-              v-else-if="part.type === 'tool-invocation'"
-              :toolCall="part.toolInvocation"
-              :askingPermission="askingPermission"
-              @result-click="handleResultClick"
-              @accept="acceptPermission"
-              @reject="rejectPermission"
-            />
-          </template>
+    <div class="scroll-container">
+      <h1 class="plugin-title">AI Shell</h1>
+      <div class="chat-messages" ref="chatMessagesRef">
+        <div
+          v-for="message in messages"
+          :key="message.id"
+          :class="['message', message.role]"
+        >
+          <!-- TODO put this at the Message component -->
+          <div class="message-content">
+            <template v-if="message.role === 'system'" />
+            <template v-else v-for="(part, index) of message.parts" :key="index">
+              <Message v-if="part.type === 'text'" :content="part.text" />
+              <tool-message
+                v-else-if="part.type === 'tool-invocation'"
+                :toolCall="part.toolInvocation"
+                :askingPermission="askingPermission"
+                @result-click="handleResultClick"
+                @accept="acceptPermission"
+                @reject="rejectPermission"
+              />
+            </template>
+          </div>
+        </div>
+        <div
+          class="message error"
+          v-if="error && !error.message.includes('User rejected tool call')"
+        >
+          <div class="message-content">
+            Something went wrong.
+            <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
+            <pre v-else v-text="truncatedError" />
+            <button
+              v-if="isErrorTruncated"
+              @click="showFullError = !showFullError"
+              class="btn show-more-btn"
+            >
+              {{ showFullError ? "Show less" : "Show more" }}
+            </button>
+          </div>
+        </div>
+        <div
+          class="spinner-container"
+          :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
+        >
+          <span class="spinner" />
         </div>
       </div>
-      <div
-        class="message error"
-        v-if="error && !error.message.includes('User rejected tool call')"
-      >
-        <div class="message-content">
-          Something went wrong.
-          <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
-          <pre v-else v-text="truncatedError" />
-          <button
-            v-if="isErrorTruncated"
-            @click="showFullError = !showFullError"
-            class="btn show-more-btn"
-          >
-            {{ showFullError ? "Show less" : "Show more" }}
-          </button>
-        </div>
-      </div>
-      <div
-        class="spinner-container"
-        :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
-      >
-        <span class="spinner" />
-      </div>
+      <div ref="bottomMarker"></div>
     </div>
-
     <div class="chat-input-container">
       <textarea
         v-model="input"
@@ -87,7 +89,6 @@
         </button>
         <button v-else @click="stop" class="stop-btn" />
       </div>
-      <div ref="bottomMarker"></div>
     </div>
   </div>
 </template>

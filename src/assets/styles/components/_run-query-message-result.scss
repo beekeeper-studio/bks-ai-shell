@@ -1,8 +1,12 @@
-.run-query-message {
+.run-query-message-result {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   .view-more-btn {
     width: max-content;
+  }
+
+  .null-cell, .empty-cell {
+    opacity: 0.65;
   }
 }
