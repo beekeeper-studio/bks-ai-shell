@@ -13,11 +13,14 @@
     "plugin:build": "vite build && cp manifest.json dist/"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@ai-sdk/anthropic": "^1.2.12",
+    "@ai-sdk/google": "^1.2.22",
+    "@ai-sdk/openai": "^1.3.22",
+    "@ai-sdk/vue": "^1.2.12",
     "@beekeeperstudio/plugin": "^1.3.0-beta",
-    "@langchain/anthropic": "^0.3.21",
-    "@langchain/core": "^0.3.48",
+    "@langchain/core": "^0.3.61",
     "@material-symbols/font-400": "^0.31.2",
+    "ai": "^4.3.16",
     "highlight.js": "^11.11.1",
     "langchain": "^0.3.19",
     "lodash": "^4.17.21",
@@ -27,7 +30,7 @@
     "pluralize": "^8.0.0",
     "typeface-roboto": "^0.0.75",
     "vue": "^3.4.21",
-    "zod": "^3.22.4"
+    "zod": "^3.25.32"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",

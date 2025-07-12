@@ -23,7 +23,7 @@ import "@material-symbols/font-400/outlined.css";
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import pluralize from "pluralize";
-import App from "./App.vue";
+import App from "@/App.vue";
 import {
   addNotificationListener,
   setDebugComms,
@@ -35,7 +35,7 @@ import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
 
-setDebugComms(true);
+setDebugComms(false);
 
 hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("javascript", javascript);

@@ -17,7 +17,16 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-inline: auto;
   margin-bottom: 1.5rem;
+  max-width: 20rem;
+
+  .input-group {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+    align-items: center;
+  }
 
   input {
     padding: 0.65rem 1rem;
@@ -32,10 +41,13 @@
     }
   }
 
-  button[type="submit"] {
-    padding-block: 1.15rem;
-    font-size: 0.85rem;
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 
+  button {
     &:disabled {
       opacity: 0.6;
     }
@@ -45,10 +57,7 @@
     font-size: 0.85rem;
     color: var(--text-dark);
     opacity: 0.7;
-
-    p {
-      margin-bottom: 0.5rem;
-    }
+    margin-bottom: 0.5rem;
   }
 
   .error-message {

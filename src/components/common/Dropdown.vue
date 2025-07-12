@@ -22,11 +22,14 @@
 </template>
 
 <script lang="ts">
+import { PropType } from "vue";
+import { Model } from "@/stores/chat";
+
 export default {
   name: "Dropdown",
   props: {
     modelValue: {
-      type: [String, Number, Object],
+      type: Object as PropType<Model>,
       default: null,
     },
     placeholder: {
@@ -40,7 +43,7 @@ export default {
   },
   computed: {
     displayText() {
-      return this.modelValue || this.placeholder;
+      return this.modelValue.id || this.placeholder;
     },
   },
   data() {
@@ -50,10 +53,12 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.handleOutsideClick);
+    document.addEventListener('keydown', this.handleKeydown);
   },
   
   beforeUnmount() {
     document.removeEventListener('click', this.handleOutsideClick);
+    document.removeEventListener('keydown', this.handleKeydown);
   },
   
   methods: {
@@ -87,6 +92,12 @@ export default {
       }
     },
     
+    handleKeydown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && this.isOpen) {
+        this.close();
+      }
+    },
+    
     positionDropdown() {
       const trigger = this.$refs.trigger as HTMLElement;
       const dropdown = this.$refs.dropdown as HTMLElement;
@@ -94,20 +105,28 @@ export default {
       if (!trigger || !dropdown) return;
       
       const triggerRect = trigger.getBoundingClientRect();
-      const dropdownRect = dropdown.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       
       let left = triggerRect.left;
       let top = triggerRect.bottom + 5;
       
-      // Check if there's enough space below
-      const spaceBelow = viewportHeight - triggerRect.bottom;
-      const spaceAbove = triggerRect.top;
+      // Calculate available space
+      const spaceBelow = viewportHeight - triggerRect.bottom - 20; // 20px margin
+      const spaceAbove = triggerRect.top - 20; // 20px margin
       
-      if (dropdownRect.height + 5 > spaceBelow && spaceAbove > spaceBelow) {
+      // Set max height to prevent overflow
+      const maxHeight = Math.max(spaceBelow, spaceAbove);
+      dropdown.style.maxHeight = `${maxHeight}px`;
+      dropdown.style.overflowY = 'auto';
+      
+      // Get updated dropdown dimensions after setting max-height
+      const dropdownRect = dropdown.getBoundingClientRect();
+      
+      if (dropdownRect.height > spaceBelow && spaceAbove > spaceBelow) {
         // Position above trigger
         top = triggerRect.top - dropdownRect.height - 5;
+        dropdown.style.maxHeight = `${spaceAbove}px`;
       }
       
       // Check horizontal positioning
@@ -120,11 +139,8 @@ export default {
       }
       
       // Final bounds check
-      if (top < 0) {
+      if (top < 10) {
         top = 10;
-      }
-      if (top + dropdownRect.height > viewportHeight) {
-        top = viewportHeight - dropdownRect.height - 10;
       }
       
       dropdown.style.left = `${left}px`;

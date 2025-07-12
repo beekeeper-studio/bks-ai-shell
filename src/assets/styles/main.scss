@@ -19,3 +19,11 @@
   overflow: auto;
 }
 
+.not-ready {
+  width: 100%;
+  max-width: 20rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
