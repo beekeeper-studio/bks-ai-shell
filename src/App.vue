@@ -1,8 +1,8 @@
 <template>
   <div class="shell-app">
-    <div v-if="!appReady" class="not-ready">
+    <div v-if="!appReady && showLoading" class="not-ready">
       <h1>AI Shell</h1>
-      <div v-if="showLoading" class="progress-bar"></div>
+      <div class="progress-bar"></div>
     </div>
     <template v-else>
       <!-- API Key Form -->
