@@ -52,12 +52,12 @@
 </template>
 
 <script lang="ts">
-import Message from "./Message.vue";
+import Message from "@/components/messages/Message.vue";
 import { ToolCall } from "ai";
 import { PropType } from "vue";
-import { safeJSONStringify } from "../utils";
-import RunQueryMessageResult from "./toolMessage/RunQueryMessageResult.vue";
-import { isErrorContent, parseErrorContent } from "../utils";
+import { safeJSONStringify } from "@/utils";
+import RunQueryMessageResult from "@/components/messages/tool/RunQueryMessageResult.vue";
+import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
 
 export default {

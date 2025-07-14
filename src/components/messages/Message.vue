@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { clipboard } from "@beekeeperstudio/plugin";
-import { parseMarkdownToHTML } from "../markdownParser";
+import { parseMarkdownToHTML } from "@/markdownParser";
 
 export default {
   props: ["content"],
