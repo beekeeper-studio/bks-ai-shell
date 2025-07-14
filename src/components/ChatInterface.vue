@@ -12,7 +12,7 @@
           <div class="message-content">
             <template v-if="message.role === 'system'" />
             <template v-else v-for="(part, index) of message.parts" :key="index">
-              <Message v-if="part.type === 'text'" :content="part.text" />
+              <markdown v-if="part.type === 'text'" :content="part.text" />
               <tool-message
                 v-else-if="part.type === 'tool-invocation'"
                 :toolCall="part.toolInvocation"
@@ -100,7 +100,7 @@ import Dropdown from "./common/Dropdown.vue";
 import DropdownOption from "./common/DropdownOption.vue";
 import _ from "lodash";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
-import Message from "@/components/messages/Message.vue";
+import Markdown from "@/components/messages/Markdown.vue";
 import { Message as MessageType } from "ai";
 import { PropType } from "vue";
 import { mapState, mapWritableState } from "pinia";
@@ -115,7 +115,7 @@ export default {
     Dropdown,
     DropdownOption,
     ToolMessage,
-    Message,
+    Markdown,
   },
 
   props: {

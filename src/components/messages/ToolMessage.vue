@@ -1,7 +1,7 @@
 <template>
   <div class="tool">
     <div>{{ displayName }}</div>
-    <Message
+    <markdown
       v-if="toolCall.toolName === 'run_query'"
       :content="'```sql\n' + toolCall.args.query + '\n```'"
     />
@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import Message from "@/components/messages/Message.vue";
+import Markdown from "@/components/messages/Markdown.vue";
 import { ToolCall } from "ai";
 import { PropType } from "vue";
 import { safeJSONStringify } from "@/utils";
@@ -61,7 +61,7 @@ import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
 
 export default {
-  components: { Message, RunQueryMessageResult },
+  components: { Markdown, RunQueryMessageResult },
   props: {
     askingPermission: Boolean,
     toolCall: {
