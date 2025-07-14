@@ -26,12 +26,18 @@
     }
 
     .chat-messages {
-      flex: 0;
+      display: none;
     }
   }
 
-  &:not(.empty-chat) .plugin-title {
-    display: none;
+  &:not(.empty-chat){
+    .plugin-title {
+      display: none;
+    }
+
+    .scroll-container {
+      flex-grow: 1;
+    }
   }
 }
 
