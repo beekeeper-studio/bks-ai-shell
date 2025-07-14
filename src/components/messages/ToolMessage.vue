@@ -41,7 +41,7 @@
             v-text="data.map((c) => c.name).join(', ')"
           />)
         </template>
-        <run-query-message-result
+        <run-query-result
           v-else-if="toolCall.toolName === 'run_query' && data"
           :data="data"
         />
@@ -55,12 +55,12 @@ import Markdown from "@/components/messages/Markdown.vue";
 import { ToolCall } from "ai";
 import { PropType } from "vue";
 import { safeJSONStringify } from "@/utils";
-import RunQueryMessageResult from "@/components/messages/tool/RunQueryMessageResult.vue";
+import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
 
 export default {
-  components: { Markdown, RunQueryMessageResult },
+  components: { Markdown, RunQueryResult },
   props: {
     askingPermission: Boolean,
     toolCall: {

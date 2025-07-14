@@ -1,5 +1,5 @@
 <template>
-  <div class="run-query-message-result">
+  <div class="run-query-result">
     <span>
       Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
     </span>
