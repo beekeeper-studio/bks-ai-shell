@@ -34,6 +34,7 @@ import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
+import { createAppEvent } from "@/plugins/appEvent";
 
 setDebugComms(false);
 
@@ -49,7 +50,9 @@ addNotificationListener("themeChanged", (args) => {
 // Create and mount the Vue app
 const app = createApp(App);
 const pinia = createPinia();
+const appEvent = createAppEvent();
 app.use(pinia);
+app.use(appEvent);
 app.config.globalProperties.$pluralize = pluralize;
 app.config.globalProperties.$openExternal = openExternal;
 app.mount("#app");

@@ -37,7 +37,7 @@
     </div>
     <button
       class="btn view-more-btn"
-      @click="() => $emit('result-click', data.results)"
+      @click.prevent="handleViewMoreClick"
     >
       <div class="label">View more</div>
       <span class="material-symbols-outlined open-icon">
@@ -60,7 +60,6 @@ export default {
       required: true,
     },
   },
-  emits: ['result-click'],
   computed: {
     columns() {
       return this.data.results[0].fields.map((field) => field.name);
@@ -73,6 +72,12 @@ export default {
     },
     remainingRows() {
       return Math.max(0, this.rows.length - TABLE_MAX_ROWS);
+    },
+  },
+
+  methods: {
+    handleViewMoreClick() {
+      this.trigger("showResultTable", this.data.results)
     },
   },
 };

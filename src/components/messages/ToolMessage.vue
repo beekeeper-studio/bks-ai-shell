@@ -44,7 +44,6 @@
         <run-query-message-result
           v-else-if="toolCall.toolName === 'run_query' && data"
           :data="data"
-          @result-click="$emit('result-click', $event)"
         />
       </template>
     </div>
@@ -69,6 +68,7 @@ export default {
       required: true,
     },
   },
+  emits: ["accept", "reject"],
   computed: {
     content() {
       if (this.data) {

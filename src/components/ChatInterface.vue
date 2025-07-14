@@ -1,29 +1,20 @@
 <template>
-  <div class="chat-container" :class="{ 'empty-chat': messages.length === 0 }">
-    <div class="scroll-container">
+  <div
+    class="chat-container"
+    :class="{ 'empty-chat': messages.length === 0 }"
+    :data-status="status"
+  >
+    <div class="scroll-container" ref="scrollContainerRef">
       <h1 class="plugin-title">AI Shell</h1>
-      <div class="chat-messages" ref="chatMessagesRef">
-        <div
+      <div class="chat-messages">
+        <message
           v-for="message in messages"
           :key="message.id"
-          :class="['message', message.role]"
-        >
-          <!-- TODO put this at the Message component -->
-          <div class="message-content">
-            <template v-if="message.role === 'system'" />
-            <template v-else v-for="(part, index) of message.parts" :key="index">
-              <markdown v-if="part.type === 'text'" :content="part.text" />
-              <tool-message
-                v-else-if="part.type === 'tool-invocation'"
-                :toolCall="part.toolInvocation"
-                :askingPermission="askingPermission"
-                @result-click="handleResultClick"
-                @accept="acceptPermission"
-                @reject="rejectPermission"
-              />
-            </template>
-          </div>
-        </div>
+          :message="message"
+          :asking-permission="askingPermission"
+          @accept-permission="acceptPermission"
+          @reject-permission="rejectPermission"
+        />
         <div
           class="message error"
           v-if="error && !error.message.includes('User rejected tool call')"
@@ -101,10 +92,11 @@ import DropdownOption from "./common/DropdownOption.vue";
 import _ from "lodash";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
 import Markdown from "@/components/messages/Markdown.vue";
+import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
 import { PropType } from "vue";
 import { mapState, mapWritableState } from "pinia";
-import { expandTableResult, QueryResult } from "@beekeeperstudio/plugin";
+import { RootBinding } from "@/plugins/appEvent";
 
 const maxHistorySize = 50;
 
@@ -114,6 +106,7 @@ export default {
   components: {
     Dropdown,
     DropdownOption,
+    Message,
     ToolMessage,
     Markdown,
   },
@@ -183,13 +176,27 @@ export default {
     truncatedError() {
       return this.error ? this.error.toString().substring(0, 300) + "..." : "";
     },
+
+    rootBindings(): RootBinding[] {
+      return [
+        {
+          event: "showedResultTable",
+          handler: async () => {
+            if (this.isAtBottom) {
+              await this.$nextTick();
+              this.scrollToBottom();
+            }
+          },
+        },
+      ]
+    },
   },
 
   watch: {
     messages: {
       async handler() {
         await this.$nextTick();
-        if (this.$refs.chatMessagesRef && this.isAtBottom) {
+        if (this.$refs.scrollContainerRef && this.isAtBottom) {
           this.scrollToBottom();
         }
       },
@@ -201,13 +208,13 @@ export default {
     if (this.model) {
       this.setModel(this.model.provider, this.model.id);
     }
-    const chatMessages = this.$refs.chatMessagesRef as HTMLElement;
-    chatMessages.addEventListener("scroll", () => {
+    const scrollContainer = this.$refs.scrollContainerRef as HTMLElement;
+    scrollContainer.addEventListener("scroll", () => {
       // Calculate if we're near bottom (within 50px of bottom)
       const isNearBottom =
-        chatMessages.scrollHeight -
-          chatMessages.scrollTop -
-          chatMessages.clientHeight <
+        scrollContainer.scrollHeight -
+          scrollContainer.scrollTop -
+          scrollContainer.clientHeight <
         50;
 
       this.isAtBottom = isNearBottom;
@@ -351,20 +358,16 @@ export default {
       if (this.askingPermission) {
         this.rejectPermission();
       } else {
-        this.abort()
+        this.abort();
       }
     },
 
-    async handleResultClick(results: QueryResult[]) {
-      await expandTableResult(results);
-      await this.$nextTick();
-      if (this.isAtBottom) {
-        this.scrollToBottom();
-      }
-    },
     scrollToBottom() {
-      this.$refs.chatMessagesRef!.scrollTop =
-        this.$refs.chatMessagesRef!.scrollHeight;
+      if (!this.$refs.scrollContainerRef) {
+        return;
+      }
+      this.$refs.scrollContainerRef.scrollTop =
+        this.$refs.scrollContainerRef.scrollHeight;
     },
     selectModel(model: Model) {
       this.setModel(model.provider, model.id);
