@@ -128,6 +128,7 @@ export function useAI(options: AIOptions) {
     } else if (providerId.value === "anthropic") {
       return createAnthropic({
         apiKey: options.anthropicApiKey,
+        headers: { 'anthropic-dangerous-direct-browser-access': 'true' }
       });
     } else if (providerId.value === "openai") {
       return createOpenAI({
