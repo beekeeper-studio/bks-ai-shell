@@ -65,6 +65,7 @@
 
 <script lang="ts">
 import { mapState, mapActions } from "pinia";
+import { useChatStore } from "@/stores/chat";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useConfigurationStore } from "@/stores/configuration";
 import { providerConfigs } from "@/config";
@@ -108,6 +109,7 @@ export default {
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
+    ...mapActions(useChatStore, ["syncModels"]),
     handleInput(e) {
       this.dirty = true;
     },
@@ -115,6 +117,7 @@ export default {
       await this.configure("providers.openai.apiKey", this.openaiApiKey);
       await this.configure("providers.anthropic.apiKey", this.anthropicApiKey);
       await this.configure("providers.google.apiKey", this.googleApiKey);
+      this.syncModels();
       this.dirty = false;
       this.$emit("submit");
     },

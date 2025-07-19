@@ -39,6 +39,11 @@ export const useChatStore = defineStore("chat", {
       await config.sync();
       await internal.sync();
       await tabState.sync();
+      this.syncModels();
+    },
+    syncModels() {
+      const config = useConfigurationStore();
+      const internal = useInternalDataStore();
       const models: ChatState["models"] = [];
       if (config["providers.openai.apiKey"]) {
         models.push(
@@ -66,8 +71,7 @@ export const useChatStore = defineStore("chat", {
       }
       this.models = models;
       this.model =
-        models.find((m) => m.id === internal.lastUsedModelId) ||
-        this.models.find((model) => model.id === "claude-3-5-haiku-latest");
+        this.models.find((m) => m.id === internal.lastUsedModelId) || models[0];
     },
   },
 });
