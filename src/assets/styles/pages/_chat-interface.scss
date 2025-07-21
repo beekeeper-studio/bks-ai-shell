@@ -244,7 +244,7 @@
       text-wrap: wrap;
     }
 
-    .show-more-btn {
+    .btn {
       align-self: flex-start;
       border: 1px solid rgb(from var(--brand-danger) r g b / 30%);
       background-color: rgb(from var(--brand-danger) r g b / 5%);
@@ -257,6 +257,11 @@
       &:focus {
         outline: none;
         box-shadow: 0 0 0 2px rgb(from var(--brand-danger) r g b / 20%);
+      }
+
+      .material-symbols-outlined {
+        font-size: 1.1rem;
+        margin-right: 0.3rem;
       }
     }
   }

@@ -30,6 +30,10 @@
             >
               {{ showFullError ? "Show less" : "Show more" }}
             </button>
+            <button class="btn" @click="() => reload()">
+              <span class="material-symbols-outlined">refresh</span>
+              Retry
+            </button>
           </div>
         </div>
         <div
@@ -141,6 +145,7 @@ export default {
       askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
       rejectPermission: ai.rejectPermission,
+      reload: ai.reload,
     };
   },
 

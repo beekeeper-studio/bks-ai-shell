@@ -37,7 +37,7 @@ export function useAI(options: AIOptions) {
 
   let permitted = false;
 
-  const { messages, input, append, error, status, addToolResult, stop } =
+  const { messages, input, append, error, status, addToolResult, stop, reload } =
     useChat({
       fetch: async (url, fetchOptions) => {
         if (!modelId.value) {
@@ -213,5 +213,6 @@ export function useAI(options: AIOptions) {
     rejectPermission,
     send,
     abort,
+    reload,
   };
 }
