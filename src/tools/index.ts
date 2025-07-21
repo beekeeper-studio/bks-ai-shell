@@ -80,7 +80,7 @@ export const run_query = (
       await onAskPermission(options.toolCallId, params);
       try {
         return safeJSONStringify(
-          await runQuery(params.query + "someshadyquery234&*%$@;"),
+          await runQuery(params.query),
         );
       } catch (e) {
         return safeJSONStringify({
