@@ -13,7 +13,14 @@ export const get_connection_info = tool({
     "Get information about the current database connection including type, default database, and read-only status",
   parameters: z.object({}),
   execute: async () => {
-    return safeJSONStringify(await getConnectionInfo());
+    try {
+      return safeJSONStringify(await getConnectionInfo());
+    } catch (e) {
+      return safeJSONStringify({
+        type: "error",
+        message: e.message,
+      });
+    }
   },
 });
 
@@ -26,7 +33,14 @@ export const get_tables = tool({
       .describe("The name of the schema to get tables for"),
   }),
   execute: async (params) => {
-    return safeJSONStringify(await getTables(params.schema ?? undefined));
+    try {
+      return safeJSONStringify(await getTables(params.schema ?? undefined));
+    } catch (e) {
+      return safeJSONStringify({
+        type: "error",
+        message: e.message,
+      });
+    }
   },
 });
 
@@ -41,13 +55,22 @@ export const get_columns = tool({
       .describe("The name of the schema of the table"),
   }),
   execute: async (params) => {
-    return safeJSONStringify(
-      await getColumns(params.table, params.schema ?? undefined),
-    );
+    try {
+      return safeJSONStringify(
+        await getColumns(params.table, params.schema ?? undefined),
+      );
+    } catch (e) {
+      return safeJSONStringify({
+        type: "error",
+        message: e.message,
+      });
+    }
   },
 });
 
-export const run_query = (onAskPermission: (toolCallId: string, params: any) => Promise<void>) =>
+export const run_query = (
+  onAskPermission: (toolCallId: string, params: any) => Promise<void>,
+) =>
   tool({
     description: "Run a SQL query and get the results",
     parameters: z.object({
@@ -55,7 +78,16 @@ export const run_query = (onAskPermission: (toolCallId: string, params: any) => 
     }),
     execute: async (params, options) => {
       await onAskPermission(options.toolCallId, params);
-      return safeJSONStringify(await runQuery(params.query));
+      try {
+        return safeJSONStringify(
+          await runQuery(params.query + "someshadyquery234&*%$@;"),
+        );
+      } catch (e) {
+        return safeJSONStringify({
+          type: "error",
+          message: e.message,
+        });
+      }
     },
   });
 
@@ -67,14 +99,12 @@ export function getTools(
     get_tables,
     get_columns,
   };
-  toolSet["run_query"] = run_query(
-    async (toolCallId, params) => {
-      const permitted = await onAskPermission("run_query", params)
-      if (!permitted) {
-        throw new UserRejectedError(toolCallId);
-      }
-    },
-  );
+  toolSet["run_query"] = run_query(async (toolCallId, params) => {
+    const permitted = await onAskPermission("run_query", params);
+    if (!permitted) {
+      throw new UserRejectedError(toolCallId);
+    }
+  });
   return toolSet;
 }
 
