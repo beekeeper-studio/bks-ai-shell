@@ -17,8 +17,8 @@ window.addEventListener("unhandledrejection", (e) => {
 // -------------------
 
 import "typeface-roboto";
-import "./assets/styles/main.scss";
-import "@material-symbols/font-400/outlined.css";
+import "typeface-source-code-pro";
+import "@beekeeperstudio/ui-kit/sql-text-editor";
 
 import { createApp } from "vue";
 import { createPinia } from "pinia";

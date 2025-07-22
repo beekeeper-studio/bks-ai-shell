@@ -2,9 +2,19 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
+const customElements = [
+  "bks-sql-text-editor",
+]
+
 export default defineConfig({
   base: "/dist/",
-  plugins: [vue()],
+  plugins: [vue({
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => customElements.includes(tag),
+      },
+    },
+  })],
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),

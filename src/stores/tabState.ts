@@ -27,6 +27,11 @@ type TabState = {
   version: "2"
   messages: Message[];
   conversationTitle: string;
+  toolPermissions: {
+    [toolCallId: string]: {
+      status: "pending" | "accepted" | "rejected";
+    }
+  };
 };
 
 function isOldTabState(viewState: any): viewState is Old_TabState {
@@ -38,6 +43,7 @@ export const useTabState = defineStore("tabState", {
     version: "2",
     messages: [],
     conversationTitle: "",
+    toolPermissions: {},
   }),
 
   actions: {
@@ -52,12 +58,19 @@ export const useTabState = defineStore("tabState", {
         this.conversationTitle = state.conversationTitle;
       }
     },
-    async setTabState(key: keyof TabState, value: TabState[keyof TabState]) {
+    async setTabState<T extends keyof TabState>(
+      key: T,
+      value: TabState[T] | ((value: TabState[T]) => TabState[T]),
+    ) {
+      if (typeof value === "function") {
+        value = value(this[key]);
+      }
       this.$patch({ [key]: value });
       setViewState<TabState>({
         version: "2",
         messages: _.cloneDeep(this.messages),
         conversationTitle: this.conversationTitle,
+        toolPermissions: _.cloneDeep(this.toolPermissions),
       });
     },
     async setTabTitle(title: string) {

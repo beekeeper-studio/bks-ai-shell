@@ -17,16 +17,17 @@ import {
   setData,
   setEncryptedData,
 } from "@beekeeperstudio/plugin";
+import { AvailableProviders } from "@/config";
 
 type Configurable = {
   /** Enable summarization. */
   summarization: boolean;
 };
 
+type ApiKeys = `providers.${AvailableProviders}.apiKey`;
+
 type EncryptedConfigurable = {
-  "providers.openai.apiKey": string;
-  "providers.anthropic.apiKey": string;
-  "providers.google.apiKey": string;
+  [key in ApiKeys]: string;
 };
 
 type ConfigurationState = Configurable & EncryptedConfigurable;

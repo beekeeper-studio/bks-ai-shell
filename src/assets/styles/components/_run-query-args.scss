@@ -1,0 +1,48 @@
+.run-query-args {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .header {
+    padding: 0.2rem 0.5rem 0;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .hint {
+    font-size: 0.7rem;
+    opacity: 0.5;
+    line-height: 1.25rem;
+  }
+
+  .copy-btn {
+    font-size: 0.7rem;
+    color: var(--text-dark);
+
+    .material-symbols-outlined {
+      font-size: 0.9rem;
+    }
+
+    &.copied .copy-label,
+    &:not(.copied) .copied-label {
+      display: none;
+    }
+
+    .label {
+      content: "Copy";
+    }
+
+    padding: 0.3rem;
+    background-color: transparent;
+    gap: 0.2rem;
+    line-height: 1;
+    height: auto;
+    min-width: 0px;
+  }
+
+  .bks-text-editor {
+    font-size: 0.765rem;
+  }
+}
