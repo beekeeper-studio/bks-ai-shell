@@ -7,9 +7,9 @@
         <tool-message
           v-else-if="part.type === 'tool-invocation'"
           :toolCall="part.toolInvocation"
-          :askingPermission="askingPermission"
-          @accept="$emit('accept-permission')"
-          @reject="$emit('reject-permission')"
+          :askingPermission="pendingToolCallIds.includes(part.toolInvocation.toolCallId)"
+          @accept="$emit('accept-permission', part.toolInvocation.toolCallId)"
+          @reject="$emit('reject-permission', part.toolInvocation.toolCallId)"
         />
       </template>
     </div>
@@ -35,7 +35,10 @@ export default {
       type: Object as PropType<Message>,
       required: true,
     },
-    askingPermission: Boolean,
+    pendingToolCallIds: {
+      type: Array as PropType<string[]>,
+      required: true,
+    },
   },
 };
 </script>

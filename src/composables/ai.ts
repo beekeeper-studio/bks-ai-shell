@@ -6,7 +6,7 @@ import {
   ToolExecutionError,
 } from "ai";
 import { useChat } from "@ai-sdk/vue";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -32,7 +32,8 @@ type AIOptions = {
 export function useAI(options: AIOptions) {
   const providerId = ref<AvailableProviders | undefined>();
   const modelId = ref<AvailableModels["id"] | undefined>();
-  const askingPermission = ref(false);
+  const pendingToolCallIds = ref<string[]>([]);
+  const askingPermission = computed(() => pendingToolCallIds.value.length > 0);
   const followupAfterRejected = ref("");
 
   let permitted = false;
@@ -50,17 +51,19 @@ export function useAI(options: AIOptions) {
           messages: m.messages,
           abortSignal: fetchOptions.signal,
           system: await getDefaultInstructions(),
-          tools: getTools(async (name, params) => {
-            askingPermission.value = true;
+          tools: getTools(async (name, toolCallId) => {
+            pendingToolCallIds.value.push(toolCallId);
             await new Promise<void>((resolve) => {
-              const unwatch = watch(askingPermission, () => {
-                if (!askingPermission.value) {
+              const unwatch = watch(pendingToolCallIds, () => {
+                if (!pendingToolCallIds.value.includes(toolCallId)) {
                   unwatch();
                   resolve();
                 }
               });
             });
-            askingPermission.value = false;
+            pendingToolCallIds.value = pendingToolCallIds.value.filter(
+              (id) => id !== toolCallId
+            );
             return permitted;
           }),
           maxSteps: 10,
@@ -152,18 +155,32 @@ export function useAI(options: AIOptions) {
     modelId.value = model;
   }
 
-  function acceptPermission() {
+  /** If toolCallId is not provided, all tool calls are accepted */
+  function acceptPermission(toolCallId?: string) {
     permitted = true;
-    askingPermission.value = false;
+    if (toolCallId === undefined) {
+      pendingToolCallIds.value = [];
+    } else {
+      pendingToolCallIds.value = pendingToolCallIds.value.filter(
+        (id) => id !== toolCallId
+      );
+    }
   }
 
-  /** After the user rejected the permission, they can provide a follow-up message */
-  function rejectPermission(userFollowup?: string) {
+  /** After the user rejected the permission, they can provide a follow-up message.
+   * If no toolCallId is provided, all tool calls are rejected.*/
+  function rejectPermission(toolCallId?: string, userFollowup?: string) {
     if (userFollowup) {
       followupAfterRejected.value = userFollowup;
     }
     permitted = false;
-    askingPermission.value = false;
+    if (toolCallId === undefined) {
+      pendingToolCallIds.value = [];
+    } else {
+      pendingToolCallIds.value = pendingToolCallIds.value.filter(
+        (id) => id !== toolCallId
+      );
+    }
   }
 
   async function fillTitle() {
@@ -208,6 +225,7 @@ export function useAI(options: AIOptions) {
     error,
     status,
     setModel,
+    pendingToolCallIds,
     askingPermission,
     acceptPermission,
     rejectPermission,

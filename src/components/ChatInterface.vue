@@ -11,7 +11,7 @@
           v-for="message in messages"
           :key="message.id"
           :message="message"
-          :asking-permission="askingPermission"
+          :pending-tool-call-ids="pendingToolCallIds"
           @accept-permission="acceptPermission"
           @reject-permission="rejectPermission"
         />
@@ -142,6 +142,7 @@ export default {
       error: ai.error,
       status: ai.status,
       setModel: ai.setModel,
+      pendingToolCallIds: ai.pendingToolCallIds,
       askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
       rejectPermission: ai.rejectPermission,
