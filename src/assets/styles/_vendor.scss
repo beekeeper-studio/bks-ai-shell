@@ -1,0 +1,8 @@
+@import "@beekeeperstudio/ui-kit/style.css";
+@import "@material-symbols/font-400/outlined.css";
+
+bks-sql-text-editor, bks-text-editor {
+  &.read-only {
+   --bks-text-editor-cursor-bg-color: transparent;
+  }
+}

@@ -1,39 +1,51 @@
 <template>
   <div class="tool">
     <div>{{ displayName }}</div>
-    <markdown
-      v-if="toolCall.toolName === 'run_query'"
-      :content="'```sql\n' + toolCall.args.query + '\n```'"
+    <run-query-args
+      v-if="toolResult.toolName === 'run_query'"
+      :args="toolResult.args"
+      :asking-permission="askingPermission"
+      @change="handleChangeArgs"
     />
     <div v-if="askingPermission">
       {{
-        toolCall.toolName === "run_query"
+        toolResult.toolName === "run_query"
           ? "Do you want to run this query?"
           : "Do you want to proceed?"
       }}
       <div class="tool-permission-buttons">
-        <button class="accept-btn" @click="$emit('accept')">
+        <button
+          class="btn btn-flat"
+          @click="handlePermissionButton('accepted')"
+        >
           Yes
-          <span class="material-symbols-outlined accept-icon"> check </span>
         </button>
-        <button class="reject-btn" @click="$emit('reject')">
+        <button
+          class="btn btn-flat"
+          @click="handlePermissionButton('rejected')"
+        >
           No
-          <span class="material-symbols-outlined reject-icon"> close </span>
+        </button>
+        <button
+          class="btn btn-flat"
+          @click="handleEdit"
+        >
+          Edit query
         </button>
       </div>
     </div>
     <div :class="{ error }">
       <template v-if="error">{{ error }}</template>
       <template v-else-if="data">
-        <template v-if="toolCall.toolName === 'get_connection_info'">
+        <template v-if="toolResult.toolName === 'get_connection_info'">
           {{ data.connectionType }}
         </template>
-        <template v-if="toolCall.toolName === 'get_tables'">
+        <template v-if="toolResult.toolName === 'get_tables'">
           {{ data.length }}
           {{ $pluralize("table", data.length) }}
           (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
         </template>
-        <template v-if="toolCall.toolName === 'get_columns'">
+        <template v-if="toolResult.toolName === 'get_columns'">
           {{ data.length }}
           {{ $pluralize("column", data.length) }}
           (<code
@@ -42,7 +54,7 @@
           />)
         </template>
         <run-query-result
-          v-else-if="toolCall.toolName === 'run_query' && data"
+          v-else-if="toolResult.toolName === 'run_query' && data"
           :data="data"
         />
       </template>
@@ -52,24 +64,44 @@
 
 <script lang="ts">
 import Markdown from "@/components/messages/Markdown.vue";
-import { ToolCall } from "ai";
-import { PropType } from "vue";
+import { PropType, computed } from "vue";
 import { safeJSONStringify } from "@/utils";
+import RunQueryArgs from "@/components/messages/tool/RunQueryArgs.vue";
 import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
+import type { MappedToolResult } from "@/tools";
+import { mapState } from "pinia";
+import { useTabState } from "@/stores/tabState";
 
 export default {
-  components: { Markdown, RunQueryResult },
+  components: {
+    Markdown,
+    RunQueryResult,
+    RunQueryArgs,
+  },
+
   props: {
-    askingPermission: Boolean,
-    toolCall: {
-      type: Object as PropType<ToolCall<string, any>>,
+    toolResult: {
+      type: Object as PropType<MappedToolResult>,
       required: true,
     },
   },
-  emits: ["accept", "reject"],
+
+  data() {
+    return {
+      userChangedArgs: false,
+      newArgs: {} as MappedToolResult["args"],
+    };
+  },
+
   computed: {
+    ...mapState(useTabState, ["toolPermissions"]),
+    askingPermission() {
+      return (
+        this.toolPermissions[this.toolResult.toolCallId]?.status === "pending"
+      );
+    },
     content() {
       if (this.data) {
         let str = "";
@@ -87,31 +119,50 @@ export default {
     },
     data() {
       try {
-        return JSON.parse(this.toolCall.result);
+        return JSON.parse(this.toolResult.result);
       } catch (e) {
         return null;
       }
     },
     error() {
-      if (isErrorContent(this.toolCall.result)) {
-        const err = parseErrorContent(this.toolCall.result);
+      if (isErrorContent(this.toolResult.result)) {
+        const err = parseErrorContent(this.toolResult.result);
         return err.message ?? err;
       }
     },
     displayName() {
-      if (this.toolCall.toolName === "get_columns") {
-        if (this.toolCall.args.schema) {
-          return `Get Columns (schema: ${this.toolCall.args.schema}, table: ${this.toolCall.args.table})`;
+      if (this.toolResult.toolName === "get_columns") {
+        if (this.toolResult.args.schema) {
+          return `Get Columns (schema: ${this.toolResult.args.schema}, table: ${this.toolResult.args.table})`;
         }
-        return `Get Columns (table: ${this.toolCall.args.table})`;
+        return `Get Columns (table: ${this.toolResult.args.table})`;
       }
-      return this.toolCall.toolName.split("_").map(_.capitalize).join(" ");
+      return this.toolResult.toolName.split("_").map(_.capitalize).join(" ");
     },
   },
   methods: {
     truncateAtWord(str, maxLength) {
       if (str.length <= maxLength) return str;
       return str.slice(0, str.lastIndexOf(" ", maxLength)) + "…";
+    },
+
+    handleChangeArgs(args: MappedToolResult["args"]) {
+      this.userChangedArgs = true;
+      this.newArgs = args;
+    },
+
+    handleEdit() {
+      this.trigger("editToolArgs", {
+        toolName: this.toolResult.toolName,
+        args: this.toolResult.args,
+      });
+    },
+
+    handlePermissionButton(status: "accepted" | "rejected") {
+      this.trigger("resolvePermission", {
+        toolCallId: this.toolResult.toolCallId,
+        status,
+      });
     },
   },
 };

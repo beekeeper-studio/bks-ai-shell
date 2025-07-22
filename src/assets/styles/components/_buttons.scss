@@ -58,3 +58,11 @@ $btn-border-radius:         8px;
     color: var(--query-editor-bg);
   }
 }
+
+.btn-flat {
+  color: var(--theme-base);
+  background-color: rgb(from var(--theme-base) r g b / 6%);
+  &:hover, &:focus {
+    background-color: rgb(from var(--theme-base) r g b / 12%);
+  }
+}

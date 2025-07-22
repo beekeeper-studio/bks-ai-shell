@@ -11,9 +11,6 @@
           v-for="message in messages"
           :key="message.id"
           :message="message"
-          :pending-tool-call-ids="pendingToolCallIds"
-          @accept-permission="acceptPermission"
-          @reject-permission="rejectPermission"
         />
         <div
           class="message error"
@@ -89,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { useAI } from "@/composables/ai";
+import { useAI } from "@/ai";
 import { useChatStore, Model } from "@/stores/chat";
 import Dropdown from "./common/Dropdown.vue";
 import DropdownOption from "./common/DropdownOption.vue";
@@ -128,9 +125,6 @@ export default {
   setup(props) {
     const ai = useAI({
       initialMessages: props.initialMessages,
-      anthropicApiKey: props.anthropicApiKey,
-      openaiApiKey: props.openaiApiKey,
-      googleApiKey: props.googleApiKey,
     });
 
     return {
@@ -142,11 +136,8 @@ export default {
       error: ai.error,
       status: ai.status,
       setModel: ai.setModel,
-      pendingToolCallIds: ai.pendingToolCallIds,
       askingPermission: ai.askingPermission,
-      acceptPermission: ai.acceptPermission,
-      rejectPermission: ai.rejectPermission,
-      reload: ai.reload,
+      resolvePermission: ai.resolvePermission,
     };
   },
 
@@ -194,7 +185,21 @@ export default {
             }
           },
         },
-      ]
+        {
+          event: "resolvePermission",
+          handler: (res) => this.resolvePermission(res),
+        },
+        {
+          event: "editToolArgs",
+          handler: (toolInvocation) => {
+            console.log('editing huh')
+            this.resolvePermission({
+              status: 'rejected',
+            })
+            toolInvocation.toolName
+          }
+        },
+      ];
     },
   },
 
@@ -332,11 +337,7 @@ export default {
       this.tempInput = "";
       this.input = "";
 
-      if (this.askingPermission) {
-        this.rejectPermission(message);
-      } else {
-        this.send(message);
-      }
+      this.send(message);
     },
 
     addToHistory(input: string) {
@@ -361,11 +362,7 @@ export default {
     },
 
     stop() {
-      if (this.askingPermission) {
-        this.rejectPermission();
-      } else {
-        this.abort();
-      }
+      this.abort();
     },
 
     scrollToBottom() {

@@ -295,34 +295,20 @@
   gap: 0.5rem;
   margin-top: 0.2rem;
 
-  button {
-    border: none;
-    background-color: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: currentColor;
-    padding: 0;
-
-    &:hover {
-      .accept-icon {
-        color: color-mix(in srgb, var(--brand-success) 70%, black);
-      }
-
-      .reject-icon {
-        color: color-mix(in srgb, var(--brand-danger) 90%, black);
-      }
-    }
+  .btn {
+    min-width: 0px;
+    padding-inline: 0.5rem;
   }
 }
 
 .chat-input-container {
+  overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin: 1rem;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   width: calc(100% - 2rem);
   max-width: var(--screen-max-width);
 

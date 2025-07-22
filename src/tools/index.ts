@@ -1,28 +1,15 @@
 import { z } from "zod";
-import { Tool, tool, ToolSet } from "ai";
+import { tool, ToolSet, ToolResult } from "ai";
 import {
   getColumns,
-  getConnectionInfo,
   getTables,
-  runQuery,
 } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
 
-export const get_connection_info = tool({
-  description:
-    "Get information about the current database connection including type, default database, and read-only status",
-  parameters: z.object({}),
-  execute: async () => {
-    try {
-      return safeJSONStringify(await getConnectionInfo());
-    } catch (e) {
-      return safeJSONStringify({
-        type: "error",
-        message: e.message,
-      });
-    }
-  },
-});
+export type MappedToolResult =
+  | ToolResult<"get_tables", z.infer<typeof get_tables['parameters']>, string>
+  | ToolResult<"get_columns", z.infer<typeof get_columns['parameters']>, string>
+  | ToolResult<"run_query", z.infer<typeof run_query['parameters']>, string>;
 
 export const get_tables = tool({
   description: "Get a list of all tables in the current database",
@@ -68,53 +55,18 @@ export const get_columns = tool({
   },
 });
 
-export const run_query = (
-  onAskPermission: (toolCallId: string, params: any) => Promise<void>,
-) =>
-  tool({
-    description: "Run a SQL query and get the results",
-    parameters: z.object({
-      query: z.string().describe("The SQL query to execute"),
-    }),
-    execute: async (params, options) => {
-      await onAskPermission(options.toolCallId, params);
-      try {
-        return safeJSONStringify(
-          await runQuery(params.query),
-        );
-      } catch (e) {
-        return safeJSONStringify({
-          type: "error",
-          message: e.message,
-        });
-      }
-    },
-  });
+export type RunQueryParams = z.infer<typeof run_query['parameters']>;
 
-export function getTools(
-  onAskPermission: (name: string, toolCallId: string) => Promise<boolean>,
-): ToolSet {
-  const toolSet: ToolSet = {
-    get_connection_info,
-    get_tables,
-    get_columns,
-  };
-  toolSet["run_query"] = run_query(async (toolCallId, params) => {
-    const permitted = await onAskPermission("run_query", toolCallId);
-    if (!permitted) {
-      throw new UserRejectedError(toolCallId);
-    }
-  });
-  return toolSet;
-}
+export const run_query = tool({
+  description: "Run a SQL query and get the results",
+  parameters: z.object({
+    query: z.string().describe("The SQL query to execute"),
+  }),
+  // No execute function because user permission is required
+});
 
-export class UserRejectedError extends Error {
-  constructor(public toolCallId: string) {
-    super();
-    this.name = "UserRejectedError";
-  }
-
-  static isInstance(error: any): error is UserRejectedError {
-    return error && error.name === "UserRejectedError";
-  }
+export const tools = {
+  get_tables,
+  get_columns,
+  run_query,
 }

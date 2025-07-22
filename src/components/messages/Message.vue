@@ -6,10 +6,7 @@
         <markdown v-if="part.type === 'text'" :content="part.text" />
         <tool-message
           v-else-if="part.type === 'tool-invocation'"
-          :toolCall="part.toolInvocation"
-          :askingPermission="pendingToolCallIds.includes(part.toolInvocation.toolCallId)"
-          @accept="$emit('accept-permission', part.toolInvocation.toolCallId)"
-          @reject="$emit('reject-permission', part.toolInvocation.toolCallId)"
+          :toolResult="part.toolInvocation"
         />
       </template>
     </div>
@@ -33,10 +30,6 @@ export default {
   props: {
     message: {
       type: Object as PropType<Message>,
-      required: true,
-    },
-    pendingToolCallIds: {
-      type: Array as PropType<string[]>,
       required: true,
     },
   },

@@ -1,17 +1,35 @@
+import type { tools } from "@/tools";
 import { expandTableResult, QueryResult } from "@beekeeperstudio/plugin";
 import { Plugin, App } from "vue";
+import { z } from "zod";
 
 export type AppEvent = keyof AppEventHandlers;
 
 export interface AppEventHandlers {
   showResultTable: (queryResults: QueryResult[]) => void;
   showedResultTable: (queryResults: QueryResult[]) => void;
+  resolvePermission: (response: PermissionResponse) => void;
+  editToolArgs: <T extends keyof typeof tools>(tool: EditableTool<T>) => void;
 }
 
-export interface RootBinding {
-  event: AppEvent;
-  handler: AppEventHandlers[AppEvent];
-}
+export type PermissionResponse = {
+  /** If `toolCallId` is not provided, the response applies to all
+   * tool calls that are currently pending. */
+  toolCallId?: string;
+  status: "accepted" | "rejected";
+};
+
+export type EditableTool<T extends keyof typeof tools> = {
+  toolName: T;
+  args: z.infer<(typeof tools)[T]["parameters"]>;
+};
+
+export type RootBinding = {
+  [K in keyof AppEventHandlers]: {
+    event: K;
+    handler: AppEventHandlers[K];
+  };
+}[keyof AppEventHandlers];
 
 export function createAppEvent(): Plugin {
   const events: {
