@@ -52,12 +52,7 @@ export default {
 
       switch (action) {
         case "copy": {
-          if (navigator.clipboard) {
-            // FIXME remove this
-            navigator.clipboard.writeText(text);
-          } else {
-            clipboard.writeText(text);
-          }
+          clipboard.writeText(text);
           target.classList.add("copied");
           if (this.copyTimeout) {
             clearTimeout(this.copyTimeout);
