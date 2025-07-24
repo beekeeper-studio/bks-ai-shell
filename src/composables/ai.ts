@@ -4,6 +4,9 @@ import {
   streamText,
   generateObject,
   ToolExecutionError,
+  APICallError,
+  NoSuchModelError,
+  NoSuchProviderError,
 } from "ai";
 import { useChat } from "@ai-sdk/vue";
 import { computed, ref, watch } from "vue";
@@ -15,6 +18,7 @@ import {
   defaultTemperature,
   AvailableProviders,
   AvailableModels,
+  providerConfigs,
 } from "@/config";
 import { getTools, UserRejectedError } from "@/tools";
 import { Message } from "ai";
@@ -71,6 +75,12 @@ export function useAI(options: AIOptions) {
         });
         return result.toDataStreamResponse({
           getErrorMessage: (error) => {
+            notify("pluginError", {
+              message: error.message,
+              name: error.name,
+              stack: error.stack
+            })
+
             if (NoSuchToolError.isInstance(error)) {
               return "The model tried to call a unknown tool.";
             } else if (InvalidToolArgumentsError.isInstance(error)) {
@@ -81,10 +91,22 @@ export function useAI(options: AIOptions) {
               } else {
                 return "An error occurred during tool execution.";
               }
-            } else {
-              return "An unknown error occurred.";
+            } else if (APICallError.isInstance(error)) {
+              if (
+                error.data?.error?.code === "invalid_api_key" ||
+                error.data?.error?.message === "invalid x-api-key" ||
+                error.data?.error?.code === 400
+              ) {
+                return `The ${providerConfigs[providerId.value!].displayName} API key is invalid.`;
+              }
+              return "An error occurred during API call.";
+            } else if (NoSuchProviderError.isInstance(error)) {
+              return `Provider ${providerId.value} does not exist.`;
+            } else if (NoSuchModelError.isInstance(error)) {
+              return `Model ${modelId.value} does not exist.`;
             }
-          },
+            return "An unknown error occurred.";
+          }
         });
       },
       onError: (error) => {
