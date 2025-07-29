@@ -25,6 +25,7 @@ import { Message } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
+import { useInternalDataStore } from "@/stores/internalData";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -175,6 +176,7 @@ export function useAI(options: AIOptions) {
   ) {
     providerId.value = provider;
     modelId.value = model;
+    useInternalDataStore().setInternal("lastUsedModelId", model);
   }
 
   /** If toolCallId is not provided, all tool calls are accepted */

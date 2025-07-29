@@ -61,21 +61,17 @@ export default {
       await this.$nextTick();
 
       const configuration = useConfigurationStore();
-      const apiKey =
-        configuration[`providers.${this.lastUsedProviderId}.apiKey`] ?? "";
 
       // Check if API key exists and auto-navigate to appropriate page
-      if (apiKey && this.lastUsedProviderId) {
-        try {
-          this.page = "chat-interface";
-        } catch (e) {
-          // If initialization fails, go to API key form
-          this.page = "api-key-form";
-          this.error = e;
-        }
+      if (configuration.apiKeyExists) {
+        this.page = "chat-interface";
       } else {
         this.page = "api-key-form";
       }
+    } catch (e) {
+      // If initialization fails, go to API key form
+      this.page = "api-key-form";
+      this.error = e;
     } finally {
       clearTimeout(loadingTimer);
       this.appReady = true;
@@ -83,7 +79,6 @@ export default {
   },
 
   computed: {
-    ...mapState(useInternalDataStore, ["lastUsedProviderId"]),
     ...mapState(useTabState, ["messages"]),
     ...mapState(useConfigurationStore, {
       openaiApiKey: "providers.openai.apiKey",

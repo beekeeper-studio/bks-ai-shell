@@ -66,7 +66,6 @@
 <script lang="ts">
 import { mapState, mapActions } from "pinia";
 import { useChatStore } from "@/stores/chat";
-import { useInternalDataStore } from "@/stores/internalData";
 import { useConfigurationStore } from "@/stores/configuration";
 import { providerConfigs } from "@/config";
 
@@ -89,7 +88,6 @@ export default {
   },
 
   computed: {
-    ...mapState(useInternalDataStore, ["lastUsedProviderId"]),
     ...mapState(useConfigurationStore, [
       "providers.openai.apiKey",
       "providers.anthropic.apiKey",
