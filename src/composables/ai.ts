@@ -18,7 +18,6 @@ import {
   defaultTemperature,
   AvailableProviders,
   AvailableModels,
-  providerConfigs,
 } from "@/config";
 import { getTools, UserRejectedError } from "@/tools";
 import { Message } from "ai";
@@ -34,9 +33,13 @@ type AIOptions = {
   googleApiKey?: string;
 };
 
+type SendOptions = {
+  providerId: AvailableProviders;
+  modelId: AvailableModels["id"];
+  apiKey: string;
+}
+
 export function useAI(options: AIOptions) {
-  const providerId = ref<AvailableProviders | undefined>();
-  const modelId = ref<AvailableModels["id"] | undefined>();
   const pendingToolCallIds = ref<string[]>([]);
   const askingPermission = computed(() => pendingToolCallIds.value.length > 0);
   const followupAfterRejected = ref("");
@@ -46,11 +49,12 @@ export function useAI(options: AIOptions) {
   const { messages, input, append, error, status, addToolResult, stop, reload } =
     useChat({
       fetch: async (url, fetchOptions) => {
-        if (!modelId.value) {
-          throw new Error("No provider or model selected.");
-        }
-        const model = createProvider().chat(modelId.value);
         const m = JSON.parse(fetchOptions.body) as any;
+        const sendOptions = m.sendOptions as SendOptions;
+        const model = createProvider(
+          sendOptions.providerId,
+          sendOptions.apiKey
+        ).chat(sendOptions.modelId);
         const result = streamText({
           model,
           messages: m.messages,
@@ -98,13 +102,13 @@ export function useAI(options: AIOptions) {
                 error.data?.error?.message === "invalid x-api-key" ||
                 error.data?.error?.code === 400
               ) {
-                return `The ${providerConfigs[providerId.value!].displayName} API key is invalid.`;
+                return `The API key is invalid.`;
               }
               return "An error occurred during API call.";
             } else if (NoSuchProviderError.isInstance(error)) {
-              return `Provider ${providerId.value} does not exist.`;
+              return `Provider ${error.providerId} does not exist.`;
             } else if (NoSuchModelError.isInstance(error)) {
-              return `Model ${modelId.value} does not exist.`;
+              return `Model ${error.modelId} does not exist.`;
             }
             return "An unknown error occurred.";
           }
@@ -131,52 +135,42 @@ export function useAI(options: AIOptions) {
               content: followupAfterRejected.value,
             });
             followupAfterRejected.value = "";
-            fillTitle();
+            // fillTitle();
           }
         }
       },
       onFinish: () => {
         saveMessages();
-        fillTitle();
       },
       initialMessages: options.initialMessages,
     });
 
-  function createProvider() {
-    if (!providerId.value) {
+  function createProvider(providerId: AvailableProviders, apiKey: string) {
+    if (!providerId) {
       throw new Error("No provider selected.");
     }
 
-    if (providerId.value === "google") {
+    if (providerId === "google") {
       return createGoogleGenerativeAI({
-        apiKey: options.googleApiKey,
+        apiKey,
       });
-    } else if (providerId.value === "anthropic") {
+    } else if (providerId === "anthropic") {
       return createAnthropic({
-        apiKey: options.anthropicApiKey,
+        apiKey,
         headers: { 'anthropic-dangerous-direct-browser-access': 'true' }
       });
-    } else if (providerId.value === "openai") {
+    } else if (providerId === "openai") {
       return createOpenAI({
         compatibility: "strict",
-        apiKey: options.openaiApiKey,
+        apiKey,
       });
     }
 
-    throw new Error("Unknown provider");
+    throw new Error(`Provider ${providerId} does not exist.`);
   }
 
   function saveMessages() {
     useTabState().setTabState("messages", messages.value);
-  }
-
-  function setModel<T extends AvailableProviders>(
-    provider: T,
-    model: AvailableModels<T>["id"],
-  ) {
-    providerId.value = provider;
-    modelId.value = model;
-    useInternalDataStore().setInternal("lastUsedModelId", model);
   }
 
   /** If toolCallId is not provided, all tool calls are accepted */
@@ -207,15 +201,12 @@ export function useAI(options: AIOptions) {
     }
   }
 
-  async function fillTitle() {
-    if (!modelId.value) {
-      throw new Error("No provider or model selected.");
-    }
+  async function fillTitle(options: SendOptions) {
     if (useTabState().conversationTitle) {
       // Skip generation if title is already set
       return;
     }
-    const model = createProvider().languageModel(modelId.value);
+    const model = createProvider(options.providerId, options.apiKey).languageModel(options.modelId);
     const res = await generateObject({
       model,
       schema: z.object({
@@ -230,11 +221,19 @@ export function useAI(options: AIOptions) {
   }
 
   /** Send a message to the AI */
-  function send(message: string) {
-    append({
-      role: "user",
-      content: message,
-    });
+  async function send(message: string, options: SendOptions) {
+    await append(
+      {
+        role: "user",
+        content: message,
+      },
+      {
+        body: {
+          sendOptions: options,
+        },
+      },
+    );
+    fillTitle(options);
   }
 
   function abort() {
@@ -244,11 +243,9 @@ export function useAI(options: AIOptions) {
 
   return {
     messages,
-    provider: providerId,
     input,
     error,
     status,
-    setModel,
     pendingToolCallIds,
     askingPermission,
     acceptPermission,

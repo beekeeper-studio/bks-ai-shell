@@ -99,8 +99,10 @@ import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
 import { PropType } from "vue";
-import { mapState, mapWritableState } from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
+import { useConfigurationStore } from "@/stores/configuration";
+import { useInternalDataStore } from "@/stores/internalData";
 
 const maxHistorySize = 50;
 
@@ -137,11 +139,9 @@ export default {
       send: ai.send,
       abort: ai.abort,
       messages: ai.messages,
-      provider: ai.provider,
       input: ai.input,
       error: ai.error,
       status: ai.status,
-      setModel: ai.setModel,
       pendingToolCallIds: ai.pendingToolCallIds,
       askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
@@ -165,7 +165,12 @@ export default {
 
   computed: {
     ...mapWritableState(useChatStore, ["model"]),
-    ...mapState(useChatStore, ["models", "isAborting"]),
+    ...mapState(useChatStore, ["models"]),
+    ...mapState(useConfigurationStore, [
+      "providers.openai.apiKey",
+      "providers.anthropic.apiKey",
+      "providers.google.apiKey",
+    ]),
     canSendMessage() {
       if (this.askingPermission && this.input.trim().length > 0) return true;
       return this.status === "ready" || this.status === "error";
@@ -211,9 +216,6 @@ export default {
   },
 
   async mounted() {
-    if (this.model) {
-      this.setModel(this.model.provider, this.model.id);
-    }
     const scrollContainer = this.$refs.scrollContainerRef as HTMLElement;
     scrollContainer.addEventListener("scroll", () => {
       // Calculate if we're near bottom (within 50px of bottom)
@@ -230,6 +232,7 @@ export default {
   },
 
   methods: {
+    ...mapActions(useInternalDataStore, ["setInternal"]),
     handleEnterKey(e) {
       if (e.shiftKey) {
         // Allow default behavior (new line) when Shift+Enter is pressed
@@ -332,10 +335,19 @@ export default {
       this.tempInput = "";
       this.input = "";
 
+      if (!this.model) {
+        // FIXME we should catch this and show it on screen
+        throw new Error("No model selected");
+      }
+
       if (this.askingPermission) {
         this.rejectPermission(message);
       } else {
-        this.send(message);
+        this.send(message, {
+          modelId: this.model.id,
+          providerId: this.model.provider,
+          apiKey: this[`providers.${this.model.provider}.apiKey`],
+        });
       }
     },
 
@@ -376,7 +388,7 @@ export default {
         this.$refs.scrollContainerRef.scrollHeight;
     },
     selectModel(model: Model) {
-      this.setModel(model.provider, model.id);
+      this.setInternal("lastUsedModelId", model.id);
       this.model = model;
     },
   },
