@@ -96,9 +96,9 @@
     "@babel/helper-validator-identifier" "^7.25.9"
 
 "@beekeeperstudio/plugin@^1.3.0-beta":
-  version "1.3.0-beta"
-  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.3.0-beta.tgz#87da0b7cbe65a653ab980775e33bbb232861de94"
-  integrity sha512-HYofwVa9YZWBJ9jb6JyJtYMqq7ULBXfD9nNKe70BbsFtphw8uK5z2H+jZKmu+i0IgPT65cofc+nP98eNDqad3g==
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.3.1.tgz#1c774c5eaa7c9a45f6a7e19e723e99fe64837d20"
+  integrity sha512-p5/vo8PZc5NaxFCAoY+WS/fI9Y16RuE6lWbJvnxhoy380ODV+f9FkFH2sLYi3Vr2Ht1iC+ilfZqeZH0/QqZEyA==
 
 "@cfworker/json-schema@^4.0.2":
   version "4.1.1"

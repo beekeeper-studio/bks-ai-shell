@@ -4,57 +4,19 @@
       <h1>AI Shell</h1>
       <p>Enter at least one API key to get started</p>
       <form @submit.prevent="submitApiKey" class="api-key-form">
-        <div class="input-group">
-          <label for="openaiApiKey">
-            {{ providerConfigs["openai"].displayName }}
-          </label>
-          <input
-            type="password"
-            id="openaiApiKey"
-            :placeholder="`Your ${providerConfigs['openai'].displayName} API key`"
-            v-model="openaiApiKey"
-          />
-        </div>
-        <div class="input-group">
-          <label for="anthropicApiKey">
-            {{ providerConfigs["anthropic"].displayName }}
-          </label>
-          <input
-            type="password"
-            id="anthropicApiKey"
-            :placeholder="`Your ${providerConfigs['anthropic'].displayName} API key`"
-            v-model="anthropicApiKey"
-          />
-        </div>
-        <div class="input-group">
-          <label for="googleApiKey">
-            {{ providerConfigs["google"].displayName }}
-          </label>
-          <input
-            type="password"
-            for="googleApiKey"
-            :placeholder="`Your ${providerConfigs['google'].displayName} API key`"
-            v-model="googleApiKey"
-          />
-        </div>
+        <ApiInput provider-id="openai" helper-link="https://platform.openai.com/api-keys" v-model="openaiApiKey" />
+        <ApiInput provider-id="anthropic" helper-link="https://console.anthropic.com/settings/keys"
+          v-model="anthropicApiKey" />
+        <ApiInput provider-id="google" helper-link="https://aistudio.google.com/apikey" v-model="googleApiKey" />
         <p class="api-info">
           Your API keys are stored only on your device and are never shared with
           any server except the selected AI providers.
         </p>
         <div class="actions">
-          <button
-            class="btn"
-            v-if="cancelable"
-            type="button"
-            @click.prevent="$emit('cancel')"
-          >
+          <button class="btn" v-if="cancelable" type="button" @click.prevent="$emit('cancel')">
             Cancel
           </button>
-          <button
-            class="btn btn-primary"
-            type="submit"
-            :disabled="cancelable && !dirty"
-          >
+          <button class="btn btn-primary" type="submit" :disabled="cancelable && !dirty">
             Save
           </button>
         </div>
@@ -68,9 +30,14 @@ import { mapState, mapActions } from "pinia";
 import { useChatStore } from "@/stores/chat";
 import { useConfigurationStore } from "@/stores/configuration";
 import { providerConfigs } from "@/config";
+import ApiInput from "./ApiInput.vue";
 
 export default {
   name: "ApiKeyForm",
+
+  components: {
+    ApiInput,
+  },
 
   props: {
     cancelable: {
