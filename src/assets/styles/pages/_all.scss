@@ -1,6 +1,6 @@
 @use "api-key-form";
 @use "chat-interface";
-@use "configuration";
+@use "configuration/main";
 
 .first-time-user {
   max-width: 20rem;
