@@ -14,9 +14,6 @@ type ChatState = {
   /** The active model. E.g. Claude 4 Sonnet, Claude 3.5, etc. */
   model?: Model;
 
-  /** All available models. */
-  models: Model[];
-
   /** The title of the conversation. */
   conversationTitle: string;
 
@@ -27,24 +24,13 @@ type ChatState = {
 // the first argument is a unique id of the store across your application
 export const useChatStore = defineStore("chat", {
   state: (): ChatState => ({
-    models: [],
     conversationTitle: "",
     isGeneratingConversationTitle: false,
   }),
-  actions: {
-    async initialize() {
-      const internal = useInternalDataStore();
+  getters: {
+    models() {
       const config = useConfigurationStore();
-      const tabState = useTabState();
-      await config.sync();
-      await internal.sync();
-      await tabState.sync();
-      this.syncModels();
-    },
-    syncModels() {
-      const config = useConfigurationStore();
-      const internal = useInternalDataStore();
-      const models: ChatState["models"] = [];
+      const models: Model[] = [];
       if (config["providers.openai.apiKey"]) {
         models.push(
           ...providerConfigs.openai.models.map((m) => ({
@@ -69,9 +55,21 @@ export const useChatStore = defineStore("chat", {
           })),
         );
       }
-      this.models = models;
+      return models.filter((model) =>
+        !config.disabledModels.some((disabled) => model.id === disabled),
+      );
+    },
+  },
+  actions: {
+    async initialize() {
+      const internal = useInternalDataStore();
+      const config = useConfigurationStore();
+      const tabState = useTabState();
+      await config.sync();
+      await internal.sync();
+      await tabState.sync();
       this.model =
-        this.models.find((m) => m.id === internal.lastUsedModelId) || models[0];
+        this.models.find((m) => m.id === internal.lastUsedModelId) || this.models[0];
     },
   },
 });

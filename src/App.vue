@@ -5,22 +5,32 @@
       <div class="progress-bar"></div>
     </div>
     <template v-else>
-      <!-- API Key Form -->
-      <ApiKeyForm
-        v-if="!apiKeyExists || page === 'api-key-form'"
-        @submit="page = 'chat-interface'"
-        @cancel="page = 'chat-interface'"
-        :cancelable="apiKeyExists"
-      />
+      <div v-if="firstTimeUser" class="first-time-user">
+        <h1>AI Shell</h1>
+        <p>Enter at least one API key to get started</p>
+        <form @submit.prevent="submitFirstTimeUser">
+          <ApiKeyForm />
+          <ApiInfo />
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Continue</button>
+          </div>
+        </form>
+      </div>
 
       <ChatInterface
-        v-else
+        v-else-if="page === 'chat-interface'"
         :initialMessages="messages"
         :openaiApiKey="openaiApiKey"
         :anthropicApiKey="anthropicApiKey"
         :googleApiKey="googleApiKey"
-        @manage-models="page = 'api-key-form'"
+        @manage-models="page = 'configuration'"
       />
+      <div id="configuration-page" v-else>
+        <button class="btn btn-flat btn-back" @click="page = 'chat-interface'">
+          <span class="material-symbols-outlined">keyboard_arrow_left</span> Back
+        </button>
+        <Configuration />
+      </div>
     </template>
   </div>
 </template>
@@ -33,11 +43,15 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
+import Configuration from "@/components/configuration/Configuration.vue";
+import ApiInfo from "./components/configuration/ApiInfo.vue";
 
 export default {
   components: {
     ApiKeyForm,
+    ApiInfo,
     ChatInterface,
+    Configuration,
   },
 
   data() {
@@ -47,6 +61,7 @@ export default {
       error: "" as unknown,
       appReady: false,
       showLoading: false,
+      firstTimeUser: false,
     };
   },
 
@@ -61,16 +76,12 @@ export default {
       await this.$nextTick();
 
       const configuration = useConfigurationStore();
-
-      // Check if API key exists and auto-navigate to appropriate page
-      if (configuration.apiKeyExists) {
+      this.firstTimeUser = !configuration.apiKeyExists;
+      if (!this.firstTimeUser) {
         this.page = "chat-interface";
-      } else {
-        this.page = "api-key-form";
       }
     } catch (e) {
-      // If initialization fails, go to API key form
-      this.page = "api-key-form";
+      this.page = "configuration";
       this.error = e;
     } finally {
       clearTimeout(loadingTimer);
@@ -92,6 +103,10 @@ export default {
     ...mapActions(useConfigurationStore, ["configure"]),
     ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initialize"]),
+    submitFirstTimeUser() {
+      this.page = "chat-interface";
+      this.firstTimeUser = false;
+    },
   },
 };
 </script>

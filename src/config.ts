@@ -97,10 +97,16 @@ export const providerConfigs = {
       { id: "gpt-4.1-mini", displayName: "gpt-4.1-mini" },
       { id: "gpt-4.1-nano", displayName: "gpt-4.1-nano" },
       { id: "gpt-4o", displayName: "gpt-4o" },
-      { id: "gpt-4o", displayName: "gpt-4o-mini" },
+      { id: "gpt-4o-mini", displayName: "gpt-4o-mini" },
       { id: "o3", displayName: "o3" },
       { id: "o3-mini", displayName: "o3-mini" },
       { id: "o4-mini", displayName: "o4-mini" },
     ],
   },
 } as const;
+
+export const disabledModelsByDefault: AvailableModels['id'][] = [
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-8b",
+  "gemini-1.5-pro",
+]

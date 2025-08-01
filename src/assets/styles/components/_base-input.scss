@@ -1,12 +1,9 @@
-.api-input {
+.base-input {
   display: flex;
   gap: 0.5rem;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
 
-  label {
-    margin-top: 0.6rem;
-  }
+  text-align: left;
 
   .input-wrapper {
     display: flex;
@@ -15,7 +12,7 @@
     gap: 0.5rem;
   }
 
-  .helper-text {
+  .helper {
     font-size: 0.75rem;
     color: var(--text-dark);
     opacity: 0.7;

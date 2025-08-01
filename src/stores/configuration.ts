@@ -17,10 +17,13 @@ import {
   setData,
   setEncryptedData,
 } from "@beekeeperstudio/plugin";
+import { AvailableModels, disabledModelsByDefault } from "@/config";
 
 type Configurable = {
   /** Enable summarization. */
   summarization: boolean;
+  /** List of disabled models by id. */
+  disabledModels: AvailableModels["id"][];
 };
 
 type EncryptedConfigurable = {
@@ -42,6 +45,7 @@ const defaultConfiguration: ConfigurationState = {
   "providers.openai.apiKey": "",
   "providers.anthropic.apiKey": "",
   "providers.google.apiKey": "",
+  disabledModels: disabledModelsByDefault,
 };
 
 function isEncryptedConfig(

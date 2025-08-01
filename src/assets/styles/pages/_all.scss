@@ -1,2 +1,33 @@
 @use "api-key-form";
 @use "chat-interface";
+@use "configuration";
+
+.first-time-user {
+  max-width: 20rem;
+  text-align: center;
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+
+#configuration-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .btn-back {
+    background-color: transparent;
+    box-shadow: none;
+    margin-right: auto;
+    margin-top: 1rem;
+  }
+
+  .configuration {
+    max-width: 700px;
+    height: 100%;
+    margin: 0 auto;
+  }
+}
