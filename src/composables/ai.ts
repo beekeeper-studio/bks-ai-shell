@@ -24,7 +24,6 @@ import { Message } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
-import { useInternalDataStore } from "@/stores/internalData";
 
 type AIOptions = {
   initialMessages: Message[];

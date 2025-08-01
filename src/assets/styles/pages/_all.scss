@@ -15,8 +15,10 @@
 
 #configuration-page {
   height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  overflow: scroll;
 
   .btn-back {
     background-color: transparent;
@@ -26,8 +28,9 @@
   }
 
   .configuration {
-    max-width: 700px;
+    max-width: 600px;
     height: 100%;
     margin: 0 auto;
+    width: 100%;
   }
 }

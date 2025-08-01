@@ -1,46 +1,30 @@
 <template>
-  <div class="configuration">
-    <nav>
-      <ul>
-        <li>
-          <button class="btn btn-flat nav-button" :class="{ active: page === 'models' }" @click="page = 'models'">
-            Models
-          </button>
-        </li>
-        <li>
-          <button class="btn btn-flat nav-button" :class="{ active: page === 'providers' }" @click="page = 'providers'">
-            Providers
-          </button>
-        </li>
-      </ul>
-    </nav>
-    <div class="content">
-      <ModelsConfiguration v-if="page === 'models'" />
-      <ProvidersConfiguration v-else-if="page === 'providers'" />
-    </div>
+  <h2>Models</h2>
+  <div v-for="provider in modelsByProvider" class="provider">
+    <h3>{{ provider.providerDisplayName }}</h3>
+    <ul class="model-list">
+      <li v-for="model in provider.models" :key="model.id" class="model">
+        <label class="switch-label">
+          {{ model.id }}
+          <Switch :model-value="model.enabled" @change="toggleModel(model.id, $event)" />
+        </label>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script lang="ts">
 import { AvailableProviders, AvailableModels, providerConfigs } from "@/config";
+import Switch from "@/components/common/Switch.vue";
 import { useChatStore } from "@/stores/chat";
 import { mapActions, mapState } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
-import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.vue";
-import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
 
 export default {
-  name: "Configuration",
+  name: "ModelsConfiguration",
 
   components: {
-    ModelsConfiguration,
-    ProvidersConfiguration,
-  },
-
-  data() {
-    return {
-      page: "models" as "models" | "providers",
-    };
+    Switch,
   },
 
   computed: {
