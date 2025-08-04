@@ -14,7 +14,7 @@
         </li>
       </ul>
     </nav>
-    <div class="content">
+    <div class="content" :class="page">
       <ModelsConfiguration v-if="page === 'models'" />
       <ProvidersConfiguration v-else-if="page === 'providers'" />
     </div>

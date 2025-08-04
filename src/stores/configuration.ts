@@ -24,6 +24,10 @@ type Configurable = {
   summarization: boolean;
   /** List of disabled models by id. */
   disabledModels: AvailableModels["id"][];
+  "providers_openaiCompat_url": string;
+  "providers_openaiCompat_headers": { key: string; value: string }[];
+  "providers_ollama_url": string;
+  "providers_ollama_headers": { key: string; value: string }[];
 };
 
 type EncryptedConfigurable = {
@@ -45,6 +49,10 @@ const defaultConfiguration: ConfigurationState = {
   "providers.openai.apiKey": "",
   "providers.anthropic.apiKey": "",
   "providers.google.apiKey": "",
+  "providers_openaiCompat_url": "",
+  "providers_openaiCompat_headers": [{ key: "", value: "" }],
+  "providers_ollama_url": "http://localhost:11434",
+  "providers_ollama_headers": [{ key: "", value: "" }],
   disabledModels: disabledModelsByDefault,
 };
 

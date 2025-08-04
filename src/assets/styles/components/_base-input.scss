@@ -10,6 +10,15 @@
     flex-direction: column;
     text-align: left;
     gap: 0.5rem;
+
+    input {
+      background-color: var(--query-editor-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+    }
   }
 
   .helper {

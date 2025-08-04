@@ -4,19 +4,6 @@
   gap: 1rem;
   margin-inline: auto;
 
-  input {
-    padding: 0.65rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    background-color: var(--query-editor-bg);
-    color: var(--text-dark);
-
-    &:disabled {
-      opacity: 0.6;
-    }
-  }
-
   .actions {
     display: flex;
     justify-content: center;

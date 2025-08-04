@@ -1,6 +1,29 @@
+@use "providers";
+
+#configuration-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
+
+  .btn-back {
+    background-color: transparent;
+    box-shadow: none;
+    margin-right: auto;
+    margin-top: 1rem;
+  }
+
+  .configuration {
+    max-width: 600px;
+    height: 100%;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
 .configuration {
   display: flex;
-  // height: 100%;
   width: 100%;
   background-color: var(--query-editor-bg);
 
@@ -36,6 +59,7 @@
   .content {
     padding: 1rem;
     flex-grow: 1;
+    min-width: 0;
 
     > :first-child {
       margin-top: 0;
