@@ -26,10 +26,7 @@
         @manage-models="page = 'configuration'"
       />
       <div id="configuration-page" v-else>
-        <button class="btn btn-flat btn-back" @click="page = 'chat-interface'">
-          <span class="material-symbols-outlined">keyboard_arrow_left</span> Back
-        </button>
-        <Configuration />
+        <Configuration @close="page = 'chat-interface'" />
       </div>
     </template>
   </div>

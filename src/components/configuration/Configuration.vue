@@ -3,7 +3,13 @@
     <nav>
       <ul>
         <li>
-          <button class="btn btn-flat nav-button" :class="{ active: page === 'models' }" @click="page = 'models'">
+          <button class="btn btn-flat nav-btn back-btn" @click="$emit('close')">
+            <span class="material-symbols-outlined">keyboard_arrow_left</span>
+            Back
+          </button>
+        </li>
+        <li>
+          <button class="btn btn-flat nav-btn" :class="{ active: page === 'models' }" @click="page = 'models'">
             Models
           </button>
         </li>
@@ -33,6 +39,8 @@ export default {
     ModelsConfiguration,
     ProvidersConfiguration,
   },
+
+  emits: ["close"],
 
   data() {
     return {

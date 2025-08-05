@@ -67,7 +67,7 @@ const defaultConfiguration: ConfigurationState = {
   providers_openaiCompat_baseUrl: "",
   providers_openaiCompat_apiKey: "",
   providers_openaiCompat_headers: "",
-  providers_ollama_baseUrl: "http://localhost:11434/api",
+  providers_ollama_baseUrl: "http://localhost:11434",
   providers_ollama_headers: "",
   providers_openai_models: [],
   providers_anthropic_models: [],
