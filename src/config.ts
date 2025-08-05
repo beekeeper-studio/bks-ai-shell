@@ -52,6 +52,14 @@ export const STORAGE_KEYS = {
 
 export type AvailableProviders = keyof typeof providerConfigs;
 
+export type AvailableProvidersWithDynamicModels = {
+  [K in keyof typeof providerConfigs]: 'dynamicModels' extends keyof typeof providerConfigs[K]
+    ? typeof providerConfigs[K]['dynamicModels'] extends true
+      ? K
+      : never
+    : never;
+}[keyof typeof providerConfigs];
+
 export type AvailableModels<T extends AvailableProviders | unknown = unknown> =
   T extends AvailableProviders
   ? (typeof providerConfigs)[T]["models"][number]
@@ -103,10 +111,32 @@ export const providerConfigs = {
       { id: "o4-mini", displayName: "o4-mini" },
     ],
   },
+  openaiCompat: {
+    displayName: "OpenAI-Compatible",
+    models: [],
+    dynamicModels: true,
+  },
+  ollama: {
+    displayName: "Ollama",
+    models: [],
+    dynamicModels: true,
+  },
 } as const;
 
-export const disabledModelsByDefault: AvailableModels['id'][] = [
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro",
-]
+export const disabledModelsByDefault: {
+  providerId: AvailableProviders;
+  modelId: string;
+}[] = [
+    {
+      providerId: "google" as const,
+      modelId: "gemini-1.5-flash",
+    },
+    {
+      providerId: "google" as const,
+      modelId: "gemini-1.5-flash-8b",
+    },
+    {
+      providerId: "google" as const,
+      modelId: "gemini-1.5-pro",
+    },
+  ];

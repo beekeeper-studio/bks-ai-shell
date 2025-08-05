@@ -1,7 +1,8 @@
 <template>
   <div class="key-value-list-input">
     <div class="key-value-list-item" v-for="(item, index) in items" :key="index">
-      <KeyValueRow v-model:key-input="item.key" v-model:value-input="item.value" />
+      <KeyValueRow v-model:key-input="item.key" v-model:value-input="item.value" :key-placeholder="keyPlaceholder"
+        :value-placeholder="valuePlaceholder" />
       <div class="actions">
         <button class="remove" v-if="items.length > 1" @click="removeItem(index)">
           <span class="material-symbols-outlined">remove</span>
@@ -31,6 +32,8 @@ export default {
       type: Array as PropType<{ key: string; value: string }[]>,
       required: true,
     },
+    keyPlaceholder: String,
+    valuePlaceholder: String,
   },
 
   emits: ["update:modelValue"],

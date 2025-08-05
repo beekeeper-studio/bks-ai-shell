@@ -1,32 +1,38 @@
 <template>
-  <h2>API Keys</h2>
-  <ApiInfo />
-  <api-key-form />
+  <form @submit.prevent class="config-form">
+    <h2>API Keys</h2>
+    <ApiInfo />
+    <api-key-form />
+  </form>
 
-  <h2>OpenAI Compatible</h2>
-  <BaseInput :model-value="providers_openaiCompat_url"
-    @update:modelValue="configure('providers_openaiCompat_url', $event)">
-    <template #label>URL</template>
-  </BaseInput>
-  <ToggleFormArea>
-    <template #header>
-      <h3>Headers</h3>
+  <form @submit.prevent class="config-form">
+    <h3>OpenAI Compatible</h3>
+    <template v-for="(error, index) in errors" :key="index">
+      <div v-if="error.providerId === 'openaiCompat'" class="error-message">
+        {{ error }}
+      </div>
     </template>
-    <KeyValueListInput :model-value="providers_openaiCompat_headers"
-      @update:modelValue="configure('providers_openaiCompat_headers', $event)" />
-  </ToggleFormArea>
+    <BaseInput :model-value="providers_openaiCompat_baseUrl"
+      @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)" @change="handleChange($event, 'openaiCompat')">
+      <template #label>URL</template>
+    </BaseInput>
+    <BaseInput type="password" :model-value="providers_openaiCompat_apiKey"
+      @update:modelValue="configure('providers_openaiCompat_apiKey', $event)" @change="handleChange($event, 'openaiCompat')">
+      <template #label>API Key</template>
+    </BaseInput>
+    <BaseInput type="textarea" :model-value="providers_openaiCompat_headers"
+      @update:modelValue="configure('providers_openaiCompat_headers', $event)" @change="handleChange($event, 'openaiCompat')">
+      <template #label>Headers</template>
+    </BaseInput>
+  </form>
 
-  <h2>Ollama</h2>
-  <BaseInput :model-value="providers_ollama_url" @update:modelValue="configure('providers_ollama_url', $event)">
-    <template #label>URL</template>
-  </BaseInput>
-  <ToggleFormArea>
-    <template #header>
-      <h3>Headers</h3>
-    </template>
-    <KeyValueListInput :model-value="providers_ollama_headers"
-      @update:modelValue="configure('providers_ollama_headers', $event)" />
-  </ToggleFormArea>
+  <form @submit.prevent class="config-form">
+    <h3>Ollama</h3>
+    <BaseInput :model-value="providers_ollama_baseUrl"
+      @update:modelValue="configure('providers_ollama_baseUrl', $event)" @change="handleChange($event, 'ollama')">
+      <template #label>URL</template>
+    </BaseInput>
+  </form>
 </template>
 
 <script lang="ts">
@@ -37,6 +43,8 @@ import KeyValueListInput from "../common/KeyValueListInput.vue";
 import ToggleFormArea from "../common/ToggleFormArea.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import { mapState, mapActions } from "pinia";
+import { AvailableProvidersWithDynamicModels } from "@/config";
+import { useChatStore } from "@/stores/chat";
 
 export default {
   name: "ProvidersConfiguration",
@@ -51,15 +59,21 @@ export default {
 
   computed: {
     ...mapState(useConfigurationStore, [
-      "providers_openaiCompat_url",
+      "providers_openaiCompat_baseUrl",
+      "providers_openaiCompat_apiKey",
       "providers_openaiCompat_headers",
-      "providers_ollama_url",
+      "providers_ollama_baseUrl",
       "providers_ollama_headers",
     ]),
+    ...mapState(useChatStore, ["errors"]),
   },
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
+    ...mapActions(useChatStore, ["syncProvider"]),
+    handleChange(_event: Event, provider: AvailableProvidersWithDynamicModels) {
+      this.syncProvider(provider);
+    },
   },
 };
 </script>

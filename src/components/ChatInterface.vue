@@ -62,7 +62,7 @@
           aria-label="Model"
         >
           <DropdownOption
-            v-for="optionModel in models"
+            v-for="optionModel in filteredModels"
             :key="optionModel.id"
             :value="optionModel.id"
             :text="optionModel.id"
@@ -165,7 +165,11 @@ export default {
 
   computed: {
     ...mapWritableState(useChatStore, ["model"]),
-    ...mapState(useChatStore, ["models"]),
+    ...mapState(useChatStore, {
+      filteredModels(store) {
+        return store.models.filter((m) => m.enabled);
+      },
+    }),
     ...mapState(useConfigurationStore, [
       "providers.openai.apiKey",
       "providers.anthropic.apiKey",

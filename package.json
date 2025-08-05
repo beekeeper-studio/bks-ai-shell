@@ -26,6 +26,7 @@
     "lodash": "^4.17.21",
     "marked": "^15.0.12",
     "marked-highlight": "^2.2.1",
+    "ollama-ai-provider": "^1.2.0",
     "pinia": "^3.0.2",
     "pluralize": "^8.0.0",
     "typeface-roboto": "^0.0.75",

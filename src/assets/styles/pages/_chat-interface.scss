@@ -110,6 +110,10 @@
       margin-block-end: 0.8em;
       padding-inline-start: 2rem;
     }
+
+    think {
+      color: rgb(from var(--text-dark) r g b / 50%);
+    }
   }
 
   .code-block {

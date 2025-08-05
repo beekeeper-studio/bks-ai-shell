@@ -1,10 +1,13 @@
 <template>
-  <div class="base-input" :class="class">
+  <div class="base-input" :class="[className, type]">
     <label :for="id" v-if="$slots['label']">
       <slot name="label"></slot>
     </label>
-    <div class="input-wrapper">
-      <input :type="type" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput" />
+    <div class="input-wrapper" :data-value="modelValue">
+      <textarea v-if="type === 'textarea'" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
+        @change="emitChange" />
+      <input v-else :type="type" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
+        @change="emitChange" />
       <div class="helper" v-if="$slots['helper']">
         <slot name="helper"></slot>
       </div>
@@ -20,7 +23,7 @@ export default {
   name: "BaseInput",
 
   props: {
-    class: {
+    className: {
       type: String,
       default: "",
     },
@@ -28,18 +31,21 @@ export default {
       type: String,
       default: () => _.uniqueId("input-"),
     },
-    type: String as PropType<HTMLInputElement["type"]>,
+    type: String as PropType<HTMLInputElement["type"]> | "textarea",
     placeholder: String,
     /** We add this to support v-model */
     modelValue: String,
   },
 
-  emits: ["update:modelValue", "input"],
+  emits: ["update:modelValue", "input", "change"],
 
   methods: {
     emitInput(event: Event) {
       this.$emit("input", event);
       this.$emit("update:modelValue", (event.target as HTMLInputElement).value);
+    },
+    emitChange(event: Event) {
+      this.$emit("change", event);
     },
   },
 };

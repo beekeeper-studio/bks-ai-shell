@@ -7,16 +7,13 @@
             Models
           </button>
         </li>
-        <li>
-          <button class="btn btn-flat nav-button" :class="{ active: page === 'providers' }" @click="page = 'providers'">
-            Providers
-          </button>
-        </li>
       </ul>
     </nav>
     <div class="content" :class="page">
-      <ModelsConfiguration v-if="page === 'models'" />
-      <ProvidersConfiguration v-else-if="page === 'providers'" />
+      <template v-if="page === 'models'">
+        <ModelsConfiguration />
+        <ProvidersConfiguration />
+      </template>
     </div>
   </div>
 </template>

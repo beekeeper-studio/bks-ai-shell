@@ -45,3 +45,23 @@ export function isAbortError(error: unknown) {
       error.message.startsWith("AbortError"))
   );
 }
+
+export function parseHeaders(text: string): Record<string, string> {
+  const headers = {};
+  const lines = text.split('\n');
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || !line.includes(':')) continue;
+
+    const [key, ...rest] = line.split(':');
+    const trimmedKey = key.trim();
+    const value = rest.join(':').trim();
+
+    if (trimmedKey) {
+      headers[trimmedKey] = value;
+    }
+  }
+
+  return headers;
+}

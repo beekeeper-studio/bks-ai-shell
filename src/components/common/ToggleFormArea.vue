@@ -1,7 +1,7 @@
 <template>
   <div class="toggle-form-area">
     <div class="header" @click="toggleContent = !toggleContent">
-      <button v-if="!hideToggle" @click.prevent class="btn">
+      <button v-if="!hideToggle" @click.prevent class="btn toggle-btn">
         <i class="material-symbols-outlined">{{ toggleIcon }}</i>
       </button>
       <slot name="header" />

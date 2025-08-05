@@ -1,4 +1,4 @@
-@use "providers";
+@use "models";
 
 #configuration-page {
   height: 100%;
@@ -15,7 +15,7 @@
   }
 
   .configuration {
-    max-width: 600px;
+    max-width: 48rem;
     height: 100%;
     margin: 0 auto;
     width: 100%;
@@ -67,34 +67,6 @@
 
     > :last-child {
       padding-bottom: 2rem;
-    }
-  }
-
-  .provider {
-    display: flex;
-    // border: 1px solid red;
-
-    h3 {
-      margin: 0;
-      width: 6rem;
-    }
-
-    ul {
-      flex-grow: 1;
-    }
-
-    li {
-      // border: 1px solid green;
-      height: 2rem;
-
-      label {
-        display: flex;
-        justify-content: space-between;
-      }
-    }
-
-    .switch {
-      font-size: 0.45rem;
     }
   }
 }

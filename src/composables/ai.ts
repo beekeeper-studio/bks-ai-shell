@@ -1,29 +1,18 @@
 import {
-  InvalidToolArgumentsError,
-  NoSuchToolError,
-  streamText,
   generateObject,
-  ToolExecutionError,
-  APICallError,
-  NoSuchModelError,
-  NoSuchProviderError,
 } from "ai";
 import { useChat } from "@ai-sdk/vue";
 import { computed, ref, watch } from "vue";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createOpenAI } from "@ai-sdk/openai";
 import {
-  getDefaultInstructions,
-  defaultTemperature,
   AvailableProviders,
   AvailableModels,
 } from "@/config";
-import { getTools, UserRejectedError } from "@/tools";
+import { getTools } from "@/tools";
 import { Message } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
+import { createProvider } from "@/providers";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -35,7 +24,6 @@ type AIOptions = {
 type SendOptions = {
   providerId: AvailableProviders;
   modelId: AvailableModels["id"];
-  apiKey: string;
 }
 
 export function useAI(options: AIOptions) {
@@ -50,15 +38,11 @@ export function useAI(options: AIOptions) {
       fetch: async (url, fetchOptions) => {
         const m = JSON.parse(fetchOptions.body) as any;
         const sendOptions = m.sendOptions as SendOptions;
-        const model = createProvider(
-          sendOptions.providerId,
-          sendOptions.apiKey
-        ).chat(sendOptions.modelId);
-        const result = streamText({
-          model,
+        const provider = createProvider(sendOptions.providerId);
+        return provider.stream({
+          modelId: sendOptions.modelId,
           messages: m.messages,
-          abortSignal: fetchOptions.signal,
-          system: await getDefaultInstructions(),
+          signal: fetchOptions.signal,
           tools: getTools(async (name, toolCallId) => {
             pendingToolCallIds.value.push(toolCallId);
             await new Promise<void>((resolve) => {
@@ -74,43 +58,6 @@ export function useAI(options: AIOptions) {
             );
             return permitted;
           }),
-          maxSteps: 10,
-          temperature: defaultTemperature,
-        });
-        return result.toDataStreamResponse({
-          getErrorMessage: (error) => {
-            notify("pluginError", {
-              message: error.message,
-              name: error.name,
-              stack: error.stack
-            })
-
-            if (NoSuchToolError.isInstance(error)) {
-              return "The model tried to call a unknown tool.";
-            } else if (InvalidToolArgumentsError.isInstance(error)) {
-              return "The model called a tool with invalid arguments.";
-            } else if (ToolExecutionError.isInstance(error)) {
-              if (UserRejectedError.isInstance(error.cause)) {
-                return `User rejected tool call. (toolCallId: ${error.toolCallId})`;
-              } else {
-                return "An error occurred during tool execution.";
-              }
-            } else if (APICallError.isInstance(error)) {
-              if (
-                error.data?.error?.code === "invalid_api_key" ||
-                error.data?.error?.message === "invalid x-api-key" ||
-                error.data?.error?.code === 400
-              ) {
-                return `The API key is invalid.`;
-              }
-              return "An error occurred during API call.";
-            } else if (NoSuchProviderError.isInstance(error)) {
-              return `Provider ${error.providerId} does not exist.`;
-            } else if (NoSuchModelError.isInstance(error)) {
-              return `Model ${error.modelId} does not exist.`;
-            }
-            return "An unknown error occurred.";
-          }
         });
       },
       onError: (error) => {
@@ -143,30 +90,6 @@ export function useAI(options: AIOptions) {
       },
       initialMessages: options.initialMessages,
     });
-
-  function createProvider(providerId: AvailableProviders, apiKey: string) {
-    if (!providerId) {
-      throw new Error("No provider selected.");
-    }
-
-    if (providerId === "google") {
-      return createGoogleGenerativeAI({
-        apiKey,
-      });
-    } else if (providerId === "anthropic") {
-      return createAnthropic({
-        apiKey,
-        headers: { 'anthropic-dangerous-direct-browser-access': 'true' }
-      });
-    } else if (providerId === "openai") {
-      return createOpenAI({
-        compatibility: "strict",
-        apiKey,
-      });
-    }
-
-    throw new Error(`Provider ${providerId} does not exist.`);
-  }
 
   function saveMessages() {
     useTabState().setTabState("messages", messages.value);
@@ -205,9 +128,8 @@ export function useAI(options: AIOptions) {
       // Skip generation if title is already set
       return;
     }
-    const model = createProvider(options.providerId, options.apiKey).languageModel(options.modelId);
-    const res = await generateObject({
-      model,
+    const res = await createProvider(options.providerId).generateObject({
+      modelId: options.modelId,
       schema: z.object({
         title: z.string().describe("The title of the conversation"),
       }),
@@ -215,7 +137,7 @@ export function useAI(options: AIOptions) {
         "Name this conversation in less than 30 characters.\n```" +
         messages.value.map((m) => `${m.role}: ${m.content}`).join("\n") +
         "\n```",
-    });
+    })
     await useTabState().setTabTitle(res.object.title);
   }
 

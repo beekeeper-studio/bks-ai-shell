@@ -1,9 +1,11 @@
 <template>
   <div class="key-value-row">
-    <BaseInput :model-value="keyInput" @update:modelValue="(val) => $emit('update:keyInput', val)">
+    <BaseInput :model-value="keyInput" @update:modelValue="(val) => $emit('update:keyInput', val)"
+      :placeholder="keyPlaceholder">
       <template #label>Key</template>
     </BaseInput>
-    <BaseInput :model-value="valueInput" @update:modelValue="(val) => $emit('update:valueInput', val)">
+    <BaseInput :model-value="valueInput" @update:modelValue="(val) => $emit('update:valueInput', val)"
+      :placeholder="valuePlaceholder">
       <template #label>Value</template>
     </BaseInput>
   </div>
@@ -28,6 +30,8 @@ export default {
       type: String,
       required: true,
     },
+    keyPlaceholder: String,
+    valuePlaceholder: String,
   },
 
   emits: ["update:keyInput", "update:valueInput"],

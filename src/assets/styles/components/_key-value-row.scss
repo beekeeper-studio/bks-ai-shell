@@ -5,6 +5,7 @@
 
   >* {
     min-width: 0;
+    flex-grow: 1;
   }
 }
 
@@ -21,13 +22,14 @@
 
   >* {
     min-width: 0;
+    flex-grow: 1;
   }
 
   .actions {
     display: flex;
     gap: 0.5rem;
-    margin-top: 1.4rem;
     flex-shrink: 0;
+    flex-grow: 0;
   }
 
   button.add,
