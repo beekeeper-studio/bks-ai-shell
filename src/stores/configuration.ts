@@ -101,6 +101,7 @@ export const useConfigurationStore = defineStore("configuration", {
       };
     },
 
+    /** Models that are not defined in the config. */
     models(state): (Model & { providerId: AvailableProviders })[] {
       const availableProviders = Object.keys(
         providerConfigs,

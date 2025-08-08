@@ -19,6 +19,8 @@ export type Model<T extends AvailableProviders = AvailableProviders> = (
   provider: T;
   providerDisplayName: (typeof providerConfigs)[T]["displayName"];
   enabled: boolean;
+  /** Available if the api key is set. */
+  available: boolean;
   removable: boolean;
 };
 
@@ -37,63 +39,63 @@ export const useChatStore = defineStore("chat", {
   getters: {
     models() {
       const config = useConfigurationStore();
-      const models: Model[] = [];
-      if (config["providers.openai.apiKey"]) {
-        models.push(
-          ...providerConfigs.openai.models.map((m) => ({
-            ...m,
-            provider: "openai" as const,
-            providerDisplayName: providerConfigs.openai.displayName,
-            enabled: !config.disabledModels.some(
-              (disabled) =>
-                m.id === disabled.modelId && disabled.providerId === "openai",
-            ),
-            removable: false,
-          })),
-        );
-      }
-      if (config["providers.anthropic.apiKey"]) {
-        models.push(
-          ...providerConfigs.anthropic.models.map((m) => ({
-            ...m,
-            provider: "anthropic" as const,
-            providerDisplayName: providerConfigs.anthropic.displayName,
-            enabled: !config.disabledModels.some(
-              (disabled) =>
-                m.id === disabled.modelId &&
-                disabled.providerId === "anthropic",
-            ),
-            removable: false,
-          })),
-        );
-      }
-      if (config["providers.google.apiKey"]) {
-        models.push(
-          ...providerConfigs.google.models.map((m) => ({
-            ...m,
-            provider: "google" as const,
-            providerDisplayName: providerConfigs.google.displayName,
-            enabled: !config.disabledModels.some(
-              (disabled) =>
-                m.id === disabled.modelId && disabled.providerId === "google",
-            ),
-            removable: false,
-          })),
-        );
-      }
-      models.push(
-        ...config.models.map((m) => ({
-          ...m,
-          provider: m.providerId,
-          providerDisplayName: providerConfigs[m.providerId].displayName,
-          enabled: !config.disabledModels.some(
+      const openaiModels = providerConfigs.openai.models.map((m) => ({
+        ...m,
+        provider: "openai" as const,
+        providerDisplayName: providerConfigs.openai.displayName,
+        available: !!config["providers.openai.apiKey"],
+        enabled:
+          !!config["providers.openai.apiKey"] &&
+          !config.disabledModels.some(
             (disabled) =>
-              m.id === disabled.modelId && disabled.providerId === m.providerId,
+              m.id === disabled.modelId && disabled.providerId === "openai",
           ),
-          removable: false,
-        })),
-      );
-      return models;
+        removable: false,
+      }));
+      const anthropicModels = providerConfigs.anthropic.models.map((m) => ({
+        ...m,
+        provider: "anthropic" as const,
+        providerDisplayName: providerConfigs.anthropic.displayName,
+        available: !!config["providers.anthropic.apiKey"],
+        enabled:
+          !!config["providers.anthropic.apiKey"] &&
+          !config.disabledModels.some(
+            (disabled) =>
+              m.id === disabled.modelId && disabled.providerId === "anthropic",
+          ),
+        removable: false,
+      }));
+      const googleModels = providerConfigs.google.models.map((m) => ({
+        ...m,
+        provider: "google" as const,
+        providerDisplayName: providerConfigs.google.displayName,
+        available: !!config["providers.google.apiKey"],
+        enabled:
+          !!config["providers.google.apiKey"] &&
+          !config.disabledModels.some(
+            (disabled) =>
+              m.id === disabled.modelId && disabled.providerId === "google",
+          ),
+        removable: false,
+      }));
+      const userDefinedModels = config.models.map((m) => ({
+        ...m,
+        provider: m.providerId,
+        providerDisplayName: providerConfigs[m.providerId].displayName,
+        available: true,
+        enabled: !config.disabledModels.some(
+          (disabled) =>
+            m.id === disabled.modelId && disabled.providerId === m.providerId,
+        ),
+        removable: false,
+      }));
+
+      return [
+        ...openaiModels,
+        ...anthropicModels,
+        ...googleModels,
+        ...userDefinedModels,
+      ];
     },
   },
   actions: {
@@ -106,8 +108,9 @@ export const useChatStore = defineStore("chat", {
       await tabState.sync();
 
       this.model =
-        this.models.find((m) => m.id === internal.lastUsedModelId && m.enabled) ||
-        this.models.find((m) => m.enabled);
+        this.models.find(
+          (m) => m.id === internal.lastUsedModelId && m.enabled,
+        ) || this.models.find((m) => m.enabled);
 
       internal.lastUsedModelId = this.model?.id;
 

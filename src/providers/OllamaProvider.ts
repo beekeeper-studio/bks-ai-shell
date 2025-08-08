@@ -20,15 +20,6 @@ export class OllamaProvider extends BaseProvider {
     });
   }
 
-  stream(options: Parameters<BaseProvider["stream"]>[0]) {
-    return super.stream({
-      ...options,
-      providerOptions: {
-          think: false,
-      },
-    });
-  }
-
   async listModels() {
     const url = new URL("api/tags", this.options.baseURL);
     const res = await fetch(url.toString(), {

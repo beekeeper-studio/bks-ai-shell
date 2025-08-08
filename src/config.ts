@@ -70,6 +70,7 @@ export const providerConfigs = {
     displayName: "Anthropic",
     /** https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
+      { id: "claude-opus-4-1", displayName: "Claude Opus 4.1" },
       { id: "claude-opus-4-0", displayName: "Claude Opus 4" },
       { id: "claude-sonnet-4-0", displayName: "Claude Sonnet 4" },
       { id: "claude-3-7-sonnet-latest", displayName: "Claude Sonnet 3.7" },
@@ -101,6 +102,7 @@ export const providerConfigs = {
   openai: {
     displayName: "OpenAI",
     models: [
+      { id: "gpt-5", displayName: "gpt-5" },
       { id: "gpt-4.1", displayName: "gpt-4.1" },
       { id: "gpt-4.1-mini", displayName: "gpt-4.1-mini" },
       { id: "gpt-4.1-nano", displayName: "gpt-4.1-nano" },
