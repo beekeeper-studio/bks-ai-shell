@@ -39,7 +39,6 @@
 import ApiKeyForm from "@/components/ApiKeyForm.vue";
 import ApiInfo from "@/components/configuration/ApiInfo.vue";
 import BaseInput from "@/components/common/BaseInput.vue";
-import KeyValueListInput from "../common/KeyValueListInput.vue";
 import ToggleFormArea from "../common/ToggleFormArea.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import { mapState, mapActions } from "pinia";
@@ -53,7 +52,6 @@ export default {
     ApiKeyForm,
     ApiInfo,
     BaseInput,
-    KeyValueListInput,
     ToggleFormArea,
   },
 
