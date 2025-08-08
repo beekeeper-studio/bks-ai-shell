@@ -9,6 +9,10 @@ export class OllamaProvider extends BaseProvider {
     },
   ) {
     super();
+    this.options = {
+      ...options,
+      baseURL: new URL(options.baseURL).toString() + "api/",
+    };
   }
 
   getModel(id: string) {
@@ -21,8 +25,7 @@ export class OllamaProvider extends BaseProvider {
   }
 
   async listModels() {
-    const url = new URL("api/tags", this.options.baseURL);
-    const res = await fetch(url.toString(), {
+    const res = await fetch(`${this.options.baseURL}tags/`, {
       headers: this.options.headers,
     });
     if (!res.ok) {
