@@ -5,11 +5,10 @@
  *
  * 1. Call `sync()` if it hasn't been called yet.
  * 2. Read the state by accessing it normally.
- * 3. Use `setInternal()` to update the state.
- *
+ * 3. Please don't mutate the state directly. Use `setInternal()` or any setter
+ *    so they are saved.
  */
 
-import { ProviderId } from "@/providers";
 import { defineStore } from "pinia";
 import _ from "lodash";
 import {
@@ -18,11 +17,14 @@ import {
 } from "@beekeeperstudio/plugin";
 
 type InternalData = {
+  /** FIXME use Model type */
   lastUsedModelId?: string;
+  isFirstTimeUser: boolean;
 };
 
 const defaultData: InternalData = {
   lastUsedModelId: undefined,
+  isFirstTimeUser: true,
 };
 
 const getData: typeof rawGetData = (key, ...args) => {

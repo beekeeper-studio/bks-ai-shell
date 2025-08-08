@@ -1,52 +1,43 @@
 <template>
   <div class="shell-app">
-    <div v-if="!appReady" v-show="showLoading" class="not-ready">
+    <div v-if="page === 'starting'" v-show="showLoading" class="not-ready">
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
-    <template v-else>
-      <!-- API Key Form -->
-      <ApiKeyForm
-        v-if="!apiKeyExists || page === 'api-key-form'"
-        @submit="page = 'chat-interface'"
-        @cancel="page = 'chat-interface'"
-        :cancelable="apiKeyExists"
-      />
-
-      <ChatInterface
-        v-else
-        :initialMessages="messages"
-        :openaiApiKey="openaiApiKey"
-        :anthropicApiKey="anthropicApiKey"
-        :googleApiKey="googleApiKey"
-        @manage-models="page = 'api-key-form'"
-      />
-    </template>
+    <OnboardingScreen v-if="page === 'onboarding'" @submit="submitOnboardingScreen" />
+    <ChatInterface v-else-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
+      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="page = 'configuration'" />
+    <div id="configuration-page" v-else>
+      <Configuration @close="page = 'chat-interface'" />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
-import ApiKeyForm from "./components/ApiKeyForm.vue";
 import ChatInterface from "./components/ChatInterface.vue";
 import { useChatStore } from "@/stores/chat";
 import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
+import Configuration from "@/components/configuration/Configuration.vue";
+import OnboardingScreen from "./components/OnboardingScreen.vue";
+
+type Page = "starting" | "onboarding" | "chat-interface" | "configuration";
 
 export default {
   components: {
-    ApiKeyForm,
     ChatInterface,
+    Configuration,
+    OnboardingScreen,
   },
 
   data() {
     return {
-      page: "", // Will be set in mounted based on API key availability
-      disabledApiKeyForm: false,
+      page: "starting" as Page,
       error: "" as unknown,
-      appReady: false,
       showLoading: false,
+      apiKeysChanged: false,
     };
   },
 
@@ -60,21 +51,18 @@ export default {
       await this.initialize();
       await this.$nextTick();
 
-      const configuration = useConfigurationStore();
-
-      // Check if API key exists and auto-navigate to appropriate page
-      if (configuration.apiKeyExists) {
+      if (this.isFirstTimeUser && this.apiKeyExists) {
         this.page = "chat-interface";
+      } else if (this.isFirstTimeUser) {
+        this.page = "onboarding";
       } else {
-        this.page = "api-key-form";
+        this.page = "chat-interface";
       }
     } catch (e) {
-      // If initialization fails, go to API key form
-      this.page = "api-key-form";
+      this.page = "configuration";
       this.error = e;
     } finally {
       clearTimeout(loadingTimer);
-      this.appReady = true;
     }
   },
 
@@ -86,12 +74,17 @@ export default {
       googleApiKey: "providers.google.apiKey",
     }),
     ...mapGetters(useConfigurationStore, ["apiKeyExists"]),
+    ...mapGetters(useInternalDataStore, ["isFirstTimeUser"]),
   },
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
     ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initialize"]),
+    submitOnboardingScreen() {
+      this.page = "chat-interface";
+      this.setInternal("isFirstTimeUser", false);
+    },
   },
 };
 </script>

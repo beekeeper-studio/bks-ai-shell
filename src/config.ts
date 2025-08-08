@@ -52,6 +52,14 @@ export const STORAGE_KEYS = {
 
 export type AvailableProviders = keyof typeof providerConfigs;
 
+export type AvailableProvidersWithDynamicModels = {
+  [K in keyof typeof providerConfigs]: 'dynamicModels' extends keyof typeof providerConfigs[K]
+    ? typeof providerConfigs[K]['dynamicModels'] extends true
+      ? K
+      : never
+    : never;
+}[keyof typeof providerConfigs];
+
 export type AvailableModels<T extends AvailableProviders | unknown = unknown> =
   T extends AvailableProviders
   ? (typeof providerConfigs)[T]["models"][number]
@@ -62,6 +70,7 @@ export const providerConfigs = {
     displayName: "Anthropic",
     /** https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
+      { id: "claude-opus-4-1", displayName: "Claude Opus 4.1" },
       { id: "claude-opus-4-0", displayName: "Claude Opus 4" },
       { id: "claude-sonnet-4-0", displayName: "Claude Sonnet 4" },
       { id: "claude-3-7-sonnet-latest", displayName: "Claude Sonnet 3.7" },
@@ -93,14 +102,43 @@ export const providerConfigs = {
   openai: {
     displayName: "OpenAI",
     models: [
+      { id: "gpt-5", displayName: "gpt-5" },
       { id: "gpt-4.1", displayName: "gpt-4.1" },
       { id: "gpt-4.1-mini", displayName: "gpt-4.1-mini" },
       { id: "gpt-4.1-nano", displayName: "gpt-4.1-nano" },
       { id: "gpt-4o", displayName: "gpt-4o" },
-      { id: "gpt-4o", displayName: "gpt-4o-mini" },
+      { id: "gpt-4o-mini", displayName: "gpt-4o-mini" },
       { id: "o3", displayName: "o3" },
       { id: "o3-mini", displayName: "o3-mini" },
       { id: "o4-mini", displayName: "o4-mini" },
     ],
   },
+  openaiCompat: {
+    displayName: "OpenAI-Compatible",
+    models: [],
+    dynamicModels: true,
+  },
+  ollama: {
+    displayName: "Ollama",
+    models: [],
+    dynamicModels: true,
+  },
 } as const;
+
+export const disabledModelsByDefault: {
+  providerId: AvailableProviders;
+  modelId: string;
+}[] = [
+    {
+      providerId: "google" as const,
+      modelId: "gemini-1.5-flash",
+    },
+    {
+      providerId: "google" as const,
+      modelId: "gemini-1.5-flash-8b",
+    },
+    {
+      providerId: "google" as const,
+      modelId: "gemini-1.5-pro",
+    },
+  ];

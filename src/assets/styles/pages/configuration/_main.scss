@@ -1,0 +1,72 @@
+@use "models";
+
+#configuration-page {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.configuration {
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: scroll;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: var(--query-editor-bg);
+  justify-content: center;
+
+  nav {
+    width: 9rem;
+    padding: 1rem;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-btn {
+    width: 100%;
+    box-shadow: none;
+    text-align: left;
+    height: 2rem;
+    justify-content: flex-start;
+    background-color: transparent;
+
+    &:not(.back-btn):hover {
+      background-color: rgb(from var(--theme-base) r g b / 3.5%);
+    }
+
+    &.active {
+      background-color: rgb(from var(--theme-base) r g b / 10%);
+    }
+  }
+
+  .back-btn {
+    padding-left: 0;
+  }
+
+  .content {
+    padding: 1rem;
+    padding-top: 1.26rem;
+    flex-grow: 1;
+    min-width: 0;
+    max-width: 39rem;
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      padding-bottom: 2rem;
+    }
+  }
+}

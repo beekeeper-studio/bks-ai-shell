@@ -45,6 +45,10 @@ $btn-border-radius:         8px;
       margin-left: -3px;
     }
   }
+
+  &:disabled {
+    opacity: 0.6;
+  }
 }
 
 .btn-primary {
@@ -56,5 +60,13 @@ $btn-border-radius:         8px;
   &:focus {
     background-color: rgb(from var(--theme-base) r g b / 87%);
     color: var(--query-editor-bg);
+  }
+}
+
+.btn-flat {
+  color: var(--theme-base);
+  background-color: rgb(from var(--theme-base) r g b / 6%);
+  &:hover, &:focus {
+    background-color: rgb(from var(--theme-base) r g b / 12%);
   }
 }

@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     displayText() {
-      return this.modelValue.id || this.placeholder;
+      return this.modelValue?.id || this.placeholder;
     },
   },
   data() {

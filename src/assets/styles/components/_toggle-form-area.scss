@@ -1,0 +1,23 @@
+.toggle-form-area {
+  .header {
+    display: flex;
+    align-items: center;
+
+    >.btn {
+      min-width: 0;
+      padding: 0;
+      border-radius: 9999px;
+      background-color: transparent;
+      color: var(--text-dark);
+      box-shadow: none;
+    }
+
+    >h3 {
+      margin: 0;
+    }
+  }
+
+  .body {
+    margin-top: 0.6rem;
+  }
+}

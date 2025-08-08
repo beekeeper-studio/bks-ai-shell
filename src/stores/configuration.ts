@@ -17,16 +17,38 @@ import {
   setData,
   setEncryptedData,
 } from "@beekeeperstudio/plugin";
+import {
+  AvailableProviders,
+  disabledModelsByDefault,
+  providerConfigs,
+} from "@/config";
+
+type Model = {
+  id: string;
+  displayName: string;
+};
 
 type Configurable = {
   /** Enable summarization. */
   summarization: boolean;
+  /** List of disabled models by id. */
+  disabledModels: { providerId: AvailableProviders; modelId: string }[];
+  /** Models that are removed are not shown in the UI and cannot be enabled. */
+  removedModels: { providerId: AvailableProviders; modelId: string }[];
+  providers_openaiCompat_baseUrl: string;
+  providers_openaiCompat_headers: string;
+  providers_ollama_baseUrl: string;
+  providers_ollama_headers: string;
+} & {
+  // User defined models
+  [K in AvailableProviders as `providers_${K}_models`]: Model[];
 };
 
 type EncryptedConfigurable = {
   "providers.openai.apiKey": string;
   "providers.anthropic.apiKey": string;
   "providers.google.apiKey": string;
+  providers_openaiCompat_apiKey: string;
 };
 
 type ConfigurationState = Configurable & EncryptedConfigurable;
@@ -35,6 +57,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
   "providers.openai.apiKey",
   "providers.anthropic.apiKey",
   "providers.google.apiKey",
+  "providers_openaiCompat_apiKey",
 ];
 
 const defaultConfiguration: ConfigurationState = {
@@ -42,6 +65,18 @@ const defaultConfiguration: ConfigurationState = {
   "providers.openai.apiKey": "",
   "providers.anthropic.apiKey": "",
   "providers.google.apiKey": "",
+  providers_openaiCompat_baseUrl: "",
+  providers_openaiCompat_apiKey: "",
+  providers_openaiCompat_headers: "",
+  providers_ollama_baseUrl: "http://localhost:11434",
+  providers_ollama_headers: "",
+  providers_openai_models: [],
+  providers_anthropic_models: [],
+  providers_google_models: [],
+  providers_openaiCompat_models: [],
+  providers_ollama_models: [],
+  disabledModels: disabledModelsByDefault,
+  removedModels: [],
 };
 
 function isEncryptedConfig(
@@ -58,6 +93,32 @@ export const useConfigurationStore = defineStore("configuration", {
   getters: {
     apiKeyExists(): boolean {
       return encryptedConfigKeys.some((key) => this[key].trim() !== "");
+    },
+
+    getModelsByProvider: (state) => {
+      return (provider: AvailableProviders) => {
+        return state[`providers_${provider}_models`];
+      };
+    },
+
+    /** Models that are not defined in the config. */
+    models(state): (Model & { providerId: AvailableProviders })[] {
+      const availableProviders = Object.keys(
+        providerConfigs,
+      ) as AvailableProviders[];
+      return availableProviders.flatMap((providerId) => {
+        return (
+          state[`providers_${providerId}_models`]
+            // Filter out removed models
+            .filter(
+              (model) =>
+                !state.removedModels.some(
+                  (m) => m.modelId === model.id && m.providerId === providerId,
+                ),
+            )
+            .map((model) => ({ ...model, providerId }))
+        );
+      });
     },
   },
 
@@ -89,6 +150,43 @@ export const useConfigurationStore = defineStore("configuration", {
       } else {
         await setData(config, value);
       }
+    },
+
+    async setModels(providerId: AvailableProviders, models: Model[]) {
+      await this.configure(`providers_${providerId}_models`, models);
+    },
+
+    async addModel(options: {
+      providerId: AvailableProviders;
+      modelId: string;
+      displayName: string;
+    }) {
+      const models = _.cloneDeep(this.getModelsByProvider(options.providerId));
+      models.push({ id: options.modelId, displayName: options.displayName });
+      await this.setModels(options.providerId, models);
+    },
+
+    async removeModel(providerId: AvailableProviders, modelId: string) {
+      const removedModels = _.cloneDeep(this.removedModels);
+      removedModels.push({ providerId, modelId });
+      await this.configure("removedModels", removedModels);
+    },
+
+    async disableModel(providerId: AvailableProviders, modelId: string) {
+      const disabledModels = _.cloneDeep(this.disabledModels);
+      disabledModels.push({ providerId, modelId });
+      await this.configure("disabledModels", disabledModels);
+    },
+
+    async enableModel(providerId: AvailableProviders, modelId: string) {
+      const disabledModels = _.cloneDeep(this.disabledModels);
+      const idx = disabledModels.findIndex(
+        (m) => m.providerId === providerId && m.modelId === modelId,
+      );
+      if (idx !== -1) {
+        disabledModels.splice(idx, 1);
+      }
+      await this.configure("disabledModels", disabledModels);
     },
   },
 });
