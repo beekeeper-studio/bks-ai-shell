@@ -17,11 +17,14 @@ import {
 } from "@beekeeperstudio/plugin";
 
 type InternalData = {
+  /** FIXME use Model type */
   lastUsedModelId?: string;
+  isFirstTimeUser: boolean;
 };
 
 const defaultData: InternalData = {
   lastUsedModelId: undefined,
+  isFirstTimeUser: true,
 };
 
 const getData: typeof rawGetData = (key, ...args) => {

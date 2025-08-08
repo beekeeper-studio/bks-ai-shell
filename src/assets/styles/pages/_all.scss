@@ -1,15 +1,4 @@
 @use "api-key-form";
 @use "chat-interface";
+@use "onboarding-screen";
 @use "configuration/main";
-
-.first-time-user {
-  max-width: 20rem;
-  text-align: center;
-
-  .actions {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-  }
-}
-

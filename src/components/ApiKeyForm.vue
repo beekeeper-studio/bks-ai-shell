@@ -2,8 +2,7 @@
   <div class="api-key-form">
     <BaseInput
       type="password"
-      id="openaiApiKey"
-      :placeholder="`Your ${providerConfigs['openai'].displayName} API key`"
+      placeholder="sk-proj-..."
       v-model="openaiApiKey"
     >
       <template #label>
@@ -15,8 +14,7 @@
     </BaseInput>
     <BaseInput
       type="password"
-      id="anthropicApiKey"
-      :placeholder="`Your ${providerConfigs['anthropic'].displayName} API key`"
+      placeholder="sk-ant-..."
       v-model="anthropicApiKey"
     >
       <template #label>
@@ -28,8 +26,7 @@
     </BaseInput>
     <BaseInput
       type="password"
-      for="googleApiKey"
-      :placeholder="`Your ${providerConfigs['google'].displayName} API key`"
+      placeholder="AIzaSy..."
       v-model="googleApiKey"
     >
       <template #label>
@@ -57,6 +54,8 @@ export default {
     ExternalLink,
   },
 
+  emits: ["change"],
+
   data() {
     return {
       openaiApiKey: "",
@@ -79,12 +78,15 @@ export default {
   watch: {
     openaiApiKey() {
       this.configure("providers.openai.apiKey", this.openaiApiKey);
+      this.$emit("change");
     },
     anthropicApiKey() {
       this.configure("providers.anthropic.apiKey", this.anthropicApiKey);
+      this.$emit("change");
     },
     googleApiKey() {
       this.configure("providers.google.apiKey", this.googleApiKey);
+      this.$emit("change");
     },
   },
 
