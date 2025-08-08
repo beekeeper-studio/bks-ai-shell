@@ -41,7 +41,7 @@ import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
 import Configuration from "@/components/configuration/Configuration.vue";
-import ApiInfo from "./components/configuration/ApiInfo.vue";
+import ApiInfo from "@/components/configuration/ApiInfo.vue";
 
 export default {
   components: {

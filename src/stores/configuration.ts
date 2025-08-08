@@ -33,6 +33,7 @@ type Configurable = {
   summarization: boolean;
   /** List of disabled models by id. */
   disabledModels: { providerId: AvailableProviders; modelId: string }[];
+  /** Models that are removed are not shown in the UI and cannot be enabled. */
   removedModels: { providerId: AvailableProviders; modelId: string }[];
   providers_openaiCompat_baseUrl: string;
   providers_openaiCompat_headers: string;

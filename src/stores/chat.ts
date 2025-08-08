@@ -106,8 +106,10 @@ export const useChatStore = defineStore("chat", {
       await tabState.sync();
 
       this.model =
-        this.models.find((m) => m.id === internal.lastUsedModelId) ||
-        this.models[0];
+        this.models.find((m) => m.id === internal.lastUsedModelId && m.enabled) ||
+        this.models.find((m) => m.enabled);
+
+      internal.lastUsedModelId = this.model?.id;
 
       this.syncProvider("openaiCompat");
       this.syncProvider("ollama");
@@ -136,10 +138,6 @@ export const useChatStore = defineStore("chat", {
         }
         config.setModels(provider, []);
       }
-    },
-    /* Compare two models */
-    matchModel(a: Model, b: Model) {
-      return a.id === b.id && a.provider === b.provider;
     },
   },
 });

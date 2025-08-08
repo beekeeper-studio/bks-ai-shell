@@ -18,7 +18,7 @@ import {
 
 type InternalData = {
   lastUsedModelId?: string;
-}
+};
 
 const defaultData: InternalData = {
   lastUsedModelId: undefined,

@@ -37,6 +37,12 @@
           </div>
         </div>
         <div
+          class="message error"
+          v-if="noModelError"
+        >
+          <div class="message-content">No model selected</div>
+        </div>
+        <div
           class="spinner-container"
           :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
         >
@@ -160,6 +166,7 @@ export default {
       isNavigatingHistory: false,
       isAtBottom: true,
       showFullError: false,
+      noModelError: false,
     };
   },
 
@@ -334,15 +341,17 @@ export default {
       // Don't send empty messages
       if (!message) return;
 
-      this.addToHistory(message);
-
-      this.tempInput = "";
-      this.input = "";
-
       if (!this.model) {
         // FIXME we should catch this and show it on screen
-        throw new Error("No model selected");
+        this.noModelError = true;
+        return;
       }
+
+      this.addToHistory(message);
+
+      this.noModelError = false;
+      this.tempInput = "";
+      this.input = "";
 
       if (this.askingPermission) {
         this.rejectPermission(message);

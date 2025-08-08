@@ -20,9 +20,10 @@
 import { AvailableProviders, providerConfigs } from "@/config";
 import Switch from "@/components/common/Switch.vue";
 import { Model, useChatStore } from "@/stores/chat";
-import { mapActions, mapState } from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
 import _ from "lodash";
+import { matchModel } from "@/utils";
 
 type Provider = {
   providerId: AvailableProviders;
@@ -39,6 +40,7 @@ export default {
 
   computed: {
     ...mapState(useChatStore, ["models"]),
+    ...mapWritableState(useChatStore, ["model"]),
     ...mapState(useConfigurationStore, ["disabledModels"]),
     modelsByProvider(): Provider[] {
       const providers: Provider[] = [];
@@ -68,8 +70,14 @@ export default {
     toggle(model: Model, checked: boolean) {
       if (checked) {
         this.enableModel(model.provider, model.id);
+        if (!this.model) {
+          this.model = model;
+        }
       } else {
         this.disableModel(model.provider, model.id);
+        if (matchModel(model, this.model)) {
+          this.model = this.models.find((m) => m.enabled);
+        }
       }
     },
     remove(model: Model) {

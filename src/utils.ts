@@ -1,3 +1,5 @@
+import { Model } from "./stores/chat";
+
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
     value,
@@ -64,4 +66,9 @@ export function parseHeaders(text: string): Record<string, string> {
   }
 
   return headers;
+}
+
+/* Compare two models */
+export function matchModel(a: Model, b: Model) {
+  return a.id === b.id && a.provider === b.provider;
 }
