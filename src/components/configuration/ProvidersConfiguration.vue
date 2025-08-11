@@ -7,6 +7,9 @@
 
   <form @submit.prevent class="config-form">
     <h3>OpenAI Compatible</h3>
+    <p class="description">
+      Connect to any service using OpenAI's API format.
+    </p>
     <template v-for="(error, index) in errors" :key="index">
       <div v-if="error.providerId === 'openaiCompat'" class="error-message">
         {{ error }}
@@ -15,7 +18,7 @@
     <BaseInput :model-value="providers_openaiCompat_baseUrl"
       @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)" @change="handleChange($event, 'openaiCompat')">
       <template #label>URL</template>
-      <template #helper>Base URL for any API service that implements the OpenAI API format (e.g., local LLMs, alternative providers).</template>
+      <template #helper>Base URL for an API service that implements the OpenAI API format (e.g., local LLMs, alternative providers).</template>
     </BaseInput>
     <BaseInput type="password" :model-value="providers_openaiCompat_apiKey"
       @update:modelValue="configure('providers_openaiCompat_apiKey', $event)" @change="handleChange($event, 'openaiCompat')">
@@ -32,6 +35,7 @@
     <BaseInput :model-value="providers_ollama_baseUrl"
       @update:modelValue="configure('providers_ollama_baseUrl', $event)" @change="handleChange($event, 'ollama')">
       <template #label>URL</template>
+      <template #helper>Ollama server URL (default: http://localhost:11434 for local installations).</template>
     </BaseInput>
   </form>
 </template>

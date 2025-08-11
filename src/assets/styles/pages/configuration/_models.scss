@@ -56,9 +56,12 @@
   .config-form {
     margin-top: 2.2rem;
 
-    .api-info {
+    .api-info, .description {
       margin-top: 0;
       margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      opacity: 0.7;
     }
 
     >.base-input {
@@ -69,6 +72,7 @@
       label {
         width: 7rem;
         margin-top: 0.6rem;
+        flex-shrink: 0;
       }
 
       .input-wrapper {
@@ -109,6 +113,7 @@
     gap: 0;
     label {
       width: 7rem;
+      flex-shrink: 0;
     }
   }
 }
