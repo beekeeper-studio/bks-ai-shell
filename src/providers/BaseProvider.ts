@@ -49,11 +49,13 @@ export abstract class BaseProvider {
     modelId: string;
     schema: z.Schema<OBJECT, z.ZodTypeDef, any>;
     prompt: string;
+    temperature?: number;
   }) {
     return await generateObject<OBJECT>({
       model: this.getModel(options.modelId),
       schema: options.schema,
       prompt: options.prompt,
+      temperature: options.temperature,
     });
   }
 
