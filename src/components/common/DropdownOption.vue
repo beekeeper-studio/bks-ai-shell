@@ -5,7 +5,10 @@
     :disabled="disabled"
     @click="handleClick"
   >
-    <slot>{{ text }}</slot>
+    <span class="option-content">
+      <slot>{{ text }}</slot>
+    </span>
+    <span v-if="selected" class="selected-indicator material-symbols-outlined">check</span>
   </button>
 </template>
 

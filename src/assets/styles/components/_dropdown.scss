@@ -19,7 +19,9 @@
 }
 
 .dropdown-option {
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 100%;
   padding: 0.5rem 0.75rem;
   background: none;
@@ -28,6 +30,17 @@
   cursor: pointer;
   color: var(--text-dark);
   font-size: 0.85rem;
+
+  .option-content {
+    flex: 1;
+  }
+
+  .selected-indicator {
+    color: var(--theme-base);
+    font-weight: 600;
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+  }
 
   &:hover:not(.disabled) {
     background-color: rgb(from var(--theme-base) r g b / 5%);

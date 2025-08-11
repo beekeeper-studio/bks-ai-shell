@@ -72,7 +72,7 @@
             :key="optionModel.id"
             :value="optionModel.id"
             :text="optionModel.id"
-            :selected="optionModel === model"
+            :selected="matchModel(optionModel, model)"
             @select="selectModel(optionModel)"
           />
           <div class="dropdown-separator"></div>
@@ -109,6 +109,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
 import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
+import { matchModel } from "@/utils";
 
 const maxHistorySize = 50;
 
@@ -244,6 +245,7 @@ export default {
 
   methods: {
     ...mapActions(useInternalDataStore, ["setInternal"]),
+    matchModel,
     handleEnterKey(e) {
       if (e.shiftKey) {
         // Allow default behavior (new line) when Shift+Enter is pressed
