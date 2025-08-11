@@ -15,6 +15,7 @@
     <BaseInput :model-value="providers_openaiCompat_baseUrl"
       @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)" @change="handleChange($event, 'openaiCompat')">
       <template #label>URL</template>
+      <template #helper>Base URL for any API service that implements the OpenAI API format (e.g., local LLMs, alternative providers).</template>
     </BaseInput>
     <BaseInput type="password" :model-value="providers_openaiCompat_apiKey"
       @update:modelValue="configure('providers_openaiCompat_apiKey', $event)" @change="handleChange($event, 'openaiCompat')">
