@@ -1,50 +1,60 @@
 <template>
-  <div class="api-key-container">
-    <div class="api-key-form-wrapper">
-      <h1>AI Shell</h1>
-      <p>Enter at least one API key to get started</p>
-      <form @submit.prevent="submitApiKey" class="api-key-form">
-        <ApiInput provider-id="openai" helper-link="https://platform.openai.com/api-keys" v-model="openaiApiKey" />
-        <ApiInput provider-id="anthropic" helper-link="https://console.anthropic.com/settings/keys"
-          v-model="anthropicApiKey" />
-        <ApiInput provider-id="google" helper-link="https://aistudio.google.com/apikey" v-model="googleApiKey" />
-        <p class="api-info">
-          Your API keys are stored only on your device and are never shared with
-          any server except the selected AI providers.
-        </p>
-        <div class="actions">
-          <button class="btn" v-if="cancelable" type="button" @click.prevent="$emit('cancel')">
-            Cancel
-          </button>
-          <button class="btn btn-primary" type="submit" :disabled="cancelable && !dirty">
-            Save
-          </button>
-        </div>
-      </form>
-    </div>
+  <div class="api-key-form">
+    <BaseInput
+      type="password"
+      placeholder="sk-proj-..."
+      v-model="openaiApiKey"
+    >
+      <template #label>
+        {{ providerConfigs["openai"].displayName }}
+      </template>
+      <template #helper>
+        Get your <ExternalLink href="https://platform.openai.com/account/api-keys">API Key here.</ExternalLink>
+      </template>
+    </BaseInput>
+    <BaseInput
+      type="password"
+      placeholder="sk-ant-..."
+      v-model="anthropicApiKey"
+    >
+      <template #label>
+        {{ providerConfigs["anthropic"].displayName }}
+      </template>
+      <template #helper>
+        Get your <ExternalLink href="https://console.anthropic.com/settings/keys">API Key here.</ExternalLink>
+      </template>
+    </BaseInput>
+    <BaseInput
+      type="password"
+      placeholder="AIzaSy..."
+      v-model="googleApiKey"
+    >
+      <template #label>
+        {{ providerConfigs["google"].displayName }}
+      </template>
+      <template #helper>
+        Get your <ExternalLink href="https://aistudio.google.com/app/apikey">API Key here.</ExternalLink>
+      </template>
+    </BaseInput>
   </div>
 </template>
 
 <script lang="ts">
 import { mapState, mapActions } from "pinia";
-import { useChatStore } from "@/stores/chat";
 import { useConfigurationStore } from "@/stores/configuration";
 import { providerConfigs } from "@/config";
-import ApiInput from "./ApiInput.vue";
+import BaseInput from "./common/BaseInput.vue";
+import ExternalLink from "./common/ExternalLink.vue";
 
 export default {
   name: "ApiKeyForm",
 
   components: {
-    ApiInput,
+    BaseInput,
+    ExternalLink,
   },
 
-  props: {
-    cancelable: {
-      type: Boolean,
-      default: false,
-    },
-  },
+  emits: ["change"],
 
   data() {
     return {
@@ -60,32 +70,28 @@ export default {
       "providers.anthropic.apiKey",
       "providers.google.apiKey",
     ]),
-    dirty() {
-      return (
-        this.openaiApiKey !== this["providers.openai.apiKey"] ||
-        this.anthropicApiKey !== this["providers.anthropic.apiKey"] ||
-        this.googleApiKey !== this["providers.google.apiKey"]
-      );
-    },
     providerConfigs() {
       return providerConfigs;
     },
   },
 
+  watch: {
+    openaiApiKey() {
+      this.configure("providers.openai.apiKey", this.openaiApiKey);
+      this.$emit("change");
+    },
+    anthropicApiKey() {
+      this.configure("providers.anthropic.apiKey", this.anthropicApiKey);
+      this.$emit("change");
+    },
+    googleApiKey() {
+      this.configure("providers.google.apiKey", this.googleApiKey);
+      this.$emit("change");
+    },
+  },
+
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
-    ...mapActions(useChatStore, ["syncModels"]),
-    handleInput(e) {
-      this.dirty = true;
-    },
-    async submitApiKey() {
-      await this.configure("providers.openai.apiKey", this.openaiApiKey);
-      await this.configure("providers.anthropic.apiKey", this.anthropicApiKey);
-      await this.configure("providers.google.apiKey", this.googleApiKey);
-      this.syncModels();
-      this.dirty = false;
-      this.$emit("submit");
-    },
   },
 
   mounted() {

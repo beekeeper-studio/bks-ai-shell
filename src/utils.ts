@@ -1,3 +1,5 @@
+import { Model } from "./stores/chat";
+
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
     value,
@@ -44,4 +46,29 @@ export function isAbortError(error: unknown) {
     (error.message.startsWith("Aborted") ||
       error.message.startsWith("AbortError"))
   );
+}
+
+export function parseHeaders(text: string): Record<string, string> {
+  const headers = {};
+  const lines = text.split('\n');
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || !line.includes(':')) continue;
+
+    const [key, ...rest] = line.split(':');
+    const trimmedKey = key.trim();
+    const value = rest.join(':').trim();
+
+    if (trimmedKey) {
+      headers[trimmedKey] = value;
+    }
+  }
+
+  return headers;
+}
+
+/* Compare two models */
+export function matchModel(a: Model, b: Model) {
+  return a.id === b.id && a.provider === b.provider;
 }

@@ -1,0 +1,119 @@
+.configuration .content.models {
+  .provider {
+    display: flex;
+    margin-bottom: 1rem;
+    justify-content: space-between;
+
+    h3 {
+      margin: 0;
+      width: 7rem;
+    }
+
+    .model-list {
+      flex-grow: 1;
+    }
+
+    .model {
+      height: 2rem;
+
+      label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .switch {
+      font-size: 0.45rem;
+    }
+
+    .model-list .model {
+      position: relative;
+
+      .delete-btn {
+        position: absolute;
+        top: 0;
+        right: 2.5rem;
+        background-color: transparent;
+        min-width: 0;
+        height: 1.4rem;
+        width: 1.4rem;
+        padding: 0;
+        border-radius: 9999px;
+        color: var(--text-dark);
+
+        span {
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+
+  h2:not(:first-child) {
+    margin-top: 2rem;
+  }
+
+  .config-form {
+    margin-top: 2.2rem;
+
+    .api-info, .description {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      opacity: 0.7;
+    }
+
+    >.base-input {
+      flex-direction: row;
+      margin-top: 1rem;
+      gap: 0;
+
+      label {
+        width: 7rem;
+        margin-top: 0.6rem;
+        flex-shrink: 0;
+      }
+
+      .input-wrapper {
+        flex-grow: 1;
+      }
+    }
+
+    .toggle-form-area {
+      margin-top: 1rem;
+
+      .toggle-btn {
+        margin-left: -0.5rem;
+      }
+
+      .key-value-list-input label {
+        display: none;
+      }
+
+      h4 {
+        margin: 0;
+        font-weight: normal;
+      }
+    }
+
+    .error-message {
+      background-color: rgb(from var(--brand-danger) r g b / 20%);
+      border: 1px solid rgb(from var(--brand-danger) r g b / 100%);
+      color: var(--text-dark);
+      padding: 0.75rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin: 0.5rem 0;
+      text-align: left;
+    }
+  }
+
+  .api-key-form .base-input {
+    gap: 0;
+    label {
+      width: 7rem;
+      flex-shrink: 0;
+    }
+  }
+}

@@ -1,0 +1,30 @@
+.onboarding-screen {
+  max-width: 24rem;
+  text-align: center;
+
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .api-key-form {
+    .base-input  {
+      flex-direction: column;
+
+      >* {
+        width: 100%;
+      }
+    }
+  }
+
+  .api-info {
+    margin-block: 2rem;
+  }
+
+  .continue-btn {
+    width: 100%;
+    font-size: 0.8rem;
+    padding-block: 1rem;
+  }
+}

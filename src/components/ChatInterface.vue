@@ -37,6 +37,12 @@
           </div>
         </div>
         <div
+          class="message error"
+          v-if="noModelError"
+        >
+          <div class="message-content">No model selected</div>
+        </div>
+        <div
           class="spinner-container"
           :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
         >
@@ -62,7 +68,7 @@
           aria-label="Model"
         >
           <DropdownOption
-            v-for="optionModel in models"
+            v-for="optionModel in filteredModels"
             :key="optionModel.id"
             :value="optionModel.id"
             :text="optionModel.id"
@@ -160,12 +166,17 @@ export default {
       isNavigatingHistory: false,
       isAtBottom: true,
       showFullError: false,
+      noModelError: false,
     };
   },
 
   computed: {
     ...mapWritableState(useChatStore, ["model"]),
-    ...mapState(useChatStore, ["models"]),
+    ...mapState(useChatStore, {
+      filteredModels(store) {
+        return store.models.filter((m) => m.enabled);
+      },
+    }),
     ...mapState(useConfigurationStore, [
       "providers.openai.apiKey",
       "providers.anthropic.apiKey",
@@ -330,15 +341,17 @@ export default {
       // Don't send empty messages
       if (!message) return;
 
-      this.addToHistory(message);
-
-      this.tempInput = "";
-      this.input = "";
-
       if (!this.model) {
         // FIXME we should catch this and show it on screen
-        throw new Error("No model selected");
+        this.noModelError = true;
+        return;
       }
+
+      this.addToHistory(message);
+
+      this.noModelError = false;
+      this.tempInput = "";
+      this.input = "";
 
       if (this.askingPermission) {
         this.rejectPermission(message);
