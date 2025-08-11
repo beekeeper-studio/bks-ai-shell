@@ -1,6 +1,6 @@
 import { notify } from "@beekeeperstudio/plugin";
 import { generateObject, LanguageModel, streamText, ToolSet } from "ai";
-import { defaultTemperature, getDefaultInstructions } from "@/config";
+import { AvailableModels, defaultTemperature, getDefaultInstructions } from "@/config";
 import z from "zod";
 import { UserRejectedError } from "@/tools";
 import {
@@ -12,7 +12,7 @@ import {
   ToolExecutionError,
 } from "ai";
 
-type Messages = Parameters<typeof streamText>[0]["messages"];
+export type Messages = Parameters<typeof streamText>[0]["messages"];
 
 export abstract class BaseProvider {
   abstract getModel(id: string): LanguageModel;
@@ -21,8 +21,8 @@ export abstract class BaseProvider {
     messages: Messages;
     signal: AbortSignal;
     tools: ToolSet;
-    modelId: string;
-    providerOptions: any;
+    modelId: AvailableModels["id"];
+    temperature?: number;
   }) {
     const result = streamText({
       model: this.getModel(options.modelId),
@@ -31,8 +31,7 @@ export abstract class BaseProvider {
       system: await getDefaultInstructions(),
       tools: options.tools,
       maxSteps: 10,
-      temperature: defaultTemperature,
-      providerOptions: options.providerOptions,
+      temperature: options.temperature ?? defaultTemperature,
     });
     return result.toDataStreamResponse({
       getErrorMessage: (error) => {
