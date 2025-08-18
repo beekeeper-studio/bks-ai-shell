@@ -52,15 +52,15 @@
       <div ref="bottomMarker"></div>
     </div>
     <div class="chat-input-container">
-      <textarea
+      <BaseInput
+        type="textarea"
         v-model="input"
         @keydown.enter="handleEnterKey"
         @keydown.up="handleUpArrow"
         @keydown.down="handleDownArrow"
         placeholder="Type your message here..."
         rows="1"
-        v-autoresize
-      ></textarea>
+      />
       <div class="actions">
         <Dropdown
           :model-value="model"
@@ -110,6 +110,7 @@ import { RootBinding } from "@/plugins/appEvent";
 import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { matchModel } from "@/utils";
+import BaseInput from "@/components/common/BaseInput.vue";
 
 const maxHistorySize = 50;
 
@@ -122,6 +123,7 @@ export default {
     Message,
     ToolMessage,
     Markdown,
+    BaseInput,
   },
 
   props: {
@@ -405,27 +407,6 @@ export default {
     selectModel(model: Model) {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
-    },
-  },
-  directives: {
-    autoresize: {
-      mounted(el: HTMLTextAreaElement) {
-        const resize = () => {
-          el.style.height = "auto";
-          el.style.height = el.scrollHeight + "px";
-        };
-
-        el._resizeHandler = resize;
-
-        el.addEventListener("input", resize);
-        requestAnimationFrame(resize);
-      },
-      updated(el: HTMLTextAreaElement) {
-        el._resizeHandler();
-      },
-      unmounted(el: HTMLTextAreaElement) {
-        el.removeEventListener("input", el._resizeHandler);
-      },
     },
   },
 };

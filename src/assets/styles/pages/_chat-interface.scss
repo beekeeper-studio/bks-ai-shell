@@ -330,12 +330,16 @@
   width: calc(100% - 2rem);
   max-width: var(--screen-max-width);
 
-  textarea {
+  .base-input {
     flex: initial;
     font-size: 0.9rem;
     max-height: 30vh;
     line-height: 1.25rem;
     border-radius: 8px;
+
+    textarea {
+      border-color: transparent;
+    }
   }
 
   .actions {
