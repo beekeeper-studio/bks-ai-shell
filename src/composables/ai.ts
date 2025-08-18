@@ -24,6 +24,7 @@ type AIOptions = {
 type SendOptions = {
   providerId: AvailableProviders;
   modelId: AvailableModels["id"];
+  systemPrompt?: string;
 }
 
 export function useAI(options: AIOptions) {
@@ -58,6 +59,7 @@ export function useAI(options: AIOptions) {
             );
             return permitted;
           }),
+          systemPrompt: sendOptions.systemPrompt,
         });
       },
       onError: (error) => {

@@ -8,9 +8,10 @@
             Back
           </button>
         </li>
-        <li>
-          <button class="btn btn-flat nav-btn" :class="{ active: page === 'models' }" @click="page = 'models'">
-            Models
+        <li v-for="{id, displayName} in pages" :key="id">
+          <button class="btn btn-flat nav-btn" :class="{ active: page === id }"
+            @click="page = id">
+            {{ displayName }}
           </button>
         </li>
       </ul>
@@ -20,6 +21,7 @@
         <ModelsConfiguration />
         <ProvidersConfiguration />
       </template>
+      <GeneralConfiguration v-if="page === 'general'" />
     </div>
   </div>
 </template>
@@ -31,6 +33,20 @@ import { mapActions, mapState } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
 import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.vue";
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
+import BaseInput from "../common/BaseInput.vue";
+import GeneralConfiguration from "./GeneralConfiguration.vue";
+
+const pages = [
+  {
+    id: "models",
+    displayName: "Models",
+  },
+  {
+    id: "general",
+    displayName: "General",
+  },
+] as const;
+
 
 export default {
   name: "Configuration",
@@ -38,19 +54,22 @@ export default {
   components: {
     ModelsConfiguration,
     ProvidersConfiguration,
+    BaseInput,
+    GeneralConfiguration,
   },
 
   emits: ["close"],
 
   data() {
     return {
-      page: "models" as "models" | "providers",
+      page: "models" as typeof pages[number]['id'],
     };
   },
 
   computed: {
     ...mapState(useChatStore, ["models"]),
     ...mapState(useConfigurationStore, ["disabledModels"]),
+    pages: () => pages,
     modelsByProvider(): {
       providerId: AvailableProviders;
       providerDisplayName: (typeof providerConfigs)[AvailableProviders]["displayName"];

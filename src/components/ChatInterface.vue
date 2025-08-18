@@ -105,7 +105,7 @@ import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
 import { PropType } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
 import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
@@ -172,6 +172,7 @@ export default {
   },
 
   computed: {
+    ...mapGetters(useChatStore, ["systemPrompt"]),
     ...mapWritableState(useChatStore, ["model"]),
     ...mapState(useChatStore, {
       filteredModels(store) {
@@ -362,6 +363,7 @@ export default {
           modelId: this.model.id,
           providerId: this.model.provider,
           apiKey: this[`providers.${this.model.provider}.apiKey`],
+          systemPrompt: this.systemPrompt,
         });
       }
     },

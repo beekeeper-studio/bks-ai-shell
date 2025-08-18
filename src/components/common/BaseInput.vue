@@ -4,9 +4,9 @@
       <slot name="label"></slot>
     </label>
     <div class="input-wrapper" :data-value="modelValue">
-      <textarea v-if="type === 'textarea'" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
+      <textarea v-if="type === 'textarea'" v-bind="$attrs" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
         @change="emitChange" />
-      <input v-else :type="type" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
+      <input v-else :type="type" v-bind="$attrs" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
         @change="emitChange" />
       <div class="helper" v-if="$slots['helper']">
         <slot name="helper"></slot>

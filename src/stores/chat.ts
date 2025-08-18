@@ -3,6 +3,7 @@ import {
   AvailableModels,
   AvailableProviders,
   AvailableProvidersWithDynamicModels,
+  getDefaultInstructions,
   providerConfigs,
 } from "@/config";
 import { useConfigurationStore } from "./configuration";
@@ -28,6 +29,7 @@ type ChatState = {
   /** The active model. E.g. Claude 4 Sonnet, Claude 3.5, etc. */
   model?: Model;
   errors: ProviderSyncError[];
+  defaultInstructions: string;
 };
 
 // the first argument is a unique id of the store across your application
@@ -35,6 +37,7 @@ export const useChatStore = defineStore("chat", {
   state: (): ChatState => ({
     model: undefined,
     errors: [],
+    defaultInstructions: "",
   }),
   getters: {
     models() {
@@ -97,6 +100,10 @@ export const useChatStore = defineStore("chat", {
         ...userDefinedModels,
       ];
     },
+    systemPrompt(state) {
+      const config = useConfigurationStore();
+      return state.defaultInstructions + "\n" + config.customInstructions;
+    },
   },
   actions: {
     async initialize() {
@@ -116,6 +123,9 @@ export const useChatStore = defineStore("chat", {
 
       this.syncProvider("openaiCompat");
       this.syncProvider("ollama");
+      getDefaultInstructions().then((instructions) => {
+        this.defaultInstructions = instructions;
+      }).catch(console.error);
     },
     /** List the models for a provider and store them in the internal data store. */
     async syncProvider(provider: AvailableProvidersWithDynamicModels) {
@@ -130,15 +140,13 @@ export const useChatStore = defineStore("chat", {
         const models = await createProvider(provider).listModels();
         config.setModels(provider, models);
       } catch (e) {
-        if (e.message !== "Missing API base URL") {
-          console.error(e);
-          this.errors.push(
-            new ProviderSyncError(e.message, {
-              providerId: provider,
-              cause: e,
-            }),
-          );
-        }
+        console.error(e);
+        this.errors.push(
+          new ProviderSyncError(e.message, {
+            providerId: provider,
+            cause: e,
+          }),
+        );
         config.setModels(provider, []);
       }
     },
