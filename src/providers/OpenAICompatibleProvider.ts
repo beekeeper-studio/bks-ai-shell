@@ -1,5 +1,5 @@
 import { BaseProvider } from "@/providers/BaseProvider";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 export class OpenAICompatibleProvider extends BaseProvider {
   constructor(
@@ -13,17 +13,16 @@ export class OpenAICompatibleProvider extends BaseProvider {
   }
 
   getModel(id: string) {
-    return createOpenAI({
-      compatibility: "compatible",
+    return createOpenAICompatible({
+      name: "OpenAI Compatible (AI Shell)",
       baseURL: this.options.baseURL,
       apiKey: this.options.apiKey,
-      headers: this.options.headers,
+      headers: this.options.headers
     }).languageModel(id);
   }
 
   async listModels() {
     const url = new URL("v1/models", this.options.baseURL);
-        console.log(url.toString())
 
     const res = await fetch(url.toString(), {
       headers: this.options.headers,

@@ -7,8 +7,9 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { OllamaProvider } from "./OllamaProvider";
 import { parseHeaders } from "@/utils";
 import _ from "lodash";
+import { BaseProvider } from "./BaseProvider";
 
-export function createProvider(id: AvailableProviders) {
+export function createProvider(id: AvailableProviders): BaseProvider {
   const configuration = useConfigurationStore();
   switch (id) {
     case "anthropic":
@@ -40,6 +41,8 @@ export function createProvider(id: AvailableProviders) {
         baseURL: configuration.providers_ollama_baseUrl,
         headers: parseHeaders(configuration.providers_ollama_headers),
       });
+    case "awsBedrock":
+      throw new Error("AWS Bedrock is not supported yet.");
     default:
       throw new Error(`Provider ${id} does not exist.`);
   }

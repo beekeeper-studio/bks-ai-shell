@@ -11,8 +11,7 @@ export class OpenAIProvider extends BaseProvider {
 
   getModel(id: string) {
     return createOpenAI({
-      compatibility: "strict",
-      apiKey: this.options.apiKey,
+      apiKey: this.options.apiKey
     }).languageModel(id);
   }
 

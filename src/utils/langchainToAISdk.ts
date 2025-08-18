@@ -8,7 +8,7 @@ import {
   StoredMessage,
   ToolMessage,
 } from "@langchain/core/messages";
-import { CreateMessage, Message, ToolResult } from "ai";
+import { CreateUIMessage, UIMessage, ToolResult } from "ai";
 import _ from "lodash";
 
 /**
@@ -55,8 +55,8 @@ import _ from "lodash";
  */
 export function mapLangChainStoredMessagesToAISdkMessages(
   messages: StoredMessage[],
-): Message[] {
-  const ret: Message[] = [];
+): UIMessage[] {
+  const ret: UIMessage[] = [];
   const langchainMessages = mapStoredMessagesToChatMessages(messages);
   console.log('converting langchain -> ai', langchainMessages)
   for (const langchainMessage of langchainMessages) {
@@ -69,7 +69,7 @@ export function mapLangChainStoredMessagesToAISdkMessages(
       });
     } else if (isAIMessage(langchainMessage)) {
       const message: AIMessage = langchainMessage;
-      const retMessage: Message = {
+      const retMessage: UIMessage = {
         id: message.id || _.uniqueId(),
         role: "assistant",
         content: message.text,
@@ -77,7 +77,7 @@ export function mapLangChainStoredMessagesToAISdkMessages(
       };
 
       if (typeof message.content !== "string") {
-        const parts: CreateMessage["parts"] = [];
+        const parts: CreateUIMessage["parts"] = [];
         for (const complex of message.content) {
           if (complex.type === "text") {
             parts.push({ type: "text", text: complex.text });

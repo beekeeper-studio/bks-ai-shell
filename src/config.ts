@@ -113,6 +113,11 @@ export const providerConfigs = {
       { id: "o4-mini", displayName: "o4-mini" },
     ],
   },
+  awsBedrock: {
+    displayName: "AWS Bedrock",
+    models: [],
+    dynamicModels: true,
+  },
   openaiCompat: {
     displayName: "OpenAI-Compatible",
     models: [],

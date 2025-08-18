@@ -1,5 +1,13 @@
 import { BaseProvider } from "@/providers/BaseProvider";
-import { createOllama } from "ollama-ai-provider";
+import {
+  createOllama,
+  OllamaProvider as AIOllamaProvider,
+} from "ollama-ai-provider-v2";
+import { z } from "zod/v4";
+
+type OllamaProviderOptions = {
+  ollama: z.input<Exclude<Parameters<AIOllamaProvider["chat"]>[1], undefined>>;
+};
 
 export class OllamaProvider extends BaseProvider {
   constructor(
@@ -19,9 +27,15 @@ export class OllamaProvider extends BaseProvider {
     return createOllama({
       baseURL: this.options.baseURL,
       headers: this.options.headers,
-    }).languageModel(id, {
-      simulateStreaming: true,
-    });
+    }).languageModel(id);
+  }
+
+  getProviderOptions(): OllamaProviderOptions {
+    return {
+      ollama: {
+        think: false,
+      },
+    };
   }
 
   async listModels() {
