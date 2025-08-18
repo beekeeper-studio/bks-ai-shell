@@ -38,12 +38,12 @@ import GeneralConfiguration from "./GeneralConfiguration.vue";
 
 const pages = [
   {
-    id: "models",
-    displayName: "Models",
-  },
-  {
     id: "general",
     displayName: "General",
+  },
+  {
+    id: "models",
+    displayName: "Models",
   },
 ] as const;
 
