@@ -1,7 +1,7 @@
 {
   "name": "bks-ai-shell",
   "version": "1.0.0",
-  "description": "AI Assistant for Beekeeper Studio using Claude API with LangChain",
+  "description": "A Beekeeper Studio plugin for analyzing database and generate queries",
   "license": "MIT",
   "type": "module",
   "main": "dist/main.js",
