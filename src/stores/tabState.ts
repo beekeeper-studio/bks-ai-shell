@@ -12,7 +12,7 @@
  **/
 
 import { getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
-import { Message } from "ai";
+import { UIMessage } from "ai";
 import { defineStore } from "pinia";
 import { StoredMessage } from "@langchain/core/messages";
 import { mapLangChainStoredMessagesToAISdkMessages } from "@/utils/langchainToAISdk";
@@ -25,7 +25,7 @@ type Old_TabState = {
 
 type TabState = {
   version: "2"
-  messages: Message[];
+  messages: UIMessage[];
   conversationTitle: string;
 };
 

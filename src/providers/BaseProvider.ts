@@ -1,21 +1,26 @@
 import { notify } from "@beekeeperstudio/plugin";
-import { generateObject, LanguageModel, streamText, ToolSet } from "ai";
+import { generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
 import { AvailableModels, defaultTemperature, getDefaultInstructions } from "@/config";
 import z from "zod";
-import { UserRejectedError } from "@/tools";
+// import { UserRejectedError } from "@/tools";
 import {
   APICallError,
-  InvalidToolArgumentsError,
+  // InvalidToolArgumentsError,
   NoSuchModelError,
   NoSuchProviderError,
   NoSuchToolError,
-  ToolExecutionError,
+  // ToolExecutionError,
 } from "ai";
+import { ProviderOptions } from '@ai-sdk/provider-utils';
 
 export type Messages = Parameters<typeof streamText>[0]["messages"];
 
 export abstract class BaseProvider {
   abstract getModel(id: string): LanguageModel;
+
+  getProviderOptions(): ProviderOptions | undefined {
+    return undefined;
+  }
 
   async stream(options: {
     messages: Messages;
@@ -30,11 +35,12 @@ export abstract class BaseProvider {
       abortSignal: options.signal,
       system: await getDefaultInstructions(),
       tools: options.tools,
-      maxSteps: 10,
+      stopWhen: stepCountIs(10),
       temperature: options.temperature ?? defaultTemperature,
+      providerOptions: this.getProviderOptions(),
     });
-    return result.toDataStreamResponse({
-      getErrorMessage: (error) => {
+    return result.toUIMessageStreamResponse({
+      onError: (error) => {
         notify("pluginError", {
           message: error.message,
           name: error.name,
@@ -66,14 +72,14 @@ export abstract class BaseProvider {
   getErrorMessage(error: unknown) {
     if (NoSuchToolError.isInstance(error)) {
       return "The model tried to call a unknown tool.";
-    } else if (InvalidToolArgumentsError.isInstance(error)) {
-      return "The model called a tool with invalid arguments.";
-    } else if (ToolExecutionError.isInstance(error)) {
-      if (UserRejectedError.isInstance(error.cause)) {
-        return `User rejected tool call. (toolCallId: ${error.toolCallId})`;
-      } else {
-        return "An error occurred during tool execution.";
-      }
+    // } else if (InvalidToolArgumentsError.isInstance(error)) {
+    //   return "The model called a tool with invalid arguments.";
+    // } else if (ToolExecutionError.isInstance(error)) {
+    //   if (UserRejectedError.isInstance(error.cause)) {
+    //     return `User rejected tool call. (toolCallId: ${error.toolCallId})`;
+    //   } else {
+    //     return "An error occurred during tool execution.";
+    //   }
     } else if (APICallError.isInstance(error)) {
       if (
         error.data?.error?.code === "invalid_api_key" ||

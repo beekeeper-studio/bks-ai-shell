@@ -1,6 +1,3 @@
-import {
-  generateObject,
-} from "ai";
 import { useChat } from "@ai-sdk/vue";
 import { computed, ref, watch } from "vue";
 import {
@@ -8,14 +5,14 @@ import {
   AvailableModels,
 } from "@/config";
 import { getTools } from "@/tools";
-import { Message } from "ai";
+import { UIMessage } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
 import { createProvider } from "@/providers";
 
 type AIOptions = {
-  initialMessages: Message[];
+  initialMessages: UIMessage[];
   anthropicApiKey?: string;
   openaiApiKey?: string;
   googleApiKey?: string;
