@@ -16,11 +16,10 @@
           "id": "bks-ai-shell",
           "name": "AI Shell",
           "kind": "shell",
-          "entry": "index.html"
+          "entry": "dist/index.html"
         }
       ]
     }
   },
-  "pluginEntryDir": "dist",
   "permissions": []
 }
