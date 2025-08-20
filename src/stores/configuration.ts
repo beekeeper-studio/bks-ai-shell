@@ -39,6 +39,7 @@ type Configurable = {
   providers_openaiCompat_headers: string;
   providers_ollama_baseUrl: string;
   providers_ollama_headers: string;
+  customInstructions: string;
 } & {
   // User defined models
   [K in AvailableProviders as `providers_${K}_models`]: Model[];
@@ -77,6 +78,7 @@ const defaultConfiguration: ConfigurationState = {
   providers_ollama_models: [],
   disabledModels: disabledModelsByDefault,
   removedModels: [],
+  customInstructions: "",
 };
 
 function isEncryptedConfig(
