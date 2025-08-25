@@ -36,10 +36,10 @@ export class OpenAICompatibleProvider extends BaseProvider {
       throw new Error(`Failed to list models: ${data.error}`);
     }
     try {
-      const models = data.data.map((m: any) => ({
+      const models = data.data?.map((m: any) => ({
         id: m.id,
         displayName: m.id,
-      }));
+      })) || [];
       return models;
     } catch (e) {
       throw new Error(`Failed to list models: ${e}`);
