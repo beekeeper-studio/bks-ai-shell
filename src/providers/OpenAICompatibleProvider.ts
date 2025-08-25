@@ -22,8 +22,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
   }
 
   async listModels() {
-    const url = new URL("v1/models", this.options.baseURL);
-        console.log(url.toString())
+    const url = new URL("models", this.options.baseURL);
 
     const res = await fetch(url.toString(), {
       headers: this.options.headers,
