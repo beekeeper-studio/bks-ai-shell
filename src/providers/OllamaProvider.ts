@@ -1,45 +1,19 @@
-import { BaseProvider } from "@/providers/BaseProvider";
-import { createOllama } from "ollama-ai-provider";
+import { OpenAICompatibleProvider } from "./OpenAICompatibleProvider";
 
-export class OllamaProvider extends BaseProvider {
+export class OllamaProvider extends OpenAICompatibleProvider {
   constructor(
-    private options: {
+    options: {
       baseURL: string;
       headers: Record<string, string>;
+      apiKey: string;
     },
   ) {
-    super();
+    super(options);
     this.options = {
       ...options,
-      baseURL: new URL(options.baseURL).toString() + "api/",
+      apiKey: options.apiKey || "fake-key",
+      baseURL: new URL(options.baseURL).toString() + "v1/",
+      name: "ollama",
     };
-  }
-
-  getModel(id: string) {
-    return createOllama({
-      baseURL: this.options.baseURL,
-      headers: this.options.headers,
-    }).languageModel(id, {
-      simulateStreaming: true,
-    });
-  }
-
-  async listModels() {
-    const res = await fetch(`${this.options.baseURL}tags/`, {
-      headers: this.options.headers,
-    });
-    if (!res.ok) {
-      throw new Error(`Failed to list models: ${res.statusText}`);
-    }
-    const data = await res.json();
-    try {
-      const models = data.models.map((m: any) => ({
-        id: m.name,
-        displayName: m.name,
-      }));
-      return models;
-    } catch (e) {
-      throw new Error(`Failed to list models: ${e}`);
-    }
   }
 }
