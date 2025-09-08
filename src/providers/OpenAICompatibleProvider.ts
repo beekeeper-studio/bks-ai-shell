@@ -3,10 +3,11 @@ import { createOpenAI } from "@ai-sdk/openai";
 
 export class OpenAICompatibleProvider extends BaseProvider {
   constructor(
-    private options: {
+    protected options: {
       baseURL: string;
       headers: Record<string, string>;
       apiKey: string;
+      name?: string;
     },
   ) {
     super();
@@ -18,12 +19,12 @@ export class OpenAICompatibleProvider extends BaseProvider {
       baseURL: this.options.baseURL,
       apiKey: this.options.apiKey,
       headers: this.options.headers,
+      name: this.options.name,
     }).languageModel(id);
   }
 
   async listModels() {
-    const url = new URL("v1/models", this.options.baseURL);
-        console.log(url.toString())
+    const url = new URL("./models", this.options.baseURL);
 
     const res = await fetch(url.toString(), {
       headers: this.options.headers,
@@ -36,10 +37,10 @@ export class OpenAICompatibleProvider extends BaseProvider {
       throw new Error(`Failed to list models: ${data.error}`);
     }
     try {
-      const models = data.data.map((m: any) => ({
+      const models = data.data?.map((m: any) => ({
         id: m.id,
         displayName: m.id,
-      }));
+      })) || [];
       return models;
     } catch (e) {
       throw new Error(`Failed to list models: ${e}`);

@@ -6,17 +6,25 @@ Ask AI to analyze your database and generate SQL queries.
 
 ## Development
 
-Run the commands below, and then open Beekeeper Studio.
-
 ```bash
-cd ~/.config/beekeeper-studio/plugins
+# Clone the repo
 git clone git@github.com:beekeeper-studio/bks-ai-shell.git
-cd ./bks-ai-shell
+
+# Go to the directory
+cd bks-ai-shell
+
+# Link the directory to Beekeeper Studio plugins
+ln -s $(pwd) ~/.config/beekeeper-studio/plugins/bks-ai-shell
+# On Windows, replace $(pwd) with %cd%
+
+# Install dependencies
 yarn install
-yarn build # or yarn build --watch
+
+# Start development
+yarn dev
 ```
 
-If you run Beekeeper Studio project locally, you can right click the AI Shell tab header > `[DEV] Reload Plugin View` to reload the iframe.
+Finally, open Beekeeper Studio 5.3 or newer (or restart the app).
 
 ## Deployment
 
@@ -28,5 +36,4 @@ yarn build
 
 ## Security Note
 
-This application uses the `dangerouslyAllowBrowser: true` flag to enable browser usage of the LangChain components. While convenient for this demo, be aware that this approach exposes your API key to potential security risks in a production environment.
-
+This application uses the `anthropic-dangerous-direct-browser-access: true` header to enable browser usage of the Anthropic API. While convenient for this demo, be aware that this approach exposes your API key to potential security risks in a production environment.

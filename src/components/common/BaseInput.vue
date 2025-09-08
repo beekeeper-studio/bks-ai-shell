@@ -16,6 +16,8 @@
 </template>
 
 <script lang="ts">
+/** A generic input/textarea component. Autoresize is enabled by default
+for textarea. */
 import { PropType } from "vue";
 import _ from "lodash";
 
