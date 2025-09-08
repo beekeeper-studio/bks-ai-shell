@@ -4,6 +4,11 @@
     :class="{ 'empty-chat': messages.length === 0 }"
     :data-status="status"
   >
+    <div class="header">
+      <button class="settings-btn" @click="$emit('open-configuration')" title="Configuration">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+    </div>
     <div class="scroll-container" ref="scrollContainerRef">
       <h1 class="plugin-title">AI Shell</h1>
       <div class="chat-messages">
@@ -128,6 +133,8 @@ export default {
     Markdown,
     BaseInput,
   },
+
+  emits: ["manage-models", "open-configuration"],
 
   props: {
     initialMessages: {

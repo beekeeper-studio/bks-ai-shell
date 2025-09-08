@@ -6,9 +6,10 @@
     </div>
     <OnboardingScreen v-if="page === 'onboarding'" @submit="submitOnboardingScreen" />
     <ChatInterface v-else-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
-      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="page = 'configuration'" />
+      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
+      @open-configuration="handleOpenConfiguration" />
     <div id="configuration-page" v-else>
-      <Configuration @close="page = 'chat-interface'" />
+      <Configuration :initial-page="initialConfigurationPage" @close="page = 'chat-interface'" />
     </div>
   </div>
 </template>
@@ -20,7 +21,9 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
-import Configuration from "@/components/configuration/Configuration.vue";
+import Configuration, {
+  PageId as ConfigurationPageId,
+} from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
 
 type Page = "starting" | "onboarding" | "chat-interface" | "configuration";
@@ -38,6 +41,7 @@ export default {
       error: "" as unknown,
       showLoading: false,
       apiKeysChanged: false,
+      initialConfigurationPage: "general" as ConfigurationPageId,
     };
   },
 
@@ -84,6 +88,14 @@ export default {
     submitOnboardingScreen() {
       this.page = "chat-interface";
       this.setInternal("isFirstTimeUser", false);
+    },
+    handleManageModels() {
+      this.initialConfigurationPage = "models";
+      this.page = "configuration";
+    },
+    handleOpenConfiguration() {
+      this.initialConfigurationPage = "general";
+      this.page = "configuration";
     },
   },
 };

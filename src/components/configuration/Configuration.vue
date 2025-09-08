@@ -22,6 +22,7 @@
         <ProvidersConfiguration />
       </template>
       <GeneralConfiguration v-if="page === 'general'" />
+      <AboutConfiguration v-if="page === 'about'" />
     </div>
   </div>
 </template>
@@ -35,6 +36,8 @@ import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
 import BaseInput from "../common/BaseInput.vue";
 import GeneralConfiguration from "./GeneralConfiguration.vue";
+import AboutConfiguration from "./AboutConfiguration.vue";
+import { PropType } from "vue";
 
 const pages = [
   {
@@ -45,8 +48,13 @@ const pages = [
     id: "models",
     displayName: "Models",
   },
+  {
+    id: "about",
+    displayName: "About",
+  },
 ] as const;
 
+export type PageId = typeof pages[number]["id"];
 
 export default {
   name: "Configuration",
@@ -56,13 +64,21 @@ export default {
     ProvidersConfiguration,
     BaseInput,
     GeneralConfiguration,
+    AboutConfiguration,
   },
 
   emits: ["close"],
 
+  props: {
+    initialPage: {
+      type: String as PropType<PageId>,
+      default: "general",
+    },
+  },
+
   data() {
     return {
-      page: "models" as typeof pages[number]['id'],
+      page: this.initialPage,
     };
   },
 

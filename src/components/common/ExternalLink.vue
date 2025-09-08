@@ -1,5 +1,5 @@
 <template>
-  <a @click.prevent="click" :href="href">
+  <a @click.prevent="click" :href="href" class="external-link">
     <slot />
   </a>
 </template>
