@@ -1,5 +1,5 @@
-import instructions from "../instructions.txt?raw";
-import mongodbInstructions from "../mongodb-instructions.txt?raw";
+import instructions from "../instructions/base.txt?raw";
+import mongodbInstructions from "../instructions/mongodb.txt?raw";
 import { getConnectionInfo, getTables } from "@beekeeperstudio/plugin";
 
 export async function getDefaultInstructions() {
@@ -23,7 +23,9 @@ export async function getDefaultInstructions() {
   result = result.replace("{tables}", JSON.stringify(tables));
 
   if (response.connectionType === "mongodb") {
-    result = mongodbInstructions.replace("{instructions.txt}", result);
+    result = mongodbInstructions.replace("{base_instructions}", result);
+  } else if (response.connectionType === "surrealdb") {
+    result += "\n ## SurrealDB\nIf you need to use the run_query tool, you should use SurrealQL.";
   }
 
   return result;

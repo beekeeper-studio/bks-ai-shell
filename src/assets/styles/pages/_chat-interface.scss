@@ -25,7 +25,6 @@
     justify-content: space-between;
     width: 100%;
     padding: 0.4rem 0;
-    border-bottom: 1px solid rgb(from var(--theme-base) r g b / 10%);
 
     .settings-btn {
       background-color: transparent;
@@ -516,7 +515,6 @@
     >.header {
       position: absolute;
       top: 0;
-      border-bottom: none;
     }
 
     .scroll-container {
