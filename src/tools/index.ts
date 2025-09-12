@@ -1,28 +1,11 @@
 import { z } from "zod";
-import { Tool, tool, ToolSet } from "ai";
+import { tool, ToolSet } from "ai";
 import {
   getColumns,
-  getConnectionInfo,
   getTables,
   runQuery,
 } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
-
-export const get_connection_info = tool({
-  description:
-    "Get information about the current database connection including type, default database, and read-only status",
-  parameters: z.object({}),
-  execute: async () => {
-    try {
-      return safeJSONStringify(await getConnectionInfo());
-    } catch (e) {
-      return safeJSONStringify({
-        type: "error",
-        message: e.message,
-      });
-    }
-  },
-});
 
 export const get_tables = tool({
   description: "Get a list of all tables in the current database",
@@ -95,7 +78,6 @@ export function getTools(
   onAskPermission: (name: string, toolCallId: string) => Promise<boolean>,
 ): ToolSet {
   const toolSet: ToolSet = {
-    get_connection_info,
     get_tables,
     get_columns,
   };

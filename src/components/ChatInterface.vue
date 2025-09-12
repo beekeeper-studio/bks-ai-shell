@@ -4,6 +4,11 @@
     :class="{ 'empty-chat': messages.length === 0 }"
     :data-status="status"
   >
+    <div class="header">
+      <button class="btn settings-btn" @click="$emit('open-configuration')" title="Settings">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+    </div>
     <div class="scroll-container" ref="scrollContainerRef">
       <h1 class="plugin-title">AI Shell</h1>
       <div class="chat-messages">
@@ -108,7 +113,7 @@ import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
 import { PropType } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
 import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
@@ -128,6 +133,8 @@ export default {
     Markdown,
     BaseInput,
   },
+
+  emits: ["manage-models", "open-configuration"],
 
   props: {
     initialMessages: {
@@ -158,7 +165,7 @@ export default {
       askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
       rejectPermission: ai.rejectPermission,
-      reload: ai.reload,
+      retry: ai.retry,
     };
   },
 
@@ -177,17 +184,13 @@ export default {
   },
 
   computed: {
+    ...mapGetters(useChatStore, ["systemPrompt"]),
     ...mapWritableState(useChatStore, ["model"]),
     ...mapState(useChatStore, {
       filteredModels(store) {
         return store.models.filter((m) => m.enabled);
       },
     }),
-    ...mapState(useConfigurationStore, [
-      "providers.openai.apiKey",
-      "providers.anthropic.apiKey",
-      "providers.google.apiKey",
-    ]),
     canSendMessage() {
       if (this.askingPermission && this.input.trim().length > 0) return true;
       return this.status === "ready" || this.status === "error";
@@ -373,12 +376,12 @@ export default {
       if (this.askingPermission) {
         this.rejectPermission(message);
       } else {
-        this.send(message, {
-          modelId: this.model.id,
-          providerId: this.model.provider,
-          apiKey: this[`providers.${this.model.provider}.apiKey`],
-        });
+        this.send(message, this.getSendOptions());
       }
+    },
+
+    async reload() {
+      await this.retry(this.getSendOptions());
     },
 
     addToHistory(input: string) {
@@ -421,6 +424,18 @@ export default {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
     },
+
+    getSendOptions() {
+      if (!this.model) {
+        throw new Error("No model selected");
+      }
+
+      return {
+        modelId: this.model.id,
+        providerId: this.model.provider,
+        systemPrompt: this.systemPrompt,
+      }
+    }
   },
 };
 </script>

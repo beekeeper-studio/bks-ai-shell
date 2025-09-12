@@ -1,10 +1,16 @@
 @use "models";
+@use "general";
+@use "about";
 
-#configuration-page {
-  height: 100%;
-  width: 100%;
+#configuration-popover {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
+
+  &:not(.active) {
+    display: none;
+  }
 }
 
 .configuration {

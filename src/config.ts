@@ -1,5 +1,5 @@
-import instructions from "../instructions.txt?raw";
-import mongodbInstructions from "../mongodb-instructions.txt?raw";
+import instructions from "../instructions/base.txt?raw";
+import mongodbInstructions from "../instructions/mongodb.txt?raw";
 import { getConnectionInfo, getTables } from "@beekeeperstudio/plugin";
 
 export async function getDefaultInstructions() {
@@ -23,7 +23,11 @@ export async function getDefaultInstructions() {
   result = result.replace("{tables}", JSON.stringify(tables));
 
   if (response.connectionType === "mongodb") {
-    result = mongodbInstructions.replace("{instructions.txt}", result);
+    result = mongodbInstructions.replace("{base_instructions}", result);
+  } else if (response.connectionType === "surrealdb") {
+    result += "\n ## SurrealDB\nIf you need to use the run_query tool, you should use SurrealQL.";
+  } else if (response.connectionType === "redis") {
+    result += "\n ## Redis\nIf you need to use the run_query tool, you should use redis commands instead of SQL.";
   }
 
   return result;
@@ -79,7 +83,7 @@ export const providerConfigs = {
         id: "claude-3-5-sonnet-latest",
         displayName: "Claude Sonnet 3.5 Latest",
       },
-      { id: "claude-3-haiku", displayName: "Claude Haiku 3" },
+      { id: "claude-3-haiku-20240307", displayName: "Claude Haiku 3" },
     ],
   },
   google: {
