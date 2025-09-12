@@ -8,8 +8,8 @@
     <ChatInterface v-else-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
       :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
-    <div id="configuration-page" v-else>
-      <Configuration :initial-page="initialConfigurationPage" @close="page = 'chat-interface'" />
+    <div id="configuration-popover" :class="{ active: showConfiguration }">
+      <Configuration :reactivePage="configurationPage" @close="closeConfiguration" />
     </div>
   </div>
 </template>
@@ -26,7 +26,7 @@ import Configuration, {
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
 
-type Page = "starting" | "onboarding" | "chat-interface" | "configuration";
+type Page = "starting" | "onboarding" | "chat-interface";
 
 export default {
   components: {
@@ -38,10 +38,11 @@ export default {
   data() {
     return {
       page: "starting" as Page,
+      showConfiguration: false,
       error: "" as unknown,
       showLoading: false,
       apiKeysChanged: false,
-      initialConfigurationPage: "general" as ConfigurationPageId,
+      configurationPage: "general" as ConfigurationPageId,
     };
   },
 
@@ -63,7 +64,7 @@ export default {
         this.page = "chat-interface";
       }
     } catch (e) {
-      this.page = "configuration";
+      this.showConfiguration = true;
       this.error = e;
     } finally {
       clearTimeout(loadingTimer);
@@ -90,12 +91,15 @@ export default {
       this.setInternal("isFirstTimeUser", false);
     },
     handleManageModels() {
-      this.initialConfigurationPage = "models";
-      this.page = "configuration";
+      this.configurationPage = "models";
+      this.showConfiguration = true;
     },
     handleOpenConfiguration() {
-      this.initialConfigurationPage = "general";
-      this.page = "configuration";
+      this.configurationPage = "general";
+      this.showConfiguration = true;
+    },
+    closeConfiguration() {
+      this.showConfiguration = false;
     },
   },
 };

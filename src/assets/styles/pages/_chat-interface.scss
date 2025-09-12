@@ -17,31 +17,29 @@
     align-items: center;
     width: 100%;
     overflow: auto;
-    margin-top: 2.5rem;
   }
 
-  .header {
+  >.header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: var(--screen-max-width);
-    position: absolute;
-    top: 0;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgb(from var(--theme-base) r g b / 10%);
 
     .settings-btn {
-      background: none;
+      background-color: transparent;
+      min-width: 0;
       border: none;
-      padding: 1rem;
       border-radius: 4px;
       cursor: pointer;
       color: var(--text-dark);
       transition: all 0.2s ease;
       margin-left: auto;
       opacity: 0.7;
+      box-shadow: none;
 
       &:hover {
-        background-color: var(--query-editor-bg);
         opacity: 1;
       }
 
@@ -53,6 +51,11 @@
 
   &.empty-chat {
     justify-content: center;
+
+    >.header {
+      position: absolute;
+      top: 0;
+    }
 
     .plugin-title {
       text-align: center;
@@ -102,7 +105,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.55rem 0.9rem;
   line-height: 1.4rem;
   white-space: pre-wrap;
 
@@ -163,6 +166,10 @@
         font-size: 0.7rem;
         opacity: 0.5;
         line-height: 1.25rem;
+      }
+
+      .btn {
+        box-shadow: none;
       }
 
       .copy-btn {
@@ -368,7 +375,7 @@
 .chat-input-container {
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  margin: 1rem;
+  margin: 0rem 1rem 1rem;
   display: flex;
   flex-direction: column;
   width: calc(100% - 2rem);
@@ -502,4 +509,18 @@
 
 .spinner-container {
   padding: 1rem 2rem 0;
+}
+
+@media (min-width: 900px) {
+  .chat-container {
+    >.header {
+      position: absolute;
+      top: 0;
+      border-bottom: none;
+    }
+
+    .scroll-container {
+      padding-top: 1.5rem;
+    }
+  }
 }

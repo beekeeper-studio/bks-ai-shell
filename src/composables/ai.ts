@@ -159,6 +159,14 @@ export function useAI(options: AIOptions) {
     fillTitle(options);
   }
 
+  async function retry(options: SendOptions) {
+    await reload({
+      body: {
+        sendOptions: options,
+      },
+    });
+  }
+
   function abort() {
     stop();
     saveMessages();
@@ -175,6 +183,6 @@ export function useAI(options: AIOptions) {
     rejectPermission,
     send,
     abort,
-    reload,
+    retry,
   };
 }

@@ -5,7 +5,7 @@
     :data-status="status"
   >
     <div class="header">
-      <button class="settings-btn" @click="$emit('open-configuration')" title="Configuration">
+      <button class="btn settings-btn" @click="$emit('open-configuration')" title="Settings">
         <span class="material-symbols-outlined">settings</span>
       </button>
     </div>
@@ -165,7 +165,7 @@ export default {
       askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
       rejectPermission: ai.rejectPermission,
-      reload: ai.reload,
+      retry: ai.retry,
     };
   },
 
@@ -191,11 +191,6 @@ export default {
         return store.models.filter((m) => m.enabled);
       },
     }),
-    ...mapState(useConfigurationStore, [
-      "providers.openai.apiKey",
-      "providers.anthropic.apiKey",
-      "providers.google.apiKey",
-    ]),
     canSendMessage() {
       if (this.askingPermission && this.input.trim().length > 0) return true;
       return this.status === "ready" || this.status === "error";
@@ -381,13 +376,12 @@ export default {
       if (this.askingPermission) {
         this.rejectPermission(message);
       } else {
-        this.send(message, {
-          modelId: this.model.id,
-          providerId: this.model.provider,
-          apiKey: this[`providers.${this.model.provider}.apiKey`],
-          systemPrompt: this.systemPrompt,
-        });
+        this.send(message, this.getSendOptions());
       }
+    },
+
+    async reload() {
+      await this.retry(this.getSendOptions());
     },
 
     addToHistory(input: string) {
@@ -430,6 +424,18 @@ export default {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
     },
+
+    getSendOptions() {
+      if (!this.model) {
+        throw new Error("No model selected");
+      }
+
+      return {
+        modelId: this.model.id,
+        providerId: this.model.provider,
+        systemPrompt: this.systemPrompt,
+      }
+    }
   },
 };
 </script>

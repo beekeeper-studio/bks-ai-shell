@@ -79,7 +79,7 @@ export const providerConfigs = {
         id: "claude-3-5-sonnet-latest",
         displayName: "Claude Sonnet 3.5 Latest",
       },
-      { id: "claude-3-haiku", displayName: "Claude Haiku 3" },
+      { id: "claude-3-haiku-20240307", displayName: "Claude Haiku 3" },
     ],
   },
   google: {

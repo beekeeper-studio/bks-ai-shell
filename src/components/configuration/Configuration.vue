@@ -70,7 +70,7 @@ export default {
   emits: ["close"],
 
   props: {
-    initialPage: {
+    reactivePage: {
       type: String as PropType<PageId>,
       default: "general",
     },
@@ -78,7 +78,7 @@ export default {
 
   data() {
     return {
-      page: this.initialPage,
+      page: this.reactivePage,
     };
   },
 
@@ -104,6 +104,12 @@ export default {
           })) as any,
         };
       });
+    },
+  },
+
+  watch: {
+    reactivePage() {
+      this.page = this.reactivePage;
     },
   },
 

@@ -89,6 +89,6 @@ export abstract class BaseProvider {
     } else if (NoSuchModelError.isInstance(error)) {
       return `Model ${error.modelId} does not exist.`;
     }
-    return "An unknown error occurred.";
+    return  `An error occurred. (${error.message})`;
   }
 }
