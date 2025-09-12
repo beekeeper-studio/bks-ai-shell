@@ -26,6 +26,8 @@ export async function getDefaultInstructions() {
     result = mongodbInstructions.replace("{base_instructions}", result);
   } else if (response.connectionType === "surrealdb") {
     result += "\n ## SurrealDB\nIf you need to use the run_query tool, you should use SurrealQL.";
+  } else if (response.connectionType === "redis") {
+    result += "\n ## Redis\nIf you need to use the run_query tool, you should use redis commands instead of SQL.";
   }
 
   return result;
