@@ -6,9 +6,10 @@
     </div>
     <OnboardingScreen v-if="page === 'onboarding'" @submit="submitOnboardingScreen" />
     <ChatInterface v-else-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
-      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="page = 'configuration'" />
-    <div id="configuration-page" v-else>
-      <Configuration @close="page = 'chat-interface'" />
+      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
+      @open-configuration="handleOpenConfiguration" />
+    <div id="configuration-popover" :class="{ active: showConfiguration }">
+      <Configuration :reactivePage="configurationPage" @close="closeConfiguration" />
     </div>
   </div>
 </template>
@@ -20,10 +21,12 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
-import Configuration from "@/components/configuration/Configuration.vue";
+import Configuration, {
+  PageId as ConfigurationPageId,
+} from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
 
-type Page = "starting" | "onboarding" | "chat-interface" | "configuration";
+type Page = "starting" | "onboarding" | "chat-interface";
 
 export default {
   components: {
@@ -35,9 +38,11 @@ export default {
   data() {
     return {
       page: "starting" as Page,
+      showConfiguration: false,
       error: "" as unknown,
       showLoading: false,
       apiKeysChanged: false,
+      configurationPage: "general" as ConfigurationPageId,
     };
   },
 
@@ -59,7 +64,7 @@ export default {
         this.page = "chat-interface";
       }
     } catch (e) {
-      this.page = "configuration";
+      this.showConfiguration = true;
       this.error = e;
     } finally {
       clearTimeout(loadingTimer);
@@ -84,6 +89,17 @@ export default {
     submitOnboardingScreen() {
       this.page = "chat-interface";
       this.setInternal("isFirstTimeUser", false);
+    },
+    handleManageModels() {
+      this.configurationPage = "models";
+      this.showConfiguration = true;
+    },
+    handleOpenConfiguration() {
+      this.configurationPage = "general";
+      this.showConfiguration = true;
+    },
+    closeConfiguration() {
+      this.showConfiguration = false;
     },
   },
 };

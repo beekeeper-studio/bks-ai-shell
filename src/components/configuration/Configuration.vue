@@ -8,9 +8,10 @@
             Back
           </button>
         </li>
-        <li>
-          <button class="btn btn-flat nav-btn" :class="{ active: page === 'models' }" @click="page = 'models'">
-            Models
+        <li v-for="{id, displayName} in pages" :key="id">
+          <button class="btn btn-flat nav-btn" :class="{ active: page === id }"
+            @click="page = id">
+            {{ displayName }}
           </button>
         </li>
       </ul>
@@ -20,6 +21,8 @@
         <ModelsConfiguration />
         <ProvidersConfiguration />
       </template>
+      <GeneralConfiguration v-if="page === 'general'" />
+      <AboutConfiguration v-if="page === 'about'" />
     </div>
   </div>
 </template>
@@ -31,6 +34,27 @@ import { mapActions, mapState } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
 import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.vue";
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
+import BaseInput from "../common/BaseInput.vue";
+import GeneralConfiguration from "./GeneralConfiguration.vue";
+import AboutConfiguration from "./AboutConfiguration.vue";
+import { PropType } from "vue";
+
+const pages = [
+  {
+    id: "general",
+    displayName: "General",
+  },
+  {
+    id: "models",
+    displayName: "Models",
+  },
+  {
+    id: "about",
+    displayName: "About",
+  },
+] as const;
+
+export type PageId = typeof pages[number]["id"];
 
 export default {
   name: "Configuration",
@@ -38,19 +62,30 @@ export default {
   components: {
     ModelsConfiguration,
     ProvidersConfiguration,
+    BaseInput,
+    GeneralConfiguration,
+    AboutConfiguration,
   },
 
   emits: ["close"],
 
+  props: {
+    reactivePage: {
+      type: String as PropType<PageId>,
+      default: "general",
+    },
+  },
+
   data() {
     return {
-      page: "models" as "models" | "providers",
+      page: this.reactivePage,
     };
   },
 
   computed: {
     ...mapState(useChatStore, ["models"]),
     ...mapState(useConfigurationStore, ["disabledModels"]),
+    pages: () => pages,
     modelsByProvider(): {
       providerId: AvailableProviders;
       providerDisplayName: (typeof providerConfigs)[AvailableProviders]["displayName"];
@@ -69,6 +104,12 @@ export default {
           })) as any,
         };
       });
+    },
+  },
+
+  watch: {
+    reactivePage() {
+      this.page = this.reactivePage;
     },
   },
 

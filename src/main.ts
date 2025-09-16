@@ -42,6 +42,11 @@ hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("json", json);
 
+addNotificationListener("viewLoaded", (args) => {
+  document.querySelector("#injected-style")!.textContent =
+    `:root { ${args.theme.cssString} }`;
+});
+
 addNotificationListener("themeChanged", (args) => {
   document.querySelector("#injected-style")!.textContent =
     `:root { ${args.cssString} }`;

@@ -1,6 +1,6 @@
 import { notify } from "@beekeeperstudio/plugin";
 import { generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
-import { AvailableModels, defaultTemperature, getDefaultInstructions } from "@/config";
+import { AvailableModels, defaultTemperature } from "@/config";
 import z from "zod";
 // import { UserRejectedError } from "@/tools";
 import {
@@ -28,12 +28,13 @@ export abstract class BaseProvider {
     tools: ToolSet;
     modelId: AvailableModels["id"];
     temperature?: number;
+    systemPrompt?: string;
   }) {
     const result = streamText({
       model: this.getModel(options.modelId),
       messages: options.messages,
       abortSignal: options.signal,
-      system: await getDefaultInstructions(),
+      system: options.systemPrompt,
       tools: options.tools,
       stopWhen: stepCountIs(10),
       temperature: options.temperature ?? defaultTemperature,
@@ -94,6 +95,6 @@ export abstract class BaseProvider {
     } else if (NoSuchModelError.isInstance(error)) {
       return `Model ${error.modelId} does not exist.`;
     }
-    return "An unknown error occurred.";
+    return  `An error occurred. (${error.message})`;
   }
 }

@@ -4,6 +4,11 @@
     :class="{ 'empty-chat': messages.length === 0 }"
     :data-status="status"
   >
+    <div class="header">
+      <button class="btn settings-btn" @click="$emit('open-configuration')" title="Settings">
+        <span class="material-symbols-outlined">settings</span>
+      </button>
+    </div>
     <div class="scroll-container" ref="scrollContainerRef">
       <h1 class="plugin-title">AI Shell</h1>
       <div class="chat-messages">
@@ -21,6 +26,9 @@
         >
           <div class="message-content">
             Something went wrong.
+            <div v-if="isOllamaToolError" class="error-hint">
+            💡 <strong>Hint:</strong> This might be because your Ollama model doesn't support tools. Try using a different model, or switch to a different provider.
+            </div>
             <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
             <pre v-else v-text="truncatedError" />
             <button
@@ -52,15 +60,15 @@
       <div ref="bottomMarker"></div>
     </div>
     <div class="chat-input-container">
-      <textarea
+      <BaseInput
+        type="textarea"
         v-model="input"
         @keydown.enter="handleEnterKey"
         @keydown.up="handleUpArrow"
         @keydown.down="handleDownArrow"
         placeholder="Type your message here..."
         rows="1"
-        v-autoresize
-      ></textarea>
+      />
       <div class="actions">
         <Dropdown
           :model-value="model"
@@ -105,11 +113,12 @@ import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
 import { PropType } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
 import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { matchModel } from "@/utils";
+import BaseInput from "@/components/common/BaseInput.vue";
 
 const maxHistorySize = 50;
 
@@ -122,7 +131,10 @@ export default {
     Message,
     ToolMessage,
     Markdown,
+    BaseInput,
   },
+
+  emits: ["manage-models", "open-configuration"],
 
   props: {
     initialMessages: {
@@ -153,7 +165,7 @@ export default {
       askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
       rejectPermission: ai.rejectPermission,
-      reload: ai.reload,
+      retry: ai.retry,
     };
   },
 
@@ -172,17 +184,13 @@ export default {
   },
 
   computed: {
+    ...mapGetters(useChatStore, ["systemPrompt"]),
     ...mapWritableState(useChatStore, ["model"]),
     ...mapState(useChatStore, {
       filteredModels(store) {
         return store.models.filter((m) => m.enabled);
       },
     }),
-    ...mapState(useConfigurationStore, [
-      "providers.openai.apiKey",
-      "providers.anthropic.apiKey",
-      "providers.google.apiKey",
-    ]),
     canSendMessage() {
       if (this.askingPermission && this.input.trim().length > 0) return true;
       return this.status === "ready" || this.status === "error";
@@ -198,6 +206,13 @@ export default {
     },
     truncatedError() {
       return this.error ? this.error.toString().substring(0, 300) + "..." : "";
+    },
+    isOllamaToolError() {
+      if (!this.error || !this.model) return false;
+      const errorStr = this.error.toString().toLowerCase();
+      const isOllama = this.model.provider === 'ollama';
+      const hasToolError = errorStr.includes('bad request');
+      return isOllama && hasToolError;
     },
 
     rootBindings(): RootBinding[] {
@@ -216,6 +231,9 @@ export default {
   },
 
   watch: {
+    error() {
+      console.log(this.error)
+    },
     messages: {
       async handler() {
         await this.$nextTick();
@@ -358,12 +376,12 @@ export default {
       if (this.askingPermission) {
         this.rejectPermission(message);
       } else {
-        this.send(message, {
-          modelId: this.model.id,
-          providerId: this.model.provider,
-          apiKey: this[`providers.${this.model.provider}.apiKey`],
-        });
+        this.send(message, this.getSendOptions());
       }
+    },
+
+    async reload() {
+      await this.retry(this.getSendOptions());
     },
 
     addToHistory(input: string) {
@@ -406,27 +424,18 @@ export default {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
     },
-  },
-  directives: {
-    autoresize: {
-      mounted(el: HTMLTextAreaElement) {
-        const resize = () => {
-          el.style.height = "auto";
-          el.style.height = el.scrollHeight + "px";
-        };
 
-        el._resizeHandler = resize;
+    getSendOptions() {
+      if (!this.model) {
+        throw new Error("No model selected");
+      }
 
-        el.addEventListener("input", resize);
-        requestAnimationFrame(resize);
-      },
-      updated(el: HTMLTextAreaElement) {
-        el._resizeHandler();
-      },
-      unmounted(el: HTMLTextAreaElement) {
-        el.removeEventListener("input", el._resizeHandler);
-      },
-    },
+      return {
+        modelId: this.model.id,
+        providerId: this.model.provider,
+        systemPrompt: this.systemPrompt,
+      }
+    }
   },
 };
 </script>

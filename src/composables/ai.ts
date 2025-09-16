@@ -21,6 +21,7 @@ type AIOptions = {
 type SendOptions = {
   providerId: AvailableProviders;
   modelId: AvailableModels["id"];
+  systemPrompt?: string;
 }
 
 export function useAI(options: AIOptions) {
@@ -55,6 +56,7 @@ export function useAI(options: AIOptions) {
             );
             return permitted;
           }),
+          systemPrompt: sendOptions.systemPrompt,
         });
       },
       onError: (error) => {
@@ -154,6 +156,14 @@ export function useAI(options: AIOptions) {
     fillTitle(options);
   }
 
+  async function retry(options: SendOptions) {
+    await reload({
+      body: {
+        sendOptions: options,
+      },
+    });
+  }
+
   function abort() {
     stop();
     saveMessages();
@@ -170,6 +180,6 @@ export function useAI(options: AIOptions) {
     rejectPermission,
     send,
     abort,
-    reload,
+    retry,
   };
 }

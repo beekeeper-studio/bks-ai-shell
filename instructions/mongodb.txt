@@ -1,4 +1,6 @@
-{instructions.txt}
+{base_instructions}
+
+## MongoDB
 
 If you need to use the run_query tool, you should use the SQL-like query language just like you would with any other SQL database.
 
