@@ -2,57 +2,57 @@
 # yarn lockfile v1
 
 
-"@ai-sdk/amazon-bedrock@^3.0.8":
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/amazon-bedrock/-/amazon-bedrock-3.0.8.tgz#dce3b40b9e7b9012b5ab4211a005df054cee9337"
-  integrity sha512-WZlUldtNezAlrVwTbMihHHKvxzQV94xfVcxW5AKZQqFo5PCdllI5Ky8wCOZfY72cCcsKmRmF+EFtM0R0HIez2g==
+"@ai-sdk/amazon-bedrock@^3.0.22":
+  version "3.0.22"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/amazon-bedrock/-/amazon-bedrock-3.0.22.tgz#07af7e558f428d7d8fced399a0e404dc7a3e210d"
+  integrity sha512-0JvTWfWr15yWgB9LNgqmoOikw0nLF7RHHBKnYBKo7gR9E61EHMeWprchAbUJphxkGSxmbImHHEnG84X6bv9sug==
   dependencies:
-    "@ai-sdk/anthropic" "2.0.4"
+    "@ai-sdk/anthropic" "2.0.17"
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
     "@smithy/eventstream-codec" "^4.0.1"
     "@smithy/util-utf8" "^4.0.0"
     aws4fetch "^1.0.20"
 
-"@ai-sdk/anthropic@2.0.4", "@ai-sdk/anthropic@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/anthropic/-/anthropic-2.0.4.tgz#026bceac09757aac8cf03320134af85a6c1cd5af"
-  integrity sha512-ii2bZEUPwBitUiK1dpX+HsOarcDGY71G9TVdSJqbfXSVqa+speJNZ8PA/bjuNMml0NyX8VxNsaMg3SwBUCZspA==
+"@ai-sdk/anthropic@2.0.17", "@ai-sdk/anthropic@^2.0.17":
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/anthropic/-/anthropic-2.0.17.tgz#b097a30a92942ba1989145d0b8fa4836da21eba6"
+  integrity sha512-fEmGD3H3cI4ahcrtU/ekA6xvUq9kk/IpOh2TI3wOSxqvKqpo+ztwiem5/x5R92Yenl9KRooYIefr0LNlFUR5Ow==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
 
-"@ai-sdk/gateway@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-1.0.7.tgz#8a2a735037209d571480140a7919f32ae08cea81"
-  integrity sha512-Athrq7OARuNc0iHZJP6InhSQ53tImCc990vMWyR1UHaZgPZJbXjKhIMiOj54F0I0Nlemx48V4fHYUTfLkJotnQ==
+"@ai-sdk/gateway@1.0.23":
+  version "1.0.23"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-1.0.23.tgz#284a7de5bf7c9e80ac68416f19cf3644d7bb2db6"
+  integrity sha512-ynV7WxpRK2zWLGkdOtrU2hW22mBVkEYVS3iMg1+ZGmAYSgzCqzC74bfOJZ2GU1UdcrFWUsFI9qAYjsPkd+AebA==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
 
-"@ai-sdk/google@^2.0.6":
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/google/-/google-2.0.6.tgz#8d1c2fb1cc358efcc22191f4bc442c8997fdaed7"
-  integrity sha512-8acuseWJI+RRH99JDWM/n7IJRuuGNa4YzLXB/leqE/ZByHyIiVWGADjJi/vfnJnmdM5fQnezJ6SRTF6feI5rSQ==
+"@ai-sdk/google@^2.0.14":
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/google/-/google-2.0.14.tgz#0afd7b29718d77bd104b70d46cd81af34cfd9b04"
+  integrity sha512-OCBBkEUq1RNLkbJuD+ejqGsWDD0M5nRyuFWDchwylxy0J4HSsAiGNhutNYVTdnqmNw+r9LyZlkyZ1P4YfAfLdg==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
 
-"@ai-sdk/openai-compatible@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/openai-compatible/-/openai-compatible-1.0.7.tgz#55bc110dc45afb15a0b00210435c458a8063a9d5"
-  integrity sha512-mH+0yoJCvPQZBwwyw8ALil0cA40dQAPc+YhaANFxpjDJKqtATpHXPxq7u2SiMNkbqV26jO92etHPM+EP2+p2VA==
+"@ai-sdk/openai-compatible@^1.0.18":
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/openai-compatible/-/openai-compatible-1.0.18.tgz#64176864fc11145df84a48d1fa0374a71be6a2ca"
+  integrity sha512-WSxF83ZVvTpj2vKhgSNe95qr46TaTBRitF7LlX817r1vKAHw3MDFjjrxZTHbR58jcQWX6N9B3D2aX2Ro9fPBNA==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
 
-"@ai-sdk/openai@^2.0.15":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/openai/-/openai-2.0.15.tgz#11f869e6132171db4fbcfc389d91a9abc292df19"
-  integrity sha512-/IUyQ9ck4uUTtGojvQamcUWpNWkwpL/P1F6LYRxpQGj07H00oJEBH/VUizrIq0ZvW/vkuK6c6X4UJS9PrdYyxA==
+"@ai-sdk/openai@^2.0.30":
+  version "2.0.30"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/openai/-/openai-2.0.30.tgz#efea667281f3a12f73edeab6e6152bc35d492684"
+  integrity sha512-a9Vf64OT2dWEFyEGv+OxtCs69B18BsuzInvuyUxVPczbIiBLqUCt3zcD/8EwqbTPJwsFNsL8/9nbVZFmwA1+2A==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
 
 "@ai-sdk/provider-utils@3.0.1":
   version "3.0.1"
@@ -64,15 +64,14 @@
     eventsource-parser "^3.0.3"
     zod-to-json-schema "^3.24.1"
 
-"@ai-sdk/provider-utils@3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-3.0.3.tgz#87e507d3d08c793a427a2ab15d786122d96b0c41"
-  integrity sha512-kAxIw1nYmFW1g5TvE54ZB3eNtgZna0RnLjPUp1ltz1+t9xkXJIuDT4atrwfau9IbS0BOef38wqrI8CjFfQrxhw==
+"@ai-sdk/provider-utils@3.0.9":
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-3.0.9.tgz#ac35a11eaafb5943a6c1bb024b4d2fdda6a8a0a3"
+  integrity sha512-Pm571x5efqaI4hf9yW4KsVlDBDme8++UepZRnq+kqVBWWjgvGhQlzU8glaFq0YJEB9kkxZHbRRyVeHoV2sRYaQ==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
     "@standard-schema/spec" "^1.0.0"
-    eventsource-parser "^3.0.3"
-    zod-to-json-schema "^3.24.1"
+    eventsource-parser "^3.0.5"
 
 "@ai-sdk/provider@2.0.0":
   version "2.0.0"
@@ -81,13 +80,13 @@
   dependencies:
     json-schema "^0.4.0"
 
-"@ai-sdk/vue@^2.0.15":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/vue/-/vue-2.0.15.tgz#312371a2fab7e11a0858744f9601543b238ea628"
-  integrity sha512-+xJMu14JZdAiJQHssKVBTTDRoexOXD65LugBSMkGZ4GAAKa1B/cKgRRAM36mkNH8RgO/kNO/AJq0UdKYa/IWrQ==
+"@ai-sdk/vue@^2.0.44":
+  version "2.0.44"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/vue/-/vue-2.0.44.tgz#a0fc7f0173da07cc2262372448ff455ad8a9f49b"
+  integrity sha512-SbtAHVqIAuugkSPDeHvfciD2s7eZZWaUjC7dixPJDhgK4VxCsFzYWLza+nQjFHUJLwHnept6Gzwi+C16L3aTPw==
   dependencies:
-    "@ai-sdk/provider-utils" "3.0.3"
-    ai "5.0.15"
+    "@ai-sdk/provider-utils" "3.0.9"
+    ai "5.0.44"
     swrv "^1.0.4"
 
 "@aws-crypto/crc32@5.2.0":
@@ -763,14 +762,14 @@ agentkeepalive@^4.2.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-ai@5.0.15, ai@^5.0.15:
-  version "5.0.15"
-  resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.15.tgz#227cd4a043bc897fe3e45bf0e43600c7e2131dae"
-  integrity sha512-EX5hF+NVFm6R11mvdZRbg6eJEjyMlniI4/xOnyTh4VtDQ457lhIgi3kDGrHW3/qw9ELon9m2e7AK3g5z5sLwsQ==
+ai@5.0.44, ai@^5.0.44:
+  version "5.0.44"
+  resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.44.tgz#a4503c2fbcc54329a5e59381f0c144e91eb71311"
+  integrity sha512-l/rdoM4LcRpsRBVvZQBwSU73oNoFGlWj+PcH86QRzxDGJgZqgGItWO0QcKjBNcLDmUjGN1VYd/8J0TAXHJleRQ==
   dependencies:
-    "@ai-sdk/gateway" "1.0.7"
+    "@ai-sdk/gateway" "1.0.23"
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.3"
+    "@ai-sdk/provider-utils" "3.0.9"
     "@opentelemetry/api" "1.9.0"
 
 ansi-styles@^4.1.0:
@@ -989,6 +988,11 @@ eventsource-parser@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/eventsource-parser/-/eventsource-parser-3.0.3.tgz#e9af1d40b77e6268cdcbc767321e8b9f066adea8"
   integrity sha512-nVpZkTMM9rF6AQ9gPJpFsNAMt48wIzB5TQgiTLdHiuO8XEDhUgZEhqKlZWXbIzo9VmJ/HvysHqEaVeD5v9TPvA==
+
+eventsource-parser@^3.0.5:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/eventsource-parser/-/eventsource-parser-3.0.6.tgz#292e165e34cacbc936c3c92719ef326d4aeb4e90"
+  integrity sha512-Vo1ab+QXPzZ4tCa8SwIHJFaSzy4R6SHf7BY79rFBDf0idraZWAkYrDjDj8uWaSm3S2TK+hJ7/t1CEmZ7jXw+pg==
 
 fill-range@^7.1.1:
   version "7.1.1"
@@ -1564,3 +1568,8 @@ zod@^3.25.32:
   version "3.25.67"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.67.tgz#62987e4078e2ab0f63b491ef0c4f33df24236da8"
   integrity sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw==
+
+zod@^4.1.8:
+  version "4.1.8"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-4.1.8.tgz#54f024adc634dd185006a8415da2bdd495b9d92b"
+  integrity sha512-5R1P+WwQqmmMIEACyzSvo4JXHY5WiAFHRMg+zBZKgKS+Q1viRa0C1hmUKtHltoIFKtIdki3pRxkmpP74jnNYHQ==

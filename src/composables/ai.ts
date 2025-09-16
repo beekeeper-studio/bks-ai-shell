@@ -8,7 +8,7 @@ import { getTools } from "@/tools";
 import { UIMessage } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { notify } from "@beekeeperstudio/plugin";
-import { z } from "zod";
+import { z } from 'zod/v3';
 import { createProvider } from "@/providers";
 
 type AIOptions = {
