@@ -109,17 +109,19 @@ export const useConfigurationStore = defineStore("configuration", {
         providerConfigs,
       ) as AvailableProviders[];
       return availableProviders.flatMap((providerId) => {
-        return (
-          state[`providers_${providerId}_models`]
-            // Filter out removed models
-            .filter(
-              (model) =>
-                !state.removedModels.some(
-                  (m) => m.modelId === model.id && m.providerId === providerId,
-                ),
-            )
-            .map((model) => ({ ...model, providerId }))
-        );
+        const models = state[`providers_${providerId}_models`];
+        if (!models) {
+          return [];
+        }
+        // Filter out removed models
+        return models
+          .filter(
+            (model) =>
+              !state.removedModels.some(
+                (m) => m.modelId === model.id && m.providerId === providerId,
+              ),
+          )
+          .map((model) => ({ ...model, providerId }));
       });
     },
   },
