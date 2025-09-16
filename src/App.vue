@@ -68,9 +68,9 @@ export default {
       this.showConfiguration = true;
       this.error = e;
       notify("pluginError", {
-        message: `Failed to initialize: ${e.message}`,
-        error: e.name,
-        stack: e.stack,
+        message: `Failed to initialize: ${e?.message || e}`,
+        error: e?.name,
+        stack: e?.stack,
       });
     } finally {
       clearTimeout(loadingTimer);
