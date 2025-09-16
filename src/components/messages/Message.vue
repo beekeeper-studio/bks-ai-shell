@@ -5,11 +5,11 @@
       <template v-else v-for="(part, index) of message.parts" :key="index">
         <markdown v-if="part.type === 'text'" :content="part.text" />
         <tool-message
-          v-else-if="part.type === 'tool-invocation'"
-          :toolCall="part.toolInvocation"
-          :askingPermission="pendingToolCallIds.includes(part.toolInvocation.toolCallId)"
-          @accept="$emit('accept-permission', part.toolInvocation.toolCallId)"
-          @reject="$emit('reject-permission', part.toolInvocation.toolCallId)"
+          v-else-if="isToolUIPart(part)"
+          :part="part"
+          :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
+          @accept="$emit('accept-permission', part.toolCallId)"
+          @reject="$emit('reject-permission', part.toolCallId)"
         />
       </template>
     </div>
@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { Message } from "ai";
+import { isToolUIPart, UIMessage } from "ai";
 import Markdown from "@/components/messages/Markdown.vue";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
 
@@ -32,13 +32,17 @@ export default {
 
   props: {
     message: {
-      type: Object as PropType<Message>,
+      type: Object as PropType<UIMessage>,
       required: true,
     },
     pendingToolCallIds: {
       type: Array as PropType<string[]>,
       required: true,
     },
+  },
+
+  methods: {
+    isToolUIPart,
   },
 };
 </script>

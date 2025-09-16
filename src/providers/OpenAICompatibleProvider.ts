@@ -19,7 +19,6 @@ export class OpenAICompatibleProvider extends BaseProvider {
       baseURL: this.options.baseURL,
       apiKey: this.options.apiKey,
       headers: this.options.headers,
-      name: this.options.name,
     }).languageModel(id);
   }
 
