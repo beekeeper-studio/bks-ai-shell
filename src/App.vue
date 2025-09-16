@@ -25,6 +25,7 @@ import Configuration, {
   PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
+import { notify } from "@beekeeperstudio/plugin";
 
 type Page = "starting" | "onboarding" | "chat-interface";
 
@@ -66,6 +67,11 @@ export default {
     } catch (e) {
       this.showConfiguration = true;
       this.error = e;
+      notify("pluginError", {
+        message: `Failed to initialize: ${e?.message || e}`,
+        error: e?.name,
+        stack: e?.stack,
+      });
     } finally {
       clearTimeout(loadingTimer);
     }
