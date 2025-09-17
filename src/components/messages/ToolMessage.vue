@@ -3,7 +3,7 @@
     <div>{{ displayName }}</div>
     <markdown
       v-if="name === 'run_query'"
-      :content="'```sql\n' + (input?.query || '(empty)') + '\n```'"
+      :content="'```sql\n' + (part.input?.query || '(empty)') + '\n```'"
     />
     <div v-if="askingPermission">
       {{
@@ -74,9 +74,6 @@ export default {
     name() {
       return this.part.type.replace("tool-", "");
     },
-    input() {
-      return this.part.input;
-    },
     content() {
       if (this.data) {
         let str = "";
@@ -92,28 +89,25 @@ export default {
 
       return "";
     },
-    output(): unknown {
-      return this.part.output;
-    },
     data() {
       try {
-        return JSON.parse(this.output);
+        return JSON.parse(this.part.output);
       } catch (e) {
         return null;
       }
     },
     error() {
-      if (isErrorContent(this.output)) {
-        const err = parseErrorContent(this.output);
+      if (isErrorContent(this.part.output)) {
+        const err = parseErrorContent(this.part.output);
         return err.message ?? err;
       }
     },
     displayName() {
       if (this.name === "get_columns") {
-        if (this.input?.schema) {
-          return `Get Columns (schema: ${this.input?.schema}, table: ${this.input?.table || '...'})`;
+        if (this.part.input?.schema) {
+          return `Get Columns (schema: ${this.part.input?.schema}, table: ${this.part.input?.table || '...'})`;
         }
-        return `Get Columns (table: ${this.input?.table || '...'})`;
+        return `Get Columns (table: ${this.part.input?.table || '...'})`;
       }
       return this.name.split("_").map(_.capitalize).join(" ");
     },
