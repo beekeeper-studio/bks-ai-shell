@@ -2,8 +2,8 @@
   <div class="tool">
     <div>{{ displayName }}</div>
     <markdown
-      v-if="name === 'run_query' && inputFullyAvailable"
-      :content="'```sql\n' + input?.query + '\n```'"
+      v-if="name === 'run_query'"
+      :content="'```sql\n' + (input?.query || '(empty)') + '\n```'"
     />
     <div v-if="askingPermission">
       {{
@@ -73,13 +73,6 @@ export default {
   computed: {
     name() {
       return this.part.type.replace("tool-", "");
-    },
-    inputFullyAvailable() {
-      return (
-        this.part.state === "input-available" ||
-        this.part.state === "output-available" ||
-        this.part.state === "output-error"
-      );
     },
     input() {
       return this.part.input;
