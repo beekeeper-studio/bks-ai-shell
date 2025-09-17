@@ -157,7 +157,9 @@ export function useAI(options: AIOptions) {
   /** Send a message to the AI */
   async function send(message: string, options: SendOptions) {
     await chat.sendMessage(
-      { text: message },
+      {
+        text: message,
+      },
       {
         body: {
           sendOptions: options,

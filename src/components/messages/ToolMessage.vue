@@ -25,18 +25,19 @@
         <template v-if="name === 'get_connection_info'">
           {{ data.connectionType }}
         </template>
-        <template v-else-if="name === 'get_tables'">
+        <template v-if="name === 'get_tables'">
           {{ data.length }}
           {{ $pluralize("table", data.length) }}
+          (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
+        </template>
+        </template>
+        <template v-if="name === 'get_columns'">
+          {{ data.length }}
+          {{ $pluralize("column", data.length) }}
           (<code
             v-if="data.length < 5"
             v-text="data.map((c) => c.name).join(', ')"
           />)
-        </template>
-        <template v-else-if="name === 'get_columns'">
-          {{ data.length }}
-          {{ $pluralize("column", data.length) }}
-          (<code v-if="data.length < 5" v-text="data.map((c) => c.name).join(', ')" />)
         </template>
         <run-query-result
           v-else-if="name === 'run_query' && data"
