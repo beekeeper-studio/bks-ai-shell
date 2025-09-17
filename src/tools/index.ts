@@ -1,10 +1,6 @@
-import { z } from 'zod/v3';
+import { z } from "zod/v3";
 import { tool, ToolSet } from "ai";
-import {
-  getColumns,
-  getTables,
-  runQuery,
-} from "@beekeeperstudio/plugin";
+import { getColumns, getTables } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
 
 export const get_tables = tool({
@@ -21,7 +17,7 @@ export const get_tables = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e.message,
+        message: e?.message,
       });
     }
   },
@@ -51,43 +47,17 @@ export const get_columns = tool({
   },
 });
 
-export const run_query = (
-  onAskPermission: (toolCallId: string, params: any) => Promise<void>,
-) =>
-  tool({
-    description: "Run a SQL query and get the results",
-    inputSchema: z.object({
-      query: z.string().describe("The SQL query to execute"),
-    }),
-    execute: async (params, options) => {
-      await onAskPermission(options.toolCallId, params);
-      try {
-        return safeJSONStringify(
-          await runQuery(params.query),
-        );
-      } catch (e) {
-        return safeJSONStringify({
-          type: "error",
-          message: e.message,
-        });
-      }
-    },
-  });
+export const run_query = tool({
+  description: "Run a SQL query and get the results",
+  inputSchema: z.object({
+    query: z.string().describe("The SQL query to execute"),
+  }),
+});
 
-export function getTools(
-  onAskPermission: (name: string, toolCallId: string) => Promise<boolean>,
-): ToolSet {
-  const toolSet: ToolSet = {
-    get_tables,
-    get_columns,
-  };
-  toolSet["run_query"] = run_query(async (toolCallId, params) => {
-    const permitted = await onAskPermission("run_query", toolCallId);
-    if (!permitted) {
-      throw new UserRejectedError(toolCallId);
-    }
-  });
-  return toolSet;
+export const tools: ToolSet = {
+  get_tables,
+  get_columns,
+  run_query,
 }
 
 export class UserRejectedError extends Error {

@@ -17,6 +17,7 @@ import { defineStore } from "pinia";
 import { StoredMessage } from "@langchain/core/messages";
 import { mapLangChainStoredMessagesToAISdkMessages } from "@/utils/langchainToAISdk";
 import _ from "lodash";
+import { mapV4MessagesToV5Messages, MessageV4 } from "@/utils/aiSdkV5Migration";
 
 type Old_TabState = {
   messages: StoredMessage[];
@@ -24,18 +25,24 @@ type Old_TabState = {
 }
 
 type TabState = {
-  version: "2"
+  /**
+   * Version 2 = AI SDK v4
+   * Version 3 = AI SDK v5
+   */
+  version: "2" | "3";
   messages: UIMessage[];
   conversationTitle: string;
 };
 
-function isOldTabState(viewState: any): viewState is Old_TabState {
-  return viewState && !("version" in viewState);
+const currentTabVersion = "3";
+
+function isV1TabState(viewState: any): viewState is Old_TabState {
+  return !("version" in viewState);
 }
 
 export const useTabState = defineStore("tabState", {
   state: (): TabState => ({
-    version: "2",
+    version: currentTabVersion,
     messages: [],
     conversationTitle: "",
   }),
@@ -44,8 +51,10 @@ export const useTabState = defineStore("tabState", {
     async sync() {
       const state = await getViewState<TabState>();
       if (state) {
-        if (isOldTabState(state)) {
+        if (isV1TabState(state)) {
           this.messages = mapLangChainStoredMessagesToAISdkMessages(state.messages);
+        } else if (state.version === "2"){
+          this.messages = mapV4MessagesToV5Messages(state.messages as MessageV4[]);
         } else {
           this.messages = state.messages;
         }
@@ -55,7 +64,7 @@ export const useTabState = defineStore("tabState", {
     async setTabState(key: keyof TabState, value: TabState[keyof TabState]) {
       this.$patch({ [key]: value });
       setViewState<TabState>({
-        version: "2",
+        version: currentTabVersion,
         messages: _.cloneDeep(this.messages),
         conversationTitle: this.conversationTitle,
       });

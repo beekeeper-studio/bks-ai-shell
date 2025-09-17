@@ -1,14 +1,13 @@
 import { Chat } from "@ai-sdk/vue";
-import { computed, ref, watch } from "vue";
-import {
-  AvailableProviders,
-  AvailableModels,
-} from "@/config";
-import { getTools } from "@/tools";
+import { computed, ref } from "vue";
+import { AvailableProviders, AvailableModels } from "@/config";
+import { tools } from "@/tools";
 import { UIMessage, DefaultChatTransport, convertToModelMessages } from "ai";
 import { useTabState } from "@/stores/tabState";
-import { z } from 'zod/v3';
+import { z } from "zod/v3";
 import { createProvider } from "@/providers";
+import { safeJSONStringify } from "@/utils";
+import { runQuery } from "@beekeeperstudio/plugin";
 
 type AIOptions = {
   initialMessages: UIMessage[];
@@ -21,10 +20,19 @@ type SendOptions = {
   providerId: AvailableProviders;
   modelId: AvailableModels["id"];
   systemPrompt?: string;
-}
+};
+
+type ToolCall = {
+  toolCallId: string;
+  toolName: string;
+  input: unknown;
+};
 
 export function useAI(options: AIOptions) {
-  const pendingToolCallIds = ref<string[]>([]);
+  const pendingToolCalls = ref<ToolCall[]>([]);
+  const pendingToolCallIds = computed(() =>
+    pendingToolCalls.value.map((t) => t.toolCallId),
+  );
   const askingPermission = computed(() => pendingToolCallIds.value.length > 0);
   const followupAfterRejected = ref("");
 
@@ -41,27 +49,16 @@ export function useAI(options: AIOptions) {
           modelId: sendOptions.modelId,
           messages: convertToModelMessages(m.messages),
           signal: fetchOptions.signal,
-          tools: getTools(async (name, toolCallId) => {
-            pendingToolCallIds.value.push(toolCallId);
-            await new Promise<void>((resolve) => {
-              const unwatch = watch(pendingToolCallIds, () => {
-                if (!pendingToolCallIds.value.includes(toolCallId)) {
-                  unwatch();
-                  resolve();
-                }
-              });
-            });
-            pendingToolCallIds.value = pendingToolCallIds.value.filter(
-              (id) => id !== toolCallId
-            );
-            return permitted;
-          }),
+          tools,
           systemPrompt: sendOptions.systemPrompt,
         });
       },
     }),
     messages: messages.value,
-  })
+    onToolCall({ toolCall }) {
+      pendingToolCalls.value.push(toolCall);
+    },
+  });
 
   const messageList = computed(() => chat.messages);
   const error = computed(() => chat.error);
@@ -73,14 +70,54 @@ export function useAI(options: AIOptions) {
     await useTabState().setTabState("messages", chat.messages);
   }
 
-  /** If toolCallId is not provided, all tool calls are accepted */
-  function acceptPermission(toolCallId?: string) {
-    permitted = true;
-    if (toolCallId === undefined) {
-      pendingToolCallIds.value = [];
+  async function runAndAddToolResult(toolCall: ToolCall) {
+    if (toolCall.toolName === "run_query") {
+      let output: unknown;
+      try {
+        output = safeJSONStringify(await runQuery(toolCall.input!.query));
+      } catch (e) {
+        output = safeJSONStringify({ type: "error", message: e?.message });
+      }
+      chat.addToolResult({
+        toolCallId: toolCall.toolCallId,
+        tool: toolCall.toolName,
+        output,
+      });
     } else {
-      pendingToolCallIds.value = pendingToolCallIds.value.filter(
-        (id) => id !== toolCallId
+      chat.addToolResult({
+        toolCallId: toolCall.toolCallId,
+        tool: toolCall.toolName,
+        output: safeJSONStringify({
+          type: "error",
+          message: "Tool not supported",
+        }),
+      });
+    }
+  }
+
+  /**
+   * Accept and run tool calls that are pending. If toolCallId is not provided,
+   * all tool calls are accepted.
+   **/
+  async function acceptPermission(toolCallId?: string) {
+    permitted = true;
+
+    let toolCalls = pendingToolCalls.value;
+
+    if (toolCallId) {
+      const toolCall = pendingToolCalls.value.find(
+        (t) => t.toolCallId === toolCallId,
+      );
+      if (!toolCall) {
+        throw new Error("Tool call not found");
+      }
+      toolCalls = [toolCall];
+    }
+
+    for (const toolCall of toolCalls) {
+      await runAndAddToolResult(toolCall);
+      pendingToolCalls.value = pendingToolCalls.value.filter(
+        (pt) => pt.toolCallId !== toolCall.toolCallId,
       );
     }
   }
@@ -96,7 +133,7 @@ export function useAI(options: AIOptions) {
       pendingToolCallIds.value = [];
     } else {
       pendingToolCallIds.value = pendingToolCallIds.value.filter(
-        (id) => id !== toolCallId
+        (id) => id !== toolCallId,
       );
     }
   }
@@ -116,7 +153,7 @@ export function useAI(options: AIOptions) {
         // FIXME
         chat.messages.map((m) => `${m.role}: ${m.parts.join(" ")}`).join("\n") +
         "\n```",
-    })
+    });
     await useTabState().setTabTitle(res.object.title);
   }
 

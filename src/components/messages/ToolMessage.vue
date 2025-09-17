@@ -1,8 +1,7 @@
 <template>
   <div class="tool">
     <div>{{ displayName }}</div>
-    <markdown v-if="name === 'run_query' && part.state === 'input-available'"
-      :content="'```sql\n' + part.input?.query + '\n```'" />
+    <markdown v-if="name === 'run_query' && inputFullyAvailable" :content="'```sql\n' + input?.query + '\n```'" />
     <div v-if="askingPermission">
       {{
         name === "run_query"
@@ -36,7 +35,7 @@
           {{ $pluralize("column", data.length) }}
           (<code v-if="data.length < 5" v-text="data.map((c) => c.name).join(', ')" />)
         </template>
-        <!-- <run-query-result v-else-if="name === 'run_query' && data" :data="data" /> -->
+        <run-query-result v-else-if="name === 'run_query' && data" :data="data" />
       </template>
     </div>
   </div>
@@ -66,6 +65,16 @@ export default {
     name() {
       return this.part.type.replace("tool-", "");
     },
+    inputFullyAvailable() {
+      return (
+        this.part.state === "input-available" ||
+        this.part.state === "output-available" ||
+        this.part.state === "output-error"
+      );
+    },
+    input() {
+      return this.part.input;
+    },
     content() {
       if (this.data) {
         let str = "";
@@ -81,19 +90,21 @@ export default {
 
       return "";
     },
+    output(): unknown {
+      return this.part.output;
+    },
     data() {
       try {
-        // return JSON.parse(this.toolCall.result);
-        return "result here but idk how to parse";
+        return JSON.parse(this.output);
       } catch (e) {
         return null;
       }
     },
     error() {
-      // if (isErrorContent(this.toolCall.result)) {
-      //   const err = parseErrorContent(this.toolCall.result);
-      //   return err.message ?? err;
-      // }
+      if (isErrorContent(this.output)) {
+        const err = parseErrorContent(this.output);
+        return err.message ?? err;
+      }
     },
     displayName() {
       if (this.name === "get_columns") {
