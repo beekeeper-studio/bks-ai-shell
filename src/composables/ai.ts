@@ -1,110 +1,121 @@
-import {
-  generateObject,
-} from "ai";
-import { useChat } from "@ai-sdk/vue";
-import { computed, ref, watch } from "vue";
-import {
-  AvailableProviders,
-  AvailableModels,
-} from "@/config";
-import { getTools } from "@/tools";
-import { Message } from "ai";
+import { Chat } from "@ai-sdk/vue";
+import { computed, ref } from "vue";
+import { AvailableProviders, AvailableModels } from "@/config";
+import { tools } from "@/tools";
+import { UIMessage, DefaultChatTransport, convertToModelMessages } from "ai";
 import { useTabState } from "@/stores/tabState";
-import { notify } from "@beekeeperstudio/plugin";
-import { z } from "zod";
+import { z } from "zod/v3";
 import { createProvider } from "@/providers";
+import { safeJSONStringify } from "@/utils";
+import { runQuery } from "@beekeeperstudio/plugin";
 
 type AIOptions = {
-  initialMessages: Message[];
+  initialMessages: UIMessage[];
   anthropicApiKey?: string;
   openaiApiKey?: string;
   googleApiKey?: string;
-};
+}
 
 type SendOptions = {
   providerId: AvailableProviders;
   modelId: AvailableModels["id"];
   systemPrompt?: string;
-}
+};
+
+type ToolCall = {
+  toolCallId: string;
+  toolName: string;
+  input: unknown;
+};
 
 export function useAI(options: AIOptions) {
-  const pendingToolCallIds = ref<string[]>([]);
+  const pendingToolCalls = ref<ToolCall[]>([]);
+  const pendingToolCallIds = computed(() =>
+    pendingToolCalls.value.map((t) => t.toolCallId),
+  );
   const askingPermission = computed(() => pendingToolCallIds.value.length > 0);
   const followupAfterRejected = ref("");
 
-  let permitted = false;
+  const messages = ref<UIMessage[]>(options.initialMessages);
 
-  const { messages, input, append, error, status, addToolResult, stop, reload } =
-    useChat({
+  const chat = new Chat({
+    // FIXME create a custom chat transport
+    transport: new DefaultChatTransport({
       fetch: async (url, fetchOptions) => {
         const m = JSON.parse(fetchOptions.body) as any;
         const sendOptions = m.sendOptions as SendOptions;
         const provider = createProvider(sendOptions.providerId);
         return provider.stream({
           modelId: sendOptions.modelId,
-          messages: m.messages,
+          messages: convertToModelMessages(m.messages),
           signal: fetchOptions.signal,
-          tools: getTools(async (name, toolCallId) => {
-            pendingToolCallIds.value.push(toolCallId);
-            await new Promise<void>((resolve) => {
-              const unwatch = watch(pendingToolCallIds, () => {
-                if (!pendingToolCallIds.value.includes(toolCallId)) {
-                  unwatch();
-                  resolve();
-                }
-              });
-            });
-            pendingToolCallIds.value = pendingToolCallIds.value.filter(
-              (id) => id !== toolCallId
-            );
-            return permitted;
-          }),
+          tools,
           systemPrompt: sendOptions.systemPrompt,
         });
       },
-      onError: (error) => {
-        notify("pluginError", {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-        });
-        if (error.message.includes("User rejected tool call.")) {
-          addToolResult({
-            toolCallId: error.message.split("toolCallId: ")[1].split(")")[0],
-            result: JSON.stringify({
-              type: "error",
-              message: "No - Tell the AI what to do differently.",
-            }),
-          });
-          saveMessages();
-          if (followupAfterRejected.value) {
-            append({
-              role: "user",
-              content: followupAfterRejected.value,
-            });
-            followupAfterRejected.value = "";
-            // fillTitle();
-          }
-        }
-      },
-      onFinish: () => {
-        saveMessages();
-      },
-      initialMessages: options.initialMessages,
-    });
+    }),
+    onToolCall({ toolCall }) {
+      if (toolCall.toolName === "run_query") {
+        pendingToolCalls.value.push(toolCall);
+      }
+    },
+    messages: options.initialMessages,
+  });
+
+  const messageList = computed(() => chat.messages);
+  const error = computed(() => chat.error);
+  const status = computed(() => chat.status);
 
   function saveMessages() {
-    useTabState().setTabState("messages", messages.value);
+    useTabState().setTabState("messages", chat.messages);
   }
 
-  /** If toolCallId is not provided, all tool calls are accepted */
-  function acceptPermission(toolCallId?: string) {
-    permitted = true;
-    if (toolCallId === undefined) {
-      pendingToolCallIds.value = [];
+  async function runAndAddToolResult(toolCall: ToolCall) {
+    if (toolCall.toolName === "run_query") {
+      let output: unknown;
+      try {
+        output = safeJSONStringify(await runQuery(toolCall.input!.query));
+      } catch (e) {
+        output = safeJSONStringify({ type: "error", message: e?.message });
+      }
+      chat.addToolResult({
+        toolCallId: toolCall.toolCallId,
+        tool: toolCall.toolName,
+        output,
+      });
     } else {
-      pendingToolCallIds.value = pendingToolCallIds.value.filter(
-        (id) => id !== toolCallId
+      chat.addToolResult({
+        toolCallId: toolCall.toolCallId,
+        tool: toolCall.toolName,
+        output: safeJSONStringify({
+          type: "error",
+          message: "Tool not supported",
+        }),
+      });
+    }
+  }
+
+  /**
+   * Accept and run tool calls that are pending. If toolCallId is not provided,
+   * all tool calls are accepted.
+   **/
+  async function acceptPermission(toolCallId?: string) {
+    let toolCalls = pendingToolCalls.value;
+
+    if (toolCallId) {
+      const toolCall = pendingToolCalls.value.find(
+        (t) => t.toolCallId === toolCallId,
+      );
+      if (!toolCall) {
+        throw new Error("Tool call not found");
+      }
+      toolCalls = [toolCall];
+    }
+
+    for (const toolCall of toolCalls) {
+      await runAndAddToolResult(toolCall);
+      pendingToolCalls.value = pendingToolCalls.value.filter(
+        (pt) => pt.toolCallId !== toolCall.toolCallId,
       );
     }
   }
@@ -115,7 +126,6 @@ export function useAI(options: AIOptions) {
     if (userFollowup) {
       followupAfterRejected.value = userFollowup;
     }
-    permitted = false;
     if (toolCallId === undefined) {
       pendingToolCallIds.value = [];
     } else {
@@ -137,18 +147,18 @@ export function useAI(options: AIOptions) {
       }),
       prompt:
         "Name this conversation in less than 30 characters.\n```" +
-        messages.value.map((m) => `${m.role}: ${m.content}`).join("\n") +
+        // FIXME
+        chat.messages.map((m) => `${m.role}: ${m.parts.join(" ")}`).join("\n") +
         "\n```",
-    })
+    });
     await useTabState().setTabTitle(res.object.title);
   }
 
   /** Send a message to the AI */
   async function send(message: string, options: SendOptions) {
-    await append(
+    await chat.sendMessage(
       {
-        role: "user",
-        content: message,
+        text: message,
       },
       {
         body: {
@@ -156,25 +166,25 @@ export function useAI(options: AIOptions) {
         },
       },
     );
+    saveMessages();
     fillTitle(options);
   }
 
   async function retry(options: SendOptions) {
-    await reload({
+    await chat.regenerate({
       body: {
         sendOptions: options,
       },
     });
   }
 
-  function abort() {
-    stop();
+  async function abort() {
+    await chat.stop();
     saveMessages();
   }
 
   return {
-    messages,
-    input,
+    messages: messageList,
     error,
     status,
     pendingToolCallIds,

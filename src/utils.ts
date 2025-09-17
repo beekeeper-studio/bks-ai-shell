@@ -24,9 +24,9 @@ export function parseErrorContent(content: string) {
   return err;
 }
 
-export function isErrorContent(str: string) {
+export function isErrorContent(content: unknown): content is string {
   try {
-    return JSON.parse(str)?.type === "error";
+    return JSON.parse(content)?.type === "error";
   } catch (e) {
     return false;
   }

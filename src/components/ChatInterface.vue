@@ -158,7 +158,6 @@ export default {
       send: ai.send,
       abort: ai.abort,
       messages: ai.messages,
-      input: ai.input,
       error: ai.error,
       status: ai.status,
       pendingToolCallIds: ai.pendingToolCallIds,
@@ -173,6 +172,7 @@ export default {
     const inputHistoryStr = localStorage.getItem("inputHistory") || "[]";
     const inputHistory = JSON.parse(inputHistoryStr);
     return {
+      input: "",
       tempInput: "",
       inputHistory,
       historyIndex: inputHistory.length,
