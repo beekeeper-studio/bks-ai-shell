@@ -30,7 +30,6 @@
           {{ $pluralize("table", data.length) }}
           (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
         </template>
-        </template>
         <template v-if="name === 'get_columns'">
           {{ data.length }}
           {{ $pluralize("column", data.length) }}
