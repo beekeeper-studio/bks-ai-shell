@@ -28,14 +28,20 @@
         <template v-else-if="name === 'get_tables'">
           {{ data.length }}
           {{ $pluralize("table", data.length) }}
-          (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
+          (<code
+            v-if="data.length < 5"
+            v-text="data.map((c) => c.name).join(', ')"
+          />)
         </template>
         <template v-else-if="name === 'get_columns'">
           {{ data.length }}
           {{ $pluralize("column", data.length) }}
           (<code v-if="data.length < 5" v-text="data.map((c) => c.name).join(', ')" />)
         </template>
-        <run-query-result v-else-if="name === 'run_query' && data" :data="data" />
+        <run-query-result
+          v-else-if="name === 'run_query' && data"
+          :data="data"
+        />
       </template>
     </div>
   </div>
@@ -43,21 +49,21 @@
 
 <script lang="ts">
 import Markdown from "@/components/messages/Markdown.vue";
+import { PropType } from "vue";
 import { safeJSONStringify } from "@/utils";
 import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
 import { ToolUIPart } from "ai";
-import { PropType } from "vue";
 
 export default {
   components: { Markdown, RunQueryResult },
   props: {
+    askingPermission: Boolean,
     part: {
       type: Object as PropType<ToolUIPart>,
       required: true,
     },
-    askingPermission: Boolean,
     args: null,
   },
   emits: ["accept", "reject"],
@@ -108,10 +114,10 @@ export default {
     },
     displayName() {
       if (this.name === "get_columns") {
-        if (this.args.schema) {
-          return `Get Columns (schema: ${this.args.schema}, table: ${this.args.table})`;
+        if (this.input?.schema) {
+          return `Get Columns (schema: ${this.input?.schema}, table: ${this.input?.table || '...'})`;
         }
-        return `Get Columns (table: ${this.args.table})`;
+        return `Get Columns (table: ${this.input?.table || '...'})`;
       }
       return this.name.split("_").map(_.capitalize).join(" ");
     },

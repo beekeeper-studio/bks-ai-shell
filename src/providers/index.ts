@@ -7,9 +7,8 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { OllamaProvider } from "./OllamaProvider";
 import { parseHeaders } from "@/utils";
 import _ from "lodash";
-import { BaseProvider } from "./BaseProvider";
 
-export function createProvider(id: AvailableProviders): BaseProvider {
+export function createProvider(id: AvailableProviders)  {
   const configuration = useConfigurationStore();
   switch (id) {
     case "anthropic":

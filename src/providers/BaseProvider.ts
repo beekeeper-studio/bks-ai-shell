@@ -1,7 +1,7 @@
 import { notify } from "@beekeeperstudio/plugin";
 import { generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
 import { AvailableModels, defaultTemperature } from "@/config";
-import { z } from 'zod/v3';
+import { z } from "zod/v3";
 // import { UserRejectedError } from "@/tools";
 import {
   APICallError,

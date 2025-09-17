@@ -14,7 +14,7 @@ type AIOptions = {
   anthropicApiKey?: string;
   openaiApiKey?: string;
   googleApiKey?: string;
-};
+}
 
 type SendOptions = {
   providerId: AvailableProviders;
@@ -54,20 +54,20 @@ export function useAI(options: AIOptions) {
         });
       },
     }),
-    messages: messages.value,
     onToolCall({ toolCall }) {
-      pendingToolCalls.value.push(toolCall);
+      if (toolCall.toolName === "run_query") {
+        pendingToolCalls.value.push(toolCall);
+      }
     },
+    messages: options.initialMessages,
   });
 
   const messageList = computed(() => chat.messages);
   const error = computed(() => chat.error);
   const status = computed(() => chat.status);
 
-  let permitted = false;
-
-  async function saveMessages() {
-    await useTabState().setTabState("messages", chat.messages);
+  function saveMessages() {
+    useTabState().setTabState("messages", chat.messages);
   }
 
   async function runAndAddToolResult(toolCall: ToolCall) {
@@ -100,8 +100,6 @@ export function useAI(options: AIOptions) {
    * all tool calls are accepted.
    **/
   async function acceptPermission(toolCallId?: string) {
-    permitted = true;
-
     let toolCalls = pendingToolCalls.value;
 
     if (toolCallId) {
@@ -128,12 +126,11 @@ export function useAI(options: AIOptions) {
     if (userFollowup) {
       followupAfterRejected.value = userFollowup;
     }
-    permitted = false;
     if (toolCallId === undefined) {
       pendingToolCallIds.value = [];
     } else {
       pendingToolCallIds.value = pendingToolCallIds.value.filter(
-        (id) => id !== toolCallId,
+        (id) => id !== toolCallId
       );
     }
   }

@@ -2,7 +2,7 @@ import { AvailableModels, providerConfigs } from "@/config";
 import { BaseProvider, Messages } from "@/providers/BaseProvider";
 import { createOpenAI } from "@ai-sdk/openai";
 import { ToolSet } from "ai";
-import { z } from 'zod/v3';
+import { z } from "zod/v3";
 
 export class OpenAIProvider extends BaseProvider {
   constructor(private options: { apiKey: string }) {
@@ -11,7 +11,7 @@ export class OpenAIProvider extends BaseProvider {
 
   getModel(id: string) {
     return createOpenAI({
-      apiKey: this.options.apiKey
+      apiKey: this.options.apiKey,
     }).languageModel(id);
   }
 

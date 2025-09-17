@@ -7,7 +7,6 @@ export class OpenAICompatibleProvider extends BaseProvider {
       baseURL: string;
       headers: Record<string, string>;
       apiKey: string;
-      name?: string;
     },
   ) {
     super();
@@ -15,10 +14,10 @@ export class OpenAICompatibleProvider extends BaseProvider {
 
   getModel(id: string) {
     return createOpenAICompatible({
-      name: "OpenAI Compatible (AI Shell)",
       baseURL: this.options.baseURL,
       apiKey: this.options.apiKey,
       headers: this.options.headers,
+      name: "OpenAI Compatible (AI Shell)",
     }).languageModel(id);
   }
 
