@@ -1,7 +1,10 @@
 <template>
   <div class="tool">
     <div>{{ displayName }}</div>
-    <markdown v-if="name === 'run_query' && inputFullyAvailable" :content="'```sql\n' + input?.query + '\n```'" />
+    <markdown
+      v-if="name === 'run_query' && inputFullyAvailable"
+      :content="'```sql\n' + input?.query + '\n```'"
+    />
     <div v-if="askingPermission">
       {{
         name === "run_query"
