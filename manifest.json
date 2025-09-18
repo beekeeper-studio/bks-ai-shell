@@ -1,14 +1,15 @@
 {
   "id": "bks-ai-shell",
   "name": "AI Shell",
-  "version": "1.3.3",
-  "minAppVersion": "5",
+  "version": "1.4.0",
+  "minAppVersion": "5.4.0",
   "description": "Ask AI to analyze your database and generate SQL queries.",
   "author": {
     "name": "Beekeeper Studio",
     "url": "https://beekeeperstudio.io"
   },
   "icon": "auto_awesome",
+  "manifestVersion": 0,
   "capabilities": {
     "views": {
       "tabTypes": [
@@ -19,7 +20,15 @@
           "entry": "dist/index.html"
         }
       ]
-    }
+    },
+    "menu": [
+      {
+        "command": "new-tab-dropdown-item",
+        "name": "Add AI Shell",
+        "view": "bks-ai-shell",
+        "placement": "newTabDropdown"
+      }
+    ]
   },
   "permissions": []
 }

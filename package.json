@@ -17,7 +17,7 @@
     "@ai-sdk/google": "^1.2.22",
     "@ai-sdk/openai": "^1.3.22",
     "@ai-sdk/vue": "^1.2.12",
-    "@beekeeperstudio/plugin": "^1.3.0-beta",
+    "@beekeeperstudio/plugin": "^1.4.0-beta.4",
     "@langchain/core": "^0.3.61",
     "@material-symbols/font-400": "^0.31.2",
     "ai": "^4.3.16",
@@ -34,7 +34,7 @@
     "zod": "^3.25.32"
   },
   "devDependencies": {
-    "@beekeeperstudio/vite-plugin": "^1.0.2",
+    "@beekeeperstudio/vite-plugin": "^1.0.3",
     "@types/lodash": "^4.17.16",
     "@vitejs/plugin-vue": "^5.0.4",
     "sass": "^1.87.0",

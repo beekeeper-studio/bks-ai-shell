@@ -1,4 +1,4 @@
-import { notify } from "@beekeeperstudio/plugin";
+import { getAppInfo, notify } from "@beekeeperstudio/plugin";
 // FIXME move this to Beekeeper Studio as injected script
 window.addEventListener("error", (e) => {
   notify("pluginError", {
@@ -42,10 +42,21 @@ hljs.registerLanguage("sql", sql);
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("json", json);
 
-addNotificationListener("viewLoaded", (args) => {
-  document.querySelector("#injected-style")!.textContent =
-    `:root { ${args.theme.cssString} }`;
-});
+// Apply theme from Beekeeper Studio
+getAppInfo()
+  .then((info) => {
+    document.querySelector("#injected-style")!.textContent =
+      `:root { ${info.theme.cssString} }`;
+  })
+  .catch((e) => {
+    if (e.message === "Unknown request: getAppInfo") {
+      // This means we are running in an older version of Beekeeper
+      // Studio (< 5.4.0-beta.2).
+      return;
+    }
+
+    throw new Error("cannot get app info", { cause: e });
+  });
 
 addNotificationListener("themeChanged", (args) => {
   document.querySelector("#injected-style")!.textContent =
