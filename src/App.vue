@@ -4,7 +4,7 @@
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
-    <OnboardingScreen v-if="page === 'onboarding'" @submit="submitOnboardingScreen" />
+    <OnboardingScreen v-else-if="page === 'onboarding'" @submit="submitOnboardingScreen" />
     <ChatInterface v-else-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
       :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
@@ -25,7 +25,7 @@ import Configuration, {
   PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
-import { notify } from "@beekeeperstudio/plugin";
+import { getData, notify } from "@beekeeperstudio/plugin";
 
 type Page = "starting" | "onboarding" | "chat-interface";
 
@@ -51,7 +51,9 @@ export default {
     // Show loading bar after 500ms if not ready
     const loadingTimer = setTimeout(() => {
       this.showLoading = true;
-    }, 1000);
+    }, 500);
+
+    await this.reloadWhenStuck();
 
     try {
       await this.initialize();
@@ -106,6 +108,35 @@ export default {
     },
     closeConfiguration() {
       this.showConfiguration = false;
+    },
+    // In Beekeeper Studio v5.3.3 and lower, the requests from plugins are
+    // sometimes not responded due to a race condition.
+    // See https://github.com/beekeeper-studio/beekeeper-studio/pull/3473
+    async reloadWhenStuck() {
+      // Track current minute for resetting attempts each minute
+      const currentMinute = Math.floor(Date.now() / 60000);
+      const storedData = JSON.parse(localStorage.getItem('reloadData') || '{"attempts": 0, "minute": 0}');
+
+      // Reset attempts if we're in a new minute, otherwise use stored attempts
+      let attempts = storedData.minute === currentMinute ? storedData.attempts : 0;
+      // Incremental delay: 1s, 2s, 3s, 4s, 5s (max)
+      const reloadDelay = Math.min(1000 + (attempts * 1000), 5000);
+
+      const reloadTimer = setTimeout(() => {
+        // Store incremented attempts for next reload
+        localStorage.setItem('reloadData', JSON.stringify({
+          attempts: attempts + 1,
+          minute: currentMinute
+        }));
+        window.location.reload();
+      }, reloadDelay);
+      try {
+        await getData();
+      } catch (e) {
+      } finally {
+        // Cancel reload if getData() succeeds or fails quickly
+        clearTimeout(reloadTimer);
+      }
     },
   },
 };
