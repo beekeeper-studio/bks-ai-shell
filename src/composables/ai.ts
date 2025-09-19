@@ -136,7 +136,7 @@ export function useAI(options: AIOptions) {
         title: z.string().describe("The title of the conversation"),
       }),
       prompt:
-        "Name this conversation in less than 30 characters.\n```" +
+        "Name this conversation in less than 30 characters or 6 words.\n```" +
         messages.value.map((m) => `${m.role}: ${m.content}`).join("\n") +
         "\n```",
     })

@@ -4,12 +4,12 @@
     :class="{ 'empty-chat': messages.length === 0 }"
     :data-status="status"
   >
-    <div class="header">
-      <button class="btn settings-btn" @click="$emit('open-configuration')" title="Settings">
-        <span class="material-symbols-outlined">settings</span>
-      </button>
-    </div>
     <div class="scroll-container" ref="scrollContainerRef">
+      <div class="header">
+        <button class="btn settings-btn" @click="$emit('open-configuration')" title="Settings">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+      </div>
       <h1 class="plugin-title">AI Shell</h1>
       <div class="chat-messages">
         <message
@@ -59,44 +59,46 @@
       </div>
       <div ref="bottomMarker"></div>
     </div>
-    <div class="chat-input-container">
-      <BaseInput
-        type="textarea"
-        v-model="input"
-        @keydown.enter="handleEnterKey"
-        @keydown.up="handleUpArrow"
-        @keydown.down="handleDownArrow"
-        placeholder="Type your message here..."
-        rows="1"
-      />
-      <div class="actions">
-        <Dropdown
-          :model-value="model"
-          placeholder="Select Model"
-          aria-label="Model"
-        >
-          <DropdownOption
-            v-for="optionModel in filteredModels"
-            :key="optionModel.id"
-            :value="optionModel.id"
-            :text="optionModel.id"
-            :selected="matchModel(optionModel, model)"
-            @select="selectModel(optionModel)"
-          />
-          <div class="dropdown-separator"></div>
-          <button class="dropdown-action" @click="$emit('manage-models')">
-            Manage models
+    <div class="chat-input-container-container">
+      <div class="chat-input-container">
+        <BaseInput
+          type="textarea"
+          v-model="input"
+          @keydown.enter="handleEnterKey"
+          @keydown.up="handleUpArrow"
+          @keydown.down="handleDownArrow"
+          placeholder="Type your message here..."
+          rows="1"
+        />
+        <div class="actions">
+          <Dropdown
+            :model-value="model"
+            placeholder="Select Model"
+            aria-label="Model"
+          >
+            <DropdownOption
+              v-for="optionModel in filteredModels"
+              :key="optionModel.id"
+              :value="optionModel.id"
+              :text="optionModel.id"
+              :selected="matchModel(optionModel, model)"
+              @select="selectModel(optionModel)"
+            />
+            <div class="dropdown-separator"></div>
+            <button class="dropdown-action" @click="$emit('manage-models')">
+              Manage models
+            </button>
+          </Dropdown>
+          <button
+            v-if="canSendMessage"
+            @click="submit"
+            class="submit-btn"
+            :disabled="!input.trim()"
+          >
+            <span class="material-symbols-outlined">send</span>
           </button>
-        </Dropdown>
-        <button
-          v-if="canSendMessage"
-          @click="submit"
-          class="submit-btn"
-          :disabled="!input.trim()"
-        >
-          <span class="material-symbols-outlined">send</span>
-        </button>
-        <button v-else @click="stop" class="stop-btn" />
+          <button v-else @click="stop" class="stop-btn" />
+        </div>
       </div>
     </div>
   </div>
@@ -115,7 +117,6 @@ import { Message as MessageType } from "ai";
 import { PropType } from "vue";
 import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
-import { useConfigurationStore } from "@/stores/configuration";
 import { useInternalDataStore } from "@/stores/internalData";
 import { matchModel } from "@/utils";
 import BaseInput from "@/components/common/BaseInput.vue";
