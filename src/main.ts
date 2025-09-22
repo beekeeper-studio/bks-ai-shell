@@ -1,20 +1,13 @@
-import { getAppInfo, notify } from "@beekeeperstudio/plugin";
-// FIXME move this to Beekeeper Studio as injected script
+import { getAppInfo, log } from "@beekeeperstudio/plugin";
+
 window.addEventListener("error", (e) => {
-  notify("pluginError", {
-    message: e.message,
-    name: e.name,
-    stack: e.stack,
-  });
+  log.error(e);
 });
+
 window.addEventListener("unhandledrejection", (e) => {
-  notify("pluginError", {
-    message: e.reason?.message,
-    name: e.reason?.name,
-    stack: e.reason?.stack,
-  });
+  log.error(e.reason);
 });
-// -------------------
+
 
 import "typeface-roboto";
 import "./assets/styles/main.scss";

@@ -67,7 +67,7 @@
           @keydown.enter="handleEnterKey"
           @keydown.up="handleUpArrow"
           @keydown.down="handleDownArrow"
-          placeholder="Type your message here..."
+          placeholder="Type your message here"
           rows="1"
         />
         <div class="actions">
@@ -159,7 +159,6 @@ export default {
       send: ai.send,
       abort: ai.abort,
       messages: ai.messages,
-      input: ai.input,
       error: ai.error,
       status: ai.status,
       pendingToolCallIds: ai.pendingToolCallIds,
@@ -172,12 +171,11 @@ export default {
 
   data() {
     const inputHistoryStr = localStorage.getItem("inputHistory") || "[]";
-    const inputHistory = JSON.parse(inputHistoryStr);
+    const inputHistory: string[] = JSON.parse(inputHistoryStr);
+    inputHistory.push("");
     return {
-      tempInput: "",
       inputHistory,
-      historyIndex: inputHistory.length,
-      isNavigatingHistory: false,
+      inputIndex: inputHistory.length - 1,
       isAtBottom: true,
       showFullError: false,
       noModelError: false,
@@ -192,6 +190,14 @@ export default {
         return store.models.filter((m) => m.enabled);
       },
     }),
+    input: {
+      get() {
+        return this.inputHistory[this.inputIndex];
+      },
+      set(value: string) {
+        this.inputHistory[this.inputIndex] = value;
+      },
+    },
     canSendMessage() {
       if (this.askingPermission && this.input.trim().length > 0) return true;
       return this.status === "ready" || this.status === "error";
@@ -288,12 +294,11 @@ export default {
       const textBeforeCursor = text.substring(0, cursorPos);
 
       // If there's no newline before cursor or cursor is at position 0, we're at the first line
-      if (
-        (cursorPos === 0 || textBeforeCursor.lastIndexOf("\n") === -1) &&
-        this.historyIndex > 0
-      ) {
-        e.preventDefault();
-        this.navigateHistory(-1); // Go back in history
+      if (cursorPos === 0 || textBeforeCursor.lastIndexOf("\n") === -1) {
+        // Go back in history
+        if (this.navigateHistory(-1)) {
+          e.preventDefault();
+        }
       }
     },
 
@@ -306,57 +311,43 @@ export default {
       const textAfterCursor = text.substring(cursorPos);
 
       // If there's no newline after cursor or cursor is at end of text, we're at the last line
-      if (
-        (cursorPos === text.length || textAfterCursor.indexOf("\n") === -1) &&
-        this.historyIndex < this.inputHistory.length - 1
-      ) {
-        e.preventDefault();
-        this.navigateHistory(1); // Go forward in history
+      if (cursorPos === text.length || textAfterCursor.indexOf("\n") === -1) {
+        // Go forward in history
+        if (this.navigateHistory(1)) {
+          e.preventDefault();
+        }
       }
     },
 
-    // Navigate through input history
-    navigateHistory(direction) {
-      // If no history or navigating beyond bounds, do nothing
-      if (this.inputHistory.length === 0) return;
+    /** Navigate through input history. Returns true if input changed. */
+    navigateHistory(direction: 1 | -1) {
+      const oldIndex = this.inputIndex;
 
-      if (this.historyIndex === 0 && direction === -1) return;
+      this.inputIndex = _.clamp(
+        this.inputIndex + direction,
+        0,
+        this.inputHistory.length - 1
+      );
 
-      if (
-        this.historyIndex >= this.inputHistory.length - 1 &&
-        direction === 1
-      ) {
-        // We are at the last history item
-        this.historyIndex = this.inputHistory.length;
-        this.input = this.tempInput;
-        this.isNavigatingHistory = false;
-        return;
+      const changed = this.inputIndex !== oldIndex;
+
+      if (changed) {
+        // Place cursor at the end of the input text
+        this.$nextTick(() => {
+          const textarea = document.querySelector("textarea");
+          if (textarea) {
+            textarea.selectionStart = textarea.selectionEnd =
+              textarea.value.length;
+          }
+        });
       }
 
-      if (!this.isNavigatingHistory) {
-        // save current input before navigating
-        this.tempInput = this.input;
-        this.isNavigatingHistory = true;
-      }
-
-      // Calculate new index
-      const newIndex = this.historyIndex + direction;
-
-      this.input = this.inputHistory[newIndex];
-
-      this.historyIndex = newIndex;
-
-      // Place cursor at the end of the input text
-      this.$nextTick(() => {
-        const textarea = document.querySelector("textarea");
-        if (textarea) {
-          textarea.selectionStart = textarea.selectionEnd =
-            textarea.value.length;
-        }
-      });
+      return changed;
     },
 
     submit() {
+      // Don't add to history if the message starts with a space
+      const preventHistory = this.input.startsWith(" ");
       const message = this.input.trim();
 
       // Don't send empty messages
@@ -368,11 +359,12 @@ export default {
         return;
       }
 
-      this.addToHistory(message);
+      if (!preventHistory) {
+        this.addToHistory(message);
+      }
 
       this.noModelError = false;
-      this.tempInput = "";
-      this.input = "";
+      this.resetInput();
 
       if (this.askingPermission) {
         this.rejectPermission(message);
@@ -385,13 +377,19 @@ export default {
       await this.retry(this.getSendOptions());
     },
 
+    resetInput() {
+      if (this.inputHistory[this.inputHistory.length - 1] === "") {
+        this.inputIndex = this.inputHistory.length - 1;
+      } else {
+        this.inputHistory.push("");
+        this.inputIndex = this.inputHistory.length - 1;
+      }
+    },
+
     addToHistory(input: string) {
       const oldHistory = JSON.parse(localStorage.getItem("inputHistory")!);
 
-      let newHistory = [...this.inputHistory, input];
-      if (this.historyIndex < this.inputHistory.length) {
-        newHistory[this.historyIndex] = oldHistory[this.historyIndex];
-      }
+      let newHistory = [...oldHistory, input];
 
       // Limit history size
       if (newHistory.length > maxHistorySize) {
@@ -402,8 +400,7 @@ export default {
 
       // Reset history navigation
       this.inputHistory = newHistory;
-      this.historyIndex = newHistory.length;
-      this.isNavigatingHistory = false;
+      this.inputIndex = newHistory.length - 1;
     },
 
     stop() {
