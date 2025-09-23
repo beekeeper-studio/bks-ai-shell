@@ -4,7 +4,7 @@ window.addEventListener("error", (e) => {
   log.error(e);
 });
 window.addEventListener("unhandledrejection", (e) => {
-  log.error(e);
+  log.error(e.reason);
 });
 // -------------------
 
