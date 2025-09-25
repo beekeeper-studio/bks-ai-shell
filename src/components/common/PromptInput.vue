@@ -12,7 +12,7 @@
           Manage models
         </button>
       </Dropdown>
-      <button v-if="!processing" @click="submit" class="submit-btn" :disabled="!input.trim()">
+      <button v-if="!processing" @click="submit" class="submit-btn" :disabled="!input.trim()" test-id="submit">
         <span class="material-symbols-outlined">send</span>
       </button>
       <button v-else @click="stop" class="stop-btn" />
@@ -83,18 +83,16 @@ export default {
     matchModel,
 
     submit() {
-      const input = this.input.trim();
+      const trimmedInput = this.input.trim();
 
       // Don't send empty messages
-      if (!input) return;
+      if (!trimmedInput) return;
 
-      if (!this.input.startsWith(" ")) {
-        this.addToHistory(input);
-      }
+      this.addToHistory(this.input);
 
       this.resetInput();
 
-      this.$emit("submit", input);
+      this.$emit("submit", trimmedInput);
     },
 
     stop() {
@@ -180,11 +178,14 @@ export default {
     addToHistory(input: string) {
       const oldHistory = JSON.parse(localStorage.getItem(this.storageKey)!);
 
-      if (oldHistory[oldHistory.length - 1] === input) {
+      let newHistory = [...oldHistory];
+
+      if (oldHistory[oldHistory.length - 1] === input || input.startsWith(" ")) {
+        this.resetHistory(newHistory);
         return;
       }
 
-      let newHistory = [...oldHistory, input];
+      newHistory.push(input);
 
       // Limit history size
       if (newHistory.length > maxHistorySize) {
@@ -193,9 +194,12 @@ export default {
 
       localStorage.setItem(this.storageKey, JSON.stringify(newHistory));
 
-      // Reset history navigation
-      this.inputHistory = newHistory;
-      this.inputIndex = newHistory.length - 1;
+      this.resetHistory(newHistory);
+    },
+
+    resetHistory(history: string[]) {
+      this.inputHistory = history;
+      this.inputIndex = this.inputHistory.length - 1;
     },
 
     resetInput() {

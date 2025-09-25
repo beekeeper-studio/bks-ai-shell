@@ -10,7 +10,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "plugin:build": "vite build && cp manifest.json dist/"
+    "plugin:build": "vite build && cp manifest.json dist/",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.12",
@@ -37,7 +39,12 @@
     "@beekeeperstudio/vite-plugin": "^1.0.3",
     "@types/lodash": "^4.17.16",
     "@vitejs/plugin-vue": "^5.0.4",
+    "@vitest/browser": "^3.2.4",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^18.0.1",
     "sass": "^1.87.0",
-    "vite": "^6.2.3"
+    "vite": "^6.2.3",
+    "vitest": "^3.2.4",
+    "vitest-browser-vue": "^1.1.0"
   }
 }
