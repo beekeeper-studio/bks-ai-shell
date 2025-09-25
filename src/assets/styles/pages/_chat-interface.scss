@@ -27,6 +27,7 @@
       position: sticky;
       top: 0;
       background-color: var(--query-editor-bg);
+      z-index: 1;
 
       .settings-btn {
         background-color: transparent;
@@ -165,19 +166,27 @@
     border-radius: 8px;
     white-space: normal;
 
-    .header {
+    .lang {
       padding: 0.2rem 0.5rem 0;
       display: flex;
       justify-content: space-between;
+      font-size: 0.7rem;
+      opacity: 0.5;
+      line-height: 1.25rem;
+    }
 
-      .lang {
-        font-size: 0.7rem;
-        opacity: 0.5;
-        line-height: 1.25rem;
-      }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      position: sticky;
+      top: 4.3rem;
 
       .btn {
+        position: absolute;
         box-shadow: none;
+        bottom: -0.2rem;
+        padding: 0.3rem;
+        background-color: var(--query-editor-bg);
       }
 
       .copy-btn {
@@ -197,8 +206,6 @@
           content: "Copy";
         }
 
-        padding: 0.3rem;
-        background-color: transparent;
         gap: 0.2rem;
         line-height: 1;
         height: auto;
@@ -526,5 +533,13 @@
 @media (min-width: 900px) {
   .chat-container .scroll-container>.header {
     background-color: transparent;
+  }
+
+  .chat-messages {
+    z-index: 1;
+  }
+
+  .message-content .code-block .actions {
+    top: 1.9rem;
   }
 }

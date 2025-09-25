@@ -56,10 +56,8 @@ marked.use({
 
         return `
           <div class="code-block">
-            <div class="header">
-              <span class="lang">${token.lang || ""}</span>
-              <div>${actionsHtml}</div>
-            </div>
+            <div class="lang">${token.lang || ""}</div>
+            <div class="actions">${actionsHtml}</div>
             <pre><code id="${codeId}" class="${className}"${langAttr}>${token.text}</code></pre>
           </div>
         `;
