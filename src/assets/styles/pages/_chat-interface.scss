@@ -27,20 +27,20 @@
       position: sticky;
       top: 0;
       background-color: var(--query-editor-bg);
+      z-index: 1;
 
       .settings-btn {
-        background-color: transparent;
         min-width: 0;
+        width: 1.8rem;
+        height: 1.8rem;
         border: none;
-        border-radius: 4px;
+        border-radius: 9999px;
         cursor: pointer;
-        color: var(--text-dark);
-        transition: all 0.2s ease;
         margin-left: auto;
         margin-right: 0.3rem;
         opacity: 0.7;
         box-shadow: none;
-        padding-inline: 0.35rem;
+        padding: 0;
 
         &:hover {
           opacity: 1;
@@ -81,6 +81,43 @@
 
     .scroll-container {
       flex-grow: 1;
+    }
+  }
+
+  .scroll-container>.header .btn, .code-block .actions .btn {
+    --btn-hover-bg-color: color-mix(in srgb, var(--theme-base) 10%, var(--query-editor-bg));
+    color: var(--text-dark);
+    background-color: var(--query-editor-bg);
+
+    &:hover {
+      background-color: var(--btn-hover-bg-color);
+    }
+  }
+
+  .scroll-down-btn {
+    position: absolute;
+    bottom: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    color: var(--text-dark);
+    background-color: var(--query-editor-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--theme-base) 10%, var(--query-editor-bg));
+    }
+
+    .material-symbols-outlined {
+      margin-top: 0.2rem;
+      font-size: 1.6rem;
     }
   }
 }
@@ -128,7 +165,7 @@
     display: inline-block;
     background-color: var(--bks-text-editor-bg-color);
     color: var(--bks-text-editor-fg-color);
-    padding: 0.2rem 0.5rem 0.5rem 0.5rem;
+    padding: 0.5rem;
     width: 100%;
     line-height: 1.07rem;
     font-size: 0.765rem;
@@ -164,45 +201,68 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     white-space: normal;
+    --header-text-color: var(--text-dark);
+    --header-bg-color: color-mix(in srgb, var(--theme-base) 3%, var(--query-editor-bg));
 
-    .header {
-      padding: 0.2rem 0.5rem 0;
+    .lang {
+      padding-inline: 0.5rem;
+      height: 1.75rem;
       display: flex;
       justify-content: space-between;
+      font-size: 0.75rem;
+      line-height: 1.75rem;
+      color: var(--header-text-color);
+      background-color: var(--header-bg-color);
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
 
-      .lang {
-        font-size: 0.7rem;
-        opacity: 0.5;
-        line-height: 1.25rem;
+    .actions {
+      position: sticky;
+      top: 4.3rem;
+      margin-right: 0.3rem;
+
+      .group {
+        position: absolute;
+        bottom: 0.1rem;
+        right: 0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.25rem;
       }
 
       .btn {
+        min-width: 0px;
+        padding: 0 0;
+        width: 1.75rem;
+        height: 1.5rem;
         box-shadow: none;
-      }
+        color: var(--header-text-color);
+        background-color: var(--header-bg-color);
 
-      .copy-btn {
-        font-size: 0.7rem;
-        color: var(--text-dark);
+        &:disabled {
+          opacity: 1;
+          color: color-mix(in srgb, var(--theme-base) 50%, var(--query-editor-bg));
+        }
 
         .material-symbols-outlined {
-          font-size: 0.9rem;
+          font-size: 1rem;
         }
 
         &.copied .copy-label,
-        &:not(.copied) .copied-label {
+        &.copied .copy-icon,
+        &:not(.copied) .copied-label,
+        &:not(.copied) .copied-icon {
           display: none;
         }
+      }
 
-        .label {
-          content: "Copy";
+      [data-action=open-in-query-editor] .title-popup {
+        max-width: 10rem;
+
+        @media (min-width: 840px) {
+          max-width: unset;
         }
-
-        padding: 0.3rem;
-        background-color: transparent;
-        gap: 0.2rem;
-        line-height: 1;
-        height: auto;
-        min-width: 0px;
       }
     }
   }
@@ -526,5 +586,13 @@
 @media (min-width: 900px) {
   .chat-container .scroll-container>.header {
     background-color: transparent;
+  }
+
+  .chat-messages {
+    z-index: 1;
+  }
+
+  .message-content .code-block .actions {
+    top: 1.9rem;
   }
 }

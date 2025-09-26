@@ -49,6 +49,34 @@ $btn-border-radius:         8px;
   &:disabled {
     opacity: 0.6;
   }
+
+  .title-popup {
+    position: absolute;
+    width: max-content;
+    top: 1.9rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.4rem 0.7rem;
+    border-radius: 4px;
+    background-color: var(--btn-hover-bg-color);
+    user-select: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:hover .title-popup {
+    animation: fadeInAfterDelay 0.8s forwards;
+  }
+}
+
+@keyframes fadeInAfterDelay {
+  0%, 75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .btn-primary {

@@ -59,6 +59,14 @@
       </div>
       <div ref="bottomMarker"></div>
     </div>
+    <button
+      v-if="!isAtBottom"
+      @click="scrollToBottom({ smooth: true })"
+      class="btn scroll-down-btn"
+      title="Scroll to bottom"
+    >
+      <span class="material-symbols-outlined">keyboard_arrow_down</span>
+    </button>
     <div class="chat-input-container-container">
       <PromptInput storage-key="inputHistory" :processing="processing" :selected-model="model"
        @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop"  />
@@ -242,12 +250,19 @@ export default {
       }
     },
 
-    scrollToBottom() {
+    scrollToBottom(options?: { smooth?: boolean }) {
       if (!this.$refs.scrollContainerRef) {
         return;
       }
-      this.$refs.scrollContainerRef.scrollTop =
-        this.$refs.scrollContainerRef.scrollHeight;
+      if (options?.smooth) {
+        this.$refs.scrollContainerRef.scrollTo({
+          top: this.$refs.scrollContainerRef.scrollHeight,
+          behavior: 'smooth'
+        });
+      } else {
+        this.$refs.scrollContainerRef.scrollTop =
+          this.$refs.scrollContainerRef.scrollHeight;
+      }
     },
 
     selectModel(model: Model) {
