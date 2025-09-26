@@ -69,6 +69,6 @@ export function parseHeaders(text: string): Record<string, string> {
 }
 
 /* Compare two models */
-export function matchModel(a: Model, b: Model) {
-  return a.id === b.id && a.provider === b.provider;
+export function matchModel(a: Model, b?: Model) {
+  return a.id === b?.id && a.provider === b?.provider;
 }
