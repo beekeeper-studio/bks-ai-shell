@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { clipboard } from "@beekeeperstudio/plugin";
+import { clipboard, openTab } from "@beekeeperstudio/plugin";
 import { parseMarkdownToHTML } from "@/markdownParser";
 
 export default {
@@ -59,8 +59,12 @@ export default {
           }
           this.copyTimeout = setTimeout(
             () => target.classList.remove("copied"),
-            3000,
+            1000,
           );
+          break;
+        }
+        case "open-in-query-editor": {
+          await openTab("query", { query: text });
           break;
         }
         case "run": {

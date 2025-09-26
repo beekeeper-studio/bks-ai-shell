@@ -95,10 +95,10 @@
     "@babel/helper-string-parser" "^7.25.9"
     "@babel/helper-validator-identifier" "^7.25.9"
 
-"@beekeeperstudio/plugin@^1.4.0-beta.6":
-  version "1.4.0-beta.6"
-  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.4.0-beta.6.tgz#d80a2061c4486fd00f1a0ba322400e04b1b88845"
-  integrity sha512-u1dH/vVqsR5UD24xaOThwBATHIvrs+2nY9fF9QsPFu9pivrIS1Lz6zYzV4eDOsGl77nEBJZpplp+F3MMpVyVuQ==
+"@beekeeperstudio/plugin@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.4.0.tgz#b5a9bf41b58950114cdb1c7efea6e5c57f39bdac"
+  integrity sha512-GS7cnXw8tugo3MEwrcFoOCLkrWZ8kY5UHghtvcfAf0WnBxfHCrxuZbcq+ZP6ffVFN2Mc3aRbXeRrV77/bkY13A==
 
 "@beekeeperstudio/vite-plugin@^1.0.3":
   version "1.0.3"
