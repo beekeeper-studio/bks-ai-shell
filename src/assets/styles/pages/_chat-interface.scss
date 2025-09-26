@@ -93,6 +93,33 @@
       background-color: var(--btn-hover-bg-color);
     }
   }
+
+  .scroll-down-btn {
+    position: absolute;
+    bottom: 7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    color: var(--text-dark);
+    background-color: var(--query-editor-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--theme-base) 10%, var(--query-editor-bg));
+    }
+
+    .material-symbols-outlined {
+      margin-top: 0.2rem;
+      font-size: 1.6rem;
+    }
+  }
 }
 
 .chat-messages {

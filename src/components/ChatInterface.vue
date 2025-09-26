@@ -59,6 +59,14 @@
       </div>
       <div ref="bottomMarker"></div>
     </div>
+    <button
+      v-if="!isAtBottom"
+      @click="scrollToBottom({ smooth: true })"
+      class="btn scroll-down-btn"
+      title="Scroll to bottom"
+    >
+      <span class="material-symbols-outlined">keyboard_arrow_down</span>
+    </button>
     <div class="chat-input-container-container">
       <div class="chat-input-container">
         <BaseInput
@@ -414,12 +422,19 @@ export default {
       }
     },
 
-    scrollToBottom() {
+    scrollToBottom(options?: { smooth?: boolean }) {
       if (!this.$refs.scrollContainerRef) {
         return;
       }
-      this.$refs.scrollContainerRef.scrollTop =
-        this.$refs.scrollContainerRef.scrollHeight;
+      if (options?.smooth) {
+        this.$refs.scrollContainerRef.scrollTo({
+          top: this.$refs.scrollContainerRef.scrollHeight,
+          behavior: 'smooth'
+        });
+      } else {
+        this.$refs.scrollContainerRef.scrollTop =
+          this.$refs.scrollContainerRef.scrollHeight;
+      }
     },
     selectModel(model: Model) {
       this.setInternal("lastUsedModelId", model.id);
