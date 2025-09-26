@@ -1,3 +1,4 @@
+import { readonly } from "vue";
 import instructions from "../instructions/base.txt?raw";
 import mongodbInstructions from "../instructions/mongodb.txt?raw";
 import { getConnectionInfo, getTables } from "@beekeeperstudio/plugin";
@@ -17,7 +18,7 @@ export async function getDefaultInstructions() {
   let result = instructions;
   result = result.replace("{current_date}", getCurrentDateFormatted());
   result = result.replace("{connection_type}", response.connectionType);
-  result = result.replace("{read_only_mode}", response.readOnlyMode.toString());
+  result = result.replace("{read_only_mode}", getReadOnlyModeInstructions(response.readOnlyMode));
   result = result.replace("{database_name}", response.databaseName);
   result = result.replace("{default_schema}", response.defaultSchema || "");
   result = result.replace("{tables}", JSON.stringify(tables));
@@ -42,6 +43,13 @@ function getCurrentDateFormatted() {
     day: 'numeric'
   };
   return now.toLocaleDateString(undefined, options);
+}
+
+function getReadOnlyModeInstructions(readOnly: boolean) {
+  if (readOnly) {
+    return "## Read Only Mode\n\nThe connected database is in read-only mode. You MUST only run queries that do not modify the database.";
+  }
+  return "";
 }
 
 export const defaultTemperature = 0.7;

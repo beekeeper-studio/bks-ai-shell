@@ -5,6 +5,11 @@
     <template #label>Instructions</template>
     <template #helper>Custom instructions appended to the system prompt for AI calls. This text will be combined with <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions">the default instructions</ExternalLink>.</template>
   </BaseInput>
+  <Switch :model-value="alwaysAllowQueryExecutionOnReadOnly" @change="handleSwitchChange">
+    <template #label>
+      Always allow query execution in read-only mode
+    </template>
+  </Switch>
 </template>
 
 <script lang="ts">
@@ -12,6 +17,7 @@ import { mapActions, mapState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import ExternalLink from "@/components/common/ExternalLink.vue";
+import Switch from "@/components/common/Switch.vue";
 
 export default {
   name: "GeneralConfiguration",
@@ -19,10 +25,14 @@ export default {
   components: {
     BaseInput,
     ExternalLink,
+    Switch,
   },
 
   computed: {
-    ...mapState(useConfigurationStore, ["customInstructions"]),
+    ...mapState(useConfigurationStore, [
+      "customInstructions",
+      "alwaysAllowQueryExecutionOnReadOnly",
+    ]),
   },
 
   methods: {
@@ -32,6 +42,9 @@ export default {
         "customInstructions",
         (event.target as HTMLTextAreaElement).value,
       );
+    },
+    handleSwitchChange(value: boolean) {
+      this.configure("alwaysAllowQueryExecutionOnReadOnly", value);
     },
   },
 };
