@@ -7,7 +7,7 @@
   </BaseInput>
   <Switch :model-value="alwaysAllowQueryExecutionOnReadOnly" @change="handleSwitchChange">
     <template #label>
-      Always allow query execution on read-only mode
+      Always allow query execution in read-only mode
     </template>
   </Switch>
 </template>
