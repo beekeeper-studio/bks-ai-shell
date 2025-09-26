@@ -114,7 +114,7 @@
     "@babel/helper-string-parser" "^7.25.9"
     "@babel/helper-validator-identifier" "^7.25.9"
 
-"@beekeeperstudio/plugin@^1.4.0-beta.6":
+"@beekeeperstudio/plugin@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.4.0.tgz#b5a9bf41b58950114cdb1c7efea6e5c57f39bdac"
   integrity sha512-GS7cnXw8tugo3MEwrcFoOCLkrWZ8kY5UHghtvcfAf0WnBxfHCrxuZbcq+ZP6ffVFN2Mc3aRbXeRrV77/bkY13A==
