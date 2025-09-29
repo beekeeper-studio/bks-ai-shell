@@ -7,8 +7,8 @@
       <table class="preview-table">
         <thead>
           <tr>
-            <th v-for="column in columns" :key="column">
-              {{ column }}
+            <th v-for="column in columns" :key="column.id">
+              {{ column.name }}
             </th>
           </tr>
         </thead>
@@ -16,15 +16,15 @@
           <tr v-for="(row, index) in limitedRows" :key="index">
             <td
               v-for="column in columns"
-              :key="column"
+              :key="column.id"
               :class="{
-                'null-cell': row[column] === null,
-                'empty-cell': row[column] === '',
+                'null-cell': row[column.id] === null,
+                'empty-cell': row[column.id] === '',
               }"
             >
-              <template v-if="row[column] === ''">(EMPTY)</template>
-              <template v-else-if="row[column] === null">(NULL)</template>
-              <template v-else>{{ row[column] }}</template>
+              <template v-if="row[column.id] === ''">(EMPTY)</template>
+              <template v-else-if="row[column.id] === null">(NULL)</template>
+              <template v-else>{{ row[column.id] }}</template>
             </td>
           </tr>
           <tr v-if="remainingRows > 0" class="remaining-rows">
@@ -62,7 +62,7 @@ export default {
   },
   computed: {
     columns() {
-      return this.data.results[0].fields.map((field) => field.name);
+      return this.data.results[0].fields;
     },
     rows() {
       return this.data.results[0].rows;

@@ -10,9 +10,10 @@ import {
 import { getTools } from "@/tools";
 import { Message } from "ai";
 import { useTabState } from "@/stores/tabState";
-import { notify } from "@beekeeperstudio/plugin";
+import { getConnectionInfo, notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
 import { createProvider } from "@/providers";
+import { useConfigurationStore } from "@/stores/configuration";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -45,6 +46,13 @@ export function useAI(options: AIOptions) {
           messages: m.messages,
           signal: fetchOptions.signal,
           tools: getTools(async (name, toolCallId) => {
+            const conn = await getConnectionInfo();
+            if (
+              conn.readOnlyMode
+              && useConfigurationStore().alwaysAllowQueryExecutionOnReadOnly
+            ) {
+              return true;
+            }
             pendingToolCallIds.value.push(toolCallId);
             await new Promise<void>((resolve) => {
               const unwatch = watch(pendingToolCallIds, () => {

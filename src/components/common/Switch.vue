@@ -1,7 +1,12 @@
 <template>
   <div class="switch">
-    <input type="checkbox" v-model="isChecked" @change="handleChange" :id="id" :disabled="disabled" />
-    <span class="slider round"></span>
+    <label :for="id" v-if="$slots['label']">
+      <slot name="label"></slot>
+    </label>
+    <button type="button" :id="id" :disabled="disabled" class="switch-control" role="switch" :aria-checked="modelValue"
+      @click="handleClick">
+      <span class="slider round"></span>
+    </button>
   </div>
 </template>
 
@@ -13,10 +18,9 @@
  * <Switch />
  * <Switch v-model="modelValue" />
  * <Switch @change="handleSwitchChange" />
- * <label>
- *   Enable notifications
- *   <Switch />
- * </label>
+ * <Switch>
+ *   <template #label>Put label here</template>
+ * </Switch>
  * ```
  */
 
@@ -24,12 +28,6 @@ import _ from "lodash";
 
 export default {
   name: "Switch",
-
-  data() {
-    return {
-      isChecked: false,
-    };
-  },
 
   props: {
     id: {
@@ -47,19 +45,10 @@ export default {
 
   emits: ["update:modelValue", "change"],
 
-  watch: {
-    modelValue: {
-      handler(newValue) {
-        this.isChecked = newValue;
-      },
-      immediate: true,
-    },
-  },
-
   methods: {
-    handleChange() {
-      this.$emit("update:modelValue", this.isChecked);
-      this.$emit("change", this.isChecked);
+    handleClick() {
+      this.$emit("update:modelValue", !this.modelValue);
+      this.$emit("change", !this.modelValue);
     },
   },
 };

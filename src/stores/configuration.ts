@@ -29,8 +29,14 @@ type Model = {
 };
 
 type Configurable = {
-  /** Enable summarization. */
+  // ==== GENERAL ====
+  /** Append custom instructions to the default system instructions. */
+  customInstructions: string;
+  alwaysAllowQueryExecutionOnReadOnly: boolean;
+  /** TODO: Enable summarization. Not implemented yet. */
   summarization: boolean;
+
+  // ==== MODELS ====
   /** List of disabled models by id. */
   disabledModels: { providerId: AvailableProviders; modelId: string }[];
   /** Models that are removed are not shown in the UI and cannot be enabled. */
@@ -39,7 +45,6 @@ type Configurable = {
   providers_openaiCompat_headers: string;
   providers_ollama_baseUrl: string;
   providers_ollama_headers: string;
-  customInstructions: string;
 } & {
   // User defined models
   [K in AvailableProviders as `providers_${K}_models`]: Model[];
@@ -62,7 +67,12 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
 ];
 
 const defaultConfiguration: ConfigurationState = {
+  // ==== GENERAL ====
+  customInstructions: "",
+  alwaysAllowQueryExecutionOnReadOnly: false,
   summarization: true,
+
+  // ==== MODELS ====
   "providers.openai.apiKey": "",
   "providers.anthropic.apiKey": "",
   "providers.google.apiKey": "",
@@ -78,13 +88,12 @@ const defaultConfiguration: ConfigurationState = {
   providers_ollama_models: [],
   disabledModels: disabledModelsByDefault,
   removedModels: [],
-  customInstructions: "",
 };
 
 function isEncryptedConfig(
   config: string,
 ): config is keyof EncryptedConfigurable {
-  return encryptedConfigKeys.includes(config);
+  return encryptedConfigKeys.includes(config as keyof EncryptedConfigurable);
 }
 
 export const useConfigurationStore = defineStore("configuration", {
