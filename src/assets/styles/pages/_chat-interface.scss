@@ -195,7 +195,7 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     white-space: normal;
-    --header-bg-color: color-mix(in srgb, var(--theme-base) 3%, var(--query-editor-bg));
+    --header-bg-color: color-mix(in srgb, var(--theme-base) 5%, var(--query-editor-bg));
 
     .lang {
       padding-inline: 0.5rem;
@@ -542,7 +542,7 @@
   }
 
   th {
-    background-color: rgb(from var(--theme-base) r g b / 5%);
+    background-color: color-mix(in srgb, var(--theme-base) 5%, var(--query-editor-bg));
     font-weight: 600;
     font-size: 0.68rem;
     line-height: 1.7rem;

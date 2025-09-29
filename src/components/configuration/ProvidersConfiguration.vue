@@ -10,11 +10,9 @@
     <p class="description">
       Connect to any service using OpenAI's API format.
     </p>
-    <template v-for="(error, index) in errors" :key="index">
-      <div v-if="error.providerId === 'openaiCompat'" class="error-message">
-        {{ error }}
-      </div>
-    </template>
+    <div v-for="(error, index) in openAiCompatibleErrors" :key="index" class="error-message">
+      {{ error }}
+    </div>
     <BaseInput :model-value="providers_openaiCompat_baseUrl"
       @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)" @change="handleChange($event, 'openaiCompat')">
       <template #label>URL</template>
@@ -32,10 +30,16 @@
 
   <form @submit.prevent class="config-form">
     <h3>Ollama</h3>
+    <div v-for="(error, index) in ollamaErrors" :key="index" class="error-message">
+      <template v-if="error.includes('[1]')">
+        We couldn’t reach Ollama. The server may not be running or CORS might be blocking the request.
+      </template>
+      <template v-else>{{ error }}</template>
+    </div>
     <BaseInput :model-value="providers_ollama_baseUrl"
       @update:modelValue="configure('providers_ollama_baseUrl', $event)" @change="handleChange($event, 'ollama')">
       <template #label>URL</template>
-      <template #helper>Ollama server URL (default: http://localhost:11434 for local installations).</template>
+      <template #helper>Ollama server URL.</template>
     </BaseInput>
   </form>
 </template>
@@ -69,6 +73,12 @@ export default {
       "providers_ollama_headers",
     ]),
     ...mapState(useChatStore, ["errors"]),
+    openAiCompatibleErrors() {
+      return this.errors.filter((error) => error.providerId === "openaiCompat" && !error.message.includes("[2]")).map((error) => error.message);
+    },
+    ollamaErrors() {
+      return this.errors.filter((error) => error.providerId === "ollama" && !error.message.includes("[2]")).map((error) => error.message);
+    },
   },
 
   methods: {
