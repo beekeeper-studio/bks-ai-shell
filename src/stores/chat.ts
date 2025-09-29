@@ -141,12 +141,24 @@ export const useChatStore = defineStore("chat", {
         config.setModels(provider, models);
       } catch (e) {
         console.error(e);
-        this.errors.push(
-          new ProviderSyncError(e.message, {
-            providerId: provider,
-            cause: e,
-          }),
-        );
+        if (provider === "ollama" && e instanceof TypeError && e.message === "Failed to fetch") {
+          this.errors.push(
+            new ProviderSyncError(
+              "Failed to fetch models from Ollama. [1]",
+              {
+                providerId: provider,
+                cause: e,
+              },
+            )
+          )
+        } else {
+          this.errors.push(
+            new ProviderSyncError(e.message, {
+              providerId: provider,
+              cause: e,
+            }),
+          );
+        }
         config.setModels(provider, []);
       }
     },

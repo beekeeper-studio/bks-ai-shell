@@ -36,7 +36,7 @@
       </table>
     </div>
     <button
-      class="btn view-more-btn"
+      class="btn btn-primary view-more-btn"
       @click.prevent="handleViewMoreClick"
     >
       <div class="label">View more</div>

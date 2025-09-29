@@ -1,7 +1,22 @@
-$input-height:              26px;
-$btn-border-radius:         8px;
+$input-height: 26px;
+$btn-border-radius: 8px;
 
 .btn {
+  --btn-bg-color: rgb(from var(--theme-base) r g b / 6%);
+  --btn-text-color: var(--theme-base);
+  --btn-hover-bg-color: rgb(from var(--theme-base) r g b / 12%);
+  --btn-hover-text-color: var(--theme-base);
+
+  background-color: var(--btn-bg-color);
+  color: var(--btn-text-color);
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--btn-hover-bg-color);
+    color: var(--btn-hover-text-color);
+  }
+
+  position: relative;
   display: inline-flex;
   align-items: center;
   font-size: 12px;
@@ -13,10 +28,9 @@ $btn-border-radius:         8px;
   border: 0;
   padding: 0 1rem;
   min-width: 88px;
-  box-shadow: inset 0 0 0 1px rgba(white, 0.025);
   border-radius: $btn-border-radius;
   transition: background 0.15s ease-in-out,
-    color 0.15s ease-in-out;
+  color 0.15s ease-in-out;
   justify-content: center;
   text-align: center;
   cursor: pointer;
@@ -53,13 +67,15 @@ $btn-border-radius:         8px;
   .title-popup {
     position: absolute;
     width: max-content;
-    top: 1.9rem;
+    top: 2.1rem;
     font-size: 0.7rem;
     font-weight: 600;
     line-height: 1;
     padding: 0.4rem 0.7rem;
     border-radius: 4px;
-    background-color: var(--btn-hover-bg-color);
+    background-color: color-mix(in srgb,
+        var(--theme-base) 10%,
+        var(--query-editor-bg));
     user-select: none;
     opacity: 0;
     pointer-events: none;
@@ -71,30 +87,36 @@ $btn-border-radius:         8px;
 }
 
 @keyframes fadeInAfterDelay {
-  0%, 75% {
+
+  0%,
+  75% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
 }
 
 .btn-primary {
-  background-color: var(--theme-base);
-  color: rgb(from var(--query-editor-bg) r g b / 87%);
-  transition: background-color 0.15s ease-in-out;
-
-  &:hover,
-  &:focus {
-    background-color: rgb(from var(--theme-base) r g b / 87%);
-    color: var(--query-editor-bg);
-  }
+  --btn-bg-color: var(--theme-base);
+  --btn-text-color: var(--query-editor-bg);
+  --btn-hover-bg-color: rgb(from var(--theme-base) r g b / 87%);
+  --btn-hover-text-color: var(--query-editor-bg);
 }
 
-.btn-flat {
-  color: var(--theme-base);
-  background-color: rgb(from var(--theme-base) r g b / 6%);
-  &:hover, &:focus {
-    background-color: rgb(from var(--theme-base) r g b / 12%);
-  }
+.btn.btn-flat {
+  --btn-bg-color: rgb(from var(--theme-base) r g b / 6%);
+  --btn-text-color: var(--theme-base);
+  --btn-hover-bg-color: rgb(from var(--theme-base) r g b / 12%);
+  --btn-hover-text-color: var(--theme-base);
+}
+
+.btn.btn-flat-2 {
+  --btn-bg-color: var(--query-editor-bg);
+  --btn-text-color: color-mix(in srgb, var(--text-dark) 90%, var(--query-editor-bg));
+  --btn-hover-bg-color: color-mix(in srgb,
+      var(--theme-base) 10%,
+      var(--query-editor-bg));
+  --btn-hover-text-color: var(--text-dark);
 }

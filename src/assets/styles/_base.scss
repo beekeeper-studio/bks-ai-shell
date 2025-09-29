@@ -62,3 +62,7 @@ a {
   background: var(--theme-scrollbar-thumb);
   border-radius: 2px;
 }
+
+:focus-visible {
+  outline-color: transparent;
+}
