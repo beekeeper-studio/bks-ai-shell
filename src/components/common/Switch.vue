@@ -5,7 +5,6 @@
     </label>
     <button type="button" :id="id" :disabled="disabled" class="switch-control" role="switch" :aria-checked="modelValue"
       @click="handleClick">
-      <!-- <input type="checkbox" v-model="isChecked" @change="handleChange" :id="id" :disabled="disabled" /> -->
       <span class="slider round"></span>
     </button>
   </div>
