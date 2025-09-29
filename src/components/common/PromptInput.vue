@@ -52,8 +52,7 @@ export default {
   },
 
   data() {
-    const inputHistoryStr = localStorage.getItem(this.storageKey) || "[]";
-    const inputHistory: string[] = JSON.parse(inputHistoryStr);
+    const inputHistory = this.loadInputHistory();
     inputHistory.push("");
     return {
       inputHistory,
@@ -176,7 +175,7 @@ export default {
     },
 
     addToHistory(input: string) {
-      const oldHistory = JSON.parse(localStorage.getItem(this.storageKey)!);
+      const oldHistory = this.loadInputHistory();
 
       let newHistory = [...oldHistory];
 
@@ -209,6 +208,11 @@ export default {
         this.inputHistory.push("");
         this.inputIndex = this.inputHistory.length - 1;
       }
+    },
+
+    loadInputHistory(): string[] {
+      const inputHistoryStr = localStorage.getItem(this.storageKey) || "[]";
+      return JSON.parse(inputHistoryStr);
     },
   },
 };
