@@ -59,16 +59,15 @@
           <span class="spinner" />
         </div>
       </div>
-      <div ref="bottomMarker"></div>
+      <button
+        v-if="!isAtBottom"
+        @click="scrollToBottom({ smooth: true })"
+        class="btn scroll-down-btn"
+        title="Scroll to bottom"
+      >
+        <span class="material-symbols-outlined">keyboard_arrow_down</span>
+      </button>
     </div>
-    <button
-      v-if="!isAtBottom"
-      @click="scrollToBottom({ smooth: true })"
-      class="btn scroll-down-btn"
-      title="Scroll to bottom"
-    >
-      <span class="material-symbols-outlined">keyboard_arrow_down</span>
-    </button>
     <div class="chat-input-container-container">
       <PromptInput storage-key="inputHistory" :processing="processing" :selected-model="model"
        @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop"  />

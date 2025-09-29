@@ -17,6 +17,7 @@
     align-items: center;
     width: 100%;
     overflow: auto;
+    position: relative;
 
     >.header {
       display: flex;
@@ -89,8 +90,8 @@
 
   .scroll-down-btn {
     z-index: 1;
-    position: absolute;
-    bottom: 7rem;
+    position: sticky;
+    bottom: 0.5rem;
     left: 50%;
     transform: translateX(-50%);
     min-width: 0;
