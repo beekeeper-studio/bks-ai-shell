@@ -6,17 +6,19 @@
   >
     <div class="scroll-container" ref="scrollContainerRef">
       <div class="header">
-        <button class="btn settings-btn" @click="$emit('open-configuration')" title="Settings">
+        <button class="btn btn-flat-2 settings-btn" @click="$emit('open-configuration')">
           <span class="material-symbols-outlined">settings</span>
+          <span class="title-popup">Settings</span>
         </button>
       </div>
       <h1 class="plugin-title">AI Shell</h1>
       <div class="chat-messages">
         <message
-          v-for="message in messages"
+          v-for="(message, index) in messages"
           :key="message.id"
           :message="message"
           :pending-tool-call-ids="pendingToolCallIds"
+          :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
           @accept-permission="acceptPermission"
           @reject-permission="rejectPermission"
         />

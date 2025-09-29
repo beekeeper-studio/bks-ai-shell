@@ -38,9 +38,12 @@
         cursor: pointer;
         margin-left: auto;
         margin-right: 0.3rem;
-        opacity: 0.7;
         box-shadow: none;
         padding: 0;
+
+        .title-popup {
+          right: 0;
+        }
 
         &:hover {
           opacity: 1;
@@ -84,17 +87,8 @@
     }
   }
 
-  .scroll-container>.header .btn, .code-block .actions .btn {
-    --btn-hover-bg-color: color-mix(in srgb, var(--theme-base) 10%, var(--query-editor-bg));
-    color: var(--text-dark);
-    background-color: var(--query-editor-bg);
-
-    &:hover {
-      background-color: var(--btn-hover-bg-color);
-    }
-  }
-
   .scroll-down-btn {
+    z-index: 1;
     position: absolute;
     bottom: 7rem;
     left: 50%;
@@ -105,7 +99,7 @@
     padding: 0;
     border: 1px solid var(--border-color);
     border-radius: 9999px;
-    color: var(--text-dark);
+    color: var(--text);
     background-color: var(--query-editor-bg);
     display: flex;
     align-items: center;
@@ -116,8 +110,8 @@
     }
 
     .material-symbols-outlined {
-      margin-top: 0.2rem;
       font-size: 1.6rem;
+      margin-top: 0.2rem;
     }
   }
 }
@@ -201,17 +195,16 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     white-space: normal;
-    --header-text-color: var(--text-dark);
     --header-bg-color: color-mix(in srgb, var(--theme-base) 3%, var(--query-editor-bg));
 
     .lang {
       padding-inline: 0.5rem;
-      height: 1.75rem;
+      height: 1.8rem;
       display: flex;
       justify-content: space-between;
       font-size: 0.75rem;
-      line-height: 1.75rem;
-      color: var(--header-text-color);
+      line-height: 1.8rem;
+      color: var(--text);
       background-color: var(--header-bg-color);
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
@@ -219,12 +212,12 @@
 
     .actions {
       position: sticky;
-      top: 4.3rem;
+      top: 4.75rem;
       margin-right: 0.3rem;
 
       .group {
         position: absolute;
-        bottom: 0.1rem;
+        bottom: 0rem;
         right: 0;
         display: flex;
         justify-content: flex-end;
@@ -235,10 +228,9 @@
         min-width: 0px;
         padding: 0 0;
         width: 1.75rem;
-        height: 1.5rem;
+        height: 1.75rem;
         box-shadow: none;
-        color: var(--header-text-color);
-        background-color: var(--header-bg-color);
+        --btn-bg-color: var(--header-bg-color);
 
         &:disabled {
           opacity: 1;

@@ -35,7 +35,7 @@ async function useExtensions() {
 
           let actionsHtml = `
             <button
-              class="btn"
+              class="btn btn-flat-2"
               ${supportOpenInQueryEditor ? "" : "disabled"}
               data-action="open-in-query-editor"
               data-action-target="${codeId}"
@@ -47,7 +47,7 @@ async function useExtensions() {
               </span>
             </button>
             <button
-              class="btn"
+              class="btn btn-flat-2"
               data-action="copy"
               data-action-target="${codeId}"
             >
