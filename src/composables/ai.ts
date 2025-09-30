@@ -1,6 +1,3 @@
-import {
-  generateObject,
-} from "ai";
 import { useChat } from "@ai-sdk/vue";
 import { computed, ref, watch } from "vue";
 import {
@@ -10,10 +7,11 @@ import {
 import { getTools } from "@/tools";
 import { Message } from "ai";
 import { useTabState } from "@/stores/tabState";
-import { getConnectionInfo, notify } from "@beekeeperstudio/plugin";
+import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
 import { createProvider } from "@/providers";
 import { useConfigurationStore } from "@/stores/configuration";
+import { isReadQuery } from "@/utils";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -45,11 +43,10 @@ export function useAI(options: AIOptions) {
           modelId: sendOptions.modelId,
           messages: m.messages,
           signal: fetchOptions.signal,
-          tools: getTools(async (name, toolCallId) => {
-            const conn = await getConnectionInfo();
+          tools: getTools(async (name, toolCallId, params) => {
             if (
-              conn.readOnlyMode
-              && useConfigurationStore().alwaysAllowQueryExecutionOnReadOnly
+              useConfigurationStore().allowExecutionOfReadOnlyQueries
+              && params?.query && isReadQuery(params.query)
             ) {
               return true;
             }

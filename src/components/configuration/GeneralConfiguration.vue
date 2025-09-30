@@ -2,14 +2,17 @@
   <h2>General</h2>
   <BaseInput :model-value="customInstructions" @change="handleChange" type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues." rows="4">
-    <template #label>Instructions</template>
-    <template #helper>Custom instructions appended to the system prompt for AI calls. This text will be combined with <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions">the default instructions</ExternalLink>.</template>
+    <template #label>Custom Instructions</template>
+    <template #helper>Custom instructions will be appended to the <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions">default instructions</ExternalLink> and included with every messages you send as a system prompt. This instructions will be applied globally to all connections.</template>
   </BaseInput>
-  <Switch :model-value="alwaysAllowQueryExecutionOnReadOnly" @change="handleSwitchChange">
+  <BaseInput type="switch" :model-value="allowExecutionOfReadOnlyQueries" @click="handleSwitchClick">
     <template #label>
-      Always allow query execution in read-only mode
+      Always allow execution of read-only queries
     </template>
-  </Switch>
+    <template #helper>
+      This will allow execution of read-only queries without asking for confirmation in all sessions.
+    </template>
+  </BaseInput>
 </template>
 
 <script lang="ts">
@@ -17,7 +20,6 @@ import { mapActions, mapState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import ExternalLink from "@/components/common/ExternalLink.vue";
-import Switch from "@/components/common/Switch.vue";
 
 export default {
   name: "GeneralConfiguration",
@@ -25,13 +27,12 @@ export default {
   components: {
     BaseInput,
     ExternalLink,
-    Switch,
   },
 
   computed: {
     ...mapState(useConfigurationStore, [
       "customInstructions",
-      "alwaysAllowQueryExecutionOnReadOnly",
+      "allowExecutionOfReadOnlyQueries",
     ]),
   },
 
@@ -43,8 +44,8 @@ export default {
         (event.target as HTMLTextAreaElement).value,
       );
     },
-    handleSwitchChange(value: boolean) {
-      this.configure("alwaysAllowQueryExecutionOnReadOnly", value);
+    handleSwitchClick() {
+      this.configure("allowExecutionOfReadOnlyQueries", !this.allowExecutionOfReadOnlyQueries);
     },
   },
 };

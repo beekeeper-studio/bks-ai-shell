@@ -75,14 +75,14 @@ export const run_query = (
   });
 
 export function getTools(
-  onAskPermission: (name: string, toolCallId: string) => Promise<boolean>,
+  onAskPermission: (name: string, toolCallId: string, params: unknown) => Promise<boolean>,
 ): ToolSet {
   const toolSet: ToolSet = {
     get_tables,
     get_columns,
   };
   toolSet["run_query"] = run_query(async (toolCallId, params) => {
-    const permitted = await onAskPermission("run_query", toolCallId);
+    const permitted = await onAskPermission("run_query", toolCallId, params);
     if (!permitted) {
       throw new UserRejectedError(toolCallId);
     }

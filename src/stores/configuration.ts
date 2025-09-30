@@ -32,7 +32,7 @@ type Configurable = {
   // ==== GENERAL ====
   /** Append custom instructions to the default system instructions. */
   customInstructions: string;
-  alwaysAllowQueryExecutionOnReadOnly: boolean;
+  allowExecutionOfReadOnlyQueries: boolean;
   /** TODO: Enable summarization. Not implemented yet. */
   summarization: boolean;
 
@@ -69,7 +69,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
 const defaultConfiguration: ConfigurationState = {
   // ==== GENERAL ====
   customInstructions: "",
-  alwaysAllowQueryExecutionOnReadOnly: false,
+  allowExecutionOfReadOnlyQueries: false,
   summarization: true,
 
   // ==== MODELS ====

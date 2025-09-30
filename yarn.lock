@@ -2063,6 +2063,11 @@ speakingurl@^14.0.1:
   resolved "https://registry.yarnpkg.com/speakingurl/-/speakingurl-14.0.1.tgz#f37ec8ddc4ab98e9600c1c9ec324a8c48d772a53"
   integrity sha512-1POYv7uv2gXoyGFpBCmpDVSNV74IfsWlDW216UPjbWufNf+bSU6GdbDsxdcxtfwb4xlI3yxzOTKClUosxARYrQ==
 
+sql-query-identifier@^2.8.0:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/sql-query-identifier/-/sql-query-identifier-2.8.0.tgz#af6e62594d784194b86c87bddc95e5f084223b47"
+  integrity sha512-5cfaQCq80pRtLulP0nxw1j8W7m2ytUrbbQNrjszV26D8gTly7FUO3bWwMu6rwF3chY30Xv9Rb/CEzAQhDJ1YgA==
+
 stackback@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/stackback/-/stackback-0.0.2.tgz#1ac8a0d9483848d1695e418b6d031a3c3ce68e3b"
