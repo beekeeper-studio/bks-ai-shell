@@ -5,7 +5,7 @@
     <div class="actions">
       <Dropdown :model-value="selectedModel" placeholder="Select Model" aria-label="Model">
         <DropdownOption v-for="optionModel in filteredModels" :key="optionModel.id" :value="optionModel.id"
-          :text="optionModel.id" :selected="matchModel(optionModel, selectedModel)"
+          :text="optionModel.displayName" :selected="matchModel(optionModel, selectedModel)"
           @select="$emit('select-model', optionModel)" />
         <div class="dropdown-separator"></div>
         <button class="dropdown-action" @click="$emit('manage-models')">

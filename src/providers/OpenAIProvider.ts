@@ -23,7 +23,7 @@ export class OpenAIProvider extends BaseProvider {
     modelId: AvailableModels<"openai">["id"];
     temperature?: number;
   }) {
-    if (options.modelId === "gpt-5") {
+    if (options.modelId.startsWith("gpt-5")) {
       // Can't set temperature for gpt-5
       return super.stream({ ...options, temperature: 1 });
     }

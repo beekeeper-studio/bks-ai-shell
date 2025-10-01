@@ -4,9 +4,9 @@
     <h3>{{ provider.providerDisplayName }}</h3>
     <ul class="model-list">
       <li v-for="model in provider.models" :key="model.id" class="model">
-        <label class="switch-label" :title="!model.available ? 'Enter the API key to enable this model' : ''
+        <label class="switch-label" :title="!model.available ? 'Enter the API key to enable this model' : model.id
           ">
-          {{ model.id }}
+          {{ model.displayName }}
           <Switch :model-value="model.enabled" @change="toggle(model, $event)" :disabled="!model.available" />
         </label>
         <button class="btn delete-btn" @click.prevent="remove(model)" v-if="model.removable">

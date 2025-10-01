@@ -84,39 +84,43 @@ export const providerConfigs = {
     displayName: "Anthropic",
     /** https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
-      { id: "claude-opus-4-1", displayName: "Claude Opus 4.1" },
-      { id: "claude-opus-4-0", displayName: "Claude Opus 4" },
-      { id: "claude-sonnet-4-0", displayName: "Claude Sonnet 4" },
-      { id: "claude-3-7-sonnet-latest", displayName: "Claude Sonnet 3.7" },
-      { id: "claude-3-5-haiku-latest", displayName: "Claude Haiku 3.5" },
+      { id: "claude-sonnet-4-5-20250929", displayName: "claude-sonnet-4-5" },
+      { id: "claude-opus-4-1", displayName: "claude-opus-4-1" },
+      { id: "claude-opus-4-20250514", displayName: "claude-opus-4" },
+      { id: "claude-sonnet-4-20250514", displayName: "claude-sonnet-4" },
+      { id: "claude-3-7-sonnet-20250219", displayName: "claude-sonnet-3-7" },
+      { id: "claude-3-5-haiku-20241022", displayName: "claude-haiku-3-5" },
       {
         id: "claude-3-5-sonnet-latest",
-        displayName: "Claude Sonnet 3.5 Latest",
+        displayName: "claude-3-5-sonnet",
       },
-      { id: "claude-3-haiku-20240307", displayName: "Claude Haiku 3" },
+      { id: "claude-3-haiku-20240307", displayName: "claude-3-haiku" },
     ],
   },
   google: {
     displayName: "Google",
     /** https://ai.google.dev/gemini-api/docs/models */
     models: [
-      { id: "gemini-2.5-pro", displayName: "Gemini 2.5 Pro" },
-      { id: "gemini-2.5-flash", displayName: "Gemini 2.5 Flash" },
+      { id: "gemini-2.5-pro", displayName: "gemini-2.5-pro" },
+      { id: "gemini-2.5-flash", displayName: "gemini-2.5-flash" },
       {
         id: "gemini-2.5-flash-lite-preview-06-17",
-        displayName: "Gemini 2.5 Flash-Lite Preview",
+        displayName: "gemini-2.5-flash-lite-preview",
       },
-      { id: "gemini-2.0-flash", displayName: "Gemini 2.0 Flash" },
-      { id: "gemini-2.0-flash-lite", displayName: "Gemini 2.0 Flash-Lite" },
-      { id: "gemini-1.5-flash", displayName: "Gemini 1.5 Flash" },
-      { id: "gemini-1.5-flash-8b", displayName: "Gemini 1.5 Flash-8B" },
-      { id: "gemini-1.5-pro", displayName: "Gemini 1.5 Pro" },
+      { id: "gemini-2.0-flash", displayName: "gemini-2.0-flash" },
+      { id: "gemini-2.0-flash-lite", displayName: "gemini-2.0-flash-lite" },
+      { id: "gemini-1.5-flash", displayName: "gemini-1.5-flash" },
+      { id: "gemini-1.5-flash-8b", displayName: "gemini-1.5-flash-8b" },
+      { id: "gemini-1.5-pro", displayName: "gemini-1.5-pro" },
     ],
   },
   openai: {
     displayName: "OpenAI",
+    /** https://platform.openai.com/docs/models */
     models: [
       { id: "gpt-5", displayName: "gpt-5" },
+      { id: "gpt-5-mini", displayName: "gpt-5-mini" },
+      { id: "gpt-5-nano", displayName: "gpt-5-nano" },
       { id: "gpt-4.1", displayName: "gpt-4.1" },
       { id: "gpt-4.1-mini", displayName: "gpt-4.1-mini" },
       { id: "gpt-4.1-nano", displayName: "gpt-4.1-nano" },
@@ -143,6 +147,7 @@ export const disabledModelsByDefault: {
   providerId: AvailableProviders;
   modelId: string;
 }[] = [
+    // Disabling this by default because they are not listed in the gemini docs anymore
     {
       providerId: "google" as const,
       modelId: "gemini-1.5-flash",
@@ -154,5 +159,34 @@ export const disabledModelsByDefault: {
     {
       providerId: "google" as const,
       modelId: "gemini-1.5-pro",
+    },
+
+    // FIXME: Can't use o3, o3-mini, and o4-mini because of this error when sending a message
+    // {
+    //   "error": {
+    //     "message": "Invalid schema for function 'get_tables': In context=(), 'required' is required to be supplied and to be an array including every key in properties. Missing 'schema'.",
+    //     "type": "invalid_request_error",
+    //     "param": "tools[0].function.parameters",
+    //     "code": "invalid_function_parameters"
+    //   }
+    // }
+    {
+      providerId: "openai" as const,
+      modelId: "o3",
+    },
+    {
+      providerId: "openai" as const,
+      modelId: "o3-mini",
+    },
+    {
+      providerId: "openai" as const,
+      modelId: "o4-mini",
+    },
+
+    // Deprecated models
+    // anthropic: https://docs.claude.com/en/docs/about-claude/model-deprecations
+    {
+      providerId: "anthropic" as const,
+      modelId: "claude-3-5-sonnet-latest",
     },
   ];
