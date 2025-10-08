@@ -25,7 +25,7 @@ export function createProvider(id: AvailableProviders)  {
       });
     case "openaiCompat":
       if (_.isEmpty(configuration.providers_openaiCompat_baseUrl)) {
-        throw new Error("Missing API base URL");
+        throw new Error("Missing API base URL [2]");
       }
       return new OpenAICompatibleProvider({
         baseURL: configuration.providers_openaiCompat_baseUrl,
@@ -34,7 +34,7 @@ export function createProvider(id: AvailableProviders)  {
       });
     case "ollama":
       if (_.isEmpty(configuration.providers_ollama_baseUrl)) {
-        throw new Error("Missing API base URL");
+        throw new Error("Missing API base URL [2]");
       }
       return new OllamaProvider({
         baseURL: configuration.providers_ollama_baseUrl,

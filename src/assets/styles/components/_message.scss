@@ -1,0 +1,38 @@
+.message {
+  .message-actions {
+    display: flex;
+    margin-top: 0.5rem;
+
+    .btn {
+      min-width: 0;
+      padding: 0;
+      width: 1.75rem;
+      height: 1.75rem;
+      border: none;
+      border-radius: 9999px;
+      box-shadow: none;
+
+      .material-symbols-outlined {
+        font-size: 1rem;
+      }
+    }
+
+    .copy-btn {
+      &.copied .copy-label,
+      &.copied .copy-icon,
+      &:not(.copied) .copied-label,
+      &:not(.copied) .copied-icon {
+        display: none;
+      }
+    }
+  }
+
+  &.assistant .message-actions {
+    padding-left: 0.4rem;
+  }
+
+  &.user .message-actions {
+    margin-top: 0.5rem;
+    justify-content: flex-end;
+  }
+}

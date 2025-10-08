@@ -13,6 +13,16 @@
         />
       </template>
     </div>
+    <div class="message-actions" v-if="status ==='ready'">
+      <button class="btn btn-flat-2 copy-btn" :class="{ copied }" @click="handleCopyClick">
+        <span class="material-symbols-outlined copy-icon">content_copy</span>
+        <span class="material-symbols-outlined copied-icon">check</span>
+        <span class="title-popup">
+          <span class="copy-label">Copy</span>
+          <span class="copied-label">Copied</span>
+        </span>
+      </button>
+    </div>
   </div>
 </template>
 
@@ -21,6 +31,7 @@ import { PropType } from "vue";
 import { isToolUIPart, UIMessage } from "ai";
 import Markdown from "@/components/messages/Markdown.vue";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
+import { clipboard } from "@beekeeperstudio/plugin";
 
 export default {
   name: "Message",
@@ -39,10 +50,46 @@ export default {
       type: Array as PropType<string[]>,
       required: true,
     },
+    status: {
+      type: String as PropType<"ready" | "processing">,
+      required: true,
+    }
+  },
+
+  data() {
+    return {
+      copied: false,
+    };
+  },
+
+  computed: {
+    text(): string {
+      const parts = this.message.parts || [];
+      let text = "";
+      for (const part of parts) {
+        if (part.type === "text") {
+          text += `${part.text}\n\n`;
+        } else if (
+          part.type === "tool-invocation" &&
+          part.toolInvocation.toolName === "run_query" &&
+          part.toolInvocation.args?.query
+        ) {
+          text += "```sql\n" + part.toolInvocation.args.query + "\n```\n\n";
+        }
+      }
+      return text.trim();
+    },
   },
 
   methods: {
     isToolUIPart,
+    async handleCopyClick() {
+      await clipboard.writeText(this.text);
+      this.copied = true;
+      setTimeout(() => {
+        this.copied = false;
+      }, 1000);
+    },
   },
 };
 </script>

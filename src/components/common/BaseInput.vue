@@ -3,14 +3,18 @@
     <label :for="id" v-if="$slots['label']">
       <slot name="label"></slot>
     </label>
-    <div class="input-wrapper" :data-value="modelValue">
-      <textarea v-if="type === 'textarea'" v-bind="$attrs" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
+    <div class="input-wrapper" :data-value="type === 'textarea' ? modelValue : ''">
+      <textarea v-if="type === 'textarea'" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
         @change="emitChange" />
-      <input v-else :type="type" v-bind="$attrs" :id="id" :placeholder="placeholder" :value="modelValue" @input="emitInput"
+      <button v-else-if="type === 'switch'" type="button" v-bind="$attrs" :id="id" :disabled="disabled" role="switch" :aria-checked="modelValue"
+        @click="handleClick">
+        <span class="slider round"></span>
+      </button>
+      <input v-else :type="type" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
         @change="emitChange" />
-      <div class="helper" v-if="$slots['helper']">
-        <slot name="helper"></slot>
-      </div>
+    </div>
+    <div class="helper" v-if="$slots['helper']">
+      <slot name="helper"></slot>
     </div>
   </div>
 </template>
@@ -33,13 +37,14 @@ export default {
       type: String,
       default: () => _.uniqueId("input-"),
     },
-    type: String as PropType<HTMLInputElement["type"]> | "textarea",
+    type: String as PropType<HTMLInputElement["type"]> | "textarea" | "switch",
     placeholder: String,
     /** We add this to support v-model */
-    modelValue: String,
+    modelValue: [String, Boolean],
+    disabled: Boolean,
   },
 
-  emits: ["update:modelValue", "input", "change"],
+  emits: ["update:modelValue", "input", "change", "click"],
 
   methods: {
     emitInput(event: Event) {
@@ -48,6 +53,9 @@ export default {
     },
     emitChange(event: Event) {
       this.$emit("change", event);
+    },
+    handleClick(event: MouseEvent) {
+      this.$emit("click", event);
     },
   },
 };

@@ -1,4 +1,5 @@
 import { Model } from "./stores/chat";
+import { getExecutionType } from "sql-query-identifier";
 
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
@@ -69,6 +70,11 @@ export function parseHeaders(text: string): Record<string, string> {
 }
 
 /* Compare two models */
-export function matchModel(a: Model, b: Model) {
-  return a.id === b.id && a.provider === b.provider;
+export function matchModel(a: Model, b?: Model) {
+  return a.id === b?.id && a.provider === b?.provider;
+}
+
+export function isReadQuery(query: string) {
+  const type = getExecutionType(query);
+  return type === "LISTING" || type === "INFORMATION";
 }

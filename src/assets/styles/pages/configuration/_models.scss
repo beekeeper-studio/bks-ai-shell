@@ -65,9 +65,7 @@
     }
 
     >.base-input {
-      flex-direction: row;
       margin-top: 1rem;
-      gap: 0;
 
       label {
         width: 7rem;
@@ -109,11 +107,23 @@
     }
   }
 
-  .api-key-form .base-input {
-    gap: 0;
+  .api-key-form .base-input, .config-form .base-input {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+
     label {
       width: 7rem;
       flex-shrink: 0;
+    }
+
+    .input-wrapper {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .helper {
+      grid-column: 2;
+      grid-row: 2;
     }
   }
 }

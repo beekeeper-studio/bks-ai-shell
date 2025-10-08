@@ -1,6 +1,9 @@
 import { Chat } from "@ai-sdk/vue";
 import { computed, ref } from "vue";
-import { AvailableProviders, AvailableModels } from "@/config";
+import {
+  AvailableProviders,
+  AvailableModels,
+} from "@/config";
 import { tools } from "@/tools";
 import { UIMessage, DefaultChatTransport, convertToModelMessages } from "ai";
 import { useTabState } from "@/stores/tabState";
@@ -146,7 +149,7 @@ export function useAI(options: AIOptions) {
         title: z.string().describe("The title of the conversation"),
       }),
       prompt:
-        "Name this conversation in less than 30 characters.\n```" +
+        "Name this conversation in less than 30 characters or 6 words.\n```" +
         // FIXME
         chat.messages.map((m) => `${m.role}: ${m.parts.join(" ")}`).join("\n") +
         "\n```",

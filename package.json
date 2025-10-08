@@ -10,7 +10,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "plugin:build": "vite build && cp manifest.json dist/"
+    "plugin:build": "vite build && cp manifest.json dist/",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^3.0.22",
@@ -19,7 +21,7 @@
     "@ai-sdk/openai": "^2.0.30",
     "@ai-sdk/openai-compatible": "^1.0.18",
     "@ai-sdk/vue": "^2.0.44",
-    "@beekeeperstudio/plugin": "^1.3.0-beta",
+    "@beekeeperstudio/plugin": "^1.4.0",
     "@langchain/core": "^0.3.61",
     "@material-symbols/font-400": "^0.31.2",
     "ai": "^5.0.44",
@@ -31,15 +33,21 @@
     "ollama-ai-provider-v2": "^1.3.1",
     "pinia": "^3.0.2",
     "pluralize": "^8.0.0",
+    "sql-query-identifier": "^2.8.0",
     "typeface-roboto": "^0.0.75",
     "vue": "^3.4.21",
     "zod": "^4.1.8"
   },
   "devDependencies": {
-    "@beekeeperstudio/vite-plugin": "^1.0.2",
+    "@beekeeperstudio/vite-plugin": "^1.0.3",
     "@types/lodash": "^4.17.16",
     "@vitejs/plugin-vue": "^5.0.4",
+    "@vitest/browser": "^3.2.4",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^18.0.1",
     "sass": "^1.87.0",
-    "vite": "^6.2.3"
+    "vite": "^6.2.3",
+    "vitest": "^3.2.4",
+    "vitest-browser-vue": "^1.1.0"
   }
 }
