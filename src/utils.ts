@@ -1,5 +1,5 @@
 import { Model } from "./stores/chat";
-import { getExecutionType } from "sql-query-identifier";
+import { identify } from "sql-query-identifier";
 
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
@@ -75,6 +75,8 @@ export function matchModel(a: Model, b?: Model) {
 }
 
 export function isReadQuery(query: string) {
-  const type = getExecutionType(query);
-  return type === "LISTING" || type === "INFORMATION";
+  const identification = identify(query);
+  return identification.every(({ executionType }) =>
+    executionType === "LISTING" || executionType === "INFORMATION"
+  );
 }
