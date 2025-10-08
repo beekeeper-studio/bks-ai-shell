@@ -11,9 +11,9 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { ProviderOptions } from '@ai-sdk/provider-utils';
+import { ModelMessage, ProviderOptions } from '@ai-sdk/provider-utils';
 
-export type Messages = Parameters<typeof streamText>[0]["messages"];
+export type Messages = ModelMessage[];
 
 export abstract class BaseProvider {
   abstract getModel(id: string): LanguageModel;
@@ -24,7 +24,7 @@ export abstract class BaseProvider {
 
   async stream(options: {
     messages: Messages;
-    signal: AbortSignal;
+    signal?: AbortSignal;
     tools: ToolSet;
     modelId: AvailableModels["id"];
     temperature?: number;

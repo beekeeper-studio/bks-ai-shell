@@ -1,23 +1,23 @@
 import { Chat } from "@ai-sdk/vue";
 import { computed, ref } from "vue";
-import {
-  AvailableProviders,
-  AvailableModels,
-} from "@/config";
-import { tools } from "@/tools";
+import { AvailableProviders, AvailableModels } from "@/config";
+import { run_query, tools } from "@/tools";
 import { UIMessage, DefaultChatTransport, convertToModelMessages } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
 import { safeJSONStringify } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
+import { FetchFunction, InferToolInput } from "@ai-sdk/provider-utils";
+import { useConfigurationStore } from "@/stores/configuration";
+import { isReadQuery } from "@/utils";
 
 type AIOptions = {
   initialMessages: UIMessage[];
   anthropicApiKey?: string;
   openaiApiKey?: string;
   googleApiKey?: string;
-}
+};
 
 type SendOptions = {
   providerId: AvailableProviders;
@@ -31,6 +31,30 @@ type ToolCall = {
   input: unknown;
 };
 
+class AIShellChatTransport extends DefaultChatTransport<UIMessage> {
+  fetch: FetchFunction = async (
+    url: Parameters<FetchFunction>[0],
+    fetchOptions: Parameters<FetchFunction>[1],
+  ) => {
+    if (!fetchOptions) {
+      throw new Error("Fetch options are missing");
+    }
+    if (!fetchOptions.body) {
+      throw new Error("Fetch does not have a body");
+    }
+    const m = JSON.parse(fetchOptions.body as string) as any;
+    const sendOptions = m.sendOptions as SendOptions;
+    const provider = createProvider(sendOptions.providerId);
+    return provider.stream({
+      modelId: sendOptions.modelId,
+      messages: convertToModelMessages(m.messages),
+      signal: fetchOptions.signal,
+      tools,
+      systemPrompt: sendOptions.systemPrompt,
+    });
+  };
+}
+
 export function useAI(options: AIOptions) {
   const pendingToolCalls = ref<ToolCall[]>([]);
   const pendingToolCallIds = computed(() =>
@@ -39,27 +63,21 @@ export function useAI(options: AIOptions) {
   const askingPermission = computed(() => pendingToolCallIds.value.length > 0);
   const followupAfterRejected = ref("");
 
-  const messages = ref<UIMessage[]>(options.initialMessages);
-
   const chat = new Chat({
-    // FIXME create a custom chat transport
-    transport: new DefaultChatTransport({
-      fetch: async (url, fetchOptions) => {
-        const m = JSON.parse(fetchOptions.body) as any;
-        const sendOptions = m.sendOptions as SendOptions;
-        const provider = createProvider(sendOptions.providerId);
-        return provider.stream({
-          modelId: sendOptions.modelId,
-          messages: convertToModelMessages(m.messages),
-          signal: fetchOptions.signal,
-          tools,
-          systemPrompt: sendOptions.systemPrompt,
-        });
-      },
-    }),
+    transport: new AIShellChatTransport(),
     onToolCall({ toolCall }) {
       if (toolCall.toolName === "run_query") {
-        pendingToolCalls.value.push(toolCall);
+        const input = toolCall.input as InferToolInput<typeof run_query>;
+
+        if (
+          useConfigurationStore().allowExecutionOfReadOnlyQueries &&
+          input.query &&
+          isReadQuery(input.query)
+        ) {
+          runAndAddToolResult(toolCall);
+        } else {
+          pendingToolCalls.value.push(toolCall);
+        }
       }
     },
     messages: options.initialMessages,
@@ -133,7 +151,7 @@ export function useAI(options: AIOptions) {
       pendingToolCallIds.value = [];
     } else {
       pendingToolCallIds.value = pendingToolCallIds.value.filter(
-        (id) => id !== toolCallId
+        (id) => id !== toolCallId,
       );
     }
   }
