@@ -161,16 +161,21 @@ export function useAI(options: AIOptions) {
       // Skip generation if title is already set
       return;
     }
+    let prompt = "Name this conversation in less than 30 characters or 6 words.\n```";
+    chat.messages.forEach((m) => {
+      m.parts.forEach((p) => {
+        if (p.type === "text") {
+          prompt += " " + p.text;
+        }
+      })
+    })
+    prompt += "\n```";
     const res = await createProvider(options.providerId).generateObject({
       modelId: options.modelId,
       schema: z.object({
         title: z.string().describe("The title of the conversation"),
       }),
-      prompt:
-        "Name this conversation in less than 30 characters or 6 words.\n```" +
-        // FIXME
-        chat.messages.map((m) => `${m.role}: ${m.parts.join(" ")}`).join("\n") +
-        "\n```",
+      prompt,
     });
     await useTabState().setTabTitle(res.object.title);
   }
