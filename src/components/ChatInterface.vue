@@ -19,7 +19,7 @@
           :message="message"
           :pending-tool-call-ids="pendingToolCallIds"
           :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
-          @accept-permission="handleAcceptPermission"
+          @accept-permission="acceptPermission"
           @reject-permission="rejectPermission"
         />
         <div
@@ -262,10 +262,6 @@ export default {
     selectModel(model: Model) {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
-    },
-
-    handleAcceptPermission(toolCallId: string) {
-      this.acceptPermission(toolCallId, this.getSendOptions());
     },
 
     getSendOptions() {

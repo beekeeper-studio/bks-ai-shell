@@ -6,7 +6,7 @@
         <markdown v-if="part.type === 'text'" :content="part.text" />
         <tool-message
           v-else-if="isToolUIPart(part)"
-          :part="part"
+          :tool="part"
           :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
           @accept="$emit('accept-permission', part.toolCallId)"
           @reject="$emit('reject-permission', part.toolCallId)"

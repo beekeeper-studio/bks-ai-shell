@@ -1,9 +1,9 @@
 <template>
-  <div class="tool" :data-tool-state="part.state">
+  <div class="tool" :data-tool-state="tool.state">
     <div>{{ displayName }}</div>
     <markdown v-if="name === 'run_query'" :content="'```sql\n' +
-      (part.input?.query ||
-        (part.state === 'output-available' ? '(empty)' : '-- Generating')) +
+      (tool.input?.query ||
+        (tool.state === 'output-available' ? '(empty)' : '-- Generating')) +
       '\n```'
       " />
     <div v-if="askingPermission">
@@ -58,7 +58,7 @@ export default {
   components: { Markdown, RunQueryResult },
   props: {
     askingPermission: Boolean,
-    part: {
+    tool: {
       type: Object as PropType<ToolUIPart>,
       required: true,
     },
@@ -67,7 +67,7 @@ export default {
   emits: ["accept", "reject"],
   computed: {
     name() {
-      return this.part.type.replace("tool-", "");
+      return this.tool.type.replace("tool-", "");
     },
     content() {
       if (this.data) {
@@ -85,33 +85,33 @@ export default {
       return "";
     },
     data() {
-      if (this.part.state !== "output-available") {
+      if (this.tool.state !== "output-available") {
         return null;
       }
 
       try {
-        return JSON.parse(this.part.output);
+        return JSON.parse(this.tool.output);
       } catch (e) {
         return null;
       }
     },
     error() {
       if (
-        this.part.state === "output-available" &&
-        isErrorContent(this.part.output)
+        this.tool.state === "output-available" &&
+        isErrorContent(this.tool.output)
       ) {
-        const err = parseErrorContent(this.part.output);
+        const err = parseErrorContent(this.tool.output);
         return err.message ?? err;
-      } else if (this.part.state === "output-error") {
-        return this.part.errorText;
+      } else if (this.tool.state === "output-error") {
+        return this.tool.errorText;
       }
     },
     displayName() {
       if (this.name === "get_columns") {
-        if (this.part.input?.schema) {
-          return `Get Columns (schema: ${this.part.input?.schema}, table: ${this.part.input?.table || "..."})`;
+        if (this.tool.input?.schema) {
+          return `Get Columns (schema: ${this.tool.input?.schema}, table: ${this.tool.input?.table || "..."})`;
         }
-        return `Get Columns (table: ${this.part.input?.table || "..."})`;
+        return `Get Columns (table: ${this.tool.input?.table || "..."})`;
       }
       return this.name.split("_").map(_.capitalize).join(" ");
     },
