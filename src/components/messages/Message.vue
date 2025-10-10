@@ -69,12 +69,11 @@ export default {
       for (const part of parts) {
         if (part.type === "text") {
           text += `${part.text}\n\n`;
-        } else if (
-          part.type === "tool-invocation" &&
-          part.toolInvocation.toolName === "run_query" &&
-          part.toolInvocation.args?.query
-        ) {
-          text += "```sql\n" + part.toolInvocation.args.query + "\n```\n\n";
+        } else if (part.type === "tool-run_query") {
+          const query: string | undefined = part.input?.query;
+          if (query) {
+            text += "```sql\n" + query + "\n```\n\n";
+          }
         }
       }
       return text.trim();

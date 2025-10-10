@@ -1,6 +1,7 @@
 import { Model } from "./stores/chat";
 import { identify } from "sql-query-identifier";
 
+/** It's safe cause we hope it doesn't throw any errors, hopefully. */
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
     value,

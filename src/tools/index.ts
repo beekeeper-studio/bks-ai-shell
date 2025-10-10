@@ -1,5 +1,5 @@
 import { z } from "zod/v3";
-import { tool, ToolSet } from "ai";
+import { tool } from "ai";
 import { getColumns, getTables } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
 
@@ -17,7 +17,7 @@ export const get_tables = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e?.message,
+        message: e?.message || e.toString() || "Unknown error",
       });
     }
   },
@@ -41,7 +41,7 @@ export const get_columns = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e.message,
+        message: e?.message || e.toString() || "Unknown error",
       });
     }
   },
@@ -54,11 +54,11 @@ export const run_query = tool({
   }),
 });
 
-export const tools: ToolSet = {
+export const tools = {
   get_tables,
   get_columns,
   run_query,
-}
+};
 
 export class UserRejectedError extends Error {
   constructor(public toolCallId: string) {

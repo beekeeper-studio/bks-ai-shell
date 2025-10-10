@@ -52,7 +52,8 @@ export const useTabState = defineStore("tabState", {
       const state = await getViewState<TabState>();
       if (state) {
         if (isV1TabState(state)) {
-          this.messages = mapLangChainStoredMessagesToAISdkMessages(state.messages);
+          const v4Messages = mapLangChainStoredMessagesToAISdkMessages(state.messages);
+          this.messages = mapV4MessagesToV5Messages(v4Messages);
         } else if (state.version === "2"){
           this.messages = mapV4MessagesToV5Messages(state.messages as MessageV4[]);
         } else {

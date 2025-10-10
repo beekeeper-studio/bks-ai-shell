@@ -19,7 +19,7 @@
           :message="message"
           :pending-tool-call-ids="pendingToolCallIds"
           :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
-          @accept-permission="acceptPermission"
+          @accept-permission="handleAcceptPermission"
           @reject-permission="rejectPermission"
         />
         <div
@@ -118,12 +118,7 @@ export default {
   },
 
   setup(props) {
-    const ai = useAI({
-      initialMessages: props.initialMessages,
-      anthropicApiKey: props.anthropicApiKey,
-      openaiApiKey: props.openaiApiKey,
-      googleApiKey: props.googleApiKey,
-    });
+    const ai = useAI({ initialMessages: props.initialMessages });
 
     return {
       send: ai.send,
@@ -233,10 +228,10 @@ export default {
       this.noModelError = false;
 
       if (this.askingPermission) {
-        this.rejectPermission(input);
-      } else {
-        this.send(input, this.getSendOptions());
+        this.rejectPermission();
       }
+
+      this.send(input, this.getSendOptions());
     },
 
     async reload() {
@@ -269,6 +264,10 @@ export default {
     selectModel(model: Model) {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
+    },
+
+    handleAcceptPermission(toolCallId: string) {
+      this.acceptPermission(toolCallId, this.getSendOptions());
     },
 
     getSendOptions() {

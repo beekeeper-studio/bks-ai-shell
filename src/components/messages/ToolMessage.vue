@@ -1,10 +1,11 @@
 <template>
-  <div class="tool">
+  <div class="tool" :data-tool-state="part.state">
     <div>{{ displayName }}</div>
-    <markdown
-      v-if="name === 'run_query'"
-      :content="'```sql\n' + (part.input?.query || '(empty)') + '\n```'"
-    />
+    <markdown v-if="name === 'run_query'" :content="'```sql\n' +
+      (part.input?.query ||
+        (part.state === 'output-available' ? '(empty)' : '-- Generating')) +
+      '\n```'
+      " />
     <div v-if="askingPermission">
       {{
         name === "run_query"
@@ -36,15 +37,9 @@
         <template v-if="name === 'get_columns'">
           {{ data.length }}
           {{ $pluralize("column", data.length) }}
-          (<code
-            v-if="data.length < 5"
-            v-text="data.map((c) => c.name).join(', ')"
-          />)
+          (<code v-if="data.length < 5" v-text="data.map((c) => c.name).join(', ')" />)
         </template>
-        <run-query-result
-          v-else-if="name === 'run_query' && data"
-          :data="data"
-        />
+        <run-query-result v-else-if="name === 'run_query' && data" :data="data" />
       </template>
     </div>
   </div>
@@ -105,9 +100,9 @@ export default {
     displayName() {
       if (this.name === "get_columns") {
         if (this.part.input?.schema) {
-          return `Get Columns (schema: ${this.part.input?.schema}, table: ${this.part.input?.table || '...'})`;
+          return `Get Columns (schema: ${this.part.input?.schema}, table: ${this.part.input?.table || "..."})`;
         }
-        return `Get Columns (table: ${this.part.input?.table || '...'})`;
+        return `Get Columns (table: ${this.part.input?.table || "..."})`;
       }
       return this.name.split("_").map(_.capitalize).join(" ");
     },
