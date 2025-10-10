@@ -1,12 +1,11 @@
 import { Chat } from "@ai-sdk/vue";
 import { computed, ComputedRef, watch } from "vue";
 import { AvailableProviders, AvailableModels } from "@/config";
-import { tools } from "@/tools";
+import { tools, userRejectedToolCall } from "@/tools";
 import {
   UIMessage,
   DefaultChatTransport,
   convertToModelMessages,
-  lastAssistantMessageIsCompleteWithToolCalls,
   ChatStatus,
   ChatOnToolCallCallback,
   UIDataTypes,
@@ -20,6 +19,7 @@ import { reactive } from "vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import { isReadQuery, safeJSONStringify } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
+import { lastAssistantMessageIsCompleteWithToolCalls } from "@/utils/lastAssistantMessageIsCompleteWithToolCalls";
 
 type AIOptions = {
   initialMessages: UIMessage[];
@@ -149,6 +149,7 @@ class AIShellChat {
         isReadQuery(toolCall.input.query)
       ) {
         await this.runQueryAndAddToolResult(toolCall);
+        return;
       }
 
       this.pendingToolCalls.push({
@@ -181,7 +182,7 @@ class AIShellChat {
           state: "output-error",
           toolCallId: toolCall.toolCallId,
           tool: toolCall.toolName,
-          errorText: "User rejected tool call",
+          errorText: userRejectedToolCall,
         });
       }
     }

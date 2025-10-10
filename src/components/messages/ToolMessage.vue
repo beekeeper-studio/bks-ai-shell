@@ -85,6 +85,10 @@ export default {
       return "";
     },
     data() {
+      if (this.part.state !== "output-available") {
+        return null;
+      }
+
       try {
         return JSON.parse(this.part.output);
       } catch (e) {
@@ -92,9 +96,14 @@ export default {
       }
     },
     error() {
-      if (isErrorContent(this.part.output)) {
+      if (
+        this.part.state === "output-available" &&
+        isErrorContent(this.part.output)
+      ) {
         const err = parseErrorContent(this.part.output);
         return err.message ?? err;
+      } else if (this.part.state === "output-error") {
+        return this.part.errorText;
       }
     },
     displayName() {

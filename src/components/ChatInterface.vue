@@ -81,7 +81,6 @@ import { useChatStore, Model } from "@/stores/chat";
 import Dropdown from "./common/Dropdown.vue";
 import DropdownOption from "./common/DropdownOption.vue";
 import _ from "lodash";
-import ToolMessage from "@/components/messages/ToolMessage.vue";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
@@ -99,7 +98,6 @@ export default {
     Dropdown,
     DropdownOption,
     Message,
-    ToolMessage,
     Markdown,
     BaseInput,
     PromptInput,

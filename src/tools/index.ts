@@ -70,3 +70,5 @@ export class UserRejectedError extends Error {
     return error && error.name === "UserRejectedError";
   }
 }
+
+export const userRejectedToolCall = "User rejected tool call";
