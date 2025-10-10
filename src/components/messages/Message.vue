@@ -4,9 +4,13 @@
       <template v-if="message.role === 'system'" />
       <template v-else v-for="(part, index) of message.parts" :key="index">
         <markdown v-if="part.type === 'text'" :content="part.text" />
-        <tool-message v-else-if="part.type === 'tool-invocation'" :toolCall="part.toolInvocation" :askingPermission="pendingToolCallIds.includes(part.toolInvocation.toolCallId)
-          " @accept="$emit('accept-permission', part.toolInvocation.toolCallId)"
-          @reject="$emit('reject-permission', part.toolInvocation.toolCallId)" />
+        <tool-message
+          v-else-if="isToolUIPart(part)"
+          :tool="part"
+          :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
+          @accept="$emit('accept-permission', part.toolCallId)"
+          @reject="$emit('reject-permission', part.toolCallId)"
+        />
       </template>
     </div>
     <div class="message-actions" v-if="status ==='ready'">
@@ -24,7 +28,7 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { UIMessage } from "ai";
+import { isToolUIPart, UIMessage } from "ai";
 import Markdown from "@/components/messages/Markdown.vue";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
 import { clipboard } from "@beekeeperstudio/plugin";
@@ -65,12 +69,11 @@ export default {
       for (const part of parts) {
         if (part.type === "text") {
           text += `${part.text}\n\n`;
-        } else if (
-          part.type === "tool-invocation" &&
-          part.toolInvocation.toolName === "run_query" &&
-          part.toolInvocation.args?.query
-        ) {
-          text += "```sql\n" + part.toolInvocation.args.query + "\n```\n\n";
+        } else if (part.type === "tool-run_query") {
+          const query: string | undefined = part.input?.query;
+          if (query) {
+            text += "```sql\n" + query + "\n```\n\n";
+          }
         }
       }
       return text.trim();
@@ -78,6 +81,7 @@ export default {
   },
 
   methods: {
+    isToolUIPart,
     async handleCopyClick() {
       await clipboard.writeText(this.text);
       this.copied = true;

@@ -1,6 +1,7 @@
 import { Model } from "./stores/chat";
-import { getExecutionType } from "sql-query-identifier";
+import { identify } from "sql-query-identifier";
 
+/** It's safe cause we hope it doesn't throw any errors, hopefully. */
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
     value,
@@ -25,9 +26,9 @@ export function parseErrorContent(content: string) {
   return err;
 }
 
-export function isErrorContent(str: string) {
+export function isErrorContent(content: unknown): content is string {
   try {
-    return JSON.parse(str)?.type === "error";
+    return JSON.parse(content)?.type === "error";
   } catch (e) {
     return false;
   }
@@ -75,6 +76,8 @@ export function matchModel(a: Model, b?: Model) {
 }
 
 export function isReadQuery(query: string) {
-  const type = getExecutionType(query);
-  return type === "LISTING" || type === "INFORMATION";
+  const identification = identify(query);
+  return identification.every(({ executionType }) =>
+    executionType === "LISTING" || executionType === "INFORMATION"
+  );
 }

@@ -1,15 +1,11 @@
-import { z } from "zod";
-import { tool, ToolSet } from "ai";
-import {
-  getColumns,
-  getTables,
-  runQuery,
-} from "@beekeeperstudio/plugin";
+import { z } from "zod/v3";
+import { tool } from "ai";
+import { getColumns, getTables } from "@beekeeperstudio/plugin";
 import { safeJSONStringify } from "@/utils";
 
 export const get_tables = tool({
   description: "Get a list of all tables in the current database",
-  parameters: z.object({
+  inputSchema: z.object({
     schema: z
       .string()
       .nullish()
@@ -21,7 +17,7 @@ export const get_tables = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e.message,
+        message: e?.message || e.toString() || "Unknown error",
       });
     }
   },
@@ -30,7 +26,7 @@ export const get_tables = tool({
 export const get_columns = tool({
   description:
     "Get all columns for a specific table including name and data type",
-  parameters: z.object({
+  inputSchema: z.object({
     table: z.string().describe("The name of the table to get columns for"),
     schema: z
       .string()
@@ -45,50 +41,24 @@ export const get_columns = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e.message,
+        message: e?.message || e.toString() || "Unknown error",
       });
     }
   },
 });
 
-export const run_query = (
-  onAskPermission: (toolCallId: string, params: any) => Promise<void>,
-) =>
-  tool({
-    description: "Run a SQL query and get the results",
-    parameters: z.object({
-      query: z.string().describe("The SQL query to execute"),
-    }),
-    execute: async (params, options) => {
-      await onAskPermission(options.toolCallId, params);
-      try {
-        return safeJSONStringify(
-          await runQuery(params.query),
-        );
-      } catch (e) {
-        return safeJSONStringify({
-          type: "error",
-          message: e.message,
-        });
-      }
-    },
-  });
+export const run_query = tool({
+  description: "Run a SQL query and get the results",
+  inputSchema: z.object({
+    query: z.string().describe("The SQL query to execute"),
+  }),
+});
 
-export function getTools(
-  onAskPermission: (name: string, toolCallId: string, params: unknown) => Promise<boolean>,
-): ToolSet {
-  const toolSet: ToolSet = {
-    get_tables,
-    get_columns,
-  };
-  toolSet["run_query"] = run_query(async (toolCallId, params) => {
-    const permitted = await onAskPermission("run_query", toolCallId, params);
-    if (!permitted) {
-      throw new UserRejectedError(toolCallId);
-    }
-  });
-  return toolSet;
-}
+export const tools = {
+  get_tables,
+  get_columns,
+  run_query,
+};
 
 export class UserRejectedError extends Error {
   constructor(public toolCallId: string) {
@@ -100,3 +70,5 @@ export class UserRejectedError extends Error {
     return error && error.name === "UserRejectedError";
   }
 }
+
+export const userRejectedToolCall = "User rejected tool call";
