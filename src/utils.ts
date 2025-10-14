@@ -1,5 +1,7 @@
+import { UIMessage } from "ai";
 import { Model } from "./stores/chat";
 import { getExecutionType } from "sql-query-identifier";
+import _ from "lodash";
 
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
@@ -77,4 +79,20 @@ export function matchModel(a: Model, b?: Model) {
 export function isReadQuery(query: string) {
   const type = getExecutionType(query);
   return type === "LISTING" || type === "INFORMATION";
+}
+
+export function isEmptyUIMessage(message: UIMessage): boolean {
+  const nonEmptyParts = message.parts.filter((part) => {
+    if (part.type === "step-start") {
+      return false;
+    }
+
+    if (part.type === "text" && _.isEmpty(part.text)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return nonEmptyParts.length === 0;
 }

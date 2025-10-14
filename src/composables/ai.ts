@@ -11,7 +11,7 @@ import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
 import { createProvider } from "@/providers";
 import { useConfigurationStore } from "@/stores/configuration";
-import { isReadQuery } from "@/utils";
+import { isEmptyUIMessage, isReadQuery } from "@/utils";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -174,6 +174,13 @@ export function useAI(options: AIOptions) {
 
   function abort() {
     stop();
+
+    // If the last message is empty, remove it
+    const lastMessage = messages.value[messages.value.length - 1];
+    if (isEmptyUIMessage(lastMessage)) {
+      messages.value = messages.value.slice(0, -1);
+    }
+
     saveMessages();
   }
 
