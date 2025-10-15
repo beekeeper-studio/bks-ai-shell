@@ -1,5 +1,5 @@
 import { Model } from "./stores/chat";
-import { getExecutionType } from "sql-query-identifier";
+import { identify } from "sql-query-identifier";
 
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
@@ -51,15 +51,15 @@ export function isAbortError(error: unknown) {
 
 export function parseHeaders(text: string): Record<string, string> {
   const headers = {};
-  const lines = text.split('\n');
+  const lines = text.split("\n");
 
   for (let line of lines) {
     line = line.trim();
-    if (!line || !line.includes(':')) continue;
+    if (!line || !line.includes(":")) continue;
 
-    const [key, ...rest] = line.split(':');
+    const [key, ...rest] = line.split(":");
     const trimmedKey = key.trim();
-    const value = rest.join(':').trim();
+    const value = rest.join(":").trim();
 
     if (trimmedKey) {
       headers[trimmedKey] = value;
@@ -75,6 +75,13 @@ export function matchModel(a: Model, b?: Model) {
 }
 
 export function isReadQuery(query: string) {
-  const type = getExecutionType(query);
-  return type === "LISTING" || type === "INFORMATION";
+  try {
+    // Not sure, but assume that identify() can throw an error
+    return identify(query).every(
+      ({ executionType }) =>
+        executionType === "LISTING" || executionType === "INFORMATION",
+    );
+  } catch (e) {
+    return false;
+  }
 }
