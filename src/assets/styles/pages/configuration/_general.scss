@@ -3,7 +3,7 @@
     resize: vertical;
   }
 
-  .switch {
+  > .base-input:not(:first-of-type) {
     margin-top: 1.5rem;
   }
 }

@@ -24,6 +24,7 @@ export abstract class BaseProvider {
     modelId: AvailableModels["id"];
     temperature?: number;
     systemPrompt?: string;
+    maxSteps?: number;
   }) {
     const result = streamText({
       model: this.getModel(options.modelId),
@@ -31,7 +32,7 @@ export abstract class BaseProvider {
       abortSignal: options.signal,
       system: options.systemPrompt,
       tools: options.tools,
-      maxSteps: 10,
+      maxSteps: options.maxSteps ?? 20,
       temperature: options.temperature ?? defaultTemperature,
     });
     return result.toDataStreamResponse({
