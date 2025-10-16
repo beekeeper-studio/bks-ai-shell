@@ -529,7 +529,6 @@
 
   th,
   td {
-    border: 1px solid var(--border-color);
     padding: 0 0.7rem;
     text-align: left;
     white-space: nowrap;
@@ -543,14 +542,12 @@
   }
 
   th {
-    background-color: color-mix(in srgb, var(--theme-base) 5%, var(--query-editor-bg));
     font-weight: 600;
     font-size: 0.68rem;
     line-height: 1.7rem;
   }
 
   td {
-    background-color: var(--query-editor-bg);
     font-size: 0.75rem;
     line-height: 1.875rem;
   }
