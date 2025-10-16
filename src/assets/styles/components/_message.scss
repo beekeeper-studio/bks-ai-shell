@@ -35,4 +35,9 @@
     margin-top: 0.5rem;
     justify-content: flex-end;
   }
+
+  .message-content.literally-empty {
+    font-style: italic;
+    --theme-text-message-system: var(--text-muted);
+  }
 }
