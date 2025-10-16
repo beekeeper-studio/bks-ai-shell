@@ -33,6 +33,8 @@ async function useExtensions() {
             langAttr = ` data-lang="${token.lang}"`;
           }
 
+          const queryOrCode = token.lang === "sql" ? "query" : "code";
+
           let actionsHtml = `
             <button
               class="btn btn-flat-2"
@@ -53,8 +55,9 @@ async function useExtensions() {
             >
               <span class="material-symbols-outlined copy-icon">content_copy</span>
               <span class="material-symbols-outlined copied-icon">check</span>
+              <span>Copy ${queryOrCode}</span>
               <span class="title-popup">
-                <span class="copy-label">Copy</span>
+                <span class="copy-label">Copy ${queryOrCode}</span>
                 <span class="copied-label">Copied</span>
               </span>
             </button>
