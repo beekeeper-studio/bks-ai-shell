@@ -93,6 +93,9 @@ export function useAI(options: AIOptions) {
         }
       },
       onFinish: () => {
+        // FIXME we dont need this once we upgrade to AI SDK v5 since we use `convertToModelMessages()`
+        // See https://ai-sdk.dev/docs/troubleshooting/use-chat-tools-no-response
+        messages.value = messages.value.filter((m) => !isEmptyUIMessage(m));
         saveMessages();
       },
       initialMessages: options.initialMessages,
@@ -174,13 +177,6 @@ export function useAI(options: AIOptions) {
 
   function abort() {
     stop();
-
-    // If the last message is empty, remove it
-    const lastMessage = messages.value[messages.value.length - 1];
-    if (isEmptyUIMessage(lastMessage)) {
-      messages.value = messages.value.slice(0, -1);
-    }
-
     saveMessages();
   }
 
