@@ -85,6 +85,7 @@ export const providerConfigs = {
     /** https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       { id: "claude-sonnet-4-5-20250929", displayName: "claude-sonnet-4-5" },
+      { id: "claude-haiku-4-5-20251001", displayName: "claude-haiku-4-5" },
       { id: "claude-opus-4-1", displayName: "claude-opus-4-1" },
       { id: "claude-opus-4-20250514", displayName: "claude-opus-4" },
       { id: "claude-sonnet-4-20250514", displayName: "claude-sonnet-4" },
