@@ -3,7 +3,10 @@
     <div class="message-content">
       <template v-if="message.role === 'system'" />
       <template v-else v-for="(part, index) of message.parts" :key="index">
-        <markdown v-if="part.type === 'text'" :content="part.text" />
+        <template v-if="part.type === 'text'">
+          <template v-if="message.role === 'user'">{{ part.text }}</template>
+          <markdown v-else :content="part.text" />
+        </template>
         <tool-message v-else-if="part.type === 'tool-invocation'" :toolCall="part.toolInvocation" :askingPermission="pendingToolCallIds.includes(part.toolInvocation.toolCallId)
           " @accept="$emit('accept-permission', part.toolInvocation.toolCallId)"
           @reject="$emit('reject-permission', part.toolInvocation.toolCallId)" />
