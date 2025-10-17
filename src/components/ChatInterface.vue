@@ -24,7 +24,7 @@
         />
         <div
           class="message error"
-          v-if="error && !error.message.includes('User rejected tool call')"
+          v-if="isUnexpectedError"
         >
           <div class="message-content">
             Something went wrong.
@@ -159,6 +159,26 @@ export default {
         !this.askingPermission &&
         (this.status === "submitted" || this.status === "streaming")
       );
+    },
+    isUnexpectedError() {
+      if (!this.error) {
+        return false;
+      }
+
+      if (!this.error.message) {
+        return true;
+      }
+
+      if (this.error.message.includes('User rejected tool call')) {
+        return false;
+      }
+
+      // User aborted request before AI got a chance to respond
+      if (this.error.message.includes('aborted without reason')) {
+        return false;
+      }
+
+      return true;
     },
     isErrorTruncated() {
       return this.error && this.error.toString().length > 300;

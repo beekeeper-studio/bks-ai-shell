@@ -1,5 +1,5 @@
 import { useChat } from "@ai-sdk/vue";
-import { computed, ref, watch } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import {
   AvailableProviders,
   AvailableModels,
@@ -11,7 +11,7 @@ import { notify } from "@beekeeperstudio/plugin";
 import { z } from "zod";
 import { createProvider } from "@/providers";
 import { useConfigurationStore } from "@/stores/configuration";
-import { isReadQuery } from "@/utils";
+import { isEmptyUIMessage, isReadQuery } from "@/utils";
 
 type AIOptions = {
   initialMessages: Message[];
@@ -27,6 +27,9 @@ type SendOptions = {
 }
 
 export function useAI(options: AIOptions) {
+  /** FIXME: Only used because we want to retry automatically after an error.
+   *  REMOVE AFTER V5 UPGRADE. */
+  const sendOptions = ref<SendOptions>();
   const pendingToolCallIds = ref<string[]>([]);
   const askingPermission = computed(() => pendingToolCallIds.value.length > 0);
   const followupAfterRejected = ref("");
@@ -90,6 +93,13 @@ export function useAI(options: AIOptions) {
             followupAfterRejected.value = "";
             // fillTitle();
           }
+        } else if (error.message.includes("all messages must have non-empty content")) {
+          // FIXME we dont need this once we upgrade to AI SDK v5 since we use `convertToModelMessages()`
+          // See https://ai-sdk.dev/docs/troubleshooting/use-chat-tools-no-response
+          messages.value = messages.value.filter((m) => !isEmptyUIMessage(m));
+          nextTick().then(() => {
+            retry(sendOptions.value!);
+          })
         }
       },
       onFinish: () => {
@@ -150,6 +160,8 @@ export function useAI(options: AIOptions) {
 
   /** Send a message to the AI */
   async function send(message: string, options: SendOptions) {
+    // FIXME: Remove after v5 upgrade
+    sendOptions.value = options;
     await append(
       {
         role: "user",
@@ -165,6 +177,8 @@ export function useAI(options: AIOptions) {
   }
 
   async function retry(options: SendOptions) {
+    // FIXME: Remove after v5 upgrade
+    sendOptions.value = options;
     await reload({
       body: {
         sendOptions: options,
