@@ -27,8 +27,27 @@
     }
   }
 
-  &.assistant .message-actions {
-    padding-left: 0.4rem;
+  &.assistant {
+    .preview-table {
+      --table-border-color: color-mix(in srgb, var(--border-color) 50%, var(--query-editor-bg));
+      border-left: 1px solid;
+      border-right: 1px solid;
+      border-bottom: 1px solid;
+      border-color: var(--table-border-color);
+    }
+
+    .preview-table thead {
+      border-bottom: 1px solid;
+      border-color: var(--table-border-color);
+    }
+
+    .preview-table tbody tr:nth-child(odd) {
+      background-color: color-mix(in srgb, var(--theme-base) 3%, var(--query-editor-bg));
+    }
+
+    .message-actions {
+      padding-left: 0.4rem;
+    }
   }
 
   &.user .message-actions {
