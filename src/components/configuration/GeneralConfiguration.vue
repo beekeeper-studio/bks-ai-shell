@@ -13,6 +13,14 @@
       This will allow execution of read-only queries without asking for confirmation in all sessions.
     </template>
   </BaseInput>
+  <BaseInput type="number" min="1" :model-value="maxSteps" @input="handleInput">
+    <template #label>
+      Maximum number of tool calls
+    </template>
+    <template #helper>
+      The maximum number of tool calls allowed in a single generation.
+    </template>
+  </BaseInput>
 </template>
 
 <script lang="ts">
@@ -33,6 +41,7 @@ export default {
     ...mapState(useConfigurationStore, [
       "customInstructions",
       "allowExecutionOfReadOnlyQueries",
+      "maxSteps",
     ]),
   },
 
@@ -46,6 +55,13 @@ export default {
     },
     handleSwitchClick() {
       this.configure("allowExecutionOfReadOnlyQueries", !this.allowExecutionOfReadOnlyQueries);
+    },
+    handleInput(event: Event) {
+      // FIXME: use zod to validate
+      const value = (event.target as HTMLInputElement).value;
+      const parsed = Number.parseInt(value);
+      const finalValue = Number.isNaN(parsed) ? 1 : parsed;
+      this.configure("maxSteps", finalValue);
     },
   },
 };

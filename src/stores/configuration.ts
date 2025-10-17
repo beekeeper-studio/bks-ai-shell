@@ -33,6 +33,7 @@ type Configurable = {
   /** Append custom instructions to the default system instructions. */
   customInstructions: string;
   allowExecutionOfReadOnlyQueries: boolean;
+  maxSteps: number;
   /** TODO: Enable summarization. Not implemented yet. */
   summarization: boolean;
 
@@ -71,6 +72,7 @@ const defaultConfiguration: ConfigurationState = {
   customInstructions: "",
   allowExecutionOfReadOnlyQueries: false,
   summarization: true,
+  maxSteps: 20,
 
   // ==== MODELS ====
   "providers.openai.apiKey": "",
