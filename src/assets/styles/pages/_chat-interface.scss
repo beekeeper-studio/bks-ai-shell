@@ -144,7 +144,6 @@
 .message-content {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
   padding: 0.55rem 0.9rem;
   line-height: 1.4rem;
   white-space: pre-wrap;
@@ -178,7 +177,6 @@
     white-space: normal;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
 
     ol,
     ul {
@@ -325,6 +323,7 @@
   border-left: 2px solid var(--border-color);
   gap: 0.35rem;
   width: 100%;
+  margin: 0.75em 0;
 
   .accept-icon,
   .reject-icon {

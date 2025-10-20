@@ -1,4 +1,45 @@
 .message {
+  .markdown {
+    p {
+      margin: 0.75em 0;
+    }
+
+    code:not([data-lang]) {
+      background-color: color-mix(in srgb, var(--theme-base) 3%, var(--query-editor-bg));
+      padding: 0.05em 0.2em;
+      border-radius: 8px;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 2.5rem 0 1.5rem 0;
+      line-height: 1.25;
+    }
+
+    ol, ul {
+      margin: 1em;
+    }
+
+    ol li ol, ol li ul, ul li ol, ul li ul {
+      margin: 0 2em;
+    }
+
+    ol li p, ul li p {
+      margin: 0;
+    }
+
+    &:first-child {
+      p:first-child, h1:first-child, h2:first-child, h3:first-child, h4:first-child, ol:first-child, ul:first-child {
+        margin-top: 0;
+      }
+    }
+
+    &:last-child {
+      p:last-child, h1:last-child, h2:last-child, h3:last-child, h4:last-child, ol:last-child, ul:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
   .message-actions {
     display: flex;
     margin-top: 0.5rem;
@@ -40,10 +81,6 @@
   &.user .message-actions {
     margin-top: 0.5rem;
     justify-content: flex-end;
-  }
-
-  code {
-    font-size: 0.8rem;
   }
 
   .message-content .code-block .actions .btn {
