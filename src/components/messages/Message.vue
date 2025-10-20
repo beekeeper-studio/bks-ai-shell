@@ -83,7 +83,7 @@ export default {
       return text.trim();
     },
     isEmpty() {
-      return isEmptyUIMessage(this.message);
+      return this.status === 'ready' && isEmptyUIMessage(this.message);
     },
   },
 

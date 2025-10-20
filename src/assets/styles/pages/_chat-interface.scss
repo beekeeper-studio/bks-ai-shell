@@ -144,7 +144,6 @@
 .message-content {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
   padding: 0.55rem 0.9rem;
   line-height: 1.4rem;
   white-space: pre-wrap;
@@ -178,7 +177,6 @@
     white-space: normal;
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
 
     ol,
     ul {
@@ -325,6 +323,7 @@
   border-left: 2px solid var(--border-color);
   gap: 0.35rem;
   width: 100%;
+  margin: 0.75em 0;
 
   .accept-icon,
   .reject-icon {
@@ -517,25 +516,29 @@
   }
 }
 
-.preview-table-container {
+.table-container {
   overflow-x: auto;
+  margin: 0.5rem 0;
 }
 
-.preview-table {
+.message.assistant table {
   width: auto;
   border-collapse: collapse;
-  margin: 0.5rem 0;
   table-layout: auto;
+
+  &.preview-table {
+    th, td {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 
   th,
   td {
-    border: 1px solid var(--border-color);
     padding: 0 0.7rem;
     text-align: left;
     white-space: nowrap;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   th {
@@ -543,14 +546,12 @@
   }
 
   th {
-    background-color: color-mix(in srgb, var(--theme-base) 5%, var(--query-editor-bg));
     font-weight: 600;
     font-size: 0.68rem;
     line-height: 1.7rem;
   }
 
   td {
-    background-color: var(--query-editor-bg);
     font-size: 0.75rem;
     line-height: 1.875rem;
   }
