@@ -64,10 +64,10 @@ export default {
   },
   computed: {
     columns() {
-      return this.data.results[0].fields;
+      return this.data.results?.[0].fields || [];
     },
     rows() {
-      return this.data.results[0].rows;
+      return this.data.results?.[0].rows || [];
     },
     limitedRows() {
       return this.rows.slice(0, TABLE_MAX_ROWS);

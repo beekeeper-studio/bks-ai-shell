@@ -1,6 +1,6 @@
 <template>
   <div class="tool" :data-tool-name="toolCall.toolName" :data-tool-state="toolCall.state"
-    :data-tool-empty-result="isEmptyResult">
+    :data-tool-empty-result="isEmptyResult" :data-tool-error="!!error">
     <div class="tool-name">{{ displayName }}</div>
     <markdown v-if="toolCall.toolName === 'run_query'" :content="'```sql\n' + toolCall.args.query + '\n```'" />
     <div v-if="askingPermission">
@@ -20,24 +20,20 @@
         </button>
       </div>
     </div>
-    <div :class="{ 'error tool-error': error }">
-      <template v-if="error">{{ error }}</template>
-      <template v-else-if="data">
-        <template v-if="toolCall.toolName === 'get_connection_info'">
-          {{ data.connectionType }}
-        </template>
-        <template v-if="toolCall.toolName === 'get_tables'">
-          {{ data.length }}
-          {{ $pluralize("table", data.length) }}
-          (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
-        </template>
-        <template v-if="toolCall.toolName === 'get_columns'">
-          {{ data.length }}
-          {{ $pluralize("column", data.length) }}
-          (<code v-if="data.length < 5" v-text="data.map((c) => c.name).join(', ')" />)
-        </template>
-        <run-query-result v-else-if="toolCall.toolName === 'run_query' && data" :data="data" />
+    <div class="tool-error error" v-if="error" v-text="error" />
+    <div class="tool-result" v-else-if="data">
+      <template v-if="toolCall.toolName === 'get_connection_info'">
+        {{ data.connectionType }}
       </template>
+      <template v-if="toolCall.toolName === 'get_tables'">
+        {{ data.length }}
+        {{ $pluralize("table", data.length) }}
+      </template>
+      <template v-if="toolCall.toolName === 'get_columns'">
+        {{ data.length }}
+        {{ $pluralize("column", data.length) }}
+      </template>
+      <run-query-result v-else-if="toolCall.toolName === 'run_query' && data" :data="data" />
     </div>
   </div>
 </template>
@@ -105,7 +101,7 @@ export default {
         if (this.toolCall.args.schema) {
           return `Get Columns (schema: ${this.toolCall.args.schema}, table: ${this.toolCall.args.table})`;
         }
-        return `Get Columns (table: ${this.toolCall.args.table})`;
+        return `Get Columns (${this.toolCall.args.table})`;
       }
       return this.toolCall.toolName.split("_").map(_.capitalize).join(" ");
     },

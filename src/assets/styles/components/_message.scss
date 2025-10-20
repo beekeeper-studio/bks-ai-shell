@@ -109,16 +109,39 @@
     }
 
     .tool {
-      .tool-name {
-        margin-bottom: 0.25rem;
-      }
-
       .tool-error {
         margin-top: 0.5rem;
+        color: var(--brand-danger);
+      }
+
+      &[data-tool-error=true] {
+        flex-direction: column;
+      }
+
+      &:not([data-tool-name="run_query"]) {
+        .tool-result {
+          margin-left: 0.5rem;
+          display: flex;
+          align-items: center;
+          color: var(--text-muted-2);
+        }
+
+        .tool-result::before {
+          content: "";
+          display: inline-block;
+          width: 0.5rem;
+          height: 1px;
+          background-color: var(--border-color);
+          margin-right: 0.5rem;
+        }
       }
 
       &[data-tool-name="run_query"] {
-        gap: 0;
+        flex-direction: column;
+
+        .tool-name {
+          margin-bottom: 0.25rem;
+        }
 
         .no-rows {
           margin-top: 0.5rem;

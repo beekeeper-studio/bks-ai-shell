@@ -31,7 +31,7 @@ export abstract class BaseProvider {
       abortSignal: options.signal,
       system: options.systemPrompt,
       tools: options.tools,
-      maxSteps: 20,
+      maxSteps: 100,
       temperature: options.temperature ?? defaultTemperature,
     });
     return result.toDataStreamResponse({
