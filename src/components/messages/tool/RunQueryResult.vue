@@ -1,8 +1,5 @@
 <template>
   <div class="run-query-result">
-    <span>
-      Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
-    </span>
     <template v-if="rows.length > 0">
       <div class="preview-table-container table-container">
         <table class="preview-table">
@@ -37,7 +34,7 @@
         </table>
       </div>
       <button
-        class="btn btn-primary view-more-btn"
+        class="btn view-more-btn"
         @click.prevent="handleViewMoreClick"
       >
         <div class="label">View more</div>
@@ -46,6 +43,9 @@
         </span>
       </button>
     </template>
+    <span class="no-rows" v-else>
+      Query returned 0 rows
+    </span>
   </div>
 </template>
 
