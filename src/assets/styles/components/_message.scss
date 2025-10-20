@@ -43,4 +43,9 @@
     width: auto;
     font-weight: normal;
   }
+
+  .message-content.literally-empty {
+    font-style: italic;
+    --theme-text-message-system: var(--text-muted);
+  }
 }
