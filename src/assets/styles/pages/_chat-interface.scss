@@ -516,24 +516,29 @@
   }
 }
 
-.preview-table-container {
+.table-container {
   overflow-x: auto;
+  margin: 0.5rem 0;
 }
 
 .message.assistant table {
   width: auto;
   border-collapse: collapse;
-  margin: 0.5rem 0;
   table-layout: auto;
+
+  &.preview-table {
+    th, td {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 
   th,
   td {
     padding: 0 0.7rem;
     text-align: left;
     white-space: nowrap;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   th {

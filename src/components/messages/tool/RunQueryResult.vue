@@ -4,7 +4,7 @@
       Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
     </span>
     <template v-if="rows.length > 0">
-      <div class="preview-table-container">
+      <div class="preview-table-container table-container">
         <table class="preview-table">
           <thead>
             <tr>

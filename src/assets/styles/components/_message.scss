@@ -69,6 +69,10 @@
   }
 
   &.assistant {
+    .table-container table {
+      width: 100%;
+    }
+
     table tbody tr:nth-child(odd) {
       background-color: color-mix(in srgb, var(--theme-base) 3%, var(--query-editor-bg));
     }

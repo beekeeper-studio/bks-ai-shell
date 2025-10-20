@@ -1,4 +1,4 @@
-import { Marked } from "marked";
+import { Marked, Renderer } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
 import { getAppVersion } from "@beekeeperstudio/plugin";
@@ -14,12 +14,19 @@ const marked = new Marked(
   }),
 );
 
+const renderer = new Renderer();
+
 let copyCounter = 0;
 
 async function useExtensions() {
   const appVersion = await getAppVersion();
   const supportOpenInQueryEditor = appVersion !== "5.3";
   marked.use({
+    renderer: {
+      table(...args) {
+        return `<div class="table-container">${renderer.table.apply(this, args)}</div>`;
+      },
+    },
     extensions: [
       {
         name: "code",
