@@ -1,4 +1,6 @@
+import { UIMessage } from "ai";
 import { Model } from "./stores/chat";
+import _ from "lodash";
 import { identify } from "sql-query-identifier";
 
 export function safeJSONStringify(value: any, ...args: any): string {
@@ -84,4 +86,20 @@ export function isReadQuery(query: string) {
   } catch (e) {
     return false;
   }
+}
+
+export function isEmptyUIMessage(message: UIMessage): boolean {
+  const nonEmptyParts = message.parts.filter((part) => {
+    if (part.type === "step-start") {
+      return false;
+    }
+
+    if (part.type === "text" && _.isEmpty(part.text)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return nonEmptyParts.length === 0;
 }

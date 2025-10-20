@@ -45,4 +45,17 @@
   code {
     font-size: 0.8rem;
   }
+
+  .message-content .code-block .actions .btn {
+    gap: 0.25rem;
+    min-width: 1.75rem;
+    padding-inline: 0.4rem;
+    width: auto;
+    font-weight: normal;
+  }
+
+  .message-content.literally-empty {
+    font-style: italic;
+    --theme-text-message-system: var(--text-muted);
+  }
 }
