@@ -8,7 +8,7 @@
           :text="optionModel.displayName" :selected="matchModel(optionModel, selectedModel)"
           @select="$emit('select-model', optionModel)" />
         <div class="dropdown-separator"></div>
-        <button class="dropdown-action" @click="$emit('manage-models')">
+        <button class="dropdown-option dropdown-action" @click="$emit('manage-models')">
           Manage models
         </button>
       </Dropdown>

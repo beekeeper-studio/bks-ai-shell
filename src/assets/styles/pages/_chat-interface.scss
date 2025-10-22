@@ -453,6 +453,10 @@
 
     textarea {
       border-color: transparent;
+
+      &:focus-visible {
+        outline: none;
+      }
     }
   }
 
@@ -473,10 +477,6 @@
       &:hover {
         background-color: rgb(from var(--theme-base) r g b / 5%);
       }
-
-      &:focus {
-        outline: none;
-      }
     }
 
     .submit-btn,
@@ -494,6 +494,10 @@
 
       &:disabled {
         opacity: 0.5;
+      }
+
+      &:focus-visible {
+        outline: var(--focus-visible-outline);
       }
 
       span {

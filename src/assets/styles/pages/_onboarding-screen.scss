@@ -1,30 +1,95 @@
+.onboarding-screen-popover-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+
+  .onboarding-screen-popover {
+    position: relative;
+    background-color: hsl(from var(--theme-bg) h s calc(l + 1));
+    padding: 1.5rem;
+    border-radius: 8px;
+    overflow: auto;
+    max-height: 90vh;
+    margin-inline: 2rem;
+
+    >.close-btn {
+      right: 0;
+      top: 0;
+      position: absolute;
+      margin-right: 0.5rem;
+      margin-top: 0.5rem;
+      border-radius: 9999px;
+      padding: 0;
+      min-width: 0;
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      background-color: transparent;
+      color: var(--text);
+
+      &:hover {
+        background-color: color-mix(in srgb,
+            var(--theme-base) 10%,
+            var(--query-editor-bg));
+      }
+
+      .material-symbols-outlined {
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+
 .onboarding-screen {
   max-width: 24rem;
   text-align: center;
 
-  .actions {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
+  .api-info {
+    margin-block: 1rem;
   }
 
-  .api-key-form {
-    .base-input  {
-      flex-direction: column;
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 
-      >* {
-        width: 100%;
-      }
+    .btn {
+      width: 100%;
+      font-size: 0.8rem;
+      padding-block: 1rem;
     }
   }
 
-  .api-info {
-    margin-block: 2rem;
-  }
+  .api-key-form {
+    margin-bottom: 1.5rem;
 
-  .continue-btn {
-    width: 100%;
-    font-size: 0.8rem;
-    padding-block: 1rem;
+    .base-input {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      margin-top: 0.15rem;
+
+      label {
+        width: 4rem;
+        flex-shrink: 0;
+      }
+
+      .input-wrapper {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .helper {
+        grid-column: 2;
+        grid-row: 2;
+      }
+    }
   }
 }
