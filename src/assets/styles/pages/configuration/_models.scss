@@ -56,7 +56,10 @@
   .config-form {
     margin-top: 2.2rem;
 
-    .api-info, .description {
+    .api-info {
+      margin-bottom: 1rem;
+    }
+    .description {
       margin-top: 0;
       margin-bottom: 1rem;
       font-size: 0.85rem;

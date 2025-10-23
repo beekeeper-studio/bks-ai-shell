@@ -4,12 +4,19 @@
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
-    <OnboardingScreen v-else-if="page === 'onboarding'" @submit="submitOnboardingScreen" />
-    <ChatInterface v-else-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
+    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
       :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
-    <div id="configuration-popover" :class="{ active: showConfiguration }">
+    <div id="configuration-popover" :class="{ active: showConfiguration }" v-kbd-trap.autofocus="showConfiguration">
       <Configuration :reactivePage="configurationPage" @close="closeConfiguration" />
+    </div>
+    <div class="onboarding-screen-popover-container" v-if="showOnboarding">
+      <div class="onboarding-screen-popover" v-kbd-trap="true">
+        <button class="btn close-btn" @click="closeOnboardingScreen">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <OnboardingScreen @submit="closeOnboardingScreen" @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
+      </div>
     </div>
   </div>
 </template>
@@ -27,7 +34,7 @@ import Configuration, {
 import OnboardingScreen from "./components/OnboardingScreen.vue";
 import { getData, notify } from "@beekeeperstudio/plugin";
 
-type Page = "starting" | "onboarding" | "chat-interface";
+type Page = "starting" | "chat-interface";
 
 export default {
   components: {
@@ -39,6 +46,7 @@ export default {
   data() {
     return {
       page: "starting" as Page,
+      showOnboarding: false,
       showConfiguration: false,
       error: "" as unknown,
       showLoading: false,
@@ -59,13 +67,12 @@ export default {
       await this.initialize();
       await this.$nextTick();
 
-      if (this.isFirstTimeUser && this.apiKeyExists) {
-        this.page = "chat-interface";
-      } else if (this.isFirstTimeUser) {
-        this.page = "onboarding";
-      } else {
-        this.page = "chat-interface";
+      if (this.isFirstTimeUser && !this.apiKeyExists) {
+        this.showOnboarding = true;
       }
+
+      this.page = "chat-interface";
+
     } catch (e) {
       this.showConfiguration = true;
       this.error = e;
@@ -94,13 +101,24 @@ export default {
     ...mapActions(useConfigurationStore, ["configure"]),
     ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initialize"]),
-    submitOnboardingScreen() {
+    closeOnboardingScreen() {
+      this.showOnboarding = false;
       this.page = "chat-interface";
       this.setInternal("isFirstTimeUser", false);
     },
-    handleManageModels() {
+    async closeOnboardingScreenAndOpenProviderConfig() {
+      this.closeOnboardingScreen();
+      this.openModelsConfig();
+      await this.$nextTick();
+      const apiKeys = document.querySelector("#providers-configuration-api-keys");
+      apiKeys?.scrollIntoView();
+    },
+    openModelsConfig() {
       this.configurationPage = "models";
       this.showConfiguration = true;
+    },
+    handleManageModels() {
+      this.openModelsConfig();
     },
     handleOpenConfiguration() {
       this.configurationPage = "general";

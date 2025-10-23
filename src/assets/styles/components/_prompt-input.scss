@@ -1,0 +1,29 @@
+.chat-input-container {
+  .model-selection {
+    position: relative;
+
+    .please-select-a-model-hint {
+      display: none;
+      position: absolute;
+      width: max-content;
+      bottom: calc(100% + 0.25rem);
+      right: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: rgb(from var(--theme-base) r g b / 5%);
+      color: var(--text-dark);
+      padding-block: 0.25rem;
+      padding-inline: 0.5rem;
+    }
+
+    &.please-select-a-model {
+      .dropdown-trigger {
+        outline: 1px solid var(--brand-info);
+      }
+
+      .please-select-a-model-hint {
+        display: block;
+      }
+    }
+  }
+}

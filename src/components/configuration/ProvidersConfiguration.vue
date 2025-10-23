@@ -1,6 +1,6 @@
 <template>
   <form @submit.prevent class="config-form">
-    <h2>API Keys</h2>
+    <h2 id="providers-configuration-api-keys">API Keys</h2>
     <ApiInfo />
     <api-key-form />
   </form>
