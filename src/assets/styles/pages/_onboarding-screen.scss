@@ -10,10 +10,12 @@
   .onboarding-screen-popover {
     position: relative;
     background-color: hsl(from var(--theme-bg) h s calc(l + 1));
-    padding: 1.5rem;
+    padding-inline: 1.5rem;
+    padding-bottom: 1.5rem;
+    padding-top: 2rem;
     border-radius: 8px;
     overflow: auto;
-    max-height: 90vh;
+    max-height: 92vh;
     margin-inline: 2rem;
 
     >.close-btn {
@@ -53,12 +55,12 @@
   text-align: center;
 
   .api-info {
-    margin-block: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .actions {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
 
     .btn {
@@ -69,26 +71,18 @@
   }
 
   .api-key-form {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    gap: 0.5rem;
 
     .base-input {
-      display: grid;
-      grid-template-columns: 1fr 3fr;
-      margin-top: 0.15rem;
-
-      label {
-        width: 4rem;
-        flex-shrink: 0;
-      }
+      flex-direction: column;
 
       .input-wrapper {
-        grid-column: 2;
-        grid-row: 1;
+        width: 100%;
       }
 
       .helper {
-        grid-column: 2;
-        grid-row: 2;
+        order: 9999;
       }
     }
   }

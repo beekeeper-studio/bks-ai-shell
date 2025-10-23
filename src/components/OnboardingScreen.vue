@@ -6,11 +6,12 @@
     <form @submit.prevent="$emit('submit')">
       <ApiKeyForm @change="changed = true" />
       <div class="actions">
+        <button class="btn btn-flat" type="button" @click="$emit('open-provider-config')">
+          <span class="material-symbols-outlined">settings</span>
+          <span>View more providers</span>
+        </button>
         <button class="btn btn-primary continue-btn" type="submit">
           {{ changed ? "Continue" : "Skip" }}
-        </button>
-        <button class="btn btn-flat" type="button" @click="$emit('open-provider-config')">
-          More provider options
         </button>
       </div>
     </form>
