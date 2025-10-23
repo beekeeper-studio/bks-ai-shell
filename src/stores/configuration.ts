@@ -72,7 +72,7 @@ const defaultConfiguration: ConfigurationState = {
   customInstructions: "",
   allowExecutionOfReadOnlyQueries: false,
   summarization: true,
-  maxSteps: 20,
+  maxSteps: 100,
 
   // ==== MODELS ====
   "providers.openai.apiKey": "",
