@@ -31,6 +31,8 @@ export async function getDefaultInstructions() {
   } else if (response.connectionType === "redis") {
     // FIXME: We can modify the run_query tool description instead
     result += "\n ## Redis\nIf you need to use the run_query tool, you should use redis commands instead of SQL.";
+  } else if (response.databaseType === "bigquery") {
+    result += "\n ## BigQuery\nIf you need to use the run_query tool, you should use BigQuery's query language. The Database Name you are given is the name of the Dataset we are using. You must qualify any tables in your queries with {dataset}.{table}";
   }
 
   return result;
