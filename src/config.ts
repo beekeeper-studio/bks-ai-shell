@@ -86,18 +86,51 @@ export const providerConfigs = {
     displayName: "Anthropic",
     /** https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
-      { id: "claude-sonnet-4-5-20250929", displayName: "claude-sonnet-4-5" },
-      { id: "claude-haiku-4-5-20251001", displayName: "claude-haiku-4-5" },
-      { id: "claude-opus-4-1", displayName: "claude-opus-4-1" },
-      { id: "claude-opus-4-20250514", displayName: "claude-opus-4" },
-      { id: "claude-sonnet-4-20250514", displayName: "claude-sonnet-4" },
-      { id: "claude-3-7-sonnet-20250219", displayName: "claude-sonnet-3-7" },
-      { id: "claude-3-5-haiku-20241022", displayName: "claude-haiku-3-5" },
+      {
+        id: "claude-sonnet-4-5-20250929",
+        displayName: "claude-sonnet-4-5",
+        contextWindow: 200_000,
+      },
+      {
+        id: "claude-haiku-4-5-20251001",
+        displayName: "claude-haiku-4-5",
+        contextWindow: 200_000,
+      },
+      {
+        id: "claude-opus-4-1",
+        displayName: "claude-opus-4-1",
+        contextWindow: 200_000,
+      },
+      {
+        id: "claude-opus-4-20250514",
+        displayName: "claude-opus-4",
+        contextWindow: 200_000,
+      },
+      {
+        id: "claude-sonnet-4-20250514",
+        displayName: "claude-sonnet-4",
+        contextWindow: 200_000,
+      },
+      {
+        id: "claude-3-7-sonnet-20250219",
+        displayName: "claude-sonnet-3-7",
+        contextWindow: 200_000,
+      },
+      {
+        id: "claude-3-5-haiku-20241022",
+        displayName: "claude-haiku-3-5",
+        contextWindow: 200_000,
+      },
       {
         id: "claude-3-5-sonnet-latest",
         displayName: "claude-3-5-sonnet",
+        contextWindow: 200_000,
       },
-      { id: "claude-3-haiku-20240307", displayName: "claude-3-haiku" },
+      {
+        id: "claude-3-haiku-20240307",
+        displayName: "claude-3-haiku",
+        contextWindow: 200_000,
+      },
     ],
   },
   google: {
