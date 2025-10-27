@@ -37,6 +37,11 @@
       margin: 0;
     }
 
+    hr {
+      margin: 0.5rem 0;
+      border-color: var(--border-color);
+    }
+
     &:first-child {
 
       p:first-child,
