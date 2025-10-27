@@ -1,6 +1,16 @@
 .api-info {
   font-size: 0.85rem;
-  color: var(--text-dark);
-  opacity: 0.7;
-  margin-bottom: 0.5rem;
+  color: hsl(from var(--brand-info) h s calc(l + 5));
+  margin-block: 0.5rem;
+  background-color: rgb(from var(--theme-base) r g b / 3.5%);
+  display: flex;
+  text-align: left;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+
+  .icon {
+    font-size: 1.25rem;
+    display: block;
+    margin-right: 0.75rem;
+  }
 }

@@ -2,7 +2,7 @@
   display: flex;
   gap: 0.5rem;
   flex-direction: column;
-  overflow: auto;
+  // overflow: auto;
   text-align: left;
 
   label {
@@ -32,6 +32,10 @@
       font-size: 0.9rem;
       color: var(--text-dark);
       overflow: hidden;
+
+      &:focus-visible {
+        outline: var(--focus-visible-outline);
+      }
     }
   }
 
@@ -93,6 +97,10 @@
 
       &[aria-checked="true"] .slider:before {
         transform: translateX(1em);
+      }
+
+      &:focus-visible {
+        outline: var(--focus-visible-outline);
       }
     }
 

@@ -4,6 +4,10 @@
 
 .dropdown-trigger {
   cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--focus-visible-outline);
+  }
 }
 
 .dropdown-popover {
@@ -42,7 +46,7 @@
     font-size: 0.8rem;
   }
 
-  &:hover:not(.disabled) {
+  &:hover:not(.disabled), &:focus-visible {
     background-color: rgb(from var(--theme-base) r g b / 5%);
   }
 
