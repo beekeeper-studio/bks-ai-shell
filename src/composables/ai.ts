@@ -68,6 +68,7 @@ export function useAI(options: AIOptions) {
             return permitted;
           }),
           systemPrompt: sendOptions.systemPrompt,
+          maxSteps: useConfigurationStore().maxSteps,
         });
       },
       onError: (error) => {
