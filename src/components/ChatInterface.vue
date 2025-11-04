@@ -69,7 +69,7 @@
       </button>
     </div>
     <div class="chat-input-container-container">
-      <PromptInput storage-key="inputHistory" :processing="processing" :selected-model="model"
+      <PromptInput ref="promptInput" storage-key="inputHistory" :processing="processing" :selected-model="model"
        @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop"  />
     </div>
   </div>
@@ -238,6 +238,7 @@ export default {
     });
     await this.$nextTick();
     this.scrollToBottom();
+    (this.$refs.promptInput as InstanceType<typeof PromptInput>).focus();
   },
 
   methods: {

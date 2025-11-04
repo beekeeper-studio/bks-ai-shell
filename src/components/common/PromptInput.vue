@@ -1,6 +1,6 @@
 <template>
   <div class="chat-input-container">
-    <BaseInput type="textarea" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
+    <BaseInput type="textarea" ref="input" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
       @keydown.down="handleDownArrow" placeholder="Type your message here" rows="1" />
     <div class="actions">
       <div class="model-selection" :class="{ 'please-select-a-model': pleaseSelectAModel }" @click="handleModelSelectionClick">
@@ -47,6 +47,8 @@ export default {
 
   emits: ["submit", "stop", "manage-models", "select-model"],
 
+  expose: ["focus"],
+
   props: {
     processing: Boolean,
     storageKey: {
@@ -86,6 +88,11 @@ export default {
   methods: {
     ...mapActions(useInternalDataStore, ["setInternal"]),
     matchModel,
+
+    focus() {
+      const input = this.$refs.input as InstanceType<typeof BaseInput>;
+      input.focus();
+    },
 
     submit() {
       const trimmedInput = this.input.trim();
