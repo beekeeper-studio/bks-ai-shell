@@ -3,7 +3,7 @@
   <BaseInput :model-value="customInstructions" @change="handleChange" type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues." rows="4">
     <template #label>Custom Instructions</template>
-    <template #helper>Custom instructions will be appended to the <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions">default instructions</ExternalLink> and included with every messages you send as a system prompt. This instructions will be applied globally to all connections.</template>
+    <template #helper>Custom instructions will be appended to the <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions">default instructions</ExternalLink> and included with every message you send as a system prompt. These instructions will be applied globally to all connections.</template>
   </BaseInput>
   <BaseInput type="switch" :model-value="allowExecutionOfReadOnlyQueries" @click="handleSwitchClick">
     <template #label>
