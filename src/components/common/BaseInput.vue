@@ -63,7 +63,7 @@ export default {
       if (this.$refs.focusable) {
         (this.$refs.focusable as HTMLElement).focus();
       }
-    }
+    },
   },
 };
 </script>

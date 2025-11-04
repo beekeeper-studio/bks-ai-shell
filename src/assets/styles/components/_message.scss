@@ -182,6 +182,11 @@
   &.user .message-actions {
     margin-top: 0.5rem;
     justify-content: flex-end;
+
+    // This fixes https://github.com/beekeeper-studio/bks-ai-shell/issues/61
+    .btn:last-child .title-popup {
+      right: 0;
+    }
   }
 
   .message-content .code-block .actions .btn {

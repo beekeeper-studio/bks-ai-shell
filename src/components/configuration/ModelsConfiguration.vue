@@ -3,8 +3,8 @@
   <div v-for="provider in modelsByProvider" class="provider">
     <h3>{{ provider.providerDisplayName }}</h3>
     <ul class="model-list">
-      <li v-for="model in provider.models" :key="model.id" class="model">
-        <label class="switch-label" :title="!model.available ? 'Enter the API key to enable this model' : model.id
+      <li v-for="model in provider.models" :key="model.id" class="model" :class="{ available: model.available }">
+        <label class="switch-label" :title="!model.available ? `${provider.providerDisplayName} API key is required to enable this model` : model.id
           ">
           {{ model.displayName }}
           <Switch :model-value="model.enabled" @change="toggle(model, $event)" :disabled="!model.available" />
