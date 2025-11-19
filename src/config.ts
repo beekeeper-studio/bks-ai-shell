@@ -121,6 +121,7 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** https://platform.openai.com/docs/models */
     models: [
+      { id: "gpt-5.1", displayName: "gpt-5.1" },
       { id: "gpt-5", displayName: "gpt-5" },
       { id: "gpt-5-mini", displayName: "gpt-5-mini" },
       { id: "gpt-5-nano", displayName: "gpt-5-nano" },

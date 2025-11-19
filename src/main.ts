@@ -27,7 +27,7 @@ import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
 import { createAppEvent } from "@/plugins/appEvent";
-import { VueKeyboardTrapDirectivePlugin } from '@pdanpdan/vue-keyboard-trap';
+import { VueKeyboardTrapDirectivePlugin } from "@pdanpdan/vue-keyboard-trap";
 
 setDebugComms(false);
 
@@ -55,6 +55,14 @@ addNotificationListener("themeChanged", (args) => {
   document.querySelector("#injected-style")!.textContent =
     `:root { ${args.cssString} }`;
 });
+
+if (import.meta.env.MODE === "development") {
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.key === "r") {
+      window.location.reload();
+    }
+  });
+}
 
 // Create and mount the Vue app
 const app = createApp(App);
