@@ -1,3 +1,4 @@
+import { UIMessage } from "ai";
 import { Model } from "./stores/chat";
 import _ from "lodash";
 import { identify } from "sql-query-identifier";
@@ -95,6 +96,10 @@ export function isEmptyUIMessage(message: UIMessage): boolean {
     }
 
     if (part.type === "text" && _.isEmpty(part.text)) {
+      return false;
+    }
+
+    if (part.type === "reasoning" && _.isEmpty(part.text)) {
       return false;
     }
 

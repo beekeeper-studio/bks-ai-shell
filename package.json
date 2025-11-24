@@ -24,7 +24,7 @@
     "@beekeeperstudio/plugin": "^1.4.0",
     "@langchain/core": "^0.3.61",
     "@material-symbols/font-400": "^0.31.2",
-    "ai": "^5.0.62",
+    "ai": "^5.0.101",
     "@pdanpdan/vue-keyboard-trap": "^1.2.0",
     "highlight.js": "^11.11.1",
     "langchain": "^0.3.19",
