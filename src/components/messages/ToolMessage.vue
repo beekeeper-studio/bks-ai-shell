@@ -1,6 +1,7 @@
 <template>
-  <div class="tool" :data-tool-state="tool.state">
-    <div>{{ displayName }}</div>
+  <div class="tool" :data-tool-name="name" :data-tool-state="tool.state"
+    :data-tool-empty-result="isEmptyResult" :data-tool-error="!!error">
+    <div class="tool-name">{{ displayName }}</div>
     <markdown v-if="name === 'run_query'" :content="'```sql\n' +
       (tool.input?.query ||
         (tool.state === 'output-available' ? '(empty)' : '-- Generating')) +
@@ -23,24 +24,20 @@
         </button>
       </div>
     </div>
-    <div :class="{ error }">
-      <template v-if="error">{{ error }}</template>
-      <template v-else-if="data">
-        <template v-if="name === 'get_connection_info'">
-          {{ data.connectionType }}
-        </template>
-        <template v-if="name === 'get_tables'">
-          {{ data.length }}
-          {{ $pluralize("table", data.length) }}
-          (<code v-text="truncateAtWord(data.map((t) => t.name).join(', '))" />)
-        </template>
-        <template v-if="name === 'get_columns'">
-          {{ data.length }}
-          {{ $pluralize("column", data.length) }}
-          (<code v-if="data.length < 5" v-text="data.map((c) => c.name).join(', ')" />)
-        </template>
-        <run-query-result v-else-if="name === 'run_query' && data" :data="data" />
+    <div class="tool-error error" v-if="error" v-text="error" />
+    <div class="tool-result" v-else-if="data">
+      <template v-if="name === 'get_connection_info'">
+        {{ data.connectionType }}
       </template>
+      <template v-if="name === 'get_tables'">
+        {{ data.length }}
+        {{ $pluralize("table", data.length) }}
+      </template>
+      <template v-if="name === 'get_columns'">
+        {{ data.length }}
+        {{ $pluralize("column", data.length) }}
+      </template>
+      <run-query-result v-else-if="name === 'run_query' && data" :data="data" />
     </div>
   </div>
 </template>
@@ -68,6 +65,16 @@ export default {
   computed: {
     name() {
       return this.tool.type.replace("tool-", "");
+    },
+    isEmptyResult() {
+      if (this.tool.state === "output-available") {
+        return _.isEmpty(
+          this.name === "run_query"
+            ? this.data.results?.[0]?.rows
+            : this.data,
+        );
+      }
+      return true;
     },
     content() {
       if (this.data) {
@@ -111,7 +118,7 @@ export default {
         if (this.tool.input?.schema) {
           return `Get Columns (schema: ${this.tool.input?.schema}, table: ${this.tool.input?.table || "..."})`;
         }
-        return `Get Columns (table: ${this.tool.input?.table || "..."})`;
+        return `Get Columns (${this.tool.input?.table || "..."})`;
       }
       return this.name.split("_").map(_.capitalize).join(" ");
     },

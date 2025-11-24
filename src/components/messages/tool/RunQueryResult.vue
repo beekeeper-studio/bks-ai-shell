@@ -1,49 +1,51 @@
 <template>
   <div class="run-query-result">
-    <span>
-      Query returned {{ rows.length }} {{ $pluralize('row', rows.length) }}
+    <template v-if="rows.length > 0">
+      <div class="preview-table-container table-container">
+        <table class="preview-table">
+          <thead>
+            <tr>
+              <th v-for="column in columns" :key="column.id">
+                {{ column.name }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, index) in limitedRows" :key="index">
+              <td
+                v-for="column in columns"
+                :key="column.id"
+                :class="{
+                  'null-cell': row[column.id] === null,
+                  'empty-cell': row[column.id] === '',
+                }"
+              >
+                <template v-if="row[column.id] === ''">(EMPTY)</template>
+                <template v-else-if="row[column.id] === null">(NULL)</template>
+                <template v-else>{{ row[column.id] }}</template>
+              </td>
+            </tr>
+            <tr v-if="remainingRows > 0" class="remaining-rows">
+              <td :colspan="columns.length">
+                ... {{ remainingRows }} more {{ $pluralize('row', remainingRows) }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button
+        class="btn view-more-btn"
+        @click.prevent="handleViewMoreClick"
+      >
+        <div class="label">View more</div>
+        <span class="material-symbols-outlined open-icon">
+          keyboard_double_arrow_down
+        </span>
+      </button>
+    </template>
+    <span class="no-rows" v-else>
+      Query returned 0 rows
     </span>
-    <div class="preview-table-container" v-if="rows.length > 0">
-      <table class="preview-table">
-        <thead>
-          <tr>
-            <th v-for="column in columns" :key="column.id">
-              {{ column.name }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, index) in limitedRows" :key="index">
-            <td
-              v-for="column in columns"
-              :key="column.id"
-              :class="{
-                'null-cell': row[column.id] === null,
-                'empty-cell': row[column.id] === '',
-              }"
-            >
-              <template v-if="row[column.id] === ''">(EMPTY)</template>
-              <template v-else-if="row[column.id] === null">(NULL)</template>
-              <template v-else>{{ row[column.id] }}</template>
-            </td>
-          </tr>
-          <tr v-if="remainingRows > 0" class="remaining-rows">
-            <td :colspan="columns.length">
-              ... {{ remainingRows }} more {{ $pluralize('row', remainingRows) }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <button
-      class="btn btn-primary view-more-btn"
-      @click.prevent="handleViewMoreClick"
-    >
-      <div class="label">View more</div>
-      <span class="material-symbols-outlined open-icon">
-        keyboard_double_arrow_down
-      </span>
-    </button>
   </div>
 </template>
 
@@ -62,10 +64,10 @@ export default {
   },
   computed: {
     columns() {
-      return this.data.results[0].fields;
+      return this.data.results?.[0].fields || [];
     },
     rows() {
-      return this.data.results[0].rows;
+      return this.data.results?.[0].rows || [];
     },
     limitedRows() {
       return this.rows.slice(0, TABLE_MAX_ROWS);

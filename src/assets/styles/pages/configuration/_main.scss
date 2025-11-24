@@ -15,6 +15,7 @@
 }
 
 .configuration {
+  --config-bg-hover: color-mix(in srgb, var(--theme-base) 3.5%, var(--query-editor-bg));
   position: fixed;
   top: 0;
   left: 0;
@@ -49,7 +50,7 @@
     background-color: transparent;
 
     &:not(.back-btn):hover {
-      background-color: rgb(from var(--theme-base) r g b / 3.5%);
+      background-color: var(--config-bg-hover);
     }
 
     &.active {
@@ -62,7 +63,7 @@
   }
 
   .content {
-    padding: 1rem;
+    padding-bottom: 1rem;
     padding-top: 1.26rem;
     flex-grow: 1;
     min-width: 0;
@@ -74,6 +75,19 @@
 
     > :last-child {
       padding-bottom: 2rem;
+    }
+
+    h1, h2, h3, h4, p, li, .base-input {
+      padding-inline: 1rem;
+    }
+
+    .base-input {
+      padding-block: 0.75rem;
+      border-radius: 8px;
+
+      &:hover {
+        background-color: var(--config-bg-hover);
+      }
     }
   }
 }

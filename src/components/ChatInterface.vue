@@ -24,7 +24,7 @@
         />
         <div
           class="message error"
-          v-if="error && !error.message.includes('User rejected tool call')"
+          v-if="isUnexpectedError"
         >
           <div class="message-content">
             Something went wrong.
@@ -69,7 +69,7 @@
       </button>
     </div>
     <div class="chat-input-container-container">
-      <PromptInput storage-key="inputHistory" :processing="processing" :selected-model="model"
+      <PromptInput ref="promptInput" storage-key="inputHistory" :processing="processing" :selected-model="model"
        @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop"  />
     </div>
   </div>
@@ -153,6 +153,26 @@ export default {
         (this.status === "submitted" || this.status === "streaming")
       );
     },
+    isUnexpectedError() {
+      if (!this.error) {
+        return false;
+      }
+
+      if (!this.error.message) {
+        return true;
+      }
+
+      if (this.error.message.includes('User rejected tool call')) {
+        return false;
+      }
+
+      // User aborted request before AI got a chance to respond
+      if (this.error.message.includes('aborted without reason')) {
+        return false;
+      }
+
+      return true;
+    },
     isErrorTruncated() {
       return this.error && this.error.toString().length > 300;
     },
@@ -211,6 +231,7 @@ export default {
     });
     await this.$nextTick();
     this.scrollToBottom();
+    (this.$refs.promptInput as InstanceType<typeof PromptInput>).focus();
   },
 
   methods: {

@@ -1,4 +1,5 @@
 import { Model } from "./stores/chat";
+import _ from "lodash";
 import { identify } from "sql-query-identifier";
 
 /** It's safe cause we hope it doesn't throw any errors, hopefully. */
@@ -52,15 +53,15 @@ export function isAbortError(error: unknown) {
 
 export function parseHeaders(text: string): Record<string, string> {
   const headers = {};
-  const lines = text.split('\n');
+  const lines = text.split("\n");
 
   for (let line of lines) {
     line = line.trim();
-    if (!line || !line.includes(':')) continue;
+    if (!line || !line.includes(":")) continue;
 
-    const [key, ...rest] = line.split(':');
+    const [key, ...rest] = line.split(":");
     const trimmedKey = key.trim();
-    const value = rest.join(':').trim();
+    const value = rest.join(":").trim();
 
     if (trimmedKey) {
       headers[trimmedKey] = value;
@@ -76,8 +77,29 @@ export function matchModel(a: Model, b?: Model) {
 }
 
 export function isReadQuery(query: string) {
-  const identification = identify(query);
-  return identification.every(({ executionType }) =>
-    executionType === "LISTING" || executionType === "INFORMATION"
-  );
+  try {
+    // Not sure, but assume that identify() can throw an error
+    return identify(query).every(
+      ({ executionType }) =>
+        executionType === "LISTING" || executionType === "INFORMATION",
+    );
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isEmptyUIMessage(message: UIMessage): boolean {
+  const nonEmptyParts = message.parts.filter((part) => {
+    if (part.type === "step-start") {
+      return false;
+    }
+
+    if (part.type === "text" && _.isEmpty(part.text)) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return nonEmptyParts.length === 0;
 }

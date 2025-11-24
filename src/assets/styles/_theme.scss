@@ -11,4 +11,8 @@
   --theme-thinking-dot: var(--text);
   --theme-scrollbar-track: transparent;
   --theme-scrollbar-thumb: color-mix(in srgb, var(--theme-base) 20%, var(--theme-bg) 80%);
+  --text-muted: color-mix(in srgb, var(--theme-base) 20%, var(--theme-bg) 80%);
+  --text-muted-2: color-mix(in srgb, var(--theme-base) 30%, var(--theme-bg) 70%);
+  --focus-visible-outline-color: color-mix(in srgb, var(--theme-base) 50%, var(--theme-bg));
+  --focus-visible-outline: var(--focus-visible-outline-color) auto 1px;
 }

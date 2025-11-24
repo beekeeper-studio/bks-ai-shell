@@ -36,7 +36,7 @@ export abstract class BaseProvider {
       abortSignal: options.signal,
       system: options.systemPrompt,
       tools: options.tools,
-      stopWhen: stepCountIs(10),
+      stopWhen: stepCountIs(100),
       temperature: options.temperature ?? defaultTemperature,
       providerOptions: this.getProviderOptions(),
     });

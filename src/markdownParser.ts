@@ -1,4 +1,4 @@
-import { Marked } from "marked";
+import { Marked, Renderer } from "marked";
 import { markedHighlight } from "marked-highlight";
 import hljs from "highlight.js";
 import { getAppVersion } from "@beekeeperstudio/plugin";
@@ -14,12 +14,19 @@ const marked = new Marked(
   }),
 );
 
+const renderer = new Renderer();
+
 let copyCounter = 0;
 
 async function useExtensions() {
   const appVersion = await getAppVersion();
   const supportOpenInQueryEditor = appVersion !== "5.3";
   marked.use({
+    renderer: {
+      table(...args) {
+        return `<div class="table-container">${renderer.table.apply(this, args)}</div>`;
+      },
+    },
     extensions: [
       {
         name: "code",
@@ -32,6 +39,8 @@ async function useExtensions() {
             className += ` language-${token.lang}`;
             langAttr = ` data-lang="${token.lang}"`;
           }
+
+          const queryOrCode = token.lang === "sql" ? "query" : "code";
 
           let actionsHtml = `
             <button
@@ -53,8 +62,9 @@ async function useExtensions() {
             >
               <span class="material-symbols-outlined copy-icon">content_copy</span>
               <span class="material-symbols-outlined copied-icon">check</span>
+              <span>Copy ${queryOrCode}</span>
               <span class="title-popup">
-                <span class="copy-label">Copy</span>
+                <span class="copy-label">Copy ${queryOrCode}</span>
                 <span class="copied-label">Copied</span>
               </span>
             </button>

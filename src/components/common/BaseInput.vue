@@ -5,13 +5,13 @@
     </label>
     <div class="input-wrapper" :data-value="type === 'textarea' ? modelValue : ''">
       <textarea v-if="type === 'textarea'" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
-        @change="emitChange" />
+        @change="emitChange" ref="focusable" />
       <button v-else-if="type === 'switch'" type="button" v-bind="$attrs" :id="id" :disabled="disabled" role="switch" :aria-checked="modelValue"
-        @click="handleClick">
+        @click="handleClick" ref="focusable">
         <span class="slider round"></span>
       </button>
       <input v-else :type="type" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
-        @change="emitChange" />
+        @change="emitChange" ref="focusable" />
     </div>
     <div class="helper" v-if="$slots['helper']">
       <slot name="helper"></slot>
@@ -37,7 +37,7 @@ export default {
       type: String,
       default: () => _.uniqueId("input-"),
     },
-    type: String as PropType<HTMLInputElement["type"]> | "textarea" | "switch",
+    type: String as PropType<HTMLInputElement["type"] | "textarea" | "switch">,
     placeholder: String,
     /** We add this to support v-model */
     modelValue: [String, Boolean],
@@ -45,6 +45,8 @@ export default {
   },
 
   emits: ["update:modelValue", "input", "change", "click"],
+
+  expose: ["focus"],
 
   methods: {
     emitInput(event: Event) {
@@ -56,6 +58,11 @@ export default {
     },
     handleClick(event: MouseEvent) {
       this.$emit("click", event);
+    },
+    focus() {
+      if (this.$refs.focusable) {
+        (this.$refs.focusable as HTMLElement).focus();
+      }
     },
   },
 };

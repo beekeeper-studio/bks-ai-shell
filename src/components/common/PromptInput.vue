@@ -1,17 +1,22 @@
 <template>
   <div class="chat-input-container">
-    <BaseInput type="textarea" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
+    <BaseInput type="textarea" ref="input" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
       @keydown.down="handleDownArrow" placeholder="Type your message here" rows="1" />
     <div class="actions">
-      <Dropdown :model-value="selectedModel" placeholder="Select Model" aria-label="Model">
-        <DropdownOption v-for="optionModel in filteredModels" :key="optionModel.id" :value="optionModel.id"
-          :text="optionModel.displayName" :selected="matchModel(optionModel, selectedModel)"
-          @select="$emit('select-model', optionModel)" />
-        <div class="dropdown-separator"></div>
-        <button class="dropdown-action" @click="$emit('manage-models')">
-          Manage models
-        </button>
-      </Dropdown>
+      <div class="model-selection" :class="{ 'please-select-a-model': pleaseSelectAModel }" @click="handleModelSelectionClick">
+        <Dropdown :model-value="selectedModel" placeholder="Select Model" aria-label="Model">
+          <DropdownOption v-for="optionModel in filteredModels" :key="optionModel.id" :value="optionModel.id"
+            :text="optionModel.displayName" :selected="matchModel(optionModel, selectedModel)"
+            @select="$emit('select-model', optionModel)" />
+          <div class="dropdown-separator"></div>
+          <button class="dropdown-option dropdown-action" @click="$emit('manage-models')">
+            Manage models
+          </button>
+        </Dropdown>
+        <div class="please-select-a-model-hint">
+          Please select a model
+        </div>
+      </div>
       <button v-if="!processing" @click="submit" class="submit-btn" :disabled="!input.trim()" test-id="submit">
         <span class="material-symbols-outlined">send</span>
       </button>
@@ -42,6 +47,8 @@ export default {
 
   emits: ["submit", "stop", "manage-models", "select-model"],
 
+  expose: ["focus"],
+
   props: {
     processing: Boolean,
     storageKey: {
@@ -52,12 +59,13 @@ export default {
   },
 
   data() {
-    const inputHistory = this.loadInputHistory();
+    const inputHistory: string[] = this.loadInputHistory();
     inputHistory.push("");
     return {
       inputHistory,
       inputIndex: inputHistory.length - 1,
       isAtBottom: true,
+      pleaseSelectAModel: false,
     };
   },
 
@@ -81,11 +89,21 @@ export default {
     ...mapActions(useInternalDataStore, ["setInternal"]),
     matchModel,
 
+    focus() {
+      const input = this.$refs.input as InstanceType<typeof BaseInput>;
+      input.focus();
+    },
+
     submit() {
       const trimmedInput = this.input.trim();
 
       // Don't send empty messages
       if (!trimmedInput) return;
+
+      if (!this.selectedModel) {
+        this.pleaseSelectAModel = true;
+        return;
+      }
 
       this.addToHistory(this.input);
 
@@ -96,6 +114,10 @@ export default {
 
     stop() {
       this.$emit("stop");
+    },
+
+    handleModelSelectionClick() {
+      this.pleaseSelectAModel = false;
     },
 
     handleEnterKey(e: KeyboardEvent) {

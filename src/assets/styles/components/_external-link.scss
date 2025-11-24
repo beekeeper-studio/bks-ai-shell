@@ -1,0 +1,5 @@
+.external-link {
+  &:focus-visible {
+    outline: var(--focus-visible-outline);
+  }
+}

@@ -27,6 +27,7 @@ import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
 import { createAppEvent } from "@/plugins/appEvent";
+import { VueKeyboardTrapDirectivePlugin } from "@pdanpdan/vue-keyboard-trap";
 
 setDebugComms(false);
 
@@ -55,12 +56,21 @@ addNotificationListener("themeChanged", (args) => {
     `:root { ${args.cssString} }`;
 });
 
+if (import.meta.env.MODE === "development") {
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.key === "r") {
+      window.location.reload();
+    }
+  });
+}
+
 // Create and mount the Vue app
 const app = createApp(App);
 const pinia = createPinia();
 const appEvent = createAppEvent();
 app.use(pinia);
 app.use(appEvent);
+app.use(VueKeyboardTrapDirectivePlugin, {});
 app.config.globalProperties.$pluralize = pluralize;
 app.config.globalProperties.$openExternal = openExternal;
 app.mount("#app");

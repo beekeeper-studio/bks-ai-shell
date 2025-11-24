@@ -31,6 +31,8 @@ export async function getDefaultInstructions() {
   } else if (response.connectionType === "redis") {
     // FIXME: We can modify the run_query tool description instead
     result += "\n ## Redis\nIf you need to use the run_query tool, you should use redis commands instead of SQL.";
+  } else if (response.databaseType === "bigquery") {
+    result += "\n ## BigQuery\nIf you need to use the run_query tool, you should use BigQuery's query language. The Database Name you are given is the name of the Dataset we are using. You must qualify any tables in your queries with {dataset}.{table}";
   }
 
   return result;
@@ -85,6 +87,7 @@ export const providerConfigs = {
     /** https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       { id: "claude-sonnet-4-5-20250929", displayName: "claude-sonnet-4-5" },
+      { id: "claude-haiku-4-5-20251001", displayName: "claude-haiku-4-5" },
       { id: "claude-opus-4-1", displayName: "claude-opus-4-1" },
       { id: "claude-opus-4-20250514", displayName: "claude-opus-4" },
       { id: "claude-sonnet-4-20250514", displayName: "claude-sonnet-4" },
@@ -118,6 +121,7 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** https://platform.openai.com/docs/models */
     models: [
+      { id: "gpt-5.1", displayName: "gpt-5.1" },
       { id: "gpt-5", displayName: "gpt-5" },
       { id: "gpt-5-mini", displayName: "gpt-5-mini" },
       { id: "gpt-5-nano", displayName: "gpt-5-nano" },

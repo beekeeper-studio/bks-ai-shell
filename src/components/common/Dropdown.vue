@@ -11,6 +11,7 @@
     <Teleport to="body">
       <div
         v-if="isOpen"
+        v-kbd-trap
         ref="dropdown"
         class="dropdown-popover"
         @click="handleDropdownClick"

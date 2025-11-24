@@ -1,9 +1,12 @@
 <template>
   <div :class="['message', message.role]">
-    <div class="message-content">
+    <div class="message-content" :class="{ 'literally-empty': isEmpty }">
       <template v-if="message.role === 'system'" />
       <template v-else v-for="(part, index) of message.parts" :key="index">
-        <markdown v-if="part.type === 'text'" :content="part.text" />
+        <template v-if="part.type === 'text'">
+          <template v-if="message.role === 'user'">{{ part.text }}</template>
+          <markdown v-else :content="part.text" />
+        </template>
         <tool-message
           v-else-if="isToolUIPart(part)"
           :tool="part"
@@ -12,6 +15,9 @@
           @reject="$emit('reject-permission', part.toolCallId)"
         />
       </template>
+      <span v-if="isEmpty">
+        Empty response
+      </span>
     </div>
     <div class="message-actions" v-if="status ==='ready'">
       <button class="btn btn-flat-2 copy-btn" :class="{ copied }" @click="handleCopyClick">
@@ -32,6 +38,7 @@ import { isToolUIPart, UIMessage } from "ai";
 import Markdown from "@/components/messages/Markdown.vue";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
 import { clipboard } from "@beekeeperstudio/plugin";
+import { isEmptyUIMessage } from "@/utils";
 
 export default {
   name: "Message",
@@ -77,6 +84,9 @@ export default {
         }
       }
       return text.trim();
+    },
+    isEmpty() {
+      return this.status === 'ready' && isEmptyUIMessage(this.message);
     },
   },
 
