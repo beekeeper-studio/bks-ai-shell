@@ -9,7 +9,7 @@
         </template>
         <tool-message
           v-else-if="isToolUIPart(part)"
-          :tool="part"
+          :toolCall="part"
           :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
           @accept="$emit('accept-permission', part.toolCallId)"
           @reject="$emit('reject-permission', part.toolCallId)"

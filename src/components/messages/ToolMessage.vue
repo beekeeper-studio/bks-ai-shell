@@ -1,10 +1,10 @@
 <template>
-  <div class="tool" :data-tool-name="name" :data-tool-state="tool.state"
+  <div class="tool" :data-tool-name="name" :data-tool-state="toolCall.state"
     :data-tool-empty-result="isEmptyResult" :data-tool-error="!!error">
     <div class="tool-name">{{ displayName }}</div>
     <markdown v-if="name === 'run_query'" :content="'```sql\n' +
-      (tool.input?.query ||
-        (tool.state === 'output-available' ? '(empty)' : '-- Generating')) +
+      (toolCall.input?.query ||
+        (toolCall.state === 'output-available' ? '(empty)' : '-- Generating')) +
       '\n```'
       " />
     <div v-if="askingPermission">
@@ -44,18 +44,18 @@
 
 <script lang="ts">
 import Markdown from "@/components/messages/Markdown.vue";
+import { type ToolUIPart } from "ai";
 import { PropType } from "vue";
 import { safeJSONStringify } from "@/utils";
 import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
-import { ToolUIPart } from "ai";
 
 export default {
   components: { Markdown, RunQueryResult },
   props: {
     askingPermission: Boolean,
-    tool: {
+    toolCall: {
       type: Object as PropType<ToolUIPart>,
       required: true,
     },
@@ -64,10 +64,10 @@ export default {
   emits: ["accept", "reject"],
   computed: {
     name() {
-      return this.tool.type.replace("tool-", "");
+      return this.toolCall.type.replace("tool-", "");
     },
     isEmptyResult() {
-      if (this.tool.state === "output-available") {
+      if (this.toolCall.state === "output-available") {
         return _.isEmpty(
           this.name === "run_query"
             ? this.data.results?.[0]?.rows
@@ -92,33 +92,33 @@ export default {
       return "";
     },
     data() {
-      if (this.tool.state !== "output-available") {
+      if (this.toolCall.state !== "output-available") {
         return null;
       }
 
       try {
-        return JSON.parse(this.tool.output);
+        return JSON.parse(this.toolCall.output);
       } catch (e) {
         return null;
       }
     },
     error() {
       if (
-        this.tool.state === "output-available" &&
-        isErrorContent(this.tool.output)
+        this.toolCall.state === "output-available" &&
+        isErrorContent(this.toolCall.output)
       ) {
-        const err = parseErrorContent(this.tool.output);
+        const err = parseErrorContent(this.toolCall.output);
         return err.message ?? err;
-      } else if (this.tool.state === "output-error") {
-        return this.tool.errorText;
+      } else if (this.toolCall.state === "output-error") {
+        return this.toolCall.errorText;
       }
     },
     displayName() {
       if (this.name === "get_columns") {
-        if (this.tool.input?.schema) {
-          return `Get Columns (schema: ${this.tool.input?.schema}, table: ${this.tool.input?.table || "..."})`;
+        if (this.toolCall.input?.schema) {
+          return `Get Columns (schema: ${this.toolCall.input?.schema}, table: ${this.toolCall.input?.table || "..."})`;
         }
-        return `Get Columns (${this.tool.input?.table || "..."})`;
+        return `Get Columns (${this.toolCall.input?.table || "..."})`;
       }
       return this.name.split("_").map(_.capitalize).join(" ");
     },

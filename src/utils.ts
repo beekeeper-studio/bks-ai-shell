@@ -28,9 +28,9 @@ export function parseErrorContent(content: string) {
   return err;
 }
 
-export function isErrorContent(content: unknown): content is string {
+export function isErrorContent(str: unknown): str is string {
   try {
-    return JSON.parse(content)?.type === "error";
+    return JSON.parse(str)?.type === "error";
   } catch (e) {
     return false;
   }
@@ -95,11 +95,7 @@ export function isEmptyUIMessage(message: UIMessage): boolean {
       return false;
     }
 
-    if (part.type === "text" && _.isEmpty(part.text)) {
-      return false;
-    }
-
-    if (part.type === "reasoning" && _.isEmpty(part.text)) {
+    if ((part.type === "text" || part.type === "reasoning") && _.isEmpty(part.text)) {
       return false;
     }
 
