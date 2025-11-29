@@ -1,8 +1,25 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
+import { createPinia, setActivePinia } from "pinia";
 import PromptInput from "../../src/components/common/PromptInput.vue";
 
+// Mock the stores before importing the component
+vi.mock("../../src/stores/chat", () => ({
+  useChatStore: vi.fn(() => ({
+    models: [],
+  })),
+}));
+
+vi.mock("../../src/stores/internalData", () => ({
+  useInternalDataStore: vi.fn(() => ({
+    setInternal: vi.fn(),
+  })),
+}));
+
 function buildPromptInput() {
+  const pinia = createPinia();
+  setActivePinia(pinia);
+
   const wrapper = mount(PromptInput, {
     props: {
       storageKey: "test-key",
@@ -10,7 +27,11 @@ function buildPromptInput() {
         id: "very-good-model",
       },
     },
+    global: {
+      plugins: [pinia],
+    },
   });
+
   const textarea = wrapper.find("textarea");
 
   return {
