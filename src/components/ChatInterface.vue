@@ -86,7 +86,6 @@
 import { useAI } from "@/composables/ai";
 import { useChatStore, Model } from "@/stores/chat";
 import _ from "lodash";
-import ToolMessage from "@/components/messages/ToolMessage.vue";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import { Message as MessageType } from "ai";
@@ -104,7 +103,6 @@ export default {
 
   components: {
     Message,
-    ToolMessage,
     Markdown,
     BaseInput,
     PromptInput,
@@ -124,12 +122,7 @@ export default {
   },
 
   setup(props) {
-    const ai = useAI({
-      initialMessages: props.initialMessages,
-      anthropicApiKey: props.anthropicApiKey,
-      openaiApiKey: props.openaiApiKey,
-      googleApiKey: props.googleApiKey,
-    });
+    const ai = useAI({ initialMessages: props.initialMessages });
 
     return {
       send: ai.send,
@@ -269,10 +262,10 @@ export default {
       this.noModelError = false;
 
       if (this.askingPermission) {
-        this.rejectPermission(input);
-      } else {
-        this.send(input, this.getSendOptions());
+        this.rejectPermission();
       }
+
+      this.send(input, this.getSendOptions());
     },
 
     async reload() {
