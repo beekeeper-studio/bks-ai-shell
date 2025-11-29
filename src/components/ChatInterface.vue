@@ -11,7 +11,14 @@
           <span class="title-popup">Settings</span>
         </button>
       </div>
-      <h1 class="plugin-title">AI Shell</h1>
+      <div class="plugin-title">
+        <h1>AI Shell</h1>
+        <p>
+          The AI Shell can see your table schemas, and (with your permission)
+          run {{ sqlOrCode }} to answer your questions.
+          <ExternalLink href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/">Learn more</ExternalLink>.
+        </p>
+      </div>
       <div class="chat-messages">
         <message
           v-for="(message, index) in messages"
@@ -89,6 +96,8 @@ import { RootBinding } from "@/plugins/appEvent";
 import { useInternalDataStore } from "@/stores/internalData";
 import BaseInput from "@/components/common/BaseInput.vue";
 import PromptInput from "@/components/common/PromptInput.vue";
+import { getConnectionInfo } from "@beekeeperstudio/plugin";
+import ExternalLink from "@/components/common/ExternalLink.vue";
 
 export default {
   name: "ChatInterface",
@@ -99,6 +108,7 @@ export default {
     Markdown,
     BaseInput,
     PromptInput,
+    ExternalLink,
   },
 
   emits: ["manage-models", "open-configuration"],
@@ -140,6 +150,7 @@ export default {
       isAtBottom: true,
       showFullError: false,
       noModelError: false,
+      sqlOrCode: "SQL",
     };
   },
 
@@ -221,6 +232,14 @@ export default {
   },
 
   async mounted() {
+    getConnectionInfo().then((connection) => {
+      if (connection.databaseType === "mongodb"
+        || connection.connectionType === "surrealdb"
+        || connection.connectionType === "redis") {
+        this.sqlOrCode = "Code";
+      }
+    });
+
     const scrollContainer = this.$refs.scrollContainerRef as HTMLElement;
     scrollContainer.addEventListener("scroll", () => {
       // Calculate if we're near bottom (within 50px of bottom)
