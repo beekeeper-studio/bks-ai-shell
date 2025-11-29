@@ -10,12 +10,6 @@ function buildPromptInput() {
         id: "very-good-model",
       },
     },
-    global: {
-      stubs: {
-        Dropdown: true,
-        DropdownOption: true,
-      },
-    },
   });
   const textarea = wrapper.find("textarea");
 

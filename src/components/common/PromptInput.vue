@@ -28,8 +28,6 @@
 <script lang="ts">
 import { PropType } from "vue";
 import BaseInput from "./BaseInput.vue";
-import Dropdown from "./Dropdown.vue";
-import DropdownOption from "./DropdownOption.vue";
 import { Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState } from "pinia";
 import { matchModel } from "@/utils";
@@ -44,8 +42,6 @@ const maxHistorySize = 50;
 export default defineComponent({
   components: {
     BaseInput,
-    Dropdown,
-    DropdownOption,
     Menu,
   },
 
