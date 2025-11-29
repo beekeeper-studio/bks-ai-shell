@@ -13,9 +13,9 @@
       <input v-else :type="type" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
         @change="emitChange" ref="focusable" />
     </div>
-    <div class="helper" v-if="$slots['helper']">
+    <p class="helper" v-if="$slots['helper']">
       <slot name="helper"></slot>
-    </div>
+    </p>
   </div>
 </template>
 

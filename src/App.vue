@@ -7,17 +7,11 @@
     <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
       :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
-    <div id="configuration-popover" :class="{ active: showConfiguration }" v-kbd-trap.autofocus="showConfiguration">
-      <Configuration :reactivePage="configurationPage" @close="closeConfiguration" />
-    </div>
-    <div class="onboarding-screen-popover-container" v-if="showOnboarding">
-      <div class="onboarding-screen-popover" v-kbd-trap="true">
-        <button class="btn close-btn" @click="closeOnboardingScreen">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-        <OnboardingScreen @submit="closeOnboardingScreen" @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
-      </div>
-    </div>
+    <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
+    <Dialog :visible="showOnboarding" :closable="false" :draggable="false">
+      <OnboardingScreen @submit="closeOnboardingScreen"
+        @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
+    </Dialog>
   </div>
 </template>
 
@@ -33,6 +27,7 @@ import Configuration, {
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
 import { getData, notify } from "@beekeeperstudio/plugin";
+import { Dialog } from "primevue";
 
 type Page = "starting" | "chat-interface";
 
@@ -41,6 +36,7 @@ export default {
     ChatInterface,
     Configuration,
     OnboardingScreen,
+    Dialog,
   },
 
   data() {

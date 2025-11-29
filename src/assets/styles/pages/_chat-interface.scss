@@ -32,8 +32,8 @@
 
       .settings-btn {
         min-width: 0;
-        width: 1.8rem;
-        height: 1.8rem;
+        width: 2rem;
+        height: 2rem;
         border: none;
         border-radius: 9999px;
         cursor: pointer;
@@ -438,7 +438,10 @@
 }
 
 .chat-input-container {
-  background-color: rgb(from var(--theme-base) r g b / 5%);
+  background-color: color-mix(
+    in srgb,
+    var(--theme-base) 5%,
+    var(--query-editor-bg));
   border: 1px solid var(--border-color);
   border-radius: 8px;
   display: flex;
@@ -453,6 +456,10 @@
     border-radius: 8px;
 
     textarea {
+      background-color: color-mix(
+        in srgb,
+        var(--theme-base) 5%,
+        var(--query-editor-bg));
       border-color: transparent;
 
       &:focus-visible {

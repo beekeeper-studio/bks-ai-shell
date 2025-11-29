@@ -14,6 +14,7 @@
     font-size: 0.75rem;
     color: var(--text-dark);
     opacity: 0.7;
+    margin: 0;
   }
 
   .input-wrapper {
@@ -25,7 +26,10 @@
 
     input,
     textarea {
-      background-color: color-mix(in srgb, var(--theme-base) 5%, var(--query-editor-bg));
+      background-color: color-mix(
+        in srgb,
+        var(--theme-base) 5%,
+        var(--theme-bg));
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 0.5rem 0.75rem;

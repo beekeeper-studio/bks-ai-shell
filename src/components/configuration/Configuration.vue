@@ -1,16 +1,15 @@
 <template>
-  <div class="configuration">
+  <Dialog class="configuration" @update:visible="$emit('update:visible', $event)" :visible="visible" dismissable-mask
+    :show-header="false" modal>
     <nav>
       <ul>
         <li>
-          <button class="btn btn-flat nav-btn back-btn" @click="$emit('close')">
-            <span class="material-symbols-outlined">keyboard_arrow_left</span>
-            Back
+          <button class="btn btn-flat nav-btn close-btn" @click="$emit('close')">
+            <span class="material-symbols-outlined">close</span>
           </button>
         </li>
-        <li v-for="{id, displayName} in pages" :key="id">
-          <button class="btn btn-flat nav-btn" :class="{ active: page === id }"
-            @click="page = id">
+        <li v-for="{ id, displayName } in pages" :key="id">
+          <button class="btn btn-flat nav-btn" :class="{ active: page === id }" @click="page = id">
             {{ displayName }}
           </button>
         </li>
@@ -24,7 +23,7 @@
       <GeneralConfiguration v-if="page === 'general'" />
       <AboutConfiguration v-if="page === 'about'" />
     </div>
-  </div>
+  </Dialog>
 </template>
 
 <script lang="ts">
@@ -38,6 +37,7 @@ import BaseInput from "../common/BaseInput.vue";
 import GeneralConfiguration from "./GeneralConfiguration.vue";
 import AboutConfiguration from "./AboutConfiguration.vue";
 import { PropType } from "vue";
+import { Dialog } from "primevue";
 
 const pages = [
   {
@@ -65,11 +65,14 @@ export default {
     BaseInput,
     GeneralConfiguration,
     AboutConfiguration,
+    Dialog,
   },
 
-  emits: ["close"],
+  emits: ["close", "update:visible"],
 
   props: {
+    closable: Boolean,
+    visible: Boolean,
     reactivePage: {
       type: String as PropType<PageId>,
       default: "general",
