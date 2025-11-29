@@ -3,16 +3,16 @@
     <BaseInput type="textarea" ref="input" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
       @keydown.down="handleDownArrow" placeholder="Type your message here" rows="1" />
     <div class="actions">
-      <div class="model-selection" :class="{ 'please-select-a-model': pleaseSelectAModel }" @click="handleModelSelectionClick">
-        <Dropdown :model-value="selectedModel" placeholder="Select Model" aria-label="Model">
-          <DropdownOption v-for="optionModel in filteredModels" :key="optionModel.id" :value="optionModel.id"
-            :text="optionModel.displayName" :selected="matchModel(optionModel, selectedModel)"
-            @select="$emit('select-model', optionModel)" />
-          <div class="dropdown-separator"></div>
-          <button class="dropdown-option dropdown-action" @click="$emit('manage-models')">
-            Manage models
-          </button>
-        </Dropdown>
+      <div class="model-selection" :class="{ 'please-select-a-model': pleaseSelectAModel }"
+        @click="handleModelSelectionClick">
+        <Menu ref="menu" id="overlay_menu" :model="filteredModels" :popup="true">
+          <template #itemicon="{ item }">
+            <span class="material-symbols-outlined menu-icon">{{ item.icon }}</span>
+          </template>
+        </Menu>
+        <button class="dropdown-trigger" @click="$refs.menu.toggle($event)">
+          {{ selectedModel ? selectedModel.displayName : "Select model" }}
+        </button>
         <div class="please-select-a-model-hint">
           Please select a model
         </div>
@@ -28,21 +28,21 @@
 <script lang="ts">
 import { PropType } from "vue";
 import BaseInput from "./BaseInput.vue";
-import Dropdown from "./Dropdown.vue";
-import DropdownOption from "./DropdownOption.vue";
 import { Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState } from "pinia";
 import { matchModel } from "@/utils";
 import { useInternalDataStore } from "@/stores/internalData";
 import _ from "lodash";
+import Menu from "primevue/menu";
+import type { MenuItem } from "primevue/menuitem";
+import { defineComponent } from "vue";
 
 const maxHistorySize = 50;
 
-export default {
+export default defineComponent({
   components: {
     BaseInput,
-    Dropdown,
-    DropdownOption,
+    Menu,
   },
 
   emits: ["submit", "stop", "manage-models", "select-model"],
@@ -71,8 +71,34 @@ export default {
 
   computed: {
     ...mapState(useChatStore, {
-      filteredModels(store) {
-        return store.models.filter((m) => m.enabled);
+      filteredModels(store): MenuItem[] {
+        const items: MenuItem[] = [];
+        for (const model of store.models) {
+          if (model.enabled) {
+            const selected = model.id === this.selectedModel?.id;
+            items.push({
+              value: model.id,
+              label: model.displayName,
+              icon: selected ? "check" : "",
+              class: selected ? "selected" : "",
+              command: () => this.$emit('select-model', model),
+            });
+          }
+        }
+        if (items.length === 0) {
+          return [{
+            label: "Manage models",
+            command: () => this.$emit('manage-models'),
+          }]
+        }
+        return [
+          ...items,
+          { separator: true },
+          {
+            label: "Manage models",
+            command: () => this.$emit('manage-models'),
+          }
+        ];
       },
     }),
     input: {
@@ -237,5 +263,5 @@ export default {
       return JSON.parse(inputHistoryStr);
     },
   },
-};
+});
 </script>

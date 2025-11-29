@@ -78,8 +78,6 @@
 <script lang="ts">
 import { useAI } from "@/composables/ai";
 import { useChatStore, Model } from "@/stores/chat";
-import Dropdown from "./common/Dropdown.vue";
-import DropdownOption from "./common/DropdownOption.vue";
 import _ from "lodash";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
@@ -95,8 +93,6 @@ export default {
   name: "ChatInterface",
 
   components: {
-    Dropdown,
-    DropdownOption,
     Message,
     Markdown,
     BaseInput,

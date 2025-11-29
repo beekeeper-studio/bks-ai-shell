@@ -495,6 +495,41 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.29.tgz#5a40109a1ab5f84d6fd8fc928b19f367cbe7e7b1"
   integrity sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==
 
+"@primeuix/styled@^0.7.4":
+  version "0.7.4"
+  resolved "https://registry.yarnpkg.com/@primeuix/styled/-/styled-0.7.4.tgz#d2108a7fad297dea60d549b2c10ed744dc0cbc0e"
+  integrity sha512-QSO/NpOQg8e9BONWRBx9y8VGMCMYz0J/uKfNJEya/RGEu7ARx0oYW0ugI1N3/KB1AAvyGxzKBzGImbwg0KUiOQ==
+  dependencies:
+    "@primeuix/utils" "^0.6.1"
+
+"@primeuix/styles@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@primeuix/styles/-/styles-2.0.1.tgz#6d7c4e95f5afa9a1c3a78fc3e5d01186f5741371"
+  integrity sha512-/9bhdkZDP6pY2HH5KfxGEDNGESjDCdCA23God7q8PqW3Xz1Gtz/8IMAEbpNe+O3I03qylRtEjL1n98J1mp+pRQ==
+  dependencies:
+    "@primeuix/styled" "^0.7.4"
+
+"@primeuix/utils@^0.6.1", "@primeuix/utils@^0.6.2":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@primeuix/utils/-/utils-0.6.3.tgz#0d31e41c530fb64dd487ce768f8c244ca1d0872e"
+  integrity sha512-/SLNQSKQ73WbBIsflKVqbpVjCfFYvQO3Sf1LMheXyxh8JqxO4M63dzP56wwm9OPGuCQ6MYOd2AHgZXz+g7PZcg==
+
+"@primevue/core@4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@primevue/core/-/core-4.5.0.tgz#4a457c37e64debc9ae0afbc0963cc312ee1d5cd1"
+  integrity sha512-1wEmhoLg8IsgRuER8Ytxtk3C1RQCfcdjAww3sKamQkqTkWvPm/psn54LzQbnn6u2njvQF66pio3EzrLK3IllNw==
+  dependencies:
+    "@primeuix/styled" "^0.7.4"
+    "@primeuix/utils" "^0.6.2"
+
+"@primevue/icons@4.5.0":
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/@primevue/icons/-/icons-4.5.0.tgz#5cedde7133f6ee492adebf708c954ad8a5140a00"
+  integrity sha512-KVjtxAiTnyVmXhrjMlnDJqL6p33rnI4O5RSQbg7TwnFVXYaanVmjHZOQ2uq2euImleaRYeePuXBHGMPEGxOxYg==
+  dependencies:
+    "@primeuix/utils" "^0.6.2"
+    "@primevue/core" "4.5.0"
+
 "@rollup/rollup-android-arm-eabi@4.37.0":
   version "4.37.0"
   resolved "https://registry.yarnpkg.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.37.0.tgz#9bedc746a97fe707154086365f269ced92ff4aa9"
@@ -2048,6 +2083,17 @@ pretty-format@^27.0.2:
     ansi-regex "^5.0.1"
     ansi-styles "^5.0.0"
     react-is "^17.0.1"
+
+primevue@^4.4.1:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/primevue/-/primevue-4.5.0.tgz#2f7caacc57ecc86dcc2b6c7dd69d686ab227cfba"
+  integrity sha512-6Na39OPTNg03LE5gHxWMXrspbBC+sEKS/270qOg2Q2CzF3gcxZagESWRAA0IDRva/vaycElL9b8NUosFm41zIg==
+  dependencies:
+    "@primeuix/styled" "^0.7.4"
+    "@primeuix/styles" "^2.0.1"
+    "@primeuix/utils" "^0.6.2"
+    "@primevue/core" "4.5.0"
+    "@primevue/icons" "4.5.0"
 
 proto-list@~1.2.1:
   version "1.2.4"
