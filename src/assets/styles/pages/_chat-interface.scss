@@ -71,7 +71,12 @@
 
     .plugin-title {
       text-align: center;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
+      max-width: 32rem;
+
+      p {
+        color: var(--text);
+      }
     }
 
     .chat-messages {
