@@ -4,8 +4,7 @@
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
-    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
-      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
+    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
     <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
     <div class="onboarding-screen-popover-container" v-if="showOnboarding">
@@ -13,7 +12,8 @@
         <button class="btn close-btn" @click="closeOnboardingScreen">
           <span class="material-symbols-outlined">close</span>
         </button>
-        <OnboardingScreen @submit="closeOnboardingScreen" @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
+        <OnboardingScreen @submit="closeOnboardingScreen"
+          @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
       </div>
     </div>
   </div>

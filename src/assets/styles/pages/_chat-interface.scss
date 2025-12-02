@@ -163,7 +163,7 @@
     padding: 0.5rem;
     width: 100%;
     line-height: 1.07rem;
-    font-size: 0.765rem;
+    font-size: 0.865rem;
 
     code {
 
@@ -407,17 +407,19 @@
 .tool-permission-buttons {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.2rem;
+  margin-top: 0.5rem;
 
   button {
     border: none;
-    background-color: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: currentColor;
-    padding: 0;
+    min-width: 0;
+
+    .accept-icon, .reject-icon {
+      font-size: 1.2em;
+    }
 
     &:hover {
       .accept-icon {

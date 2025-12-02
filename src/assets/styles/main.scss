@@ -5,6 +5,8 @@
 @use "sass:color";
 @use "primevue";
 
+@import "@beekeeperstudio/ui-kit/style.css" layer(ui-kit);
+
 #app {
   height: 100%;
   display: flex;

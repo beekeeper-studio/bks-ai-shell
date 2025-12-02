@@ -12,7 +12,10 @@
           :toolCall="part"
           :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
           @accept="$emit('accept-permission', part.toolCallId)"
-          @reject="$emit('reject-permission', part.toolCallId)"
+          @reject="$emit('reject-permission', {
+            toolCallId: part.toolCallId,
+            ...$event,
+          })"
         />
       </template>
       <span v-if="isEmpty">

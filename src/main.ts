@@ -29,6 +29,7 @@ import "@beekeeperstudio/plugin/dist/eventForwarder";
 import { createAppEvent } from "@/plugins/appEvent";
 import { VueKeyboardTrapDirectivePlugin } from "@pdanpdan/vue-keyboard-trap";
 import PrimeVue from "primevue/config";
+import "@beekeeperstudio/ui-kit/sql-text-editor";
 
 setDebugComms(false);
 
@@ -39,7 +40,7 @@ hljs.registerLanguage("json", json);
 // Apply theme from Beekeeper Studio
 getAppInfo()
   .then((info) => {
-    document.querySelector("#injected-style")!.textContent =
+    document.querySelector("#app-theme")!.textContent =
       `:root { ${info.theme.cssString} }`;
   })
   .catch((e) => {
@@ -53,7 +54,7 @@ getAppInfo()
   });
 
 addNotificationListener("themeChanged", (args) => {
-  document.querySelector("#injected-style")!.textContent =
+  document.querySelector("#app-theme")!.textContent =
     `:root { ${args.cssString} }`;
 });
 

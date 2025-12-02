@@ -3,7 +3,7 @@ import { computed, ComputedRef, watch } from "vue";
 import { AvailableProviders, AvailableModels } from "@/config";
 import { tools, userRejectedToolCall } from "@/tools";
 import {
-  UIMessage,
+  UIMessage as AIUIMessage,
   DefaultChatTransport,
   convertToModelMessages,
   ChatStatus,
@@ -20,12 +20,15 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { isReadQuery, safeJSONStringify } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "@/utils/lastAssistantMessageIsCompleteWithToolCalls";
+import mitt from "mitt";
+
+type UIMessage = AIUIMessage<unknown, UIDataTypes, InferUITools<typeof tools>>;
 
 type AIOptions = {
   initialMessages: UIMessage[];
 };
 
-type SendOptions = {
+export type SendOptions = {
   providerId: AvailableProviders;
   modelId: AvailableModels["id"];
   systemPrompt?: string;
@@ -37,28 +40,45 @@ type ToolCall = {
   input: unknown;
 };
 
+type PromisedToolCall = ToolCall & {
+  /** Awaiting user permission */
+  state: "pending";
+}
+
+type ResolvedToolCall = ToolCall & ({
+  state: "accepted";
+} | {
+  state: "rejected";
+} | {
+  state: "rejected";
+  userEdittedCode: string;
+  sendOptions: SendOptions;
+})
+
 /** A wrapper class of AI SDK's Chat class to support tool calls that require user permission. */
 class AIShellChat {
   readonly messages: ComputedRef<UIMessage[]>;
   readonly error: ComputedRef<Error | undefined>;
   readonly status: ComputedRef<ChatStatus>;
-  readonly pendingToolCalls = reactive<
-    (ToolCall & { state: "accepted" | "rejected" | "pending" })[]
-  >([]);
+  readonly pendingToolCalls = reactive<(PromisedToolCall | ResolvedToolCall)[]>([]);
   readonly pendingToolCallIds: ComputedRef<string[]>;
   readonly askingPermission: ComputedRef<boolean>;
 
   private chat: Chat<UIMessage>;
+  private emitter = mitt<{
+    finish: void;
+  }>();
 
   constructor(options: AIOptions) {
     this.fetch = this.fetch.bind(this);
     this.handleToolCall = this.handleToolCall.bind(this);
 
-    this.chat = new Chat({
+    this.chat = new Chat<UIMessage>({
       transport: new DefaultChatTransport({ fetch: this.fetch }),
       messages: options.initialMessages,
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
       onToolCall: this.handleToolCall,
+      onFinish: () => this.emitter.emit("finish"),
     });
 
     this.messages = computed(() => this.chat.messages);
@@ -109,27 +129,77 @@ class AIShellChat {
   }
 
   /** After the user rejected the permission, they can provide a follow-up message.
-   * If no toolCallId is provided, all tool calls are rejected.*/
-  rejectPermission(toolCallId?: string) {
-    if (toolCallId === undefined) {
+   * If no options is provided, all tool calls are rejected.
+   *
+   * @param options.edittedCode - The edited query / code that the user provided.
+   **/
+  rejectPermission(options?:
+    { toolCallId: string; }
+    | { toolCallId: string; userEdittedCode: string; sendOptions: SendOptions }
+  ) {
+    if (!options) {
       this.pendingToolCalls.forEach((t) => {
         t.state = "rejected";
       });
       return;
     }
 
-    const tool = this.pendingToolCalls.find((t) => t.toolCallId === toolCallId);
+    const tool = this.pendingToolCalls.find((t) => t.toolCallId === options.toolCallId);
     if (!tool) {
-      throw new Error(`Tool call with id ${toolCallId} not found`);
+      throw new Error(`Tool call with id ${options.toolCallId} not found`);
+    }
+    if ('userEdittedCode' in options) {
+      const sendFollowupMessage = async () => {
+        this.emitter.off("finish", sendFollowupMessage);
+        const toolCallId = this.chat.generateId();
+        const toolOutput = await this.createRunQueryToolOutput(
+          toolCallId,
+          options.userEdittedCode,
+        );
+        this.chat.messages = [
+          ...this.chat.messages,
+          {
+            id: this.chat.generateId(),
+            role: "user",
+            parts: [{
+              type: "text",
+              text: "Run this instead ```\n" + options.userEdittedCode + "\n```",
+            }],
+          },
+          {
+            id: this.chat.generateId(),
+            role: "assistant",
+            parts: [
+              { type: "step-start" },
+              {
+                type: "tool-run_query",
+                toolCallId,
+                input: {
+                  query: options.userEdittedCode,
+                },
+                state: toolOutput.state,
+                ...(toolOutput.state === "output-error"
+                  ? { errorText: toolOutput.errorText }
+                  : { output: toolOutput.output }),
+              },
+            ],
+          },
+        ];
+
+        this.chat.sendMessage(undefined, {
+          body: {
+            sendOptions: options.sendOptions,
+          },
+        });
+      };
+      this.emitter.on("finish", sendFollowupMessage);
     }
     tool.state = "rejected";
   }
 
   private async handleToolCall(
     options: Parameters<
-      ChatOnToolCallCallback<
-        UIMessage<unknown, UIDataTypes, InferUITools<typeof tools>>
-      >
+      ChatOnToolCallCallback<UIMessage>
     >[0],
   ) {
     const toolCall = options.toolCall;
@@ -148,7 +218,12 @@ class AIShellChat {
         toolCall.input.query &&
         isReadQuery(toolCall.input.query)
       ) {
-        await this.runQueryAndAddToolResult(toolCall);
+        this.chat.addToolOutput(
+          await this.createRunQueryToolOutput(
+            toolCall.toolCallId,
+            toolCall.input.query,
+          )
+        );
         return;
       }
 
@@ -176,9 +251,14 @@ class AIShellChat {
       );
 
       if (state === "accepted") {
-        await this.runQueryAndAddToolResult(toolCall);
+        this.chat.addToolOutput(
+          await this.createRunQueryToolOutput(
+            toolCall.toolCallId,
+            toolCall.input.query,
+          )
+        );
       } else {
-        this.chat.addToolResult({
+        this.chat.addToolOutput({
           state: "output-error",
           toolCallId: toolCall.toolCallId,
           tool: toolCall.toolName,
@@ -188,22 +268,21 @@ class AIShellChat {
     }
   }
 
-  private async runQueryAndAddToolResult(toolCall: ToolCall) {
+  private async createRunQueryToolOutput(toolCallId: string, query: string) {
     try {
-      // not using await to avoid blocking the UI
-      this.chat.addToolResult({
-        state: "output-available",
-        toolCallId: toolCall.toolCallId,
-        tool: toolCall.toolName,
-        output: safeJSONStringify(await runQuery(toolCall.input.query)),
-      });
+      return {
+        state: "output-available" as const,
+        toolCallId,
+        tool: 'tool-run_query' as const,
+        output: safeJSONStringify(await runQuery(query)),
+      };
     } catch (e) {
-      this.chat.addToolResult({
-        state: "output-error",
-        toolCallId: toolCall.toolCallId,
-        tool: toolCall.toolName,
+      return {
+        state: "output-error" as const,
+        toolCallId,
+        tool: 'tool-run_query' as const,
         errorText: e?.message || e.toString() || "Unknown error",
-      });
+      };
     }
   }
 

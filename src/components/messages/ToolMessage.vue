@@ -1,26 +1,42 @@
 <template>
-  <div class="tool" :data-tool-name="name" :data-tool-state="toolCall.state"
-    :data-tool-empty-result="isEmptyResult" :data-tool-error="!!error">
+  <div class="tool" :data-tool-name="name" :data-tool-state="toolCall.state" :data-tool-empty-result="isEmptyResult"
+    :data-tool-error="!!error">
     <div class="tool-name">{{ displayName }}</div>
-    <markdown v-if="name === 'run_query'" :content="'```sql\n' +
-      (toolCall.input?.query ||
-        (toolCall.state === 'output-available' ? '(empty)' : '-- Generating')) +
-      '\n```'
-      " />
-    <div v-if="askingPermission">
+    <div class="tool-input-container" :style="{ opacity: editing ? 0.5 : 1 }">
+      <markdown v-if="name === 'run_query'" :content="'```sql\n' +
+        (toolCall.input?.query ||
+          (toolCall.state === 'output-available' ? '(empty)' : '-- Generating')) +
+        '\n```'
+        " />
+    </div>
+    <div v-if="editing" class="tool-input-edit">
+      <bks-sql-text-editor ref="queryEditor" :class="{ 'query-editor-focused': isQueryEditorFocused }"
+        :value="initialQueryEditorValue" :isFocused="isQueryEditorFocused" @bks-focus="isQueryEditorFocused = true"
+        @bks-blur="isQueryEditorFocused = false" @bks-value-change="queryEditorValue = $event.detail.value" />
+      <div class="actions">
+        <button class="btn btn-primary" @click="saveEdit" :disabled="queryEditorValue.trim().length === 0">Save &
+          run</button>
+        <button class="btn btn-flat" @click="cancelEdit">Cancel</button>
+      </div>
+    </div>
+    <div v-if="askingPermission && !editing">
       {{
         name === "run_query"
           ? "Do you want to run this query?"
           : "Do you want to proceed?"
       }}
       <div class="tool-permission-buttons">
-        <button class="accept-btn" @click="$emit('accept')">
+        <button class="btn btn-flat" @click="$emit('accept')">
           Yes
           <span class="material-symbols-outlined accept-icon"> check </span>
         </button>
-        <button class="reject-btn" @click="$emit('reject')">
+        <button class="btn btn-flat" @click="$emit('reject')">
           No
           <span class="material-symbols-outlined reject-icon"> close </span>
+        </button>
+        <button class="btn btn-flat" @click="edit">
+          Edit
+          <span class="material-symbols-outlined reject-icon"> edit_square </span>
         </button>
       </div>
     </div>
@@ -62,6 +78,14 @@ export default {
     args: null,
   },
   emits: ["accept", "reject"],
+  data() {
+    return {
+      editing: false,
+      initialQueryEditorValue: "",
+      isQueryEditorFocused: false,
+      queryEditorValue: "",
+    };
+  },
   computed: {
     name() {
       return this.toolCall.type.replace("tool-", "");
@@ -128,6 +152,53 @@ export default {
       if (str.length <= maxLength) return str;
       return str.slice(0, str.lastIndexOf(" ", maxLength)) + "…";
     },
+    edit() {
+      if (this.initialQueryEditorValue === "") {
+        this.initialQueryEditorValue = this.toolCall.input?.query ?? "";
+      }
+      this.queryEditorValue = this.initialQueryEditorValue;
+      this.isQueryEditorFocused = true;
+      this.editing = true;
+    },
+    saveEdit() {
+      this.editing = false;
+      this.$emit("reject", { userEdittedCode: this.queryEditorValue })
+      this.initialQueryEditorValue = this.queryEditorValue;
+    },
+    cancelEdit() {
+      this.editing = false;
+      this.initialQueryEditorValue = this.queryEditorValue;
+    },
   },
 };
 </script>
+
+<style scoped>
+.tool-input-container {
+  margin-bottom: 0.5rem;
+}
+
+.tool-input-edit {
+  border-top: 1px solid var(--border-color);
+  margin-top: 1rem;
+
+  bks-sql-text-editor {
+    display: block;
+    margin-top: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    overflow: auto;
+
+    &.query-editor-focused {
+      outline: var(--focus-visible-outline);
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+}
+</style>
