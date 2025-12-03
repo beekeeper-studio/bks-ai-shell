@@ -3,13 +3,10 @@ import { computed, ComputedRef, watch } from "vue";
 import { AvailableProviders, AvailableModels } from "@/config";
 import { tools, userRejectedToolCall } from "@/tools";
 import {
-  UIMessage as AIUIMessage,
   DefaultChatTransport,
   convertToModelMessages,
   ChatStatus,
   ChatOnToolCallCallback,
-  UIDataTypes,
-  InferUITools,
 } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
@@ -21,8 +18,7 @@ import { isReadQuery, safeJSONStringify } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "@/utils/lastAssistantMessageIsCompleteWithToolCalls";
 import mitt from "mitt";
-
-type UIMessage = AIUIMessage<unknown, UIDataTypes, InferUITools<typeof tools>>;
+import { UIMessage } from "@/types";
 
 type AIOptions = {
   initialMessages: UIMessage[];
@@ -43,17 +39,9 @@ type ToolCall = {
 type PromisedToolCall = ToolCall & {
   /** Awaiting user permission */
   state: "pending";
-}
+};
 
-type ResolvedToolCall = ToolCall & ({
-  state: "accepted";
-} | {
-  state: "rejected";
-} | {
-  state: "rejected";
-  userEdittedCode: string;
-  sendOptions: SendOptions;
-})
+type ResolvedToolCall = ToolCall & { state: "accepted" | "rejected" }
 
 /** A wrapper class of AI SDK's Chat class to support tool calls that require user permission. */
 class AIShellChat {
@@ -92,11 +80,11 @@ class AIShellChat {
     );
   }
 
-  async send(message: string, options: SendOptions) {
+  async send(message: string | UIMessage['parts'], options: SendOptions) {
     await this.chat.sendMessage(
-      {
-        text: message,
-      },
+      typeof message === "string"
+        ? { text: message }
+        : { parts: message },
       {
         body: {
           sendOptions: options,
@@ -132,10 +120,11 @@ class AIShellChat {
    * If no options is provided, all tool calls are rejected.
    *
    * @param options.edittedCode - The edited query / code that the user provided.
+   * It's required to provide `sendOptions` as well if the user edited the tool call.
    **/
   rejectPermission(options?:
     { toolCallId: string; }
-    | { toolCallId: string; userEdittedCode: string; sendOptions: SendOptions }
+    | { toolCallId: string; userEditedCode: string; sendOptions: SendOptions }
   ) {
     if (!options) {
       this.pendingToolCalls.forEach((t) => {
@@ -148,52 +137,21 @@ class AIShellChat {
     if (!tool) {
       throw new Error(`Tool call with id ${options.toolCallId} not found`);
     }
-    if ('userEdittedCode' in options) {
+
+    if ('userEditedCode' in options) {
       const sendFollowupMessage = async () => {
         this.emitter.off("finish", sendFollowupMessage);
-        const toolCallId = this.chat.generateId();
-        const toolOutput = await this.createRunQueryToolOutput(
-          toolCallId,
-          options.userEdittedCode,
+        this.send(
+          [{
+            type: "data-userEditedCode",
+            data: { code: options.userEditedCode }
+          }],
+          options.sendOptions
         );
-        this.chat.messages = [
-          ...this.chat.messages,
-          {
-            id: this.chat.generateId(),
-            role: "user",
-            parts: [{
-              type: "text",
-              text: "Run this instead ```\n" + options.userEdittedCode + "\n```",
-            }],
-          },
-          {
-            id: this.chat.generateId(),
-            role: "assistant",
-            parts: [
-              { type: "step-start" },
-              {
-                type: "tool-run_query",
-                toolCallId,
-                input: {
-                  query: options.userEdittedCode,
-                },
-                state: toolOutput.state,
-                ...(toolOutput.state === "output-error"
-                  ? { errorText: toolOutput.errorText }
-                  : { output: toolOutput.output }),
-              },
-            ],
-          },
-        ];
-
-        this.chat.sendMessage(undefined, {
-          body: {
-            sendOptions: options.sendOptions,
-          },
-        });
       };
       this.emitter.on("finish", sendFollowupMessage);
     }
+
     tool.state = "rejected";
   }
 
@@ -304,7 +262,18 @@ class AIShellChat {
     const provider = createProvider(sendOptions.providerId);
     return provider.stream({
       modelId: sendOptions.modelId,
-      messages: convertToModelMessages(m.messages),
+      messages: convertToModelMessages<UIMessage>(m.messages, {
+        convertDataPart(part) {
+          if (part.type === "data-userEditedCode") {
+            return {
+              type: "text",
+              text: "Please run the following code instead:\n```\n"
+                + part.data.code
+                + "\n```",
+            };
+          }
+        },
+      }),
       signal: fetchOptions.signal,
       tools,
       systemPrompt: sendOptions.systemPrompt,

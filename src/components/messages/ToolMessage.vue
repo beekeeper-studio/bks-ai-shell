@@ -14,8 +14,10 @@
         :value="initialQueryEditorValue" :isFocused="isQueryEditorFocused" @bks-focus="isQueryEditorFocused = true"
         @bks-blur="isQueryEditorFocused = false" @bks-value-change="queryEditorValue = $event.detail.value" />
       <div class="actions">
-        <button class="btn btn-primary" @click="saveEdit" :disabled="queryEditorValue.trim().length === 0">Save &
-          run</button>
+        <button class="btn btn-primary" @click="saveEdit"
+          :disabled="queryEditorValue.trim().length === 0 || queryEditorValue === initialQueryEditorValue">
+          Save & run
+        </button>
         <button class="btn btn-flat" @click="cancelEdit">Cancel</button>
       </div>
     </div>
@@ -162,7 +164,7 @@ export default {
     },
     saveEdit() {
       this.editing = false;
-      this.$emit("reject", { userEdittedCode: this.queryEditorValue })
+      this.$emit("reject", { userEditedCode: this.queryEditorValue })
       this.initialQueryEditorValue = this.queryEditorValue;
     },
     cancelEdit() {

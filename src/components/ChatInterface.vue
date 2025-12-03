@@ -255,7 +255,7 @@ export default {
 
     handleRejectPermission(options: {
       toolCallId: string;
-      userEdittedCode?: string;
+      userEditedCode?: string;
     }) {
       this.rejectPermission({
         ...options,
