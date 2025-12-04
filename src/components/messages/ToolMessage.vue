@@ -1,7 +1,14 @@
 <template>
   <div class="tool" :data-tool-name="name" :data-tool-state="toolCall.state" :data-tool-empty-result="isEmptyResult"
     :data-tool-error="!!error">
-    <div class="tool-name">{{ displayName }}</div>
+    <div class="tool-name">
+      {{ displayName }}
+      <span
+        v-if="message.parts.find((p) => p.type === 'data-toolReplacement')"
+        class="edited-badge"
+        title="You edited the AI's suggestion"
+      >Edited</span>
+    </div>
     <div class="tool-input-container" :style="{ opacity: editing ? 0.5 : 1 }">
       <markdown v-if="name === 'run_query'" :content="'```sql\n' +
         (toolCall.input?.query ||
@@ -21,7 +28,7 @@
         <button class="btn btn-flat" @click="cancelEdit">Cancel</button>
       </div>
     </div>
-    <div v-if="askingPermission && !editing">
+    <div v-if="askingPermission && !editing" class="tool-permission">
       {{
         name === "run_query"
           ? "Do you want to run this query?"
@@ -68,11 +75,16 @@ import { safeJSONStringify } from "@/utils";
 import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
+import { UIMessage } from "@/types";
 
 export default {
   components: { Markdown, RunQueryResult },
   props: {
     askingPermission: Boolean,
+    message: {
+      type: Object as PropType<UIMessage>,
+      required: true,
+    },
     toolCall: {
       type: Object as PropType<ToolUIPart>,
       required: true,
@@ -164,7 +176,7 @@ export default {
     },
     saveEdit() {
       this.editing = false;
-      this.$emit("reject", { userEditedCode: this.queryEditorValue })
+      this.$emit("reject", { editedQuery: this.queryEditorValue })
       this.initialQueryEditorValue = this.queryEditorValue;
     },
     cancelEdit() {
@@ -176,8 +188,8 @@ export default {
 </script>
 
 <style scoped>
-.tool-input-container {
-  margin-bottom: 0.5rem;
+.tool-error {
+  margin-top: 0.5rem;
 }
 
 .tool-input-edit {
@@ -201,6 +213,20 @@ export default {
     gap: 1rem;
     margin-top: 1rem;
   }
+}
 
+.tool-permission {
+  margin-top: 0.5rem;
+}
+
+.edited-badge {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+  padding-inline: 0.25rem;
+  padding-block: 0.1rem;
+  color: var(--text-light);
+  cursor: default;
 }
 </style>

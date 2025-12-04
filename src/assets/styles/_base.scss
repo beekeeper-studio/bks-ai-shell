@@ -1,5 +1,5 @@
 :root {
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-family: var(--font-family, "Roboto", Helvetica, Arial, sans-serif);
 }
 
 * {

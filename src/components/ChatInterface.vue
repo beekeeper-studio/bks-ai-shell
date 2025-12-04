@@ -9,10 +9,17 @@
       </div>
       <h1 class="plugin-title">AI Shell</h1>
       <div class="chat-messages">
-        <message v-for="(message, index) in messages" :key="message.id" :message="message"
-          :pending-tool-call-ids="pendingToolCallIds"
-          :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
-          @accept-permission="acceptPermission" @reject-permission="handleRejectPermission" />
+        <template v-for="(message, index) in messages" :key="message.id">
+          <message
+            v-if="
+              !(message.role === 'assistant' && message.parts.find((p) => p.type === 'data-userEditedToolCall'))
+                && !(message.role === 'user' && message.parts.find((p) => p.type === 'data-editedQuery'))
+              "
+            :message="message"
+            :pending-tool-call-ids="pendingToolCallIds"
+            :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
+            @accept-permission="acceptPermission" @reject-permission="handleRejectPermission" />
+        </template>
         <div class="message error" v-if="isUnexpectedError">
           <div class="message-content">
             Something went wrong.
@@ -255,7 +262,7 @@ export default {
 
     handleRejectPermission(options: {
       toolCallId: string;
-      userEditedCode?: string;
+      editedQuery?: string;
     }) {
       this.rejectPermission({
         ...options,

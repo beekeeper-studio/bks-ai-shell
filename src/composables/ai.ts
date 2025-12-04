@@ -1,5 +1,5 @@
 import { Chat } from "@ai-sdk/vue";
-import { computed, ComputedRef, watch } from "vue";
+import { computed, ComputedRef, ref, Ref, watch } from "vue";
 import { AvailableProviders, AvailableModels } from "@/config";
 import { tools, userRejectedToolCall } from "@/tools";
 import {
@@ -52,6 +52,8 @@ class AIShellChat {
   readonly pendingToolCallIds: ComputedRef<string[]>;
   readonly askingPermission: ComputedRef<boolean>;
 
+  /** Force the `status` if not `null` */
+  private forceStatus = ref<ChatStatus | null>();
   private chat: Chat<UIMessage>;
   private emitter = mitt<{
     finish: void;
@@ -71,7 +73,7 @@ class AIShellChat {
 
     this.messages = computed(() => this.chat.messages);
     this.error = computed(() => this.chat.error);
-    this.status = computed(() => this.chat.status);
+    this.status = computed(() => this.forceStatus.value ?? this.chat.status);
     this.pendingToolCallIds = computed(() =>
       this.pendingToolCalls.map((t) => t.toolCallId),
     );
@@ -80,11 +82,11 @@ class AIShellChat {
     );
   }
 
-  async send(message: string | UIMessage['parts'], options: SendOptions) {
-    await this.chat.sendMessage(
-      typeof message === "string"
-        ? { text: message }
-        : { parts: message },
+  /** Pass `undefined` to trigger the API without sending the message */
+  async send(message: string | undefined, options: SendOptions) {
+    await this.chat.sendMessage(message
+      ? { text: message }
+      : undefined,
       {
         body: {
           sendOptions: options,
@@ -124,7 +126,7 @@ class AIShellChat {
    **/
   rejectPermission(options?:
     { toolCallId: string; }
-    | { toolCallId: string; userEditedCode: string; sendOptions: SendOptions }
+    | { toolCallId: string; editedQuery: string; sendOptions: SendOptions }
   ) {
     if (!options) {
       this.pendingToolCalls.forEach((t) => {
@@ -138,16 +140,118 @@ class AIShellChat {
       throw new Error(`Tool call with id ${options.toolCallId} not found`);
     }
 
-    if ('userEditedCode' in options) {
+    if ('editedQuery' in options) {
       const sendFollowupMessage = async () => {
         this.emitter.off("finish", sendFollowupMessage);
-        this.send(
-          [{
-            type: "data-userEditedCode",
-            data: { code: options.userEditedCode }
-          }],
-          options.sendOptions
+
+        const assistantMessageId = this.chat.generateId();
+        const replacementToolCallId = this.chat.generateId();
+
+        this.forceStatus.value = "streaming";
+
+        this.chat.messages = [
+          ...this.chat.messages.slice(0, -1),
+          {
+            ...this.chat.lastMessage!,
+            parts: [
+              ...this.chat.lastMessage!.parts,
+              {
+                type: "data-userEditedToolCall",
+                data: { replacementToolCallId },
+              }
+            ],
+          },
+          {
+            id: this.chat.generateId(),
+            role: "user",
+            parts: [{
+              // We use data so it's not shown in the UI
+              type: "data-editedQuery",
+              data: {
+                query: options.editedQuery,
+                targetToolCallId: options.toolCallId,
+              },
+            }],
+          },
+          {
+            id: assistantMessageId,
+            role: "assistant",
+            parts: [
+              { type: "step-start" },
+              {
+                type: "data-toolReplacement",
+                data: { targetToolCallId: options.toolCallId },
+              },
+              {
+                type: "tool-run_query",
+                state: "input-available",
+                toolCallId: replacementToolCallId,
+                input: { query: options.editedQuery },
+              },
+            ],
+          },
+        ];
+
+        const runQueryOutput = await this.createRunQueryToolOutput(
+          replacementToolCallId,
+          options.editedQuery
         );
+
+        if (runQueryOutput.state === "output-error") {
+          this.chat.messages = [
+            ...this.chat.messages.slice(0, -1),
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              parts: [
+                { type: "step-start" },
+                {
+                  type: "data-toolReplacement",
+                  data: { targetToolCallId: options.toolCallId },
+                },
+                {
+                  type: "tool-run_query",
+                  state: "output-error",
+                  toolCallId: replacementToolCallId,
+                  input: { query: options.editedQuery },
+                  errorText: runQueryOutput.errorText,
+                },
+              ],
+            },
+          ];
+        } else {
+          this.chat.messages = [
+            ...this.chat.messages.slice(0, -1),
+            {
+              id: assistantMessageId,
+              role: "assistant",
+              parts: [
+                { type: "step-start" },
+                {
+                  type: "data-toolReplacement",
+                  data: { targetToolCallId: options.toolCallId },
+                },
+                {
+                  type: "tool-run_query",
+                  state: "output-available",
+                  toolCallId: replacementToolCallId,
+                  input: { query: options.editedQuery },
+                  // @ts-expect-error ts doesnt like this because the execute()
+                  // method for run_query (see tools/index.ts) is not defined.
+                  // It can be fixed:
+                  //   1. Upgrading to AI SDK v6
+                  //   2. Use the new API for user permission check
+                  //   3. define execute() method
+                  output: runQueryOutput.output,
+                },
+              ],
+            },
+          ];
+        }
+
+        this.forceStatus.value = null;
+
+        this.send(undefined, options.sendOptions);
       };
       this.emitter.on("finish", sendFollowupMessage);
     }
@@ -264,11 +368,11 @@ class AIShellChat {
       modelId: sendOptions.modelId,
       messages: convertToModelMessages<UIMessage>(m.messages, {
         convertDataPart(part) {
-          if (part.type === "data-userEditedCode") {
+          if (part.type === "data-editedQuery") {
             return {
               type: "text",
               text: "Please run the following code instead:\n```\n"
-                + part.data.code
+                + part.data.query
                 + "\n```",
             };
           }

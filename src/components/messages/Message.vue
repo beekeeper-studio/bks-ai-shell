@@ -9,6 +9,7 @@
         </template>
         <tool-message
           v-else-if="isToolUIPart(part)"
+          :message="message"
           :toolCall="part"
           :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
           @accept="$emit('accept-permission', part.toolCallId)"
@@ -37,11 +38,12 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import { isToolUIPart, UIMessage } from "ai";
+import { isToolUIPart } from "ai";
 import Markdown from "@/components/messages/Markdown.vue";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
 import { clipboard } from "@beekeeperstudio/plugin";
 import { isEmptyUIMessage } from "@/utils";
+import { UIMessage } from "@/types";
 
 export default {
   name: "Message",
