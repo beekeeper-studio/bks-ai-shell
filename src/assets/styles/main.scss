@@ -31,7 +31,7 @@
   justify-content: center;
 }
 
-.BksTextEditor .cm-scroller {
+.BksTextEditor .cm-scroller,
+.BksTextEditor .cm-tooltip.cm-tooltip-autocomplete>ul {
   font-family: var(--font-family-mono, monospace);
 }
-

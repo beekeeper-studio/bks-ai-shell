@@ -25,7 +25,8 @@
           </div>
           <bks-sql-text-editor ref="queryEditor" v-else-if="editing" :value="initialQueryEditorValue"
             @bks-initialized="handleQueryEditorInitialized" @bks-focus="isQueryEditorFocused = true"
-            @bks-blur="isQueryEditorFocused = false" @bks-value-change="queryEditorValue = $event.detail.value" />
+            :entities="entities" :columnsGetter="columnsGetter" @bks-blur="isQueryEditorFocused = false"
+            @bks-value-change="queryEditorValue = $event.detail.value" />
           <pre v-else><code class="hljs hljs-sql" data-lang="sql" v-html="queryHtml" /></pre>
         </div>
       </div>
@@ -68,7 +69,7 @@ import { mapGetters } from "pinia";
 import { useChatStore } from "@/stores/chat";
 import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
-import { clipboard, openTab } from "@beekeeperstudio/plugin";
+import { clipboard, getColumns, openTab } from "@beekeeperstudio/plugin";
 import { ToolUIPart } from "@/types";
 
 type RunQueryPart = Extract<ToolUIPart, { type: "tool-run_query" }>;
@@ -99,6 +100,7 @@ export default {
   },
   computed: {
     ...mapGetters(useChatStore, [
+      "entities",
       "sqlOrCode",
       "queryOrCode",
       "connectionInfo",
@@ -177,6 +179,17 @@ export default {
         });
         event.detail.editor.focus();
       });
+    },
+    async columnsGetter(entityName: string) {
+      const info = entityName.split(".");
+      let table = info[0];
+      let schema: string | undefined = undefined;
+      if (info.length === 2) {
+        schema = info[0];
+        table = info[1];
+      }
+      return getColumns(table, schema)
+        .then((columns) => columns.map((c) => c.name));
     },
   },
 };
