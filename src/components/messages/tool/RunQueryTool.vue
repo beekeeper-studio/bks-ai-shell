@@ -12,7 +12,10 @@
             <button class="btn btn-flat-2" :class="{ copied }" @click="copy">
               <span class="material-symbols-outlined copy-icon">content_copy</span>
               <span class="material-symbols-outlined copied-icon">check</span>
-              <span>Copy {{ sqlOrCode }}</span>
+              <span>
+                <template v-if="!copied">Copy {{ queryOrCode }}</template>
+                <template v-else>Copied</template>
+              </span>
             </button>
           </div>
         </div>
@@ -97,6 +100,7 @@ export default {
   computed: {
     ...mapGetters(useChatStore, [
       "sqlOrCode",
+      "queryOrCode",
       "connectionInfo",
       "supportOpenInQueryEditor",
     ]),

@@ -175,6 +175,12 @@ export const useChatStore = defineStore("chat", {
       }
       return "sql";
     },
+    queryOrCode() {
+      if (this.sqlOrCode === "sql") {
+        return "query";
+      }
+      return "code";
+    },
     supportOpenInQueryEditor(state) {
       return gt(state.appVersion, "5.3.0");
     },
