@@ -30,3 +30,8 @@
   align-items: center;
   justify-content: center;
 }
+
+.BksTextEditor .cm-scroller {
+  font-family: var(--font-family-mono, monospace);
+}
+

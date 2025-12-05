@@ -52,6 +52,10 @@ p {
   line-height: 1.5;
 }
 
+pre {
+  font-family: var(--font-family-mono, monospace);
+}
+
 /* Make the scrollbar look better */
 ::-webkit-scrollbar {
   width: 12px;
