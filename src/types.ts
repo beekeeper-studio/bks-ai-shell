@@ -1,4 +1,8 @@
-import { UIMessage as AIUIMessage, InferUITools } from "ai";
+import {
+  UIMessage as AIUIMessage,
+  InferUITools,
+  ToolUIPart as AIToolUIPart,
+} from "ai";
 import { tools } from "./tools";
 
 export type UIDataTypes = {
@@ -34,4 +38,6 @@ export type UIDataTypes = {
 }
 
 export type UIMessage = AIUIMessage<unknown, UIDataTypes, InferUITools<typeof tools>>;
+
+export type ToolUIPart = AIToolUIPart<InferUITools<typeof tools>>;
 

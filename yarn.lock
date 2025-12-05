@@ -14,7 +14,7 @@
     "@smithy/util-utf8" "^4.0.0"
     aws4fetch "^1.0.20"
 
-"@ai-sdk/anthropic@2.0.25", "@ai-sdk/anthropic@^2.0.25":
+"@ai-sdk/anthropic@2.0.25":
   version "2.0.25"
   resolved "https://registry.yarnpkg.com/@ai-sdk/anthropic/-/anthropic-2.0.25.tgz#ce48864647f673b4615168e10e0f5d414402ed92"
   integrity sha512-XuGg4Mk/hbbe34a27ElFbontKbQMi0lSIOw4iFpbzXowsvW/ld5tspFOcrjDrNcy+0z5iXSFVklwwQcNwe65SQ==
@@ -22,14 +22,13 @@
     "@ai-sdk/provider" "2.0.0"
     "@ai-sdk/provider-utils" "3.0.11"
 
-"@ai-sdk/gateway@2.0.15":
-  version "2.0.15"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-2.0.15.tgz#16db3b2fa8305a6b639d056ff4269127949cb9d5"
-  integrity sha512-i1YVKzC1dg9LGvt+GthhD7NlRhz9J4+ZRj3KELU14IZ/MHPsOBiFeEoCCIDLR+3tqT8/+5nIsK3eZ7DFRfMfdw==
+"@ai-sdk/anthropic@^2.0.53":
+  version "2.0.53"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/anthropic/-/anthropic-2.0.53.tgz#bf361ef25bb3f6018fb09824ac88007c9a0ed67d"
+  integrity sha512-ih7NV+OFSNWZCF+tYYD7ovvvM+gv7TRKQblpVohg2ipIwC9Y0TirzocJVREzZa/v9luxUwFbsPji++DUDWWxsg==
   dependencies:
     "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.17"
-    "@vercel/oidc" "3.0.5"
+    "@ai-sdk/provider-utils" "3.0.18"
 
 "@ai-sdk/gateway@2.0.18":
   version "2.0.18"
@@ -72,15 +71,6 @@
     "@ai-sdk/provider" "2.0.0"
     "@standard-schema/spec" "^1.0.0"
     eventsource-parser "^3.0.5"
-
-"@ai-sdk/provider-utils@3.0.17":
-  version "3.0.17"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-3.0.17.tgz#2f3d0be398d3f165efe8dd252b63aea6ac3896d1"
-  integrity sha512-TR3Gs4I3Tym4Ll+EPdzRdvo/rc8Js6c4nVhFLuvGLX/Y4V9ZcQMa/HTiYsHEgmYrf1zVi6Q145UEZUfleOwOjw==
-  dependencies:
-    "@ai-sdk/provider" "2.0.0"
-    "@standard-schema/spec" "^1.0.0"
-    eventsource-parser "^3.0.6"
 
 "@ai-sdk/provider-utils@3.0.18":
   version "3.0.18"
@@ -433,9 +423,29 @@
   resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.4.0.tgz#b5a9bf41b58950114cdb1c7efea6e5c57f39bdac"
   integrity sha512-GS7cnXw8tugo3MEwrcFoOCLkrWZ8kY5UHghtvcfAf0WnBxfHCrxuZbcq+ZP6ffVFN2Mc3aRbXeRrV77/bkY13A==
 
-"@beekeeperstudio/ui-kit@link:../beekeeper-studio/apps/ui-kit":
-  version "0.0.0"
-  uid ""
+"@beekeeperstudio/ui-kit@0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/ui-kit/-/ui-kit-0.3.1.tgz#e4dd5fbcf07a50c63c196cdaeae73d7a47e99c25"
+  integrity sha512-AUCuaz2J1tmp/XQdswxJgOvoWPB3gYQ/j42vcW8JS4l3TzThLQFL6ueJ1kXDwXPICu0iY++kr0Kum1gQTMVNlQ==
+  dependencies:
+    "@codemirror/autocomplete" "^6.18.4"
+    "@codemirror/commands" "^6.8.1"
+    "@codemirror/lang-html" "^6.4.9"
+    "@codemirror/lang-javascript" "^6.2.4"
+    "@codemirror/lang-json" "^6.0.1"
+    "@codemirror/lang-sql" "^6.8.0"
+    "@codemirror/language" "^6.11.0"
+    "@codemirror/lint" "^6.8.4"
+    "@codemirror/search" "^6.5.10"
+    "@codemirror/state" "^6.5.2"
+    "@codemirror/view" "^6.36.2"
+    "@lezer/highlight" "^1.2.1"
+    "@marimo-team/codemirror-languageserver" "^1.15.13"
+    "@replit/codemirror-emacs" "^6.1.0"
+    "@replit/codemirror-vim" "^6.3.0"
+    "@surrealdb/codemirror" "^1.0.0-beta.21"
+    ansi-to-html "^0.7.2"
+    highlight.js "^11.11.1"
 
 "@beekeeperstudio/vite-plugin@^1.0.3":
   version "1.0.3"
@@ -1422,6 +1432,11 @@
   resolved "https://registry.yarnpkg.com/@types/retry/-/retry-0.12.0.tgz#2b35eccfcee7d38cd72ad99232fbd58bffb3c84d"
   integrity sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==
 
+"@types/semver@^7.7.1":
+  version "7.7.1"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.7.1.tgz#3ce3af1a5524ef327d2da9e4fd8b6d95c8d70528"
+  integrity sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==
+
 "@types/uuid@^10.0.0":
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-10.0.0.tgz#e9c07fe50da0f53dc24970cca94d619ff03f6f6d"
@@ -1761,7 +1776,7 @@ agentkeepalive@^4.2.1:
   dependencies:
     humanize-ms "^1.2.1"
 
-ai@5.0.106:
+ai@5.0.106, ai@^5.0.106:
   version "5.0.106"
   resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.106.tgz#4a9a2d249a12aea9158c3bab11d0e463e0d6a149"
   integrity sha512-M5obwavxSJJ3tGlAFqI6eltYNJB0D20X6gIBCFx/KVorb/X1fxVVfiZZpZb+Gslu4340droSOjT0aKQFCarNVg==
@@ -1769,16 +1784,6 @@ ai@5.0.106:
     "@ai-sdk/gateway" "2.0.18"
     "@ai-sdk/provider" "2.0.0"
     "@ai-sdk/provider-utils" "3.0.18"
-    "@opentelemetry/api" "1.9.0"
-
-ai@^5.0.101:
-  version "5.0.101"
-  resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.101.tgz#aea90e8503192fb1fc75d94c6440e203d5bc5911"
-  integrity sha512-/P4fgs2PGYTBaZi192YkPikOudsl9vccA65F7J7LvoNTOoP5kh1yAsJPsKAy6FXU32bAngai7ft1UDyC3u7z5g==
-  dependencies:
-    "@ai-sdk/gateway" "2.0.15"
-    "@ai-sdk/provider" "2.0.0"
-    "@ai-sdk/provider-utils" "3.0.17"
     "@opentelemetry/api" "1.9.0"
 
 ansi-regex@^5.0.1:
@@ -3031,6 +3036,11 @@ semver@^7.6.3:
   version "7.7.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.1.tgz#abd5098d82b18c6c81f6074ff2647fd3e7220c9f"
   integrity sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==
+
+semver@^7.7.3:
+  version "7.7.3"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.3.tgz#4b5f4143d007633a8dc671cd0a6ef9147b8bb946"
+  integrity sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==
 
 shebang-command@^2.0.0:
   version "2.0.0"

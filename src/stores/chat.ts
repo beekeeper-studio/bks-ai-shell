@@ -15,6 +15,7 @@ import { ProviderSyncError } from "@/utils/ProviderSyncError";
 import { getAppVersion, getConnectionInfo, GetConnectionInfoResponse, getTables } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import type { SendOptions } from "@/composables/ai";
+import gt from "semver/functions/gt";
 
 export type Model = AvailableModels & {
   provider: AvailableProviders;
@@ -52,7 +53,7 @@ export const useChatStore = defineStore("chat", {
       databaseName: "",
       readOnlyMode: true,
     },
-    appVersion: "",
+    appVersion: "900.0.0",
   }),
   getters: {
     models() {
@@ -120,8 +121,8 @@ export const useChatStore = defineStore("chat", {
       return (state.defaultInstructions + "\n" + config.customInstructions).trim();
     },
     // FIXME move this to UI Kit?
-    formatterDialect() {
-      const d = this.connectionInfo.databaseType;
+    formatterDialect(state) {
+      const d = state.connectionInfo.databaseType;
       if (d === 'sqlserver') return 'tsql'
       if (d === 'sqlite') return 'sqlite'
       if (d === 'oracle') return 'plsql'
@@ -134,7 +135,7 @@ export const useChatStore = defineStore("chat", {
       return 'mysql' // we want this as the default
     },
     // FIXME move this to UI Kit?
-    identifierDialect() {
+    identifierDialect(state) {
       const mappings = {
         sqlserver: "mssql",
         sqlite: "sqlite",
@@ -145,10 +146,10 @@ export const useChatStore = defineStore("chat", {
         tidb: "mysql",
         redshift: "psql",
       };
-      return mappings[this.connectionInfo.databaseType] || "generic";
+      return mappings[state.connectionInfo.databaseType] || "generic";
     },
-    languageId() {
-      const d = this.connectionInfo.databaseType;
+    languageId(state) {
+      const d = state.connectionInfo.databaseType;
       if (d === "cassandra") return "text/x-cassandra";
       if (d === "clickhouse") return "text/x-mysql";
       if (d === "mysql" || d === "mariadb") return "text/x-mysql";
@@ -158,12 +159,24 @@ export const useChatStore = defineStore("chat", {
       return "text/x-sql";
     },
     /** For `ai.ts` */
-    sendOptions(): SendOptions {
+    sendOptions(state): SendOptions {
       return {
-        modelId: this.model?.id!,
-        providerId: this.model?.provider!,
+        modelId: state.model?.id!,
+        providerId: state.model?.provider!,
         systemPrompt: this.systemPrompt,
       }
+    },
+    sqlOrCode(state) {
+      if (
+        state.connectionInfo.databaseType === "redis"
+        || state.connectionInfo.databaseType === "mongodb"
+      )  {
+        return "code";
+      }
+      return "sql";
+    },
+    supportOpenInQueryEditor(state) {
+      return gt(state.appVersion, "5.3.0");
     },
   },
   actions: {
