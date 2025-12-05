@@ -17,7 +17,10 @@
           </div>
         </div>
         <div class="tool-input" :class="{ 'query-editor-focused': isQueryEditorFocused }">
-          <bks-sql-text-editor ref="queryEditor" v-if="editing" :value="initialQueryEditorValue"
+          <div v-if="state === 'input-streaming'" class="generating-label">
+            Generating<span class="dots"></span>
+          </div>
+          <bks-sql-text-editor ref="queryEditor" v-else-if="editing" :value="initialQueryEditorValue"
             @bks-initialized="handleQueryEditorInitialized" @bks-focus="isQueryEditorFocused = true"
             @bks-blur="isQueryEditorFocused = false" @bks-value-change="queryEditorValue = $event.detail.value" />
           <pre v-else><code class="hljs hljs-sql" data-lang="sql" v-html="queryHtml" /></pre>
@@ -98,10 +101,6 @@ export default {
       "supportOpenInQueryEditor",
     ]),
     queryHtml() {
-      if (!this.input?.query) {
-        return "Generating...";
-      }
-
       return hljs.highlight(this.input?.query ?? "", {
         language:
           this.connectionInfo.databaseType === "mongodb"
@@ -217,12 +216,35 @@ bks-sql-text-editor {
   border-bottom-right-radius: 8px;
 }
 
-.tool-input {
-  /* border: 1px solid var(--border-color); */
-  /* border-top: none; */
+.tool-input .query-editor-focused {
+  outline: 1px solid var(--focus-visible-outline-color);
+}
 
-  &.query-editor-focused {
-    outline: 1px solid var(--focus-visible-outline-color);
+.generating-label {
+  padding-block: 0.25rem;
+  padding-inline: 0.5rem;
+  font-family: var(--font-family-mono, monospace);
+  font-style: italic;
+  color: var(--text-light);
+  user-select: none;
+
+  .dots::after {
+    content: "..";
+    animation: twoDots 1s steps(2, end) infinite;
+  }
+}
+
+@keyframes twoDots {
+  0% {
+    content: "..";
+  }
+
+  50% {
+    content: "...";
+  }
+
+  100% {
+    content: "..";
   }
 }
 </style>
