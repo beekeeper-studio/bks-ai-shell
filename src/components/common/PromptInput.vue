@@ -2,7 +2,7 @@
   <div class="chat-input-container">
     <BaseInput type="textarea" ref="input" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
       @keydown.down="handleDownArrow" placeholder="Type your message here" rows="1" />
-    <div class="actions">
+    <div class="actions" @click.self="focus()">
       <div class="model-selection" :class="{ 'please-select-a-model': pleaseSelectAModel }"
         @click="handleModelSelectionClick">
         <Menu ref="menu" id="overlay_menu" :model="filteredModels" :popup="true">
@@ -265,3 +265,9 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.actions {
+  cursor: text;
+}
+</style>

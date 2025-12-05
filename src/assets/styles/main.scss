@@ -5,6 +5,8 @@
 @use "sass:color";
 @use "primevue";
 
+@import "@beekeeperstudio/ui-kit/style.css" layer(ui-kit);
+
 #app {
   height: 100%;
   display: flex;
@@ -27,4 +29,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.BksTextEditor .cm-scroller,
+.BksTextEditor .cm-tooltip.cm-tooltip-autocomplete>ul {
+  font-family: var(--font-family-mono, monospace);
 }
