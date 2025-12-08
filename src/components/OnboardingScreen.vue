@@ -8,7 +8,7 @@
     <p>
       <ExternalLink href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/">Learn more</ExternalLink>
       -
-      <ExternalLink href="https://www.youtube.com/watch?v=pAhQUFDeiwc">60s Walkthough Video</ExternalLink>
+      <ExternalLink href="https://www.youtube.com/watch?v=pAhQUFDeiwc">90s Walkthough Video</ExternalLink>
     </p>
     <form @submit.prevent="$emit('submit')">
       <ApiKeyForm dropdown-based @change="changed = true" @change-provider="$event === 'ollama' && (changed = true)" />
