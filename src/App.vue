@@ -4,8 +4,7 @@
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
-    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" :openaiApiKey="openaiApiKey"
-      :anthropicApiKey="anthropicApiKey" :googleApiKey="googleApiKey" @manage-models="handleManageModels"
+    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
     <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
     <Dialog :visible="showOnboarding" :closable="false" :draggable="false">
@@ -26,7 +25,7 @@ import Configuration, {
   PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
-import { getData, notify } from "@beekeeperstudio/plugin";
+import { getData, log } from "@beekeeperstudio/plugin";
 import { Dialog } from "primevue";
 
 type Page = "starting" | "chat-interface";
@@ -72,11 +71,7 @@ export default {
     } catch (e) {
       this.showConfiguration = true;
       this.error = e;
-      notify("pluginError", {
-        message: `Failed to initialize: ${e?.message || e}`,
-        error: e?.name,
-        stack: e?.stack,
-      });
+      log.error(e);
     } finally {
       clearTimeout(loadingTimer);
     }

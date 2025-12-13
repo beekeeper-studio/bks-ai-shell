@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="chat-container"
-    :class="{ 'empty-chat': messages.length === 0 }"
-    :data-status="status"
-  >
+  <div class="chat-container" :class="{ 'empty-chat': messages.length === 0 }" :data-status="status">
     <div class="scroll-container" ref="scrollContainerRef">
       <div class="header">
         <button class="btn btn-flat-2 settings-btn" @click="$emit('open-configuration')">
@@ -20,31 +16,27 @@
         </p>
       </div>
       <div class="chat-messages">
-        <message
-          v-for="(message, index) in messages"
-          :key="message.id"
-          :message="message"
-          :pending-tool-call-ids="pendingToolCallIds"
-          :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
-          @accept-permission="acceptPermission"
-          @reject-permission="rejectPermission"
-        />
-        <div
-          class="message error"
-          v-if="isUnexpectedError"
-        >
+        <template v-for="(message, index) in messages" :key="message.id">
+          <message
+            v-if="
+              !(message.role === 'assistant' && message.parts.find((p) => p.type === 'data-userEditedToolCall'))
+                && !(message.role === 'user' && message.parts.find((p) => p.type === 'data-editedQuery'))
+              "
+            :message="message"
+            :pending-tool-call-ids="pendingToolCallIds"
+            :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
+            @accept-permission="acceptPermission" @reject-permission="handleRejectPermission" />
+        </template>
+        <div class="message error" v-if="isUnexpectedError">
           <div class="message-content">
             Something went wrong.
             <div v-if="isOllamaToolError" class="error-hint">
-            💡 <strong>Hint:</strong> This might be because your Ollama model doesn't support tools. Try using a different model, or switch to a different provider.
+              💡 <strong>Hint:</strong> This might be because your Ollama model doesn't support tools. Try using a
+              different model, or switch to a different provider.
             </div>
             <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
             <pre v-else v-text="truncatedError" />
-            <button
-              v-if="isErrorTruncated"
-              @click="showFullError = !showFullError"
-              class="btn show-more-btn"
-            >
+            <button v-if="isErrorTruncated" @click="showFullError = !showFullError" class="btn show-more-btn">
               {{ showFullError ? "Show less" : "Show more" }}
             </button>
             <button class="btn" @click="() => reload()">
@@ -53,31 +45,21 @@
             </button>
           </div>
         </div>
-        <div
-          class="message error"
-          v-if="noModelError"
-        >
+        <div class="message error" v-if="noModelError">
           <div class="message-content">No model selected</div>
         </div>
-        <div
-          class="spinner-container"
-          :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
-        >
+        <div class="spinner-container" :style="{ visibility: showSpinner ? 'visible' : 'hidden' }">
           <span class="spinner" />
         </div>
       </div>
-      <button
-        v-if="!isAtBottom"
-        @click="scrollToBottom({ smooth: true })"
-        class="btn scroll-down-btn"
-        title="Scroll to bottom"
-      >
+      <button v-if="!isAtBottom" @click="scrollToBottom({ smooth: true })" class="btn scroll-down-btn"
+        title="Scroll to bottom">
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
     </div>
     <div class="chat-input-container-container">
       <PromptInput ref="promptInput" storage-key="inputHistory" :processing="processing" :selected-model="model"
-       @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop"  />
+        @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop" />
     </div>
   </div>
 </template>
@@ -88,9 +70,9 @@ import { useChatStore, Model } from "@/stores/chat";
 import _ from "lodash";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
-import { Message as MessageType } from "ai";
+import type { UIMessage } from "ai";
 import { PropType } from "vue";
-import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
+import { mapActions, mapGetters, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
 import { useInternalDataStore } from "@/stores/internalData";
 import BaseInput from "@/components/common/BaseInput.vue";
@@ -113,12 +95,9 @@ export default {
 
   props: {
     initialMessages: {
-      type: Array as PropType<MessageType[]>,
+      type: Array as PropType<UIMessage[]>,
       required: true,
     },
-    anthropicApiKey: String,
-    openaiApiKey: String,
-    googleApiKey: String,
   },
 
   setup(props) {
@@ -148,7 +127,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(useChatStore, ["systemPrompt"]),
+    ...mapGetters(useChatStore, ["systemPrompt", "sendOptions"]),
     ...mapWritableState(useChatStore, ["model"]),
     processing() {
       if (this.askingPermission) return false;
@@ -238,8 +217,8 @@ export default {
       // Calculate if we're near bottom (within 50px of bottom)
       const isNearBottom =
         scrollContainer.scrollHeight -
-          scrollContainer.scrollTop -
-          scrollContainer.clientHeight <
+        scrollContainer.scrollTop -
+        scrollContainer.clientHeight <
         50;
 
       this.isAtBottom = isNearBottom;
@@ -265,11 +244,11 @@ export default {
         this.rejectPermission();
       }
 
-      this.send(input, this.getSendOptions());
+      this.send(input, this.sendOptions);
     },
 
     async reload() {
-      await this.retry(this.getSendOptions());
+      await this.retry(this.sendOptions);
     },
 
     stop() {
@@ -300,17 +279,15 @@ export default {
       this.model = model;
     },
 
-    getSendOptions() {
-      if (!this.model) {
-        throw new Error("No model selected");
-      }
-
-      return {
-        modelId: this.model.id,
-        providerId: this.model.provider,
-        systemPrompt: this.systemPrompt,
-      }
-    }
+    handleRejectPermission(options: {
+      toolCallId: string;
+      editedQuery?: string;
+    }) {
+      this.rejectPermission({
+        ...options,
+        sendOptions: this.sendOptions,
+      });
+    },
   },
 };
 </script>
