@@ -30,7 +30,7 @@ import Configuration, {
   PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
-import { getData, notify } from "@beekeeperstudio/plugin";
+import { getData, log } from "@beekeeperstudio/plugin";
 import { Dialog } from "primevue";
 
 type Page = "starting" | "chat-interface";
@@ -76,11 +76,7 @@ export default {
     } catch (e) {
       this.showConfiguration = true;
       this.error = e;
-      notify("pluginError", {
-        message: `Failed to initialize: ${e?.message || e}`,
-        error: e?.name,
-        stack: e?.stack,
-      });
+      log.error(e);
     } finally {
       clearTimeout(loadingTimer);
     }
