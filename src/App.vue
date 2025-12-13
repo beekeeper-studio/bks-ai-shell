@@ -7,15 +7,10 @@
     <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
     <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
-    <div class="onboarding-screen-popover-container" v-if="showOnboarding">
-      <div class="onboarding-screen-popover" v-kbd-trap="true">
-        <button class="btn close-btn" @click="closeOnboardingScreen">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-        <OnboardingScreen @submit="closeOnboardingScreen"
-          @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
-      </div>
-    </div>
+    <Dialog :visible="showOnboarding" :closable="false" :draggable="false">
+      <OnboardingScreen @submit="closeOnboardingScreen"
+        @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
+    </Dialog>
   </div>
 </template>
 
