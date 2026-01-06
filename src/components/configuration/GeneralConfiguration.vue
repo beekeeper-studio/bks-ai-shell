@@ -37,7 +37,7 @@
         >default instructions</ExternalLink
       >
       and included with every message you send as a system prompt. These
-      instructions will be applied locally to the current connection.</template
+      instructions will be applied to the current connection.</template
     >
   </BaseInput>
   <BaseInput
