@@ -24,7 +24,7 @@
     :model-value="currentLocalInstructions"
     @change="setCustomLocalInstructions($event.target.value)"
     type="textarea"
-    placeholder="E.g. Before running a query, analyze it for any potential issues."
+    placeholder="E.g. The structure of this database is ..."
     rows="4"
   >
     <template #label>
