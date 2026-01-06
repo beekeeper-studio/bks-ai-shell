@@ -1,0 +1,197 @@
+:root {
+  // Button
+  --p-button-primary-focus-ring-color: var(--focus-visible-outline-color);
+
+  --p-button-text-secondary-hover-background: var(--p-togglebutton-background);
+
+  --p-button-icon-only-width: 2rem;
+  --p-icon-size: 0.875rem;
+
+  --p-button-focus-ring-style: var(--focus-visible-outline-style);
+  --p-button-focus-ring-width: var(--focus-visible-outline-width);
+  --p-button-focus-ring-offset: 2px;
+  // -----------------------------------
+
+  // Select Button
+  --p-selectbutton-border-radius: 8px;
+  // -----------------------------------
+
+  // Toggle Button
+  --p-togglebutton-color: color-mix(in srgb, var(--theme-base) 60%, var(--theme-bg));
+  --p-togglebutton-background: color-mix(in srgb, var(--theme-base) 6%, var(--theme-bg));
+  --p-togglebutton-padding: 0.25rem 0.25rem;
+  --p-togglebutton-font-weight: 700;
+  --p-togglebutton-border-radius: 8px;
+  --p-togglebutton-focus-ring-color: var(--focus-visible-outline-color);
+  --p-togglebutton-focus-ring-style: var(--focus-visible-outline-style);
+  --p-togglebutton-focus-ring-width: var(--focus-visible-outline-width);
+  --p-togglebutton-focus-ring-offset: var(--p-button-focus-ring-offset);
+  --p-togglebutton-transition-duration: var(--p-transition-duration);
+
+  --p-togglebutton-hover-background: var(--p-togglebutton-background);
+  --p-togglebutton-hover-color: var(--theme-base);
+  --p-togglebutton-checked-color: var(--theme-base);
+  --p-togglebutton-checked-background: var(--p-togglebutton-background);
+
+  --p-togglebutton-content-padding: 0.1rem 0.75rem;
+  --p-togglebutton-content-border-radius: 8px;
+
+  --p-togglebutton-content-checked-background: color-mix(in srgb,
+      var(--theme-base) 15%,
+      var(--theme-bg));
+  // -----------------------------------
+
+  // Select
+  --p-select-background: color-mix(
+    in srgb,
+    var(--theme-base) 6%,
+    var(--theme-bg));
+  --p-select-color: var(--text-dark);
+  --p-select-border-color: var(--border-color);
+  --p-select-border-radius: 8px;
+  --p-select-padding-x: 0.75rem;
+  --p-select-padding-y: 0.5rem;
+  --p-select-dropdown-width: 1.5rem;
+
+  --p-select-overlay-border-radius: var(--p-menu-border-radius);
+  --p-select-overlay-color: var(--p-menu-color);
+  --p-select-overlay-background: var(--p-menu-background);
+  --p-select-overlay-shadow: var(--p-menu-shadow);
+
+  --p-select-option-color: var(--text-dark);
+  --p-select-option-padding: var(--p-menu-item-padding);
+  --p-select-option-border-radius: var(--p-menu-item-border-radius);
+
+  --p-select-option-selected-color: var(--p-menu-item-focus-color);
+  --p-select-option-selected-background: var(--p-menu-item-focus-background);
+  --p-select-option-selected-focus-color: var(--p-menu-item-focus-color);
+  --p-select-option-selected-focus-background: var(--p-menu-item-focus-background);
+  --p-select-option-focus-background: var(--p-menu-item-focus-background);
+  --p-select-option-focus-color: var(--p-menu-item-focus-color);
+
+  --p-select-placeholder-color: var(--text-light);
+  // -----------------------------------
+
+
+  // Dialog
+  --p-dialog-background: var(--theme-bg);
+  --p-dialog-border-radius: 8px;
+  --p-dialog-shadow: 0 0 0.5rem var(--query-editor-bg);
+  --p-dialog-color: var(--text-dark);
+
+  --p-dialog-header-padding: 1.2rem 1.2rem 0.8rem;
+
+  --p-dialog-title-font-weight: 500;
+  --p-dialog-title-font-size: 1.1rem;
+
+  --p-dialog-content-padding: 0 1.2rem 1.75rem;
+  --p-dialog-footer-padding: 0 1.2rem 1.2rem;
+  --p-dialog-footer-gap: 0.5rem;
+  // -----------------------------------
+
+  // Menu
+  --p-menu-border-radius: 8px;
+  --p-menu-color: var(--text);
+  --p-menu-background: color-mix(in srgb,
+      var(--theme-base) 6%,
+      var(--theme-bg));
+  --p-menu-shadow: 0 0 0.5rem var(--theme-bg);
+
+  --p-menu-submenu-label-font-weight: normal;
+
+  --p-menu-list-padding: 0.3rem 0;
+
+  --p-menu-item-color: var(--text-dark);
+  // --p-menu-item-padding: 0.482rem 0.8rem;
+  --p-menu-item-padding: 0.2855rem 0.8rem;
+  --p-menu-item-focus-background: color-mix(in srgb,
+      var(--theme-base) 11%,
+      var(--theme-bg));
+  --p-menu-item-focus-color: var(--theme-base);
+  --p-menu-item-gap: 0.5rem;
+
+  --p-menu-separator-border-color: color-mix(in srgb,
+      var(--theme-base) 10%,
+      var(--theme-bg));
+  // -----------------------------------
+
+  // Context Menu -- pretty much the same as menu
+  --p-contextmenu-border-radius: var(--p-menu-border-radius);
+  --p-contextmenu-color: var(--p-menu-color);
+  --p-contextmenu-background: var(--p-menu-background);
+  --p-contextmenu-shadow: var(--p-menu-shadow);
+
+  --p-contextmenu-submenu-label-font-weight: var(--p-menu-submenu-label-font-weight);
+
+  --p-contextmenu-item-padding: var(--p-menu-item-padding);
+  --p-contextmenu-item-border-radius: var(--p-menu-item-border-radius);
+  --p-contextmenu-item-focus-background: var(--p-menu-item-focus-background);
+  --p-contextmenu-item-focus-color: var(--p-menu-item-focus-color);
+  // -----------------------------------
+
+  // Overlay
+  --p-mask-background: rgb(from var(--theme-bg) r g b / 0.3);
+  // -----------------------------------
+
+  // Popover
+  --p-popover-gutter: 0.5rem;
+  --p-popover-arrow-offset: 1rem;
+  --p-popover-background: color-mix(in srgb,
+      var(--theme-base) 6%,
+      var(--query-editor-bg));
+  --p-popover-color: var(--text);
+  --p-popover-border-color: transparent;
+  --p-popover-border-radius: 8px;
+  --p-popover-box-shadow: 0 0 0.5rem var(--theme-bg);
+  // -----------------------------------
+
+  // Progress
+  --p-progressspinner-color-one: var(--theme-primary);
+  --p-progressspinner-color-two: var(--theme-primary);
+  --p-progressspinner-color-three: var(--theme-primary);
+  --p-progressspinner-color-four: var(--theme-primary);
+  // -----------------------------------
+
+  // Mask (overlay)
+  --p-mask-transition-duration: 0.2s;
+  // -----------------------------------
+}
+
+.p-menu .p-menu-item,
+.p-contextmenu .p-contextmenu-item,
+.p-select-list, .p-select-option {
+  // FIXME should be 0.9rem. But this should match the app font size for now.
+  font-size: 12.6px;
+
+  .menu-icon {
+    font-size: 1.5em;
+    width: 1em;
+    height: 1em;
+  }
+
+  a {
+    font-weight: normal;
+  }
+}
+
+.p-select .p-select-label {
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.p-menu {
+  overflow: hidden;
+}
+
+.p-menu-list {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.p-menu-item.selected {
+  background-color: var(--p-select-option-selected-background);
+}
+
+.p-dialog {
+  max-width: 90vw;
+}

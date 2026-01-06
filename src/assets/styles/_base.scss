@@ -1,5 +1,5 @@
 :root {
-  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-family: var(--font-family, "Roboto", Helvetica, Arial, sans-serif);
 }
 
 * {
@@ -46,6 +46,14 @@ ol, ul {
 a {
   color: var(--link-color);
   font-weight: 700;
+}
+
+p {
+  line-height: 1.5;
+}
+
+pre, code {
+  font-family: var(--font-family-mono, monospace);
 }
 
 /* Make the scrollbar look better */

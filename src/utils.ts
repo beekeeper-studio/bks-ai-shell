@@ -3,6 +3,7 @@ import { Model } from "./stores/chat";
 import _ from "lodash";
 import { identify } from "sql-query-identifier";
 
+/** It's safe cause we hope it doesn't throw any errors, hopefully. */
 export function safeJSONStringify(value: any, ...args: any): string {
   return JSON.stringify(
     value,
@@ -27,7 +28,7 @@ export function parseErrorContent(content: string) {
   return err;
 }
 
-export function isErrorContent(str: string) {
+export function isErrorContent(str: unknown): str is string {
   try {
     return JSON.parse(str)?.type === "error";
   } catch (e) {
@@ -94,7 +95,7 @@ export function isEmptyUIMessage(message: UIMessage): boolean {
       return false;
     }
 
-    if (part.type === "text" && _.isEmpty(part.text)) {
+    if ((part.type === "text" || part.type === "reasoning") && _.isEmpty(part.text)) {
       return false;
     }
 

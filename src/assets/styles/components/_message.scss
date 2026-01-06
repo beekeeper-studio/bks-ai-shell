@@ -115,7 +115,6 @@
 
     .tool {
       .tool-error {
-        margin-top: 0.5rem;
         color: var(--brand-danger);
       }
 
@@ -145,7 +144,7 @@
         flex-direction: column;
 
         .tool-name {
-          margin-bottom: 0.25rem;
+          margin-bottom: 0.5rem;
         }
 
         .no-rows {
@@ -170,6 +169,9 @@
           border-top-right-radius: 0;
           height: 2rem;
           font-weight: normal;
+          border-width: 0 1px 1px;
+          border-style: solid;
+          border-color: var(--border-color);
 
           .open-icon {
             font-size: 1.2rem;
@@ -182,6 +184,11 @@
   &.user .message-actions {
     margin-top: 0.5rem;
     justify-content: flex-end;
+
+    // This fixes https://github.com/beekeeper-studio/bks-ai-shell/issues/61
+    .btn:last-child .title-popup {
+      right: 0;
+    }
   }
 
   .message-content .code-block .actions .btn {
@@ -194,5 +201,34 @@
   .message-content.literally-empty {
     font-style: italic;
     --theme-text-message-system: var(--text-muted);
+  }
+
+  [data-tool-state="input-streaming"] {
+    &>.markdown code .hljs-comment::after {
+      content: "";
+      animation: dots 2.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% {
+        content: "";
+      }
+
+      25% {
+        content: ".";
+      }
+
+      50% {
+        content: "..";
+      }
+
+      75% {
+        content: "...";
+      }
+
+      100% {
+        content: "";
+      }
+    }
   }
 }
