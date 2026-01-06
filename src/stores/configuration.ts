@@ -22,6 +22,7 @@ import {
   disabledModelsByDefault,
   providerConfigs,
 } from "@/config";
+import { useChatStore } from "./chat";
 
 type Model = {
   id: string;
@@ -32,6 +33,12 @@ type Configurable = {
   // ==== GENERAL ====
   /** Append custom instructions to the default system instructions. */
   customInstructions: string;
+  /** Append custom instructions to the default system instructions.
+   * It's applied based on the connection ID */
+  customLocalInstructions: {
+    connectionId: string;
+    instructions: string;
+  }[];
   allowExecutionOfReadOnlyQueries: boolean;
   /** TODO: Enable summarization. Not implemented yet. */
   summarization: boolean;
@@ -69,6 +76,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
 const defaultConfiguration: ConfigurationState = {
   // ==== GENERAL ====
   customInstructions: "",
+  customLocalInstructions: [],
   allowExecutionOfReadOnlyQueries: false,
   summarization: true,
 
@@ -132,6 +140,14 @@ export const useConfigurationStore = defineStore("configuration", {
           )
           .map((model) => ({ ...model, providerId }));
       });
+    },
+
+    currentLocalInstructions(state): string {
+      const connection = useChatStore().connectionInfo;
+      const localInstructions = state.customLocalInstructions.find(
+        (i) => i.connectionId === `${connection.workspaceId}:${connection.id}`,
+      );
+      return localInstructions?.instructions || "";
     },
   },
 
@@ -200,6 +216,21 @@ export const useConfigurationStore = defineStore("configuration", {
         disabledModels.splice(idx, 1);
       }
       await this.configure("disabledModels", disabledModels);
+    },
+
+    async setCustomLocalInstructions(instructions: string) {
+      const connection = useChatStore().connectionInfo;
+      const connectionId = `${connection.workspaceId}:${connection.id}`;
+      const localInstructions = _.clone(this.customLocalInstructions);
+      const idx = localInstructions.findIndex(
+        (i) => i.connectionId === connectionId,
+      );
+      if (idx === -1) {
+        localInstructions.push({ connectionId, instructions });
+      } else {
+        localInstructions[idx] = { connectionId, instructions };
+      }
+      await this.configure("customLocalInstructions", localInstructions);
     },
   },
 });
