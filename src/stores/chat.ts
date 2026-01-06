@@ -12,7 +12,7 @@ import { useTabState } from "./tabState";
 import { createProvider } from "@/providers";
 import _ from "lodash";
 import { ProviderSyncError } from "@/utils/ProviderSyncError";
-import { getAppVersion, getConnectionInfo, GetConnectionInfoResponse, getTables } from "@beekeeperstudio/plugin";
+import { ConnectionInfo, getAppVersion, getConnectionInfo, getTables } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import type { SendOptions } from "@/composables/ai";
 import gt from "semver/functions/gt";
@@ -32,8 +32,7 @@ type ChatState = {
   errors: ProviderSyncError[];
   defaultInstructions: string;
   entities: Entity[];
-  // FIXME make a new type
-  connectionInfo: GetConnectionInfoResponse['result'];
+  connectionInfo: ConnectionInfo;
   appVersion: Awaited<ReturnType<typeof getAppVersion>>;
 };
 
@@ -118,7 +117,13 @@ export const useChatStore = defineStore("chat", {
     },
     systemPrompt(state) {
       const config = useConfigurationStore();
-      return (state.defaultInstructions + "\n" + config.customInstructions).trim();
+      return (
+        state.defaultInstructions +
+        "\n" +
+        config.customInstructions +
+        "\n" +
+        config.currentLocalInstructions
+      ).trim();
     },
     // FIXME move this to UI Kit?
     formatterDialect(state) {
