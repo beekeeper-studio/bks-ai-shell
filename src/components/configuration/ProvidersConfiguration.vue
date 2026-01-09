@@ -32,7 +32,11 @@
     <h3>Ollama</h3>
     <div v-for="(error, index) in ollamaErrors" :key="index" class="error-message">
       <template v-if="error.includes('[1]')">
-        We couldn’t reach Ollama. The server may not be running or CORS might be blocking the request.
+        Ollama is unreachable. It may not be running or CORS may be blocking
+        the request. Check out our
+        <ExternalLink
+          href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/#problem-fetching-ollama"
+        >troubleshooting docs</ExternalLink>.
       </template>
       <template v-else>{{ error }}</template>
     </div>
@@ -53,6 +57,7 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { mapState, mapActions } from "pinia";
 import { AvailableProvidersWithDynamicModels } from "@/config";
 import { useChatStore } from "@/stores/chat";
+import ExternalLink from "../common/ExternalLink.vue";
 
 export default {
   name: "ProvidersConfiguration",
@@ -62,6 +67,7 @@ export default {
     ApiInfo,
     BaseInput,
     ToggleFormArea,
+    ExternalLink,
   },
 
   computed: {
