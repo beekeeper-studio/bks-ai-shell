@@ -84,8 +84,7 @@ export abstract class BaseProvider {
     } else if (APICallError.isInstance(error)) {
       if (
         error.data?.error?.code === "invalid_api_key" ||
-        error.data?.error?.message === "invalid x-api-key" ||
-        error.data?.error?.code === 400
+        error.data?.error?.message === "invalid x-api-key"
       ) {
         return `The API key is invalid.`;
       }
