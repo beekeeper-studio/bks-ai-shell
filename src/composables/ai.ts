@@ -366,7 +366,7 @@ class AIShellChat {
     const provider = createProvider(sendOptions.providerId);
     return provider.stream({
       modelId: sendOptions.modelId,
-      messages: convertToModelMessages<UIMessage>(m.messages, {
+      messages: await convertToModelMessages<UIMessage>(m.messages, {
         convertDataPart(part) {
           if (part.type === "data-editedQuery") {
             return {
