@@ -1,6 +1,6 @@
 import { notify } from "@beekeeperstudio/plugin";
-import { generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
-import { AvailableModels, defaultTemperature } from "@/config";
+import { convertToModelMessages, generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
+import { AvailableModels, AvailableProviders, defaultTemperature } from "@/config";
 import { z } from "zod/v3";
 // import { UserRejectedError } from "@/tools";
 import {
@@ -11,28 +11,42 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { ModelMessage, ProviderOptions } from '@ai-sdk/provider-utils';
+import { ProviderOptions } from '@ai-sdk/provider-utils';
+import { UIMessage } from "@/types";
 
-export type Messages = ModelMessage[];
+export type StreamOptions = {
+  messages: UIMessage[];
+  signal?: AbortSignal;
+  tools: ToolSet;
+  modelId: AvailableModels["id"];
+  temperature?: number;
+  systemPrompt?: string;
+}
 
 export abstract class BaseProvider {
+  abstract get providerId(): AvailableProviders;
+
   abstract getModel(id: string): LanguageModel;
 
   getProviderOptions(): ProviderOptions | undefined {
     return undefined;
   }
 
-  async stream(options: {
-    messages: Messages;
-    signal?: AbortSignal;
-    tools: ToolSet;
-    modelId: AvailableModels["id"];
-    temperature?: number;
-    systemPrompt?: string;
-  }) {
+  async stream(options: StreamOptions) {
     const result = streamText({
       model: this.getModel(options.modelId),
-      messages: options.messages,
+      messages: await convertToModelMessages<UIMessage>(options.messages, {
+        convertDataPart(part) {
+          if (part.type === "data-editedQuery") {
+            return {
+              type: "text",
+              text: "Please run the following code instead:\n```\n"
+                + part.data.query
+                + "\n```",
+            };
+          }
+        },
+      }),
       abortSignal: options.signal,
       system: options.systemPrompt,
       tools: options.tools,
@@ -41,6 +55,7 @@ export abstract class BaseProvider {
       providerOptions: this.getProviderOptions(),
     });
     return result.toUIMessageStreamResponse({
+      originalMessages: options.messages,
       onError: (error) => {
         notify("pluginError", {
           message: error.message,
@@ -48,6 +63,21 @@ export abstract class BaseProvider {
           stack: error.stack,
         });
         return this.getErrorMessage(error);
+      },
+      messageMetadata: ({ part }) => {
+        if (part.type === "start") {
+          return {
+            createdAt: Date.now(),
+            modelId: options.modelId,
+            providerId: this.providerId,
+          };
+        }
+
+        if (part.type === "finish") {
+          return {
+            usage: part.totalUsage,
+          };
+        }
       },
     });
   }

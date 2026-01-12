@@ -70,7 +70,7 @@ import { useChatStore, Model } from "@/stores/chat";
 import _ from "lodash";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
-import type { UIMessage } from "ai";
+import type { UIMessage } from "@/types";
 import { PropType } from "vue";
 import { mapActions, mapGetters, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";

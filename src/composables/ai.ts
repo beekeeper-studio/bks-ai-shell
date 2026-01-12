@@ -1,33 +1,21 @@
 import { Chat } from "@ai-sdk/vue";
-import { computed, ComputedRef, ref, Ref, watch } from "vue";
-import { AvailableProviders, AvailableModels } from "@/config";
-import { tools, userRejectedToolCall } from "@/tools";
-import {
-  DefaultChatTransport,
-  convertToModelMessages,
-  ChatStatus,
-  ChatOnToolCallCallback,
-} from "ai";
+import { computed, ComputedRef, ref, watch } from "vue";
+import { userRejectedToolCall } from "@/tools";
+import { ChatStatus, ChatOnToolCallCallback } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
-import { FetchFunction } from "@ai-sdk/provider-utils";
 import { reactive } from "vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import { isReadQuery, safeJSONStringify } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
 import { lastAssistantMessageIsCompleteWithToolCalls } from "@/utils/lastAssistantMessageIsCompleteWithToolCalls";
 import mitt from "mitt";
-import { UIMessage } from "@/types";
+import { SendOptions, UIMessage } from "@/types";
+import { ChatTransport } from "@/providers/ChatTransport";
 
 type AIOptions = {
   initialMessages: UIMessage[];
-};
-
-export type SendOptions = {
-  providerId: AvailableProviders;
-  modelId: AvailableModels["id"];
-  systemPrompt?: string;
 };
 
 type ToolCall = {
@@ -60,11 +48,10 @@ class AIShellChat {
   }>();
 
   constructor(options: AIOptions) {
-    this.fetch = this.fetch.bind(this);
     this.handleToolCall = this.handleToolCall.bind(this);
 
     this.chat = new Chat<UIMessage>({
-      transport: new DefaultChatTransport({ fetch: this.fetch }),
+      transport: new ChatTransport(),
       messages: options.initialMessages,
       sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
       onToolCall: this.handleToolCall,
@@ -263,14 +250,11 @@ class AIShellChat {
     options: Parameters<
       ChatOnToolCallCallback<UIMessage>
     >[0],
-  ) {
+  ): Promise<void> {
     const toolCall = options.toolCall;
 
     if (toolCall.dynamic) {
-      return safeJSONStringify({
-        type: "error",
-        message: "Dynamic tool calls are not supported",
-      });
+      throw new Error("Dynamic tool calls are not supported");
     }
 
     if (toolCall.toolName === "run_query") {
@@ -346,42 +330,6 @@ class AIShellChat {
         errorText: e?.message || e.toString() || "Unknown error",
       };
     }
-  }
-
-  /** Custom fetch function */
-  private async fetch(
-    url: Parameters<FetchFunction>[0],
-    fetchOptions: Parameters<FetchFunction>[1],
-  ) {
-    if (!fetchOptions) {
-      throw new Error("Fetch options are missing");
-    }
-
-    if (!fetchOptions.body) {
-      throw new Error("Fetch does not have a body");
-    }
-
-    const m = JSON.parse(fetchOptions.body as string) as any;
-    const sendOptions = m.sendOptions as SendOptions;
-    const provider = createProvider(sendOptions.providerId);
-    return provider.stream({
-      modelId: sendOptions.modelId,
-      messages: await convertToModelMessages<UIMessage>(m.messages, {
-        convertDataPart(part) {
-          if (part.type === "data-editedQuery") {
-            return {
-              type: "text",
-              text: "Please run the following code instead:\n```\n"
-                + part.data.query
-                + "\n```",
-            };
-          }
-        },
-      }),
-      signal: fetchOptions.signal,
-      tools,
-      systemPrompt: sendOptions.systemPrompt,
-    });
   }
 
   private async saveMessages() {

@@ -14,7 +14,7 @@ import _ from "lodash";
 import { ProviderSyncError } from "@/utils/ProviderSyncError";
 import { getAppVersion, getConnectionInfo, GetConnectionInfoResponse, getTables } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
-import type { SendOptions } from "@/composables/ai";
+import type { SendOptions } from "@/types";
 import gt from "semver/functions/gt";
 
 export type Model = AvailableModels & {

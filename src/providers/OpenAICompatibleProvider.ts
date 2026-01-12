@@ -1,3 +1,4 @@
+import { AvailableProviders } from "@/config";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -10,6 +11,10 @@ export class OpenAICompatibleProvider extends BaseProvider {
     },
   ) {
     super();
+  }
+
+  get providerId(): AvailableProviders {
+    return "openaiCompat";
   }
 
   getModel(id: string) {
