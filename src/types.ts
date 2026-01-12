@@ -53,7 +53,7 @@ const usageSchema = z.object({
 
 export const messageMetadataSchema = z.object({
   createdAt: z.number().optional(),
-  providerId: z.string().optional(),
+  providerId: z.custom<AvailableProviders>().optional(),
   modelId: z.string().optional(),
   usage: usageSchema.optional(),
 });
