@@ -1,48 +1,54 @@
 <template>
   <h2>Models</h2>
-  <BaseInput v-model="filter" placeholder="Search models..." />
-  <select
-    v-model="filterByProvider"
-    :options="filterByProviderOptions"
-    class="filter-by-provider"
-  >
-    <option v-for="option in filterByProviderOptions" :value="option.value">
-      {{ option.label }}
-    </option>
-  </select>
-  <p class="empty-state" v-if="filteredModels.length === 0">No models found</p>
-  <ul class="model-list">
-    <li
-      v-for="model in filteredModels"
-      :key="model.id"
-      class="model"
-      :class="{ available: model.available }"
-    >
-      <label
-        class="switch-label"
-        :title="
-          !model.available
-            ? `${model.providerDisplayName} API key is required to enable this model`
-            : model.id
-        "
-        @click="!model.available && showDisabledPopover($event)"
+  <div class="models-content">
+    <div class="models-header">
+      <BaseInput v-model="filter" placeholder="Search models..." />
+      <select
+        v-model="filterByProvider"
+        :options="filterByProviderOptions"
+        class="filter-by-provider"
       >
-        {{ model.displayName }}
-        <Switch
-          :model-value="model.enabled"
-          @change="toggle(model, $event)"
-          :disabled="!model.available"
-        />
-      </label>
-      <button
-        class="btn delete-btn"
-        @click.prevent="remove(model)"
-        v-if="model.removable"
+        <option v-for="option in filterByProviderOptions" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+    </div>
+    <p class="empty-state" v-if="filteredModels.length === 0">
+      No models found
+    </p>
+    <ul class="model-list">
+      <li
+        v-for="model in filteredModels"
+        :key="model.id"
+        class="model"
+        :class="{ available: model.available }"
       >
-        <span class="material-symbols-outlined">delete</span>
-      </button>
-    </li>
-  </ul>
+        <label
+          class="switch-label"
+          :title="
+            !model.available
+              ? `${model.providerDisplayName} API key is required to enable this model`
+              : model.id
+          "
+          @click="!model.available && showDisabledPopover($event)"
+        >
+          {{ model.displayName }}
+          <Switch
+            :model-value="model.enabled"
+            @change="toggle(model, $event)"
+            :disabled="!model.available"
+          />
+        </label>
+        <button
+          class="btn delete-btn"
+          @click.prevent="remove(model)"
+          v-if="model.removable"
+        >
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </li>
+    </ul>
+  </div>
   <Popover ref="disabledPopover">
     API Key is required to enable this model
   </Popover>
@@ -152,10 +158,18 @@ export default {
 </script>
 
 <style scoped>
+.models-header {
+  position: sticky;
+  top: 0;
+  background: var(--p-dialog-background);
+  z-index: 1;
+  padding-bottom: 0.4rem;
+}
+
 .filter-by-provider {
   margin-inline: 0.5rem;
   /* margin-top: 0.1rem; */
-  margin-bottom: 0.4rem;
+  /* margin-bottom: 0.4rem; */
   width: auto;
 
   .p-select-label {
