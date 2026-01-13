@@ -30,3 +30,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+ul {
+  margin-top: 0.75rem;
+}
+</style>

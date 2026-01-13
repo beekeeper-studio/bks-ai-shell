@@ -1,19 +1,61 @@
 <template>
-  <div class="base-input" :class="[className, type]">
+  <div class="form-group" :class="[className, type]">
     <label :for="id" v-if="$slots['label']">
       <slot name="label"></slot>
     </label>
-    <div class="input-wrapper" :data-value="type === 'textarea' ? modelValue : ''">
-      <textarea v-if="type === 'textarea'" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
-        @change="emitChange" ref="focusable" />
-      <button v-else-if="type === 'switch'" type="button" v-bind="$attrs" :id="id" :disabled="disabled" role="switch" :aria-checked="modelValue"
-        @click="handleClick" ref="focusable">
+    <p
+      class="helper"
+      data-position="before-input"
+      v-if="$slots['helper'] && helperPosition === 'before-input'"
+    >
+      <slot name="helper"></slot>
+    </p>
+    <div
+      class="input-wrapper"
+      :data-value="type === 'textarea' ? modelValue : ''"
+    >
+      <textarea
+        v-if="type === 'textarea'"
+        v-bind="$attrs"
+        :id="id"
+        :disabled="disabled"
+        :placeholder="placeholder"
+        :value="modelValue"
+        @input="emitInput"
+        @change="emitChange"
+        ref="focusable"
+      />
+      <button
+        v-else-if="type === 'switch'"
+        type="button"
+        v-bind="$attrs"
+        :id="id"
+        :disabled="disabled"
+        role="switch"
+        :aria-checked="modelValue"
+        @click="handleClick"
+        ref="focusable"
+      >
         <span class="slider round"></span>
       </button>
-      <input v-else :type="type" v-bind="$attrs" :id="id" :disabled="disabled" :placeholder="placeholder" :value="modelValue" @input="emitInput"
-        @change="emitChange" ref="focusable" />
+      <input
+        v-else
+        :type="type"
+        v-bind="$attrs"
+        :id="id"
+        :disabled="disabled"
+        :placeholder="placeholder"
+        :value="modelValue"
+        @input="emitInput"
+        @change="emitChange"
+        ref="focusable"
+      />
     </div>
-    <p class="helper" v-if="$slots['helper']">
+    <p
+      class="helper"
+      data-position="after-input"
+      v-if="$slots['helper'] && helperPosition === 'after-input'"
+    >
       <slot name="helper"></slot>
     </p>
   </div>
@@ -42,6 +84,10 @@ export default {
     /** We add this to support v-model */
     modelValue: [String, Boolean],
     disabled: Boolean,
+    helperPosition: {
+      type: String as PropType<"before-input" | "after-input">,
+      default: "after-input",
+    },
   },
 
   emits: ["update:modelValue", "input", "change", "click"],
@@ -67,3 +113,12 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+[data-position="before-input"] {
+  margin-bottom: 0.5rem;
+}
+.form-group:not(.switch) [data-position="after-input"] {
+  margin-top: 0.35rem;
+}
+</style>

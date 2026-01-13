@@ -230,8 +230,25 @@ export const useChatStore = defineStore("chat", {
         if (errorIdx !== -1) {
           this.errors.splice(errorIdx, 1);
         }
-        const models = await createProvider(provider).listModels();
-        config.setModels(provider, models);
+
+        // Get old models before fetching new ones
+        const oldModels = config.getModelsByProvider(provider) || [];
+
+        // Fetch new models
+        const newModels = await createProvider(provider).listModels();
+
+        // Find which models are actually NEW (not in old list)
+        const newModelIds = newModels
+          .filter(newModel => !oldModels.some(old => old.id === newModel.id))
+          .map(m => m.id);
+
+        // Update the model list first
+        await config.setModels(provider, newModels);
+
+        // Disable ONLY the new models
+        for (const modelId of newModelIds) {
+          await config.disableModel(provider, modelId);
+        }
       } catch (e) {
         if (provider === "ollama" && e instanceof TypeError && e.message === "Failed to fetch") {
           this.errors.push(

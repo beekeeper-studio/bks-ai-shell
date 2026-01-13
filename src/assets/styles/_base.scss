@@ -16,21 +16,53 @@ body {
   color: var(--text-dark);
 }
 
-textarea {
-  flex: 1;
-  resize: none;
-  border: none;
-  padding: 10px 15px;
-  font-size: 1rem;
+// Copied from Beekeeper Studio
+input, select, textarea {
+  position: relative;
+  display: flex;
+  height: 26px;
+  padding: 0 0.75rem;
+  font-size: 0.831rem;
+  font-weight: normal;
+  line-height: 26px;
+  color: var(--text);
+  background: transparent;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
   outline: none;
-  transition: border-color 0.2s;
-  background-color: var(--query-editor-bg);
-  color: var(--text-dark);
+  box-shadow: none;
+  width: 100%;
+  transition: border-color 0.15s ease-in-out;
   font-family: inherit;
 
-  &:focus {
-    border-color: var(--theme-primary);
+  &:focus, &:focus-visible {
+    border-color: var(--input-highlight);
   }
+
+  option {
+    background: hsl(from var(--theme-bg) h s calc(l + 3));
+    color: var(--text);
+    &:checked,
+    &:hover {
+      color: white;
+      box-shadow: 0 0 10px 100px var(--brand-info) inset;
+    }
+    &:disabled, &:disabled:hover, &:disabled:focus {
+      background: transparent;
+      color: var(--text-lighter);
+    }
+  }
+}
+
+textarea {
+  overflow: auto;
+}
+
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='rgba(255,255,255, 0.87)'><polygon points='0,0 8,0 4,4'/></svg>") no-repeat scroll 98% 60% transparent ;
+  padding: 0 0.75rem;
 }
 
 ol, ul {
@@ -45,7 +77,6 @@ ol, ul {
 
 a {
   color: var(--link-color);
-  font-weight: 700;
 }
 
 p {

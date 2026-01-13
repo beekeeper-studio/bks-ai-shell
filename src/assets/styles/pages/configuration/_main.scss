@@ -76,6 +76,7 @@
 
     > :first-child {
       margin-top: 0;
+      margin-bottom: 0.2rem;
     }
 
     h1,
@@ -84,12 +85,16 @@
     h4,
     p:not(.helper),
     li,
-    .base-input {
-      padding-inline: 1rem;
+    .form-group {
+      padding-inline: 0.5rem;
     }
 
-    .base-input {
-      padding-block: 0.75rem;
+    h3 {
+      margin-block: 0.75rem;
+    }
+
+    .form-group {
+      padding-block: 0.5rem;
       border-radius: 8px;
 
       &:hover {

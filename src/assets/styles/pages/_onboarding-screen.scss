@@ -69,16 +69,13 @@
 
     .btn {
       width: 100%;
-      font-size: 0.8rem;
-      padding-block: 1rem;
     }
   }
 
   .api-key-form {
-    margin-bottom: 2rem;
-    gap: 0.5rem;
+    gap: 0;
 
-    .base-input {
+    .form-group {
       flex-direction: column;
 
       .input-wrapper {
