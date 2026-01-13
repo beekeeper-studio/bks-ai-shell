@@ -10,9 +10,7 @@
       {{ option.label }}
     </option>
   </select>
-  <p class="empty-state" v-if="filteredModels.length === 0">
-    No models found
-  </p>
+  <p class="empty-state" v-if="filteredModels.length === 0">No models found</p>
   <ul class="model-list">
     <li
       v-for="model in filteredModels"
@@ -27,6 +25,7 @@
             ? `${model.providerDisplayName} API key is required to enable this model`
             : model.id
         "
+        @click="!model.available && showDisabledPopover($event)"
       >
         {{ model.displayName }}
         <Switch
@@ -44,6 +43,9 @@
       </button>
     </li>
   </ul>
+  <Popover ref="disabledPopover">
+    API Key is required to enable this model
+  </Popover>
 </template>
 
 <script lang="ts">
@@ -55,8 +57,8 @@ import { useConfigurationStore } from "@/stores/configuration";
 import _ from "lodash";
 import { matchModel } from "@/utils";
 import BaseInput from "../common/BaseInput.vue";
-import Fuse from "fuse.js";
 import Select from "primevue/select";
+import Popover from "primevue/popover";
 
 export default {
   name: "ModelsConfiguration",
@@ -65,6 +67,7 @@ export default {
     Switch,
     BaseInput,
     Select,
+    Popover,
   },
 
   data() {
@@ -78,9 +81,6 @@ export default {
     ...mapState(useChatStore, ["models"]),
     ...mapWritableState(useChatStore, ["model"]),
     ...mapState(useConfigurationStore, ["disabledModels"]),
-    fuse() {
-      return new Fuse(this.allModels, { keys: ["provider", "id"] });
-    },
     sortedModels() {
       // Enabled models first
       return this.models.sort((a, b) => {
@@ -102,7 +102,9 @@ export default {
       if (!this.filter.trim()) {
         return this.allModels;
       }
-      return this.fuse.search(this.filter).map((result) => result.item);
+      return this.allModels.filter((model) =>
+        model.displayName.toLowerCase().includes(this.filter.toLowerCase()),
+      );
     },
     filterByProviderOptions() {
       const providers = Object.keys(providerConfigs) as AvailableProviders[];
@@ -138,6 +140,12 @@ export default {
     },
     remove(model: Model) {
       this.removeModel(model.provider, model.id);
+    },
+    showDisabledPopover(event: MouseEvent) {
+      this.$refs.disabledPopover!.hide();
+      this.$nextTick(() => {
+        this.$refs.disabledPopover!.show(event);
+      });
     },
   },
 };
