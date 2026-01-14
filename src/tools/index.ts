@@ -1,7 +1,8 @@
 import { z } from "zod/v3";
 import { tool } from "ai";
-import { getColumns, getTables } from "@beekeeperstudio/plugin";
-import { safeJSONStringify } from "@/utils";
+import { getColumns, getTables, runQuery } from "@beekeeperstudio/plugin";
+import { isReadQuery, safeJSONStringify } from "@/utils";
+import { useConfigurationStore } from "@/stores/configuration";
 
 export const get_tables = tool({
   description: "Get a list of all tables in the current database",
@@ -11,6 +12,7 @@ export const get_tables = tool({
       .nullish()
       .describe("The name of the schema to get tables for"),
   }),
+  needsApproval: false,
   execute: async (params) => {
     try {
       return safeJSONStringify(await getTables(params.schema ?? undefined));
@@ -33,6 +35,7 @@ export const get_columns = tool({
       .nullish()
       .describe("The name of the schema of the table"),
   }),
+  needsApproval: false,
   execute: async (params) => {
     try {
       return safeJSONStringify(
@@ -52,6 +55,25 @@ export const run_query = tool({
   inputSchema: z.object({
     query: z.string().describe("The SQL query to execute"),
   }),
+  needsApproval({ query }) {
+    if (
+      useConfigurationStore().allowExecutionOfReadOnlyQueries &&
+      isReadQuery(query)
+    ) {
+      return false;
+    }
+    return true;
+  },
+  execute: async (params) => {
+    try {
+      return safeJSONStringify(await runQuery(params.query));
+    } catch (e) {
+      return safeJSONStringify({
+        type: "error",
+        message: e?.message || e.toString() || "Unknown error",
+      });
+    }
+  },
 });
 
 export const tools = {
@@ -59,16 +81,3 @@ export const tools = {
   get_columns,
   run_query,
 };
-
-export class UserRejectedError extends Error {
-  constructor(public toolCallId: string) {
-    super();
-    this.name = "UserRejectedError";
-  }
-
-  static isInstance(error: any): error is UserRejectedError {
-    return error && error.name === "UserRejectedError";
-  }
-}
-
-export const userRejectedToolCall = "User rejected tool call";

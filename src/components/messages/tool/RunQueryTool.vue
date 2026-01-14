@@ -38,7 +38,7 @@
       </button>
       <button class="btn btn-flat" @click="cancelEdit">Cancel</button>
     </div>
-    <div v-if="askingPermission && !editing" class="tool-permission">
+    <div v-if="state === 'approval-requested' && !editing" class="tool-permission">
       Do you want to run this query?
       <div class="tool-permission-buttons">
         <button class="btn btn-flat" @click="$emit('accept')">
@@ -56,6 +56,9 @@
       </div>
     </div>
     <div class="tool-error error" v-if="error" v-text="error" />
+    <div class="tool-error error" v-else-if="state === 'approval-responded' && approval && !approval.approved">
+      User rejected tool call
+    </div>
     <div class="tool-result" v-else-if="state === 'output-available'">
       <run-query-result v-if="data" :data="data" />
     </div>
@@ -85,7 +88,7 @@ export default {
     },
     output: String as PropType<RunQueryPart['output']>,
     errorText: String as PropType<RunQueryPart['errorText']>,
-    askingPermission: Boolean,
+    approval: Object as PropType<ToolUIPart["approval"]>,
   },
   emits: ["accept", "reject"],
   data() {

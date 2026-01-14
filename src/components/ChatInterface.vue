@@ -23,7 +23,6 @@
                 && !(message.role === 'user' && message.parts.find((p) => p.type === 'data-editedQuery'))
               "
             :message="message"
-            :pending-tool-call-ids="pendingToolCallIds"
             :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
             @accept-permission="acceptPermission" @reject-permission="handleRejectPermission" />
         </template>
@@ -70,7 +69,7 @@ import { useChatStore, Model } from "@/stores/chat";
 import _ from "lodash";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
-import type { UIMessage } from "ai";
+import type { UIMessage } from "@/types";
 import { PropType } from "vue";
 import { mapActions, mapGetters, mapWritableState } from "pinia";
 import { RootBinding } from "@/plugins/appEvent";
@@ -79,6 +78,7 @@ import BaseInput from "@/components/common/BaseInput.vue";
 import PromptInput from "@/components/common/PromptInput.vue";
 import { getConnectionInfo } from "@beekeeperstudio/plugin";
 import ExternalLink from "@/components/common/ExternalLink.vue";
+import { log } from "@beekeeperstudio/plugin";
 
 export default {
   name: "ChatInterface",
@@ -109,10 +109,10 @@ export default {
       messages: ai.messages,
       error: ai.error,
       status: ai.status,
-      pendingToolCallIds: ai.pendingToolCallIds,
-      askingPermission: ai.askingPermission,
       acceptPermission: ai.acceptPermission,
       rejectPermission: ai.rejectPermission,
+      rejectAllPendingApprovals: ai.rejectAllPendingApprovals,
+      hasPendingApprovals: ai.hasPendingApprovals,
       retry: ai.retry,
     };
   },
@@ -127,15 +127,15 @@ export default {
   },
 
   computed: {
-    ...mapGetters(useChatStore, ["systemPrompt", "sendOptions"]),
+    ...mapGetters(useChatStore, ["systemPrompt"]),
     ...mapWritableState(useChatStore, ["model"]),
     processing() {
-      if (this.askingPermission) return false;
+      if (this.hasPendingApprovals) return false;
       return this.status !== "ready" && this.status !== "error";
     },
     showSpinner() {
       return (
-        !this.askingPermission &&
+        !this.hasPendingApprovals &&
         (this.status === "submitted" || this.status === "streaming")
       );
     },
@@ -190,7 +190,9 @@ export default {
 
   watch: {
     error() {
-      console.log(this.error)
+      if (this.error) {
+        log.error(this.error);
+      }
     },
     messages: {
       async handler() {
@@ -240,20 +242,20 @@ export default {
 
       this.noModelError = false;
 
-      if (this.askingPermission) {
-        this.rejectPermission();
+      if (this.hasPendingApprovals) {
+        this.rejectAllPendingApprovals();
       }
 
-      this.send(input, this.sendOptions);
+      this.send(input);
     },
 
     async reload() {
-      await this.retry(this.sendOptions);
+      await this.retry();
     },
 
     stop() {
-      if (this.askingPermission) {
-        this.rejectPermission();
+      if (this.hasPendingApprovals) {
+        this.rejectAllPendingApprovals();
       } else {
         this.abort();
       }
@@ -281,12 +283,18 @@ export default {
 
     handleRejectPermission(options: {
       toolCallId: string;
+      approvalId: string;
       editedQuery?: string;
     }) {
-      this.rejectPermission({
-        ...options,
-        sendOptions: this.sendOptions,
-      });
+      if (options.editedQuery) {
+        this.rejectPermission({
+          toolCallId: options.toolCallId,
+          approvalId: options.approvalId,
+          editedQuery: options.editedQuery,
+        });
+      } else {
+        this.rejectPermission(options.approvalId);
+      }
     },
   },
 };
