@@ -12,7 +12,7 @@
  **/
 
 import { getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
-import { UIMessage } from "ai";
+import type { UIMessage } from "@/types";
 import { defineStore } from "pinia";
 import { StoredMessage } from "@langchain/core/messages";
 import { mapLangChainStoredMessagesToAISdkMessages } from "@/utils/langchainToAISdk";

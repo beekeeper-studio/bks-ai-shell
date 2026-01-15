@@ -40,9 +40,8 @@ export function createProvider(id: AvailableProviders)  {
         baseURL: configuration.providers_ollama_baseUrl,
         headers: parseHeaders(configuration.providers_ollama_headers),
       });
-    case "awsBedrock":
-      throw new Error("AWS Bedrock is not supported yet.");
     default:
       throw new Error(`Provider ${id} does not exist.`);
   }
 }
+

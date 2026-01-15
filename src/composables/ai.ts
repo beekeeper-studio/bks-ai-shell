@@ -1,37 +1,35 @@
 import { Chat } from "@ai-sdk/vue";
 import { computed, ComputedRef, ref } from "vue";
-import { tools } from "@/tools";
-import { DefaultChatTransport, ChatStatus, isToolUIPart } from "ai";
+import { ChatStatus, isToolUIPart } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
-import { FetchFunction } from "@ai-sdk/provider-utils";
 import { safeJSONStringify } from "@/utils";
-import { runQuery } from "@beekeeperstudio/plugin";
+import { log, runQuery } from "@beekeeperstudio/plugin";
 import { UIMessage } from "@/types";
-import { useChatStore } from "@/stores/chat";
 import { lastAssistantMessageIsCompleteWithApprovedResponses } from "@/utils/last-assistant-message-is-complete-with-approved-responses";
+import { ChatTransport } from "@/providers/ChatTransport";
+import { useChatStore } from "@/stores/chat";
 
 type AIOptions = {
   initialMessages: UIMessage[];
 };
 
-/** A wrapper class of AI SDK's Chat class. */
+/** A wrapper class of AI SDK's Chat class */
 class AIShellChat {
   readonly messages: ComputedRef<UIMessage[]>;
   readonly error: ComputedRef<Error | undefined>;
   readonly status: ComputedRef<ChatStatus>;
   readonly hasPendingApprovals: ComputedRef<boolean>;
+  readonly reducingContext = ref(false);
 
   /** Force the `status` if not `null` */
   private runningEditedQuery = ref<boolean>();
   private chat: Chat<UIMessage>;
 
   constructor(options: AIOptions) {
-    this.fetch = this.fetch.bind(this);
-
     this.chat = new Chat<UIMessage>({
-      transport: new DefaultChatTransport({ fetch: this.fetch }),
+      transport: new ChatTransport(),
       messages: options.initialMessages,
       sendAutomaticallyWhen:
         lastAssistantMessageIsCompleteWithApprovedResponses,
@@ -52,6 +50,30 @@ class AIShellChat {
         ),
       ),
     );
+  }
+
+  async reduceContext() {
+    const model = this.getModelOrThrow();
+
+    if (!model.contextWindow) {
+      throw new Error(`Model ${model.id} does not support context reduction.`);
+    }
+
+    try {
+      this.reducingContext.value = true;
+      const summaryMessage = await createProvider(
+        model.provider,
+      ).generateSummary({
+        messages: this.messages.value,
+        modelId: model.id,
+        maxOutputTokens: Math.round(0.15 * model.contextWindow), // 15% of context
+      });
+      this.chat.messages = [summaryMessage];
+    } catch {
+      log.error("Failed to reduce context");
+    } finally {
+      this.reducingContext.value = false;
+    }
   }
 
   /** Pass `undefined` to trigger the API without sending the message */
@@ -240,45 +262,11 @@ class AIShellChat {
     }
   }
 
-  /** Custom fetch function */
-  private async fetch(
-    url: Parameters<FetchFunction>[0],
-    fetchOptions: Parameters<FetchFunction>[1],
-  ) {
-    if (!fetchOptions) {
-      throw new Error("Fetch options are missing");
-    }
-
-    if (!fetchOptions.body) {
-      throw new Error("Fetch does not have a body");
-    }
-
-    const model = this.getModelOrThrow();
-    const m = JSON.parse(fetchOptions.body as string) as any;
-    const provider = createProvider(model.provider);
-    return provider.stream({
-      modelId: model.id,
-      messages: m.messages,
-      signal: fetchOptions.signal,
-      tools,
-      systemPrompt: useChatStore().systemPrompt,
-    });
-  }
-
-  private getModelOrThrow() {
-    const model = useChatStore().model;
-    if (!model) {
-      throw new Error("Model is not set");
-    }
-    return model;
-  }
-
   private async saveMessages() {
     useTabState().setTabState("messages", this.messages.value);
   }
 
   private async fillTitle() {
-    return;
     if (useTabState().conversationTitle) {
       // Skip generation if title is already set
       return;
@@ -303,6 +291,14 @@ class AIShellChat {
     });
     await useTabState().setTabTitle(res.object.title);
   }
+
+  private getModelOrThrow() {
+    const chat = useChatStore();
+    if (!chat.model) {
+      throw new Error("No model selected");
+    }
+    return chat.model;
+  }
 }
 
 export function useAI(options: AIOptions) {
@@ -321,5 +317,7 @@ export function useAI(options: AIOptions) {
     send: chat.send.bind(chat),
     retry: chat.retry.bind(chat),
     abort: chat.abort.bind(chat),
+    reduceContext: chat.reduceContext.bind(chat),
+    reducingContext: computed(() => chat.reducingContext.value),
   };
 }
