@@ -1,8 +1,15 @@
-import { notify } from "@beekeeperstudio/plugin";
-import { convertToModelMessages, generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
-import { AvailableModels, AvailableProviders, defaultTemperature } from "@/config";
+import { log } from "@beekeeperstudio/plugin";
+import {
+  convertToModelMessages,
+  generateObject,
+  LanguageModel,
+  stepCountIs,
+  streamText,
+  ToolSet,
+} from "ai";
+import { AvailableModels, defaultTemperature } from "@/config";
+import { UIMessage } from "@/types";
 import { z } from "zod/v3";
-// import { UserRejectedError } from "@/tools";
 import {
   APICallError,
   // InvalidToolArgumentsError,
@@ -11,11 +18,12 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { ProviderOptions } from '@ai-sdk/provider-utils';
-import { UIMessage } from "@/types";
+import { ProviderOptions } from "@ai-sdk/provider-utils";
+
+export type Messages = UIMessage[];
 
 export type StreamOptions = {
-  messages: UIMessage[];
+  messages: Messages;
   signal?: AbortSignal;
   tools: ToolSet;
   modelId: AvailableModels["id"];
@@ -40,9 +48,10 @@ export abstract class BaseProvider {
           if (part.type === "data-editedQuery") {
             return {
               type: "text",
-              text: "Please run the following code instead:\n```\n"
-                + part.data.query
-                + "\n```",
+              text:
+                "Please run the following code instead:\n```\n" +
+                part.data.query +
+                "\n```",
             };
           }
         },
@@ -57,11 +66,7 @@ export abstract class BaseProvider {
     return result.toUIMessageStreamResponse({
       originalMessages: options.messages,
       onError: (error) => {
-        notify("pluginError", {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-        });
+        log.error(error);
         return this.getErrorMessage(error);
       },
       messageMetadata: ({ part }) => {
@@ -105,12 +110,6 @@ export abstract class BaseProvider {
       return "The model tried to call a unknown tool.";
     // } else if (InvalidToolArgumentsError.isInstance(error)) {
     //   return "The model called a tool with invalid arguments.";
-    // } else if (ToolExecutionError.isInstance(error)) {
-    //   if (UserRejectedError.isInstance(error.cause)) {
-    //     return `User rejected tool call. (toolCallId: ${error.toolCallId})`;
-    //   } else {
-    //     return "An error occurred during tool execution.";
-    //   }
     } else if (APICallError.isInstance(error)) {
       if (
         error.data?.error?.code === "invalid_api_key" ||

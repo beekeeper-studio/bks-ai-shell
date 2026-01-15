@@ -11,14 +11,13 @@
           v-else-if="isToolUIPart(part)"
           :message="message"
           :toolCall="part"
-          :askingPermission="pendingToolCallIds.includes(part.toolCallId)"
-          @accept="$emit('accept-permission', part.toolCallId)"
-          @reject="
-            $emit('reject-permission', {
-              toolCallId: part.toolCallId,
-              ...$event,
-            })
-          "
+          :disableToolEdit="disableToolEdit"
+          @accept="$emit('accept-permission', part.approval?.id)"
+          @reject="$emit('reject-permission', {
+            toolCallId: part.toolCallId,
+            approvalId: part.approval?.id,
+            ...$event,
+          })"
         />
       </template>
       <span v-if="isEmpty">Empty response</span>
@@ -83,10 +82,6 @@ export default {
       type: Object as PropType<UIMessage>,
       required: true,
     },
-    pendingToolCallIds: {
-      type: Array as PropType<string[]>,
-      required: true,
-    },
     status: {
       type: String as PropType<"ready" | "processing">,
       required: true,
@@ -137,6 +132,10 @@ export default {
         }
       } catch {}
       return { provider, model, totalTokens };
+    },
+    disableToolEdit() {
+      // For now, we dont support tool edit if the there are multiple query tools
+      return this.message.parts.filter((p) => p.type === "tool-run_query").length > 1;
     },
   },
 
