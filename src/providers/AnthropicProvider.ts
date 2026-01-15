@@ -1,4 +1,4 @@
-import { AvailableProviders, providerConfigs } from "@/config";
+import { AvailableProviders, ModelInfo, providerConfigs } from "@/config";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { createAnthropic } from "@ai-sdk/anthropic";
 
@@ -18,7 +18,7 @@ export class AnthropicProvider extends BaseProvider {
     }).languageModel(id);
   }
 
-  async listModels() {
+  async listModels(): Promise<ModelInfo[]> {
     return providerConfigs.anthropic.models;
   }
 }

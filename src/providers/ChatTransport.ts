@@ -3,6 +3,7 @@ import { UIMessage, SendOptions } from "@/types";
 import { FetchFunction } from "@ai-sdk/provider-utils";
 import { tools } from "@/tools";
 import { createProvider } from ".";
+import { useChatStore } from "@/stores/chat";
 
 export class ChatTransport extends DefaultChatTransport<UIMessage> {
   protected fetch = async (
@@ -17,18 +18,22 @@ export class ChatTransport extends DefaultChatTransport<UIMessage> {
       throw new Error("Fetch does not have a body");
     }
 
+    const chat = useChatStore();
+    if (!chat.model) {
+      throw new Error("No model selected");
+    }
+
     const m = JSON.parse(fetchOptions.body as string) as {
       messages: UIMessage[];
-      sendOptions: SendOptions;
     };
-    const sendOptions = m.sendOptions;
-    const provider = createProvider(sendOptions.providerId);
+
+    const provider = createProvider(chat.model.provider);
     return provider.stream({
-      modelId: sendOptions.modelId,
+      modelId: chat.model.id,
       messages: m.messages,
       signal: fetchOptions.signal,
       tools,
-      systemPrompt: sendOptions.systemPrompt,
+      systemPrompt: chat.systemPrompt,
     });
   }
 }

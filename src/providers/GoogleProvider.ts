@@ -1,4 +1,4 @@
-import { AvailableProviders, providerConfigs } from "@/config";
+import { AvailableProviders, ModelInfo, providerConfigs } from "@/config";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
@@ -17,7 +17,7 @@ export class GoogleProvider extends BaseProvider {
     }).languageModel(id);
   }
 
-  async listModels() {
+  async listModels(): Promise<ModelInfo[]> {
     return providerConfigs.google.models;
   }
 }

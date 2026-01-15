@@ -5,20 +5,23 @@ import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
 import { safeJSONStringify } from "@/utils";
-import { runQuery } from "@beekeeperstudio/plugin";
+import { log, runQuery } from "@beekeeperstudio/plugin";
 import { UIMessage } from "@/types";
 import { lastAssistantMessageIsCompleteWithApprovedResponses } from "@/utils/last-assistant-message-is-complete-with-approved-responses";
 import { ChatTransport } from "@/providers/ChatTransport";
+import { useChatStore } from "@/stores/chat";
 
 type AIOptions = {
   initialMessages: UIMessage[];
 };
 
+/** A wrapper class of AI SDK's Chat class */
 class AIShellChat {
   readonly messages: ComputedRef<UIMessage[]>;
   readonly error: ComputedRef<Error | undefined>;
   readonly status: ComputedRef<ChatStatus>;
   readonly hasPendingApprovals: ComputedRef<boolean>;
+  readonly reducingContext = ref(false);
 
   /** Force the `status` if not `null` */
   private runningEditedQuery = ref<boolean>();
@@ -47,6 +50,30 @@ class AIShellChat {
         ),
       ),
     );
+  }
+
+  async reduceContext() {
+    const model = this.getModelOrThrow();
+
+    if (!model.contextWindow) {
+      throw new Error(`Model ${model.id} does not support context reduction.`);
+    }
+
+    try {
+      this.reducingContext.value = true;
+      const summaryMessage = await createProvider(
+        model.provider,
+      ).generateSummary({
+        messages: this.messages.value,
+        modelId: model.id,
+        maxOutputTokens: Math.round(0.15 * model.contextWindow), // 15% of context
+      });
+      this.chat.messages = [summaryMessage];
+    } catch {
+      log.error("Failed to reduce context");
+    } finally {
+      this.reducingContext.value = false;
+    }
   }
 
   /** Pass `undefined` to trigger the API without sending the message */
@@ -240,7 +267,6 @@ class AIShellChat {
   }
 
   private async fillTitle() {
-    return;
     if (useTabState().conversationTitle) {
       // Skip generation if title is already set
       return;
@@ -265,6 +291,14 @@ class AIShellChat {
     });
     await useTabState().setTabTitle(res.object.title);
   }
+
+  private getModelOrThrow() {
+    const chat = useChatStore();
+    if (!chat.model) {
+      throw new Error("No model selected");
+    }
+    return chat.model;
+  }
 }
 
 export function useAI(options: AIOptions) {
@@ -283,5 +317,7 @@ export function useAI(options: AIOptions) {
     send: chat.send.bind(chat),
     retry: chat.retry.bind(chat),
     abort: chat.abort.bind(chat),
+    reduceContext: chat.reduceContext.bind(chat),
+    reducingContext: computed(() => chat.reducingContext.value),
   };
 }

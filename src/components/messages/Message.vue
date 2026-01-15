@@ -1,7 +1,13 @@
 <template>
   <div :class="['message', message.role]">
     <div class="message-content" :class="{ 'literally-empty': isEmpty }">
-      <template v-if="message.role === 'system'" />
+      <p
+        class="session-compacted"
+        v-if="message.metadata?.isSummary"
+      >Session compacted</p>
+
+      <template v-if="hidden" />
+      <template v-else-if="message.role === 'system'" />
       <template v-else v-for="(part, index) of message.parts" :key="index">
         <template v-if="part.type === 'text'">
           <template v-if="message.role === 'user'">{{ part.text }}</template>
@@ -13,14 +19,23 @@
           :toolCall="part"
           :disableToolEdit="disableToolEdit"
           @accept="$emit('accept-permission', part.approval?.id)"
-          @reject="$emit('reject-permission', {
-            toolCallId: part.toolCallId,
-            approvalId: part.approval?.id,
-            ...$event,
-          })"
+          @reject="
+            $emit('reject-permission', {
+              toolCallId: part.toolCallId,
+              approvalId: part.approval?.id,
+              ...$event,
+            })
+          "
         />
       </template>
+
       <span v-if="isEmpty">Empty response</span>
+
+      <p v-if="message.metadata?.isSummary">
+        <a href="#" @click="hideCompactResult = !hideCompactResult">{{
+          hideCompactResult ? "Show result" : "Hide result"
+        }}</a>
+      </p>
     </div>
     <div class="message-actions" v-if="status === 'ready'">
       <button
@@ -91,6 +106,7 @@ export default {
   data() {
     return {
       copied: false,
+      hideCompactResult: true,
     };
   },
 
@@ -136,6 +152,9 @@ export default {
     disableToolEdit() {
       // For now, we dont support tool edit if the there are multiple query tools
       return this.message.parts.filter((p) => p.type === "tool-run_query").length > 1;
+    },
+    hidden() {
+      return this.message.metadata?.isSummary && this.hideCompactResult;
     },
   },
 

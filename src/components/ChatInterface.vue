@@ -1,8 +1,15 @@
 <template>
-  <div class="chat-container" :class="{ 'empty-chat': messages.length === 0 }" :data-status="status">
+  <div
+    class="chat-container"
+    :class="{ 'empty-chat': messages.length === 0 }"
+    :data-status="status"
+  >
     <div class="scroll-container" ref="scrollContainerRef">
       <div class="header">
-        <button class="btn btn-flat-2 settings-btn" @click="$emit('open-configuration')">
+        <button
+          class="btn btn-flat-2 settings-btn"
+          @click="$emit('open-configuration')"
+        >
           <span class="material-symbols-outlined">settings</span>
           <span class="title-popup">Settings</span>
         </button>
@@ -12,16 +19,25 @@
         <p>
           The AI Shell can see your table schemas, and (with your permission)
           run {{ sqlOrCode }} to answer your questions.
-          <ExternalLink href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/">Learn more</ExternalLink>.
+          <ExternalLink
+            href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/"
+            >Learn more</ExternalLink
+          >.
         </p>
       </div>
       <div class="chat-messages">
         <template v-for="(message, index) in messages" :key="message.id">
           <message
             v-if="
-              !(message.role === 'assistant' && message.parts.find((p) => p.type === 'data-userEditedToolCall'))
-                && !(message.role === 'user' && message.parts.find((p) => p.type === 'data-editedQuery'))
-              "
+              !(
+                message.role === 'assistant' &&
+                message.parts.find((p) => p.type === 'data-userEditedToolCall')
+              ) &&
+              !(
+                message.role === 'user' &&
+                message.parts.find((p) => p.type === 'data-editedQuery')
+              )
+            "
             :message="message"
             :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
             @accept-permission="acceptPermission" @reject-permission="handleRejectPermission" />
@@ -30,12 +46,16 @@
           <div class="message-content">
             Something went wrong.
             <div v-if="isOllamaToolError" class="error-hint">
-              💡 <strong>Hint:</strong> This might be because your Ollama model doesn't support tools. Try using a
-              different model, or switch to a different provider.
+              💡 <strong>Hint:</strong> This might be because your Ollama model
+              doesn't support tools. Try using a different model.
             </div>
             <pre v-if="!isErrorTruncated || showFullError" v-text="error" />
             <pre v-else v-text="truncatedError" />
-            <button v-if="isErrorTruncated" @click="showFullError = !showFullError" class="btn show-more-btn">
+            <button
+              v-if="isErrorTruncated"
+              @click="showFullError = !showFullError"
+              class="btn show-more-btn"
+            >
               {{ showFullError ? "Show less" : "Show more" }}
             </button>
             <button class="btn" @click="() => reload()">
@@ -47,18 +67,34 @@
         <div class="message error" v-if="noModelError">
           <div class="message-content">No model selected</div>
         </div>
-        <div class="spinner-container" :style="{ visibility: showSpinner ? 'visible' : 'hidden' }">
+        <div
+          class="spinner-container"
+          :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
+        >
           <span class="spinner" />
+          <span class="label" v-if="reducingContext">Compacting</span>
         </div>
       </div>
-      <button v-if="!isAtBottom" @click="scrollToBottom({ smooth: true })" class="btn scroll-down-btn"
-        title="Scroll to bottom">
+      <button
+        v-if="!isAtBottom"
+        @click="scrollToBottom({ smooth: true })"
+        class="btn scroll-down-btn"
+        title="Scroll to bottom"
+      >
         <span class="material-symbols-outlined">keyboard_arrow_down</span>
       </button>
     </div>
     <div class="chat-input-container-container">
-      <PromptInput ref="promptInput" storage-key="inputHistory" :processing="processing" :selected-model="model"
-        @select-model="selectModel" @manage-models="$emit('manage-models')" @submit="submit" @stop="stop" />
+      <PromptInput
+        ref="promptInput"
+        storage-key="inputHistory"
+        :processing="processing"
+        :selected-model="model"
+        @select-model="selectModel"
+        @manage-models="$emit('manage-models')"
+        @submit="submit"
+        @stop="stop"
+      />
     </div>
   </div>
 </template>
@@ -79,6 +115,7 @@ import PromptInput from "@/components/common/PromptInput.vue";
 import { getConnectionInfo } from "@beekeeperstudio/plugin";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 import { log } from "@beekeeperstudio/plugin";
+import { useContextWindow } from "@/stores/contextWindow";
 
 export default {
   name: "ChatInterface",
@@ -101,20 +138,7 @@ export default {
   },
 
   setup(props) {
-    const ai = useAI({ initialMessages: props.initialMessages });
-
-    return {
-      send: ai.send,
-      abort: ai.abort,
-      messages: ai.messages,
-      error: ai.error,
-      status: ai.status,
-      acceptPermission: ai.acceptPermission,
-      rejectPermission: ai.rejectPermission,
-      rejectAllPendingApprovals: ai.rejectAllPendingApprovals,
-      hasPendingApprovals: ai.hasPendingApprovals,
-      retry: ai.retry,
-    };
+    return useAI({ initialMessages: props.initialMessages });
   },
 
   data() {
@@ -128,12 +152,17 @@ export default {
 
   computed: {
     ...mapGetters(useChatStore, ["systemPrompt"]),
+    ...mapGetters(useContextWindow, ["contextUsage", "mustReduceContext"]),
     ...mapWritableState(useChatStore, ["model"]),
     processing() {
       if (this.hasPendingApprovals) return false;
       return this.status !== "ready" && this.status !== "error";
     },
     showSpinner() {
+      if (this.reducingContext) {
+        return true;
+      }
+
       return (
         !this.hasPendingApprovals &&
         (this.status === "submitted" || this.status === "streaming")
@@ -148,12 +177,12 @@ export default {
         return true;
       }
 
-      if (this.error.message.includes('User rejected tool call')) {
+      if (this.error.message.includes("User rejected tool call")) {
         return false;
       }
 
       // User aborted request before AI got a chance to respond
-      if (this.error.message.includes('aborted without reason')) {
+      if (this.error.message.includes("aborted without reason")) {
         return false;
       }
 
@@ -168,8 +197,8 @@ export default {
     isOllamaToolError() {
       if (!this.error || !this.model) return false;
       const errorStr = this.error.toString().toLowerCase();
-      const isOllama = this.model.provider === 'ollama';
-      const hasToolError = errorStr.includes('bad request');
+      const isOllama = this.model.provider === "ollama";
+      const hasToolError = errorStr.includes("bad request");
       return isOllama && hasToolError;
     },
 
@@ -184,7 +213,7 @@ export default {
             }
           },
         },
-      ]
+      ];
     },
   },
 
@@ -207,9 +236,11 @@ export default {
 
   async mounted() {
     getConnectionInfo().then((connection) => {
-      if (connection.databaseType === "mongodb"
-        || connection.connectionType === "surrealdb"
-        || connection.connectionType === "redis") {
+      if (
+        connection.databaseType === "mongodb" ||
+        connection.connectionType === "surrealdb" ||
+        connection.connectionType === "redis"
+      ) {
         this.sqlOrCode = "Code";
       }
     });
@@ -219,8 +250,8 @@ export default {
       // Calculate if we're near bottom (within 50px of bottom)
       const isNearBottom =
         scrollContainer.scrollHeight -
-        scrollContainer.scrollTop -
-        scrollContainer.clientHeight <
+          scrollContainer.scrollTop -
+          scrollContainer.clientHeight <
         50;
 
       this.isAtBottom = isNearBottom;
@@ -233,7 +264,7 @@ export default {
   methods: {
     ...mapActions(useInternalDataStore, ["setInternal"]),
 
-    submit(input: string) {
+    async submit(input: string) {
       if (!this.model) {
         // FIXME we should catch this and show it on screen
         this.noModelError = true;
@@ -244,6 +275,10 @@ export default {
 
       if (this.hasPendingApprovals) {
         this.rejectAllPendingApprovals();
+      }
+
+      if (this.mustReduceContext) {
+        await this.reduceContext();
       }
 
       this.send(input);
@@ -268,7 +303,7 @@ export default {
       if (options?.smooth) {
         this.$refs.scrollContainerRef.scrollTo({
           top: this.$refs.scrollContainerRef.scrollHeight,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       } else {
         this.$refs.scrollContainerRef.scrollTop =
@@ -299,3 +334,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.spinner-container .label {
+  padding-left: 1ch;
+}
+</style>

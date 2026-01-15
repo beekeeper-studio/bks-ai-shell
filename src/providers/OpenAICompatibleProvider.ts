@@ -1,4 +1,4 @@
-import { AvailableProviders } from "@/config";
+import { AvailableProviders, ModelInfo } from "@/config";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -26,7 +26,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
     }).languageModel(id);
   }
 
-  async listModels() {
+  async listModels(): Promise<ModelInfo[]> {
     const url = new URL("./models", this.options.baseURL);
 
     const res = await fetch(url.toString(), {
@@ -39,12 +39,17 @@ export class OpenAICompatibleProvider extends BaseProvider {
     if (data.error) {
       throw new Error(`Failed to list models: ${data.error}`);
     }
+    if (!Array.isArray(data.data)) {
+      // use log.warn from @beekeeperstudio/plugin
+      console.warn("Provider returns invalid data", this.options.baseURL, data);
+      return [];
+    }
     try {
-      const models = data.data?.map((m: any) => ({
+      return (data.data as any[]).map<ModelInfo>((m) => ({
         id: m.id,
-        displayName: m.id,
-      })) || [];
-      return models;
+        displayName: m.name ?? m.id,
+        contextWindow: m.context_length,
+      }));
     } catch (e) {
       throw new Error(`Failed to list models: ${e}`);
     }

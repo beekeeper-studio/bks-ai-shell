@@ -60,17 +60,20 @@ export const defaultTemperature = 0.7;
 export type AvailableProviders = keyof typeof providerConfigs;
 
 export type AvailableProvidersWithDynamicModels = {
-  [K in keyof typeof providerConfigs]: 'dynamicModels' extends keyof typeof providerConfigs[K]
-    ? typeof providerConfigs[K]['dynamicModels'] extends true
-      ? K
-      : never
-    : never;
+  [K in keyof typeof providerConfigs]:
+    typeof providerConfigs[K]["dynamicModels"] extends true ? K : never
 }[keyof typeof providerConfigs];
 
 export type AvailableModels<T extends AvailableProviders | unknown = unknown> =
   T extends AvailableProviders
   ? (typeof providerConfigs)[T]["models"][number]
   : (typeof providerConfigs)[AvailableProviders]["models"][number];
+
+export type ModelInfo = {
+  id: string;
+  displayName: string;
+  contextWindow?: number;
+};
 
 export const providerConfigs = {
   anthropic: {
@@ -130,6 +133,7 @@ export const providerConfigs = {
         contextWindow: 200_000,
       } as const,
     ],
+    dynamicModels: false as const,
   },
   google: {
     displayName: "Google" as const,
@@ -163,6 +167,7 @@ export const providerConfigs = {
         contextWindow: 1_048_576,
       } as const,
     ],
+    dynamicModels: false as const,
   },
   openai: {
     displayName: "OpenAI" as const,
@@ -244,16 +249,17 @@ export const providerConfigs = {
         contextWindow: 200_000,
       } as const,
     ],
+    dynamicModels: false as const,
   },
   openaiCompat: {
     displayName: "OpenAI-Compatible" as const,
     models: [],
-    dynamicModels: true,
+    dynamicModels: true as const,
   },
   ollama: {
     displayName: "Ollama" as const,
     models: [],
-    dynamicModels: true,
+    dynamicModels: true as const,
   },
 };
 

@@ -1,4 +1,4 @@
-import { AvailableProviders, providerConfigs } from "@/config";
+import { AvailableProviders, ModelInfo, providerConfigs } from "@/config";
 import { BaseProvider, StreamOptions } from "@/providers/BaseProvider";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod/v3";
@@ -39,7 +39,7 @@ export class OpenAIProvider extends BaseProvider {
     return super.generateObject(options);
   }
 
-  async listModels() {
+  async listModels(): Promise<ModelInfo[]> {
     return providerConfigs.openai.models;
   }
 }

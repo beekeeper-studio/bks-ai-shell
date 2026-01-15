@@ -56,13 +56,8 @@ export const messageMetadataSchema = z.object({
   providerId: z.custom<AvailableProviders>().optional(),
   modelId: z.string().optional(),
   usage: usageSchema.optional(),
+  isSummary: z.boolean().optional(),
 });
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
-
-export type SendOptions = {
-  providerId: AvailableProviders;
-  modelId: AvailableModels["id"];
-  systemPrompt?: string;
-};
 

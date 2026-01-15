@@ -2,12 +2,18 @@ import { log } from "@beekeeperstudio/plugin";
 import {
   convertToModelMessages,
   generateObject,
+  generateText,
   LanguageModel,
   stepCountIs,
   streamText,
   ToolSet,
 } from "ai";
-import { AvailableModels, defaultTemperature } from "@/config";
+import {
+  AvailableModels,
+  AvailableProviders,
+  defaultTemperature,
+  ModelInfo,
+} from "@/config";
 import { UIMessage } from "@/types";
 import { z } from "zod/v3";
 import {
@@ -18,7 +24,7 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { ProviderOptions } from "@ai-sdk/provider-utils";
+import { generateId, ProviderOptions } from "@ai-sdk/provider-utils";
 
 export type Messages = UIMessage[];
 
@@ -29,7 +35,13 @@ export type StreamOptions = {
   modelId: AvailableModels["id"];
   temperature?: number;
   systemPrompt?: string;
-}
+};
+
+export type GenerateSummaryOptions = {
+  messages: UIMessage[];
+  modelId: AvailableModels["id"];
+  maxOutputTokens?: number;
+};
 
 export abstract class BaseProvider {
   abstract get providerId(): AvailableProviders;
@@ -43,19 +55,7 @@ export abstract class BaseProvider {
   async stream(options: StreamOptions) {
     const result = streamText({
       model: this.getModel(options.modelId),
-      messages: await convertToModelMessages<UIMessage>(options.messages, {
-        convertDataPart(part) {
-          if (part.type === "data-editedQuery") {
-            return {
-              type: "text",
-              text:
-                "Please run the following code instead:\n```\n" +
-                part.data.query +
-                "\n```",
-            };
-          }
-        },
-      }),
+      messages: await this.convertToModelMessages(options.messages),
       abortSignal: options.signal,
       system: options.systemPrompt,
       tools: options.tools,
@@ -87,6 +87,41 @@ export abstract class BaseProvider {
     });
   }
 
+  async generateSummary(options: GenerateSummaryOptions): Promise<UIMessage> {
+    const output = await generateText({
+      model: this.getModel(options.modelId),
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Please summarize the following conversation:\n",
+            },
+          ],
+        },
+        ...(await this.convertToModelMessages(options.messages)),
+      ],
+      maxOutputTokens: options.maxOutputTokens,
+    });
+
+    return {
+      id: generateId(),
+      role: "assistant",
+      parts: [
+        { type: "step-start" },
+        { type: "text", text: output.text },
+      ],
+      metadata: {
+        createdAt: Date.now(),
+        modelId: options.modelId,
+        providerId: this.providerId,
+        usage: output.usage,
+        isSummary: true,
+      },
+    }
+  }
+
   async generateObject<OBJECT>(options: {
     modelId: string;
     schema: z.Schema<OBJECT, z.ZodTypeDef, any>;
@@ -101,9 +136,7 @@ export abstract class BaseProvider {
     });
   }
 
-  abstract listModels(): Promise<
-    readonly { id: string; displayName: string }[]
-  >;
+  abstract listModels(): Promise<ModelInfo[]>;
 
   getErrorMessage(error: unknown) {
     if (NoSuchToolError.isInstance(error)) {
@@ -124,5 +157,21 @@ export abstract class BaseProvider {
       return `Model ${error.modelId} does not exist.`;
     }
     return  `An error occurred. (${error.message})`;
+  }
+
+  private async convertToModelMessages(messages: UIMessage[]) {
+    return await convertToModelMessages<UIMessage>(messages, {
+      convertDataPart(part) {
+        if (part.type === "data-editedQuery") {
+          return {
+            type: "text",
+            text:
+              "Please run the following code instead:\n```\n" +
+              part.data.query +
+              "\n```",
+          };
+        }
+      },
+    });
   }
 }
