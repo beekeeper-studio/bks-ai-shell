@@ -11,6 +11,7 @@
           v-else-if="isToolUIPart(part)"
           :message="message"
           :toolCall="part"
+          :disableToolEdit="disableToolEdit"
           @accept="$emit('accept-permission', part.approval?.id)"
           @reject="$emit('reject-permission', {
             toolCallId: part.toolCallId,
@@ -88,6 +89,10 @@ export default {
     },
     isEmpty() {
       return this.status === 'ready' && isEmptyUIMessage(this.message);
+    },
+    disableToolEdit() {
+      // For now, we dont support tool edit if the there are multiple query tools
+      return this.message.parts.filter((p) => p.type === "tool-run_query").length > 1;
     },
   },
 

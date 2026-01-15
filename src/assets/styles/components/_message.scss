@@ -4,13 +4,13 @@
       margin: 0.75em 0;
     }
 
-    code:not([data-lang]) {
-      background-color: color-mix(in srgb,
-          var(--theme-base) 3%,
-          var(--query-editor-bg));
-      padding: 0.05em 0.2em;
-      border-radius: 8px;
-    }
+    // code:not([data-lang]) {
+    //   background-color: color-mix(in srgb,
+    //       var(--theme-base) 3%,
+    //       var(--query-editor-bg));
+    //   padding: 0.05em 0.2em;
+    //   border-radius: 8px;
+    // }
 
     h1,
     h2,

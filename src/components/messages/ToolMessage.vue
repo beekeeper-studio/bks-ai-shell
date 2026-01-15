@@ -13,6 +13,7 @@
       :output="toolCall.output"
       :errorText="toolCall.errorText"
       :approval="toolCall.approval"
+      :disableToolEdit="disableToolEdit"
       @accept="$emit('accept')"
       @reject="$emit('reject', $event)"
     />
@@ -64,7 +65,7 @@ export default {
       type: Object as PropType<ToolUIPart>,
       required: true,
     },
-    args: null,
+    disableToolEdit: Boolean,
   },
   emits: ["accept", "reject"],
   computed: {

@@ -31,15 +31,20 @@ export function lastAssistantMessageIsCompleteWithApprovedResponses({
     .filter(isToolUIPart)
     .filter((part) => !part.providerExecuted);
 
+  // Stop if all tool invocations are unapproved
+  if (
+    lastStepToolInvocations.filter(
+      (part) => part.state === "approval-responded" && !part.approval.approved,
+    ).length === lastStepToolInvocations.length
+  ) {
+    return false;
+  }
+
   return (
     // has at least one tool approval response
     lastStepToolInvocations.filter(
       (part) => part.state === "approval-responded",
     ).length > 0 &&
-    // stop when there is an unapproved response
-    lastStepToolInvocations.filter(
-      (part) => part.state === "approval-responded" && !part.approval.approved,
-    ).length === 0 &&
     // all tool approvals must have a response
     lastStepToolInvocations.every(
       (part) =>

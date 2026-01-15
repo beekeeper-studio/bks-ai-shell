@@ -49,9 +49,16 @@
           No
           <span class="material-symbols-outlined reject-icon"> close </span>
         </button>
-        <button class="btn btn-flat" @click="edit">
+        <button
+          class="btn btn-flat"
+          @click="edit"
+          :disabled="disableToolEdit"
+          :title="disableToolEdit ? 'Editing disabled for multiple Run Query calls.' : ''"
+        >
           Edit
-          <span class="material-symbols-outlined reject-icon"> edit_square </span>
+          <span class="material-symbols-outlined reject-icon">
+            edit_square
+          </span>
         </button>
       </div>
     </div>
@@ -89,6 +96,7 @@ export default {
     output: String as PropType<RunQueryPart['output']>,
     errorText: String as PropType<RunQueryPart['errorText']>,
     approval: Object as PropType<ToolUIPart["approval"]>,
+    disableToolEdit: Boolean,
   },
   emits: ["accept", "reject"],
   data() {
