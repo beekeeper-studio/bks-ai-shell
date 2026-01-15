@@ -1,4 +1,3 @@
-import { readonly } from "vue";
 import instructions from "../instructions/base.txt?raw";
 import mongodbInstructions from "../instructions/mongodb.txt?raw";
 import { getConnectionInfo, getTables } from "@beekeeperstudio/plugin";

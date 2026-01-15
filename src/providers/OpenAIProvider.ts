@@ -1,7 +1,6 @@
-import { AvailableModels, providerConfigs } from "@/config";
-import { BaseProvider, Messages } from "@/providers/BaseProvider";
+import { providerConfigs } from "@/config";
+import { BaseProvider, StreamOptions } from "@/providers/BaseProvider";
 import { createOpenAI } from "@ai-sdk/openai";
-import { ToolSet } from "ai";
 import { z } from "zod/v3";
 
 export class OpenAIProvider extends BaseProvider {
@@ -15,13 +14,7 @@ export class OpenAIProvider extends BaseProvider {
     }).languageModel(id);
   }
 
-  stream(options: {
-    messages: Messages;
-    signal: AbortSignal;
-    tools: ToolSet;
-    modelId: AvailableModels<"openai">["id"];
-    temperature?: number;
-  }) {
+  stream(options: StreamOptions) {
     if (options.modelId.startsWith("gpt-5")) {
       // Can't set temperature for gpt-5
       return super.stream({ ...options, temperature: 1 });
