@@ -33,8 +33,7 @@ type Configurable = {
   /** Append custom instructions to the default system instructions. */
   customInstructions: string;
   allowExecutionOfReadOnlyQueries: boolean;
-  /** TODO: Enable summarization. Not implemented yet. */
-  summarization: boolean;
+  enableAutoCompact: boolean;
 
   // ==== MODELS ====
   /** List of disabled models by id. */
@@ -59,6 +58,8 @@ type EncryptedConfigurable = {
 
 type ConfigurationState = Configurable & EncryptedConfigurable;
 
+export type ConfigurationKey = keyof ConfigurationState;
+
 const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
   "providers.openai.apiKey",
   "providers.anthropic.apiKey",
@@ -70,7 +71,7 @@ const defaultConfiguration: ConfigurationState = {
   // ==== GENERAL ====
   customInstructions: "",
   allowExecutionOfReadOnlyQueries: false,
-  summarization: true,
+  enableAutoCompact: true,
 
   // ==== MODELS ====
   "providers.openai.apiKey": "",

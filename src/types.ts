@@ -56,7 +56,7 @@ export const messageMetadataSchema = z.object({
   providerId: z.custom<AvailableProviders>().optional(),
   modelId: z.string().optional(),
   usage: usageSchema.optional(),
-  isSummary: z.boolean().optional(),
+  isCompact: z.boolean().optional(),
 });
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;

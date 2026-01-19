@@ -25,7 +25,7 @@ import {
   // ToolExecutionError,
 } from "ai";
 import { generateId, ProviderOptions } from "@ai-sdk/provider-utils";
-import summarizationPrompt from "../../instructions/summarize.txt?raw";
+import compactPrompt from "../../instructions/compact.txt?raw";
 
 export type Messages = UIMessage[];
 
@@ -38,10 +38,9 @@ export type StreamOptions = {
   systemPrompt?: string;
 };
 
-export type GenerateSummaryOptions = {
+export type GenerateCompactOptions = {
   messages: UIMessage[];
   modelId: AvailableModels["id"];
-  maxOutputTokens?: number;
 };
 
 export abstract class BaseProvider {
@@ -88,17 +87,16 @@ export abstract class BaseProvider {
     });
   }
 
-  async generateSummary(options: GenerateSummaryOptions): Promise<UIMessage> {
+  async generateCompact(options: GenerateCompactOptions): Promise<UIMessage> {
     const output = await generateText({
       model: this.getModel(options.modelId),
       messages: [
         ...(await this.convertToModelMessages(options.messages)),
         {
           role: "user",
-          content: [{ type: "text", text: summarizationPrompt }],
+          content: [{ type: "text", text: compactPrompt }],
         },
       ],
-      maxOutputTokens: options.maxOutputTokens,
     });
 
     return {
@@ -113,7 +111,7 @@ export abstract class BaseProvider {
         modelId: options.modelId,
         providerId: this.providerId,
         usage: output.usage,
-        isSummary: true,
+        isCompact: true,
       },
     }
   }

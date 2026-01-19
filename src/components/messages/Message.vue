@@ -3,7 +3,7 @@
     <div class="message-content" :class="{ 'literally-empty': isEmpty }">
       <p
         class="session-compacted"
-        v-if="message.metadata?.isSummary"
+        v-if="message.metadata?.isCompact"
       >Session compacted</p>
 
       <template v-if="hidden" />
@@ -31,7 +31,7 @@
 
       <span v-if="isEmpty">Empty response</span>
 
-      <p v-if="message.metadata?.isSummary">
+      <p v-if="message.metadata?.isCompact">
         <a href="#" @click="hideCompactResult = !hideCompactResult">{{
           hideCompactResult ? "Show result" : "Hide result"
         }}</a>
@@ -154,7 +154,7 @@ export default {
       return this.message.parts.filter((p) => p.type === "tool-run_query").length > 1;
     },
     hidden() {
-      return this.message.metadata?.isSummary && this.hideCompactResult;
+      return this.message.metadata?.isCompact && this.hideCompactResult;
     },
   },
 

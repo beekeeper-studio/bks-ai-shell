@@ -61,14 +61,10 @@ class AIShellChat {
 
     try {
       this.reducingContext.value = true;
-      const summaryMessage = await createProvider(
+      const compactMessage = await createProvider(
         model.provider,
-      ).generateSummary({
-        messages: this.messages.value,
-        modelId: model.id,
-        maxOutputTokens: Math.round(0.15 * model.contextWindow), // 15% of context
-      });
-      this.chat.messages = [summaryMessage];
+      ).generateCompact({ messages: this.messages.value, modelId: model.id });
+      this.chat.messages = [compactMessage];
     } catch {
       log.error("Failed to reduce context");
     } finally {
@@ -109,10 +105,10 @@ class AIShellChat {
     options:
       | string
       | {
-        approvalId: string;
-        toolCallId: string;
-        editedQuery: string;
-      },
+          approvalId: string;
+          toolCallId: string;
+          editedQuery: string;
+        },
   ) {
     let approvalId = typeof options === "string" ? options : options.approvalId;
 

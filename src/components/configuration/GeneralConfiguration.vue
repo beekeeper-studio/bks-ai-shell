@@ -1,16 +1,43 @@
 <template>
   <h2>General</h2>
-  <BaseInput :model-value="customInstructions" @change="handleChange" type="textarea"
-    placeholder="E.g. Before running a query, analyze it for any potential issues." rows="4">
+  <BaseInput
+    :model-value="customInstructions"
+    @change="handleChange"
+    type="textarea"
+    placeholder="E.g. Before running a query, analyze it for any potential issues."
+    rows="4"
+  >
     <template #label>Custom Instructions</template>
-    <template #helper>Custom instructions will be appended to the <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions">default instructions</ExternalLink> and included with every message you send as a system prompt. These instructions will be applied globally to all connections.</template>
-  </BaseInput>
-  <BaseInput type="switch" :model-value="allowExecutionOfReadOnlyQueries" @click="handleSwitchClick">
-    <template #label>
-      Always allow execution of read-only queries
-    </template>
     <template #helper>
-      This will allow execution of read-only queries without asking for confirmation in all sessions.
+      Custom instructions will be appended to the
+      <ExternalLink
+        href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions"
+        >default instructions</ExternalLink
+      >
+      and included with every message you send as a system prompt. These
+      instructions will be applied globally to all connections.
+    </template>
+  </BaseInput>
+  <BaseInput
+    type="switch"
+    :model-value="allowExecutionOfReadOnlyQueries"
+    @click="handleSwitchClick('allowExecutionOfReadOnlyQueries')"
+  >
+    <template #label>Always allow execution of read-only queries</template>
+    <template #helper>
+      This will allow execution of read-only queries without asking for
+      confirmation in all sessions.
+    </template>
+  </BaseInput>
+  <BaseInput
+    type="switch"
+    :model-value="enableAutoCompact"
+    @click="handleSwitchClick('enableAutoCompact')"
+  >
+    <template #label>Enable auto-compact</template>
+    <template #helper>
+      When enabled, the conversation is automatically compacted to avoid
+      hitting the context limit.
     </template>
   </BaseInput>
 </template>
@@ -18,7 +45,7 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useConfigurationStore, ConfigurationKey } from "@/stores/configuration";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 
 export default {
@@ -33,6 +60,7 @@ export default {
     ...mapState(useConfigurationStore, [
       "customInstructions",
       "allowExecutionOfReadOnlyQueries",
+      "enableAutoCompact",
     ]),
   },
 
@@ -44,8 +72,11 @@ export default {
         (event.target as HTMLTextAreaElement).value,
       );
     },
-    handleSwitchClick() {
-      this.configure("allowExecutionOfReadOnlyQueries", !this.allowExecutionOfReadOnlyQueries);
+    handleSwitchClick(name: ConfigurationKey) {
+      this.configure(
+        name,
+        !this.allowExecutionOfReadOnlyQueries,
+      );
     },
   },
 };
