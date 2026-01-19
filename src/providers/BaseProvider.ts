@@ -1,8 +1,15 @@
-import { notify } from "@beekeeperstudio/plugin";
-import { generateObject, LanguageModel, stepCountIs, streamText, ToolSet } from "ai";
+import { log } from "@beekeeperstudio/plugin";
+import {
+  convertToModelMessages,
+  generateObject,
+  LanguageModel,
+  stepCountIs,
+  streamText,
+  ToolSet,
+} from "ai";
 import { AvailableModels, defaultTemperature } from "@/config";
+import { UIMessage } from "@/types";
 import { z } from "zod/v3";
-// import { UserRejectedError } from "@/tools";
 import {
   APICallError,
   // InvalidToolArgumentsError,
@@ -11,9 +18,18 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { ModelMessage, ProviderOptions } from '@ai-sdk/provider-utils';
+import { ProviderOptions } from "@ai-sdk/provider-utils";
 
-export type Messages = ModelMessage[];
+export type Messages = UIMessage[];
+
+export type StreamOptions = {
+  messages: Messages;
+  signal?: AbortSignal;
+  tools: ToolSet;
+  modelId: AvailableModels["id"];
+  temperature?: number;
+  systemPrompt?: string;
+}
 
 export abstract class BaseProvider {
   abstract getModel(id: string): LanguageModel;
@@ -22,17 +38,22 @@ export abstract class BaseProvider {
     return undefined;
   }
 
-  async stream(options: {
-    messages: Messages;
-    signal?: AbortSignal;
-    tools: ToolSet;
-    modelId: AvailableModels["id"];
-    temperature?: number;
-    systemPrompt?: string;
-  }) {
+  async stream(options: StreamOptions) {
     const result = streamText({
       model: this.getModel(options.modelId),
-      messages: options.messages,
+      messages: await convertToModelMessages<UIMessage>(options.messages, {
+        convertDataPart(part) {
+          if (part.type === "data-editedQuery") {
+            return {
+              type: "text",
+              text:
+                "Please run the following code instead:\n```\n" +
+                part.data.query +
+                "\n```",
+            };
+          }
+        },
+      }),
       abortSignal: options.signal,
       system: options.systemPrompt,
       tools: options.tools,
@@ -41,12 +62,9 @@ export abstract class BaseProvider {
       providerOptions: this.getProviderOptions(),
     });
     return result.toUIMessageStreamResponse({
+      originalMessages: options.messages,
       onError: (error) => {
-        notify("pluginError", {
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-        });
+        log.error(error);
         return this.getErrorMessage(error);
       },
     });
@@ -75,17 +93,10 @@ export abstract class BaseProvider {
       return "The model tried to call a unknown tool.";
     // } else if (InvalidToolArgumentsError.isInstance(error)) {
     //   return "The model called a tool with invalid arguments.";
-    // } else if (ToolExecutionError.isInstance(error)) {
-    //   if (UserRejectedError.isInstance(error.cause)) {
-    //     return `User rejected tool call. (toolCallId: ${error.toolCallId})`;
-    //   } else {
-    //     return "An error occurred during tool execution.";
-    //   }
     } else if (APICallError.isInstance(error)) {
       if (
         error.data?.error?.code === "invalid_api_key" ||
-        error.data?.error?.message === "invalid x-api-key" ||
-        error.data?.error?.code === 400
+        error.data?.error?.message === "invalid x-api-key"
       ) {
         return `The API key is invalid.`;
       }
