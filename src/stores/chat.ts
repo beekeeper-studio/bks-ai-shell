@@ -209,8 +209,7 @@ export const useChatStore = defineStore("chat", {
         return 100;
       }
 
-      // const contextLimit = state.model.contextWindow - 32_000;
-      const contextLimit = state.model.contextWindow - 259_600;
+      const contextLimit = state.model.contextWindow - 32_000;
       const contextUsage = totalTokens / contextLimit;
       return (1 - contextUsage) * 100;
     },
