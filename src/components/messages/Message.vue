@@ -1,12 +1,30 @@
 <template>
-  <div :class="['message', message.role]">
+  <div
+    v-if="!message.metadata?.isCompactPrompt"
+    :class="['message', message.role]"
+  >
     <div class="message-content" :class="{ 'literally-empty': isEmpty }">
-      <p
-        class="session-compacted"
-        v-if="message.metadata?.isCompact"
-      >Session compacted</p>
+      <div class="compact-result" v-if="isCompactResult">
+        <details
+          :open="showCompactResult"
+          @toggle="showCompactResult = $event.target.open"
+        >
+          <summary>
+            <span class="material-symbols-outlined">keyboard_arrow_right</span>
+            Show compact
+          </summary>
+          <div class="compact-result-content">
+            <template v-for="(part, index) of message.parts">
+              <markdown
+                v-if="part.type === 'text'"
+                :key="index"
+                :content="part.text"
+              />
+            </template>
+          </div>
+        </details>
+      </div>
 
-      <template v-if="hidden" />
       <template v-else-if="message.role === 'system'" />
       <template v-else v-for="(part, index) of message.parts" :key="index">
         <template v-if="part.type === 'text'">
@@ -30,12 +48,6 @@
       </template>
 
       <span v-if="isEmpty">Empty response</span>
-
-      <p v-if="message.metadata?.isCompact">
-        <a href="#" @click="hideCompactResult = !hideCompactResult">{{
-          hideCompactResult ? "Show result" : "Hide result"
-        }}</a>
-      </p>
     </div>
     <div class="message-actions" v-if="status === 'ready'">
       <button
@@ -106,7 +118,7 @@ export default {
   data() {
     return {
       copied: false,
-      hideCompactResult: true,
+      showCompactResult: true,
     };
   },
 
@@ -127,7 +139,14 @@ export default {
       return text.trim();
     },
     isEmpty() {
-      return this.status === "ready" && isEmptyUIMessage(this.message);
+      return (
+        this.status === "ready" &&
+        isEmptyUIMessage(this.message) &&
+        !this.isCompactResult
+      );
+    },
+    isCompactResult() {
+      return typeof this.message.metadata?.compactStatus === "string";
     },
     metadata() {
       if (!this.message.metadata) {
@@ -151,10 +170,9 @@ export default {
     },
     disableToolEdit() {
       // For now, we dont support tool edit if the there are multiple query tools
-      return this.message.parts.filter((p) => p.type === "tool-run_query").length > 1;
-    },
-    hidden() {
-      return this.message.metadata?.isCompact && this.hideCompactResult;
+      return (
+        this.message.parts.filter((p) => p.type === "tool-run_query").length > 1
+      );
     },
   },
 
@@ -193,6 +211,46 @@ ul.metadata-content {
     span:nth-child(2) {
       margin-left: 0.5rem;
     }
+  }
+}
+
+.compact-result {
+  border: 1px solid var(--border-color);
+  /* padding: 0.5rem 1rem; */
+  border-radius: 0.25rem;
+
+  details[open] summary .material-symbols-outlined {
+    transform: rotate(90deg);
+  }
+
+  summary {
+    font-size: 0.75rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    padding-inline: 0.5rem;
+    background-color: color-mix(
+      in srgb,
+      var(--theme-base) 5%,
+      var(--query-editor-bg)
+    );
+    user-select: none;
+    cursor: pointer;
+
+    .material-symbols-outlined {
+      color: var(--text);
+      font-size: 1.25rem;
+    }
+
+    &::marker {
+      display: none;
+    }
+  }
+
+  .compact-result-content {
+    padding-block: 1rem;
+    padding-inline: 0.5rem;
+    color: var(--text);
   }
 }
 </style>

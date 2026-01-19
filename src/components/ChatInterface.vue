@@ -39,8 +39,16 @@
               )
             "
             :message="message"
-            :status="index === messages.length - 1 ? (status === 'ready' || status === 'error' ? 'ready' : 'processing') : 'ready'"
-            @accept-permission="acceptPermission" @reject-permission="handleRejectPermission" />
+            :status="
+              index === messages.length - 1
+                ? status === 'ready' || status === 'error'
+                  ? 'ready'
+                  : 'processing'
+                : 'ready'
+            "
+            @accept-permission="acceptPermission"
+            @reject-permission="handleRejectPermission"
+          />
         </template>
         <div class="message error" v-if="isUnexpectedError">
           <div class="message-content">
@@ -72,7 +80,7 @@
           :style="{ visibility: showSpinner ? 'visible' : 'hidden' }"
         >
           <span class="spinner" />
-          <span class="label" v-if="reducingContext">Compacting</span>
+          <span class="label" v-if="compacting">Compacting</span>
         </div>
       </div>
       <button
@@ -95,6 +103,18 @@
         @submit="submit"
         @stop="stop"
       />
+      <div
+        v-if="enableAutoCompact && contextLeftUntilAutoCompact <= 15"
+        class="auto-compact-notice"
+      >
+        <template v-if="contextOverflow">
+          Auto-compacting on next message
+        </template>
+        <template v-else>
+          Context left until auto-compact:
+          {{ contextLeftUntilAutoCompact.toFixed(1) }}%
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -115,7 +135,7 @@ import PromptInput from "@/components/common/PromptInput.vue";
 import { getConnectionInfo } from "@beekeeperstudio/plugin";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 import { log } from "@beekeeperstudio/plugin";
-import { useContextWindow } from "@/stores/contextWindow";
+import { useConfigurationStore } from "@/stores/configuration";
 
 export default {
   name: "ChatInterface",
@@ -151,15 +171,19 @@ export default {
   },
 
   computed: {
-    ...mapGetters(useChatStore, ["systemPrompt"]),
-    ...mapGetters(useContextWindow, ["contextUsage", "mustReduceContext"]),
+    ...mapGetters(useConfigurationStore, ["enableAutoCompact"]),
+    ...mapGetters(useChatStore, [
+      "systemPrompt",
+      "contextOverflow",
+      "contextLeftUntilAutoCompact",
+    ]),
     ...mapWritableState(useChatStore, ["model"]),
     processing() {
       if (this.hasPendingApprovals) return false;
       return this.status !== "ready" && this.status !== "error";
     },
     showSpinner() {
-      if (this.reducingContext) {
+      if (this.compacting) {
         return true;
       }
 
@@ -277,11 +301,11 @@ export default {
         this.rejectAllPendingApprovals();
       }
 
-      if (this.mustReduceContext) {
-        await this.reduceContext();
+      if (this.contextOverflow) {
+        await this.compact(input);
+      } else {
+        await this.send(input);
       }
-
-      this.send(input);
     },
 
     async reload() {
@@ -338,5 +362,11 @@ export default {
 <style scoped>
 .spinner-container .label {
   padding-left: 1ch;
+}
+.auto-compact-notice {
+  width: 100%;
+  margin-top: 0.5rem;
+  text-align: right;
+  color: var(--text);
 }
 </style>

@@ -184,6 +184,39 @@ export const useChatStore = defineStore("chat", {
     supportOpenInQueryEditor(state) {
       return gt(state.appVersion, "5.3.0");
     },
+    /**
+     * The context limit is the actual context window - 32K tokens.
+     *
+     * For example,
+     *   - gpt-5.2's context window is 400K.
+     *   - The context limit is 400K - 32K = 368K.
+     *
+     * Why 32K? Because we want to leave some room for compact result.
+     *
+     **/
+    contextLeftUntilAutoCompact(state): number {
+      if (typeof state.model?.contextWindow !== "number") {
+        return 100;
+      }
+
+      const totalTokens = useTabState().messages.findLast(
+        (m) =>
+          m.role === "assistant" &&
+          typeof m.metadata?.usage?.totalTokens === "number",
+      )?.metadata?.usage?.totalTokens;
+
+      if (typeof totalTokens !== "number") {
+        return 100;
+      }
+
+      // const contextLimit = state.model.contextWindow - 32_000;
+      const contextLimit = state.model.contextWindow - 259_600;
+      const contextUsage = totalTokens / contextLimit;
+      return (1 - contextUsage) * 100;
+    },
+    contextOverflow(): boolean {
+      return this.contextLeftUntilAutoCompact <= 0;
+    },
   },
   actions: {
     async initialize() {

@@ -34,7 +34,7 @@
     :model-value="enableAutoCompact"
     @click="handleSwitchClick('enableAutoCompact')"
   >
-    <template #label>Enable auto-compact</template>
+    <template #label>Enable auto-compact (recommended)</template>
     <template #helper>
       When enabled, the conversation is automatically compacted to avoid
       hitting the context limit.

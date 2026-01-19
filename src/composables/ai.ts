@@ -10,6 +10,7 @@ import { UIMessage } from "@/types";
 import { lastAssistantMessageIsCompleteWithApprovedResponses } from "@/utils/last-assistant-message-is-complete-with-approved-responses";
 import { ChatTransport } from "@/providers/ChatTransport";
 import { useChatStore } from "@/stores/chat";
+import compactPrompt from "../../instructions/compact.txt?raw";
 
 type AIOptions = {
   initialMessages: UIMessage[];
@@ -21,11 +22,15 @@ class AIShellChat {
   readonly error: ComputedRef<Error | undefined>;
   readonly status: ComputedRef<ChatStatus>;
   readonly hasPendingApprovals: ComputedRef<boolean>;
-  readonly reducingContext = ref(false);
+  readonly compacting = ref(false);
 
   /** Force the `status` if not `null` */
   private runningEditedQuery = ref<boolean>();
   private chat: Chat<UIMessage>;
+  /** Messages to be sent after compacting */
+  private pendingCompactMessages = ref<UIMessage[]>([]);
+  private errorCompacting = ref<Error | undefined>();
+  private aborted = ref(false);
 
   constructor(options: AIOptions) {
     this.chat = new Chat<UIMessage>({
@@ -33,9 +38,15 @@ class AIShellChat {
       messages: options.initialMessages,
       sendAutomaticallyWhen:
         lastAssistantMessageIsCompleteWithApprovedResponses,
+      onFinish: () => {
+        this.saveMessages();
+        this.fillTitle();
+      },
     });
 
-    this.messages = computed(() => this.chat.messages);
+    this.messages = computed(() =>
+      this.chat.messages.concat(this.pendingCompactMessages.value),
+    );
     this.error = computed(() => this.chat.error);
     this.status = computed<ChatStatus>(() => {
       if (this.runningEditedQuery.value) {
@@ -52,47 +63,119 @@ class AIShellChat {
     );
   }
 
-  async reduceContext() {
-    const model = this.getModelOrThrow();
-
-    if (!model.contextWindow) {
-      throw new Error(`Model ${model.id} does not support context reduction.`);
-    }
-
-    try {
-      this.reducingContext.value = true;
-      const compactMessage = await createProvider(
-        model.provider,
-      ).generateCompact({ messages: this.messages.value, modelId: model.id });
-      this.chat.messages = [compactMessage];
-    } catch {
-      log.error("Failed to reduce context");
-    } finally {
-      this.reducingContext.value = false;
-    }
+  // Trigger API request without sending a message
+  async triggerRequest() {
+    this.aborted.value = false;
+    await this.chat.sendMessage();
   }
 
-  /** Pass `undefined` to trigger the API without sending the message */
-  async send(message: string | undefined) {
-    await this.chat.sendMessage(message ? { text: message } : undefined);
-    this.saveMessages();
-    this.fillTitle();
+  async send(text: string) {
+    this.aborted.value = false;
+    await this.chat.sendMessage({ text });
   }
 
   async retry() {
+    this.aborted.value = false;
+    if (this.errorCompacting.value) {
+      await this.continueCompacting();
+    }
     await this.chat.regenerate();
   }
 
   async abort() {
+    this.aborted.value = true;
     await this.chat.stop();
-    this.saveMessages();
+  }
+
+  /**
+   * Request a compact message and remove all previous messages.
+   *
+   * @param followUpMessage - The followup message to be sent after the compact message.
+   **/
+  async compact(followUpMessage?: string) {
+    this.aborted.value = false;
+
+    let isCompactSuccess = false;
+
+    if (followUpMessage) {
+      this.pendingCompactMessages.value.push({
+        id: this.chat.generateId(),
+        role: "user",
+        parts: [{ type: "text", text: followUpMessage }],
+      });
+    }
+
+    // If the last message is an unfinished compact message, remove it
+    if (this.chat.lastMessage?.metadata?.compactStatus === "processing") {
+      // Two messages to remove:
+      // 1. The compact prompt
+      // 2. The compact result
+      this.chat.messages = this.chat.messages.slice(0, -2);
+    }
+
+    try {
+      this.compacting.value = true;
+      await this.chat.sendMessage({
+        role: "user",
+        parts: [{ type: "text", text: compactPrompt }],
+        metadata: { isCompactPrompt: true },
+      });
+      if (this.aborted.value) {
+        throw new Error("Aborted");
+      }
+      this.chat.messages = [this.chat.messages[this.chat.messages.length - 1]];
+      isCompactSuccess = true;
+    } catch (e) {
+      this.errorCompacting.value = e as Error;
+      log.error("Failed to reduce context");
+    } finally {
+      this.compacting.value = false;
+    }
+
+    if (isCompactSuccess) {
+      await this.flushPendingCompactMessages();
+    }
+  }
+
+  /** Call this to continue the compacting process if it fails. */
+  private async continueCompacting() {
+    let isCompactSuccess = false;
+
+    this.errorCompacting.value = undefined;
+
+    try {
+      this.compacting.value = true;
+      await this.chat.regenerate();
+      isCompactSuccess = true;
+    } catch (e) {
+      this.errorCompacting.value = e as Error;
+      log.error("Failed to continue compacting");
+    } finally {
+      this.compacting.value = false;
+    }
+
+    if (isCompactSuccess) {
+      await this.flushPendingCompactMessages();
+    }
+  }
+
+  private async flushPendingCompactMessages() {
+    if (this.pendingCompactMessages.value.length === 0) {
+      return;
+    }
+
+    this.chat.messages = [
+      ...this.chat.messages,
+      ...this.pendingCompactMessages.value,
+    ];
+
+    this.pendingCompactMessages.value = [];
+
+    await this.chat.sendMessage();
   }
 
   acceptPermission(approvalId: string) {
-    this.chat.addToolApprovalResponse({
-      id: approvalId,
-      approved: true,
-    });
+    this.chat.addToolApprovalResponse({ id: approvalId, approved: true });
   }
 
   /** After the user rejected the permission, they can provide a follow-up message.
@@ -105,10 +188,10 @@ class AIShellChat {
     options:
       | string
       | {
-          approvalId: string;
-          toolCallId: string;
-          editedQuery: string;
-        },
+        approvalId: string;
+        toolCallId: string;
+        editedQuery: string;
+      },
   ) {
     let approvalId = typeof options === "string" ? options : options.approvalId;
 
@@ -222,7 +305,7 @@ class AIShellChat {
 
       this.runningEditedQuery.value = false;
 
-      this.send(undefined);
+      this.triggerRequest();
     }
   }
 
@@ -313,7 +396,7 @@ export function useAI(options: AIOptions) {
     send: chat.send.bind(chat),
     retry: chat.retry.bind(chat),
     abort: chat.abort.bind(chat),
-    reduceContext: chat.reduceContext.bind(chat),
-    reducingContext: computed(() => chat.reducingContext.value),
+    compact: chat.compact.bind(chat),
+    compacting: computed(() => chat.compacting.value),
   };
 }

@@ -2,7 +2,6 @@ import { log } from "@beekeeperstudio/plugin";
 import {
   convertToModelMessages,
   generateObject,
-  generateText,
   LanguageModel,
   stepCountIs,
   streamText,
@@ -24,8 +23,7 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { generateId, ProviderOptions } from "@ai-sdk/provider-utils";
-import compactPrompt from "../../instructions/compact.txt?raw";
+import { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export type Messages = UIMessage[];
 
@@ -38,11 +36,6 @@ export type StreamOptions = {
   systemPrompt?: string;
 };
 
-export type GenerateCompactOptions = {
-  messages: UIMessage[];
-  modelId: AvailableModels["id"];
-};
-
 export abstract class BaseProvider {
   abstract get providerId(): AvailableProviders;
 
@@ -53,12 +46,14 @@ export abstract class BaseProvider {
   }
 
   async stream(options: StreamOptions) {
+    const isCompactPrompt =
+      options.messages[options.messages.length - 1]?.metadata?.isCompactPrompt;
     const result = streamText({
       model: this.getModel(options.modelId),
       messages: await this.convertToModelMessages(options.messages),
       abortSignal: options.signal,
-      system: options.systemPrompt,
-      tools: options.tools,
+      system: isCompactPrompt ? undefined : options.systemPrompt,
+      tools: isCompactPrompt ? undefined : options.tools,
       stopWhen: stepCountIs(100),
       temperature: options.temperature ?? defaultTemperature,
       providerOptions: this.getProviderOptions(),
@@ -75,45 +70,18 @@ export abstract class BaseProvider {
             createdAt: Date.now(),
             modelId: options.modelId,
             providerId: this.providerId,
+            compactStatus: isCompactPrompt ? "processing" : undefined,
           };
         }
 
         if (part.type === "finish") {
           return {
             usage: part.totalUsage,
+            compactStatus: isCompactPrompt ? "complete" : undefined,
           };
         }
       },
     });
-  }
-
-  async generateCompact(options: GenerateCompactOptions): Promise<UIMessage> {
-    const output = await generateText({
-      model: this.getModel(options.modelId),
-      messages: [
-        ...(await this.convertToModelMessages(options.messages)),
-        {
-          role: "user",
-          content: [{ type: "text", text: compactPrompt }],
-        },
-      ],
-    });
-
-    return {
-      id: generateId(),
-      role: "assistant",
-      parts: [
-        { type: "step-start" },
-        { type: "text", text: output.text },
-      ],
-      metadata: {
-        createdAt: Date.now(),
-        modelId: options.modelId,
-        providerId: this.providerId,
-        usage: output.usage,
-        isCompact: true,
-      },
-    }
   }
 
   async generateObject<OBJECT>(options: {

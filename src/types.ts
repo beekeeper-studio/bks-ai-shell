@@ -56,8 +56,14 @@ export const messageMetadataSchema = z.object({
   providerId: z.custom<AvailableProviders>().optional(),
   modelId: z.string().optional(),
   usage: usageSchema.optional(),
-  isCompact: z.boolean().optional(),
+  compactStatus: z
+    .enum(["processing", "complete"])
+    .optional()
+    .describe("If it's defined, it's a compact message."),
+  isCompactPrompt: z
+    .boolean()
+    .optional()
+    .describe("Whether this is a compact prompt"),
 });
 
 export type MessageMetadata = z.infer<typeof messageMetadataSchema>;
-
