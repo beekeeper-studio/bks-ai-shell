@@ -1,0 +1,4 @@
+Summarize the above conversation for a new session. The new session will
+continue the conversation and will not be able to access it. Include any useful
+context needed, such as what has been done, what is currently being done, and
+next steps if applicable.

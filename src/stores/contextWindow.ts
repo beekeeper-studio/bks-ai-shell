@@ -35,32 +35,7 @@ export const useContextWindow = defineStore("contextWindow", {
       }
 
       // Round to 1 decimal (e.g. 12.3%)
-      return Math.round((totalTokens / 3400) * 100 * 10) / 10;
       return Math.round((totalTokens / model.contextWindow) * 100 * 10) / 10;
     },
   },
-
-  // actions: {
-  //   async reduceContextWhenNeeded(
-  //     messages: UIMessage[],
-  //   ) {
-  //     if (this.reducingContext) {
-  //       console.warn("Already reducing context");
-  //       return;
-  //     }
-  //     if (this.contextUsage < 0.8) {
-  //       return;
-  //     }
-  //     this.reducingContext = true;
-  //
-  //     try {
-  //       const ai = useAI({ initialMessages: messages });
-  //       await ai.summarize(options);
-  //     } catch (e) {
-  //       log.error("Error reducing context", e);
-  //     } finally {
-  //       this.reducingContext = false;
-  //     }
-  //   },
-  // },
 });

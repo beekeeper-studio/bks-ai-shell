@@ -25,6 +25,7 @@ import {
   // ToolExecutionError,
 } from "ai";
 import { generateId, ProviderOptions } from "@ai-sdk/provider-utils";
+import summarizationPrompt from "../../instructions/summarize.txt?raw";
 
 export type Messages = UIMessage[];
 
@@ -91,16 +92,11 @@ export abstract class BaseProvider {
     const output = await generateText({
       model: this.getModel(options.modelId),
       messages: [
+        ...(await this.convertToModelMessages(options.messages)),
         {
           role: "user",
-          content: [
-            {
-              type: "text",
-              text: "Please summarize the following conversation:\n",
-            },
-          ],
+          content: [{ type: "text", text: summarizationPrompt }],
         },
-        ...(await this.convertToModelMessages(options.messages)),
       ],
       maxOutputTokens: options.maxOutputTokens,
     });
