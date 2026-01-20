@@ -46,7 +46,6 @@
           "
         />
       </template>
-
       <span v-if="isEmpty">Empty response</span>
     </div>
     <div class="message-actions" v-if="status === 'ready'">
@@ -54,7 +53,6 @@
         class="btn btn-flat-2 copy-btn"
         :class="{ copied }"
         @click="handleCopyClick"
-        :title="copied ? 'Copied' : 'Copy'"
       >
         <span class="material-symbols-outlined copy-icon">content_copy</span>
         <span class="material-symbols-outlined copied-icon">check</span>
@@ -169,9 +167,13 @@ export default {
       return { provider, model, totalTokens };
     },
     disableToolEdit() {
-      // For now, we dont support tool edit if the there are multiple query tools
+      // For now, we don't support tool edits when multiple query tools are
+      // pending approval.
       return (
-        this.message.parts.filter((p) => p.type === "tool-run_query").length > 1
+        this.message.parts.filter(
+          (p) =>
+            p.type === "tool-run_query" && p.state === "approval-requested",
+        ).length > 1
       );
     },
   },
