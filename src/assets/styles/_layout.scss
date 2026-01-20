@@ -1,0 +1,51 @@
+// Forked from https://github.com/beekeeper-studio/beekeeper-studio/blob/master/apps/ui-kit/lib/styles/_layout.scss
+
+.alert {
+  display: flex;
+  border-radius: 6px;
+  padding: 0.75em 1em;
+  background: rgb(from var(--theme-base) r g b / 3.5%);
+  margin: 0.5rem 0;
+  font-size: 0.74375rem;
+  line-height: 24px;
+  > .material-symbols-outlined {
+    font-size: 18px;
+    line-height: 24px;
+    margin-right: 1rem;
+  }
+  ul {
+    margin: 0.35rem 0;
+    padding-left: 1.5rem;
+  }
+  p {
+    margin: 0;
+  }
+  a:not(.btn) {
+    text-decoration: underline;
+    color: inherit;
+  }
+  .alert-body {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-grow: 1;
+    line-height: 24px;
+  }
+  .alert-footer {
+    display: flex;
+    line-height: 24px;
+    height: 26px; // button height
+  }
+}
+.alert-danger {
+  color: hsl(from var(--brand-danger) h s calc(l + 5));
+}
+.alert-warning {
+  color: hsl(from var(--brand-warning) h s calc(l + 5));
+}
+.alert-info {
+  color: hsl(from var(--brand-info) h s calc(l + 5));
+}
+.alert-success {
+  color: hsl(from var(--brand-success) h s calc(l + 5));
+}

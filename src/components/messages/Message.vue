@@ -13,19 +13,23 @@
           :toolCall="part"
           :disableToolEdit="disableToolEdit"
           @accept="$emit('accept-permission', part.approval?.id)"
-          @reject="$emit('reject-permission', {
-            toolCallId: part.toolCallId,
-            approvalId: part.approval?.id,
-            ...$event,
-          })"
+          @reject="
+            $emit('reject-permission', {
+              toolCallId: part.toolCallId,
+              approvalId: part.approval?.id,
+              ...$event,
+            })
+          "
         />
       </template>
-      <span v-if="isEmpty">
-        Empty response
-      </span>
+      <span v-if="isEmpty">Empty response</span>
     </div>
-    <div class="message-actions" v-if="status ==='ready'">
-      <button class="btn btn-flat-2 copy-btn" :class="{ copied }" @click="handleCopyClick">
+    <div class="message-actions" v-if="status === 'ready'">
+      <button
+        class="btn btn-flat-2 copy-btn"
+        :class="{ copied }"
+        @click="handleCopyClick"
+      >
         <span class="material-symbols-outlined copy-icon">content_copy</span>
         <span class="material-symbols-outlined copied-icon">check</span>
         <span class="title-popup">
@@ -62,7 +66,7 @@ export default {
     status: {
       type: String as PropType<"ready" | "processing">,
       required: true,
-    }
+    },
   },
 
   data() {
@@ -88,11 +92,17 @@ export default {
       return text.trim();
     },
     isEmpty() {
-      return this.status === 'ready' && isEmptyUIMessage(this.message);
+      return this.status === "ready" && isEmptyUIMessage(this.message);
     },
     disableToolEdit() {
-      // For now, we dont support tool edit if the there are multiple query tools
-      return this.message.parts.filter((p) => p.type === "tool-run_query").length > 1;
+      // For now, we don't support tool edits when multiple query tools are
+      // pending approval.
+      return (
+        this.message.parts.filter(
+          (p) =>
+            p.type === "tool-run_query" && p.state === "approval-requested",
+        ).length > 1
+      );
     },
   },
 

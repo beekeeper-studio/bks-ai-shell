@@ -68,8 +68,8 @@ export const STORAGE_KEYS = {
 export type AvailableProviders = keyof typeof providerConfigs;
 
 export type AvailableProvidersWithDynamicModels = {
-  [K in keyof typeof providerConfigs]: 'dynamicModels' extends keyof typeof providerConfigs[K]
-    ? typeof providerConfigs[K]['dynamicModels'] extends true
+  [K in keyof typeof providerConfigs]: 'supportsRuntimeModels' extends keyof typeof providerConfigs[K]
+    ? typeof providerConfigs[K]['supportsRuntimeModels'] extends true
       ? K
       : never
     : never;
@@ -97,6 +97,7 @@ export const providerConfigs = {
       // Deprecated models
       { id: "claude-3-7-sonnet-20250219", displayName: "claude-sonnet-3-7" },
     ],
+    supportsRuntimeModels: false,
   },
   google: {
     displayName: "Google",
@@ -113,6 +114,7 @@ export const providerConfigs = {
       { id: "gemini-2.0-flash", displayName: "gemini-2.0-flash" },
       { id: "gemini-2.0-flash-lite", displayName: "gemini-2.0-flash-lite" },
     ],
+    supportsRuntimeModels: false,
   },
   openai: {
     displayName: "OpenAI",
@@ -134,16 +136,19 @@ export const providerConfigs = {
       { id: "o3-mini", displayName: "o3-mini" },
       { id: "o4-mini", displayName: "o4-mini" },
     ],
+    supportsRuntimeModels: false,
   },
   openaiCompat: {
     displayName: "OpenAI-Compatible",
     models: [],
-    dynamicModels: true,
+    /** Models are fetched at runtime */
+    supportsRuntimeModels: true,
   },
   ollama: {
     displayName: "Ollama",
     models: [],
-    dynamicModels: true,
+    /** Models are fetched at runtime */
+    supportsRuntimeModels: true,
   },
 } as const;
 

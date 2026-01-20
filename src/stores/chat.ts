@@ -12,7 +12,13 @@ import { useTabState } from "./tabState";
 import { createProvider } from "@/providers";
 import _ from "lodash";
 import { ProviderSyncError } from "@/utils/ProviderSyncError";
-import { ConnectionInfo, getAppVersion, getConnectionInfo, getTables, log } from "@beekeeperstudio/plugin";
+import {
+  ConnectionInfo,
+  getAppVersion,
+  getConnectionInfo,
+  getTables,
+  log,
+} from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import gt from "semver/functions/gt";
 
@@ -127,16 +133,16 @@ export const useChatStore = defineStore("chat", {
     // FIXME move this to UI Kit?
     formatterDialect(state) {
       const d = state.connectionInfo.databaseType;
-      if (d === 'sqlserver') return 'tsql'
-      if (d === 'sqlite') return 'sqlite'
-      if (d === 'oracle') return 'plsql'
-      if (d === 'postgresql') return 'postgresql'
-      if (d === 'redshift') return 'redshift'
-      if (d === 'cassandra') return 'sql'
-      if (d === 'duckdb') return 'sql'
-      if (d === 'trino') return 'trino'
-      if (d === 'surrealdb') return 'sql'
-      return 'mysql' // we want this as the default
+      if (d === "sqlserver") return "tsql";
+      if (d === "sqlite") return "sqlite";
+      if (d === "oracle") return "plsql";
+      if (d === "postgresql") return "postgresql";
+      if (d === "redshift") return "redshift";
+      if (d === "cassandra") return "sql";
+      if (d === "duckdb") return "sql";
+      if (d === "trino") return "trino";
+      if (d === "surrealdb") return "sql";
+      return "mysql"; // we want this as the default
     },
     // FIXME move this to UI Kit?
     identifierDialect(state) {
@@ -164,9 +170,9 @@ export const useChatStore = defineStore("chat", {
     },
     sqlOrCode(state) {
       if (
-        state.connectionInfo.databaseType === "redis"
-        || state.connectionInfo.databaseType === "mongodb"
-      )  {
+        state.connectionInfo.databaseType === "redis" ||
+        state.connectionInfo.databaseType === "mongodb"
+      ) {
         return "code";
       }
       return "sql";
@@ -199,22 +205,30 @@ export const useChatStore = defineStore("chat", {
 
       this.syncProvider("openaiCompat");
       this.syncProvider("ollama");
-      getDefaultInstructions().then((instructions) => {
-        this.defaultInstructions = instructions;
-      }).catch(log.error);
-      getTables().then((tables) => {
-        this.entities = tables.map((table) => ({
-          name: table.name,
-          schema: table.schema,
-          entityType: "table",
-        }));
-      }).catch(log.error);
-      getAppVersion().then((version) => {
-        this.appVersion = version;
-      });
-      getConnectionInfo().then((info) => {
-        this.connectionInfo = info;
-      }).catch(log.error);
+      getDefaultInstructions()
+        .then((instructions) => {
+          this.defaultInstructions = instructions;
+        })
+        .catch(log.error);
+      getTables()
+        .then((tables) => {
+          this.entities = tables.map((table) => ({
+            name: table.name,
+            schema: table.schema,
+            entityType: "table",
+          }));
+        })
+        .catch(log.error);
+      getAppVersion()
+        .then((version) => {
+          this.appVersion = version;
+        })
+        .catch(log.error);
+      getConnectionInfo()
+        .then((info) => {
+          this.connectionInfo = info;
+        })
+        .catch(log.error);
     },
     /** List the models for a provider and store them in the internal data store. */
     async syncProvider(provider: AvailableProvidersWithDynamicModels) {
@@ -226,19 +240,42 @@ export const useChatStore = defineStore("chat", {
         if (errorIdx !== -1) {
           this.errors.splice(errorIdx, 1);
         }
-        const models = await createProvider(provider).listModels();
-        config.setModels(provider, models);
-      } catch (e) {
-        if (provider === "ollama" && e instanceof TypeError && e.message === "Failed to fetch") {
-          this.errors.push(
-            new ProviderSyncError(
-              "Failed to fetch models from Ollama. [1]",
-              {
-                providerId: provider,
-                cause: e,
-              },
-            )
+
+        // Get old models before fetching new ones
+        const oldModels = config.getModelsByProvider(provider) || [];
+
+        // Fetch new models
+        const newModels = await createProvider(provider).listModels();
+
+        // Find which models are actually NEW (not in old list)
+        const newModelIds = newModels
+          .filter(
+            (newModel) => !oldModels.some((old) => old.id === newModel.id),
           )
+          .map((m) => m.id);
+
+        // Update the model list first
+        await config.setModels(provider, newModels);
+
+        // Disable ONLY the new models
+        await config.disableModels(
+          newModelIds.map((modelId) => ({
+            modelId,
+            providerId: provider,
+          })),
+        );
+      } catch (e) {
+        if (
+          provider === "ollama" &&
+          e instanceof TypeError &&
+          e.message === "Failed to fetch"
+        ) {
+          this.errors.push(
+            new ProviderSyncError("Failed to fetch models from Ollama. [1]", {
+              providerId: provider,
+              cause: e,
+            }),
+          );
         } else {
           console.error(e);
           this.errors.push(

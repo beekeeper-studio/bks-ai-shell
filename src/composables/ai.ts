@@ -278,7 +278,6 @@ class AIShellChat {
   }
 
   private async fillTitle() {
-    return;
     if (useTabState().conversationTitle) {
       // Skip generation if title is already set
       return;
