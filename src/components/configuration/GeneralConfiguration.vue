@@ -2,7 +2,7 @@
   <h2>General</h2>
   <BaseInput
     :model-value="customInstructions"
-    @change="handleChange"
+    @change="configure('customInstructions', $event.target.value)"
     type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues."
     rows="4"
@@ -13,8 +13,7 @@
       Custom instructions will be appended to the
       <ExternalLink
         href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions"
-        >default instructions</ExternalLink
-      >
+        >default instructions</ExternalLink>
       and included with every message you send as a system prompt. These
       instructions will be applied globally to all connections.
     </template>
@@ -22,7 +21,12 @@
   <BaseInput
     type="switch"
     :model-value="allowExecutionOfReadOnlyQueries"
-    @click="handleSwitchClick('allowExecutionOfReadOnlyQueries')"
+    @click="
+      configure(
+        'allowExecutionOfReadOnlyQueries',
+        !allowExecutionOfReadOnlyQueries,
+      )
+    "
   >
     <template #label>Always allow execution of read-only queries</template>
     <template #helper>
@@ -33,12 +37,12 @@
   <BaseInput
     type="switch"
     :model-value="enableAutoCompact"
-    @click="handleSwitchClick('enableAutoCompact')"
+    @click="configure('enableAutoCompact', !enableAutoCompact)"
   >
     <template #label>Enable auto-compact (recommended)</template>
     <template #helper>
-      When enabled, the conversation is automatically compacted to avoid
-      hitting the context limit.
+      When enabled, the conversation is automatically compacted to avoid hitting
+      the context limit.
     </template>
   </BaseInput>
 </template>
@@ -46,7 +50,7 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
-import { useConfigurationStore, ConfigurationKey } from "@/stores/configuration";
+import { useConfigurationStore } from "@/stores/configuration";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 
 export default {
@@ -67,18 +71,6 @@ export default {
 
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
-    handleChange(event: Event) {
-      this.configure(
-        "customInstructions",
-        (event.target as HTMLTextAreaElement).value,
-      );
-    },
-    handleSwitchClick(name: ConfigurationKey) {
-      this.configure(
-        name,
-        !this.allowExecutionOfReadOnlyQueries,
-      );
-    },
   },
 };
 </script>
