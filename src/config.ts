@@ -80,193 +80,193 @@ export type ModelInfo = {
 
 export const providerConfigs = {
   anthropic: {
-    displayName: "Anthropic" as const,
+    displayName: "Anthropic",
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
         id: "claude-opus-4-5-20251101",
         displayName: "claude-opus-4-5",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-sonnet-4-5-20250929",
         displayName: "claude-sonnet-4-5",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-haiku-4-5-20251001",
         displayName: "claude-haiku-4-5",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-opus-4-1",
         displayName: "claude-opus-4-1",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-opus-4-20250514",
         displayName: "claude-opus-4",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-sonnet-4-20250514",
         displayName: "claude-sonnet-4",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-3-5-haiku-20241022",
         displayName: "claude-haiku-3-5",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-3-5-sonnet-latest",
         displayName: "claude-3-5-sonnet",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "claude-3-haiku-20240307",
         displayName: "claude-3-haiku",
         contextWindow: 200_000,
-      } as const,
+      },
 
       // Deprecated models
       {
         id: "claude-3-7-sonnet-20250219",
         displayName: "claude-sonnet-3-7",
         contextWindow: 200_000,
-      } as const,
+      },
     ],
     supportsRuntimeModels: false,
   },
   google: {
-    displayName: "Google" as const,
+    displayName: "Google",
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
         id: "gemini-2.5-pro",
         displayName: "gemini-2.5-pro",
         contextWindow: 1_048_576,
-      } as const,
+      },
       {
         id: "gemini-2.5-flash",
         displayName: "gemini-2.5-flash",
         contextWindow: 1_048_576,
-      } as const,
+      },
       {
         id: "gemini-2.5-flash-lite",
         displayName: "gemini-2.5-flash-lite",
         contextWindow: 1_048_576,
-      } as const,
+      },
 
       // Deprecated models
       {
         id: "gemini-2.0-flash",
         displayName: "gemini-2.0-flash",
         contextWindow: 1_048_576,
-      } as const,
+      },
       {
         id: "gemini-2.0-flash-lite",
         displayName: "gemini-2.0-flash-lite",
         contextWindow: 1_048_576,
-      } as const,
+      },
     ],
     supportsRuntimeModels: false,
   },
   openai: {
-    displayName: "OpenAI" as const,
+    displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
     models: [
       {
         id: "gpt-5.2-pro-2025-12-11",
         displayName: "gpt-5.2-pro",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-5.2-2025-12-11",
         displayName: "gpt-5.2",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-5.1",
         displayName: "gpt-5.1",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-5",
         displayName: "gpt-5",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-5-pro-2025-10-06",
         displayName: "gpt-5-pro",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-5-mini",
         displayName: "gpt-5-mini",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-5-nano",
         displayName: "gpt-5-nano",
         contextWindow: 400_000,
-      } as const,
+      },
       {
         id: "gpt-4.1",
         displayName: "gpt-4.1",
         contextWindow: 1_047_576,
-      } as const,
+      },
       {
         id: "gpt-4.1-mini",
         displayName: "gpt-4.1-mini",
         contextWindow: 1_047_576,
-      } as const,
+      },
       {
         id: "gpt-4.1-nano",
         displayName: "gpt-4.1-nano",
         contextWindow: 1_047_576,
-      } as const,
+      },
       {
         id: "gpt-4o",
         displayName: "gpt-4o",
         contextWindow: 128_000,
-      } as const,
+      },
       {
         id: "gpt-4o-mini",
         displayName: "gpt-4o-mini",
         contextWindow: 128_000,
-      } as const,
+      },
       {
         id: "o3",
         displayName: "o3",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "o3-mini",
         displayName: "o3-mini",
         contextWindow: 200_000,
-      } as const,
+      },
       {
         id: "o4-mini",
         displayName: "o4-mini",
         contextWindow: 200_000,
-      } as const,
+      },
     ],
     supportsRuntimeModels: false,
   },
   openaiCompat: {
-    displayName: "OpenAI-Compatible" as const,
+    displayName: "OpenAI-Compatible",
     models: [],
     /** Models are fetched at runtime */
     supportsRuntimeModels: true,
   },
   ollama: {
-    displayName: "Ollama" as const,
+    displayName: "Ollama",
     models: [],
     /** Models are fetched at runtime */
     supportsRuntimeModels: true,
   },
-};
+} as const;
 
 export const disabledModelsByDefault: {
   providerId: AvailableProviders;
