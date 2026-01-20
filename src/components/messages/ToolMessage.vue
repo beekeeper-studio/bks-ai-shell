@@ -12,12 +12,13 @@
       :input="toolCall.input"
       :output="toolCall.output"
       :errorText="toolCall.errorText"
-      :askingPermission="askingPermission"
+      :approval="toolCall.approval"
+      :disableToolEdit="disableToolEdit"
       @accept="$emit('accept')"
       @reject="$emit('reject', $event)"
     />
     <template v-else>
-      <div v-if="askingPermission" class="tool-permission">
+      <div v-if="toolCall.state === 'approval-requested'" class="tool-permission">
         Do you want to proceed?
         <div class="tool-permission-buttons">
           <button class="btn btn-flat" @click="$emit('accept')">
@@ -56,7 +57,6 @@ import RunQueryTool from "@/components/messages/tool/RunQueryTool.vue";
 export default {
   components: { RunQueryTool },
   props: {
-    askingPermission: Boolean,
     message: {
       type: Object as PropType<UIMessage>,
       required: true,
@@ -65,7 +65,7 @@ export default {
       type: Object as PropType<ToolUIPart>,
       required: true,
     },
-    args: null,
+    disableToolEdit: Boolean,
   },
   emits: ["accept", "reject"],
   computed: {

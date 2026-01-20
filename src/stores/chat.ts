@@ -17,9 +17,9 @@ import {
   getAppVersion,
   getConnectionInfo,
   getTables,
+  log,
 } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
-import type { SendOptions } from "@/composables/ai";
 import gt from "semver/functions/gt";
 
 export type Model = AvailableModels & {
@@ -166,14 +166,6 @@ export const useChatStore = defineStore("chat", {
       if (d === "sqlite" || d === "libsql") return "text/x-sqlite";
       return "text/x-sql";
     },
-    /** For `ai.ts` */
-    sendOptions(state): SendOptions {
-      return {
-        modelId: state.model?.id!,
-        providerId: state.model?.provider!,
-        systemPrompt: this.systemPrompt,
-      };
-    },
     sqlOrCode(state) {
       if (
         state.connectionInfo.databaseType === "redis" ||
@@ -215,7 +207,7 @@ export const useChatStore = defineStore("chat", {
         .then((instructions) => {
           this.defaultInstructions = instructions;
         })
-        .catch(console.error);
+        .catch(log.error);
       getTables()
         .then((tables) => {
           this.entities = tables.map((table) => ({
@@ -224,15 +216,17 @@ export const useChatStore = defineStore("chat", {
             entityType: "table",
           }));
         })
-        .catch(console.error);
-      getAppVersion().then((version) => {
-        this.appVersion = version;
-      });
+        .catch(log.error);
+      getAppVersion()
+        .then((version) => {
+          this.appVersion = version;
+        })
+        .catch(log.error);
       getConnectionInfo()
         .then((info) => {
           this.connectionInfo = info;
         })
-        .catch(console.error);
+        .catch(log.error);
     },
     /** List the models for a provider and store them in the internal data store. */
     async syncProvider(provider: AvailableProvidersWithDynamicModels) {
