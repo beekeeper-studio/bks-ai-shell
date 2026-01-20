@@ -150,20 +150,20 @@ export default {
       if (!this.message.metadata) {
         return null;
       }
+
       const { providerId, modelId, usage } = this.message.metadata;
       const providerObj = providerId ? providerConfigs[providerId] : undefined;
-      const provider = providerObj ? providerObj.displayName : "-";
-      const modelObj =
-        modelId && providerObj
-          ? providerObj.models.find((m) => m.id === modelId)
-          : undefined;
-      const model = modelObj?.displayName || modelId || "-";
-      let totalTokens = "-";
-      try {
-        if (typeof usage?.totalTokens === "number") {
-          totalTokens = Intl.NumberFormat().format(usage.totalTokens);
-        }
-      } catch {}
+
+      const provider = providerObj?.displayName ?? "-";
+      const model =
+        providerObj?.models.find((m) => m.id === modelId)?.displayName ??
+        modelId ??
+        "-";
+      const totalTokens =
+        typeof usage?.totalTokens === "number"
+          ? Intl.NumberFormat().format(usage.totalTokens)
+          : "-";
+
       return { provider, model, totalTokens };
     },
     disableToolEdit() {
