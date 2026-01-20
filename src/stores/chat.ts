@@ -185,14 +185,9 @@ export const useChatStore = defineStore("chat", {
       return gt(state.appVersion, "5.3.0");
     },
     /**
-     * The context limit is the actual context window - 32K tokens.
-     *
-     * For example,
-     *   - gpt-5.2's context window is 400K.
-     *   - The context limit is 400K - 32K = 368K.
-     *
-     * Why 32K? Because we want to leave some room for compact result.
-     *
+     * The context limit is the actual `contextWindow` - `outputTokens`.
+     * For most models, reserved `outputTokens` are 32K. If the `contextWindow`
+     * is less than 32K, we will reserve 25% of the `contextWindow` instead.
      **/
     contextLeftUntilAutoCompact(state): number {
       if (typeof state.model?.contextWindow !== "number") {
@@ -209,7 +204,12 @@ export const useChatStore = defineStore("chat", {
         return 100;
       }
 
-      const contextLimit = state.model.contextWindow - 32_000;
+      // Reserve 32K tokens or 25% for output tokens
+      const outputTokens = Math.min(
+        32_000,
+        Math.floor(state.model.contextWindow * 0.25)
+      );
+      const contextLimit = state.model.contextWindow - outputTokens;
       const contextUsage = totalTokens / contextLimit;
       return (1 - contextUsage) * 100;
     },

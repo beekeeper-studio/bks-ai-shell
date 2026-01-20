@@ -29,8 +29,8 @@ class AIShellChat {
   private chat: Chat<UIMessage>;
   /** Messages to be sent after compacting */
   private pendingCompactMessages = ref<UIMessage[]>([]);
-  private errorCompacting = ref<Error | undefined>();
   private aborted = ref(false);
+  private errorDuringCompaction = ref(false);
 
   constructor(options: AIOptions) {
     this.chat = new Chat<UIMessage>({
@@ -41,6 +41,11 @@ class AIShellChat {
       onFinish: () => {
         this.saveMessages();
         this.fillTitle();
+      },
+      onError: (e) => {
+        if (this.chat.lastMessage?.metadata?.compactStatus === "processing") {
+          this.errorDuringCompaction.value = true;
+        }
       },
     });
 
@@ -76,8 +81,9 @@ class AIShellChat {
 
   async retry() {
     this.aborted.value = false;
-    if (this.errorCompacting.value) {
+    if (this.errorDuringCompaction.value) {
       await this.continueCompacting();
+      return;
     }
     await this.chat.regenerate();
   }
@@ -94,8 +100,7 @@ class AIShellChat {
    **/
   async compact(followUpMessage?: string) {
     this.aborted.value = false;
-
-    let isCompactSuccess = false;
+    this.errorDuringCompaction.value = false;
 
     if (followUpMessage) {
       this.pendingCompactMessages.value.push({
@@ -113,53 +118,50 @@ class AIShellChat {
       this.chat.messages = this.chat.messages.slice(0, -2);
     }
 
-    try {
-      this.compacting.value = true;
-      await this.chat.sendMessage({
-        role: "user",
-        parts: [{ type: "text", text: compactPrompt }],
-        metadata: { isCompactPrompt: true },
-      });
-      if (this.aborted.value) {
-        throw new Error("Aborted");
-      }
-      this.chat.messages = [this.chat.messages[this.chat.messages.length - 1]];
-      isCompactSuccess = true;
-    } catch (e) {
-      this.errorCompacting.value = e as Error;
-      log.error("Failed to reduce context");
-    } finally {
+    this.compacting.value = true;
+
+    await this.chat.sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: compactPrompt }],
+      metadata: { isCompactPrompt: true },
+    }).finally(() => {
       this.compacting.value = false;
+      if (this.aborted.value) {
+        this.errorDuringCompaction.value = true;
+      }
+    });
+
+    if (this.errorDuringCompaction.value) {
+      return;
     }
 
-    if (isCompactSuccess) {
-      await this.flushPendingCompactMessages();
-    }
+    await this.finishCompaction();
   }
 
   /** Call this to continue the compacting process if it fails. */
   private async continueCompacting() {
-    let isCompactSuccess = false;
+    this.aborted.value = false;
+    this.errorDuringCompaction.value = false;
 
-    this.errorCompacting.value = undefined;
+    this.compacting.value = true;
 
-    try {
-      this.compacting.value = true;
-      await this.chat.regenerate();
-      isCompactSuccess = true;
-    } catch (e) {
-      this.errorCompacting.value = e as Error;
-      log.error("Failed to continue compacting");
-    } finally {
+    await this.chat.regenerate().finally(() => {
       this.compacting.value = false;
+      if (this.aborted.value) {
+        this.errorDuringCompaction.value = true;
+      }
+    });
+
+    if (this.errorDuringCompaction.value) {
+      return;
     }
 
-    if (isCompactSuccess) {
-      await this.flushPendingCompactMessages();
-    }
+    await this.finishCompaction();
   }
 
-  private async flushPendingCompactMessages() {
+  private async finishCompaction() {
+    this.chat.messages = [this.chat.messages[this.chat.messages.length - 1]];
+
     if (this.pendingCompactMessages.value.length === 0) {
       return;
     }
