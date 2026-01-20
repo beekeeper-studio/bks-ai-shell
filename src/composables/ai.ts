@@ -343,6 +343,14 @@ class AIShellChat {
     }
   }
 
+  private getModelOrThrow() {
+    const chat = useChatStore();
+    if (!chat.model) {
+      throw new Error("No model selected");
+    }
+    return chat.model;
+  }
+
   private async saveMessages() {
     useTabState().setTabState("messages", this.messages.value);
   }
@@ -371,14 +379,6 @@ class AIShellChat {
       prompt,
     });
     await useTabState().setTabTitle(res.object.title);
-  }
-
-  private getModelOrThrow() {
-    const chat = useChatStore();
-    if (!chat.model) {
-      throw new Error("No model selected");
-    }
-    return chat.model;
   }
 }
 
