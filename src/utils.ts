@@ -2,6 +2,11 @@ import { UIMessage } from "ai";
 import { Model } from "./stores/chat";
 import _ from "lodash";
 import { identify } from "sql-query-identifier";
+import {
+  AvailableProviders,
+  AvailableProvidersWithDynamicModels,
+  providerConfigs,
+} from "./config";
 
 /** It's safe cause we hope it doesn't throw any errors, hopefully. */
 export function safeJSONStringify(value: any, ...args: any): string {
@@ -95,7 +100,10 @@ export function isEmptyUIMessage(message: UIMessage): boolean {
       return false;
     }
 
-    if ((part.type === "text" || part.type === "reasoning") && _.isEmpty(part.text)) {
+    if (
+      (part.type === "text" || part.type === "reasoning") &&
+      _.isEmpty(part.text)
+    ) {
       return false;
     }
 
@@ -103,4 +111,13 @@ export function isEmptyUIMessage(message: UIMessage): boolean {
   });
 
   return nonEmptyParts.length === 0;
+}
+
+export function providerSupportsRuntimeModels(
+  provider: string,
+): provider is AvailableProvidersWithDynamicModels {
+  return (
+    providerConfigs[provider as AvailableProviders]?.supportsRuntimeModels ??
+    false
+  );
 }

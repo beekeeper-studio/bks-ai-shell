@@ -68,11 +68,15 @@
       </template>
     </BaseInput>
     <template v-if="selectedProvider === 'openaiCompat'">
-      <BaseInput v-model="openaiCompatApiKey">
-        <template #label>API Key</template>
-      </BaseInput>
       <BaseInput v-model="openaiCompatBaseUrl">
         <template #label>Base URL</template>
+        <template #helper>
+          Base URL for an API service that implements the OpenAI API format
+          (e.g., local LLMs, alternative providers).
+        </template>
+      </BaseInput>
+      <BaseInput v-model="openaiCompatApiKey" type="password">
+        <template #label>API Key</template>
       </BaseInput>
       <BaseInput v-model="openaiCompatHeaders" type="textarea">
         <template #label>Custom Headers</template>
@@ -95,7 +99,6 @@ import { useConfigurationStore } from "@/stores/configuration";
 import { AvailableProviders, providerConfigs } from "@/config";
 import BaseInput from "./common/BaseInput.vue";
 import ExternalLink from "./common/ExternalLink.vue";
-import Select from "primevue/select";
 
 export default {
   name: "ApiKeyForm",
@@ -103,7 +106,6 @@ export default {
   components: {
     BaseInput,
     ExternalLink,
-    Select,
   },
 
   emits: ["change", "changeProvider"],

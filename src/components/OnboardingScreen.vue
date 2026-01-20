@@ -21,8 +21,9 @@
       <ApiKeyForm
         dropdown-based
         @change="changed = true"
-        @change-provider="$event === 'ollama' && (changed = true)"
+        @change-provider="handleChangeProvider"
       />
+      <ApiInfo v-if="providerChanged" />
       <div class="actions">
         <button
           class="btn btn-primary continue-btn"
@@ -40,6 +41,7 @@
 import ApiKeyForm from "@/components/ApiKeyForm.vue";
 import ApiInfo from "@/components/configuration/ApiInfo.vue";
 import ExternalLink from "@/components/common/ExternalLink.vue";
+import { AvailableProviders } from "@/config";
 
 export default {
   emits: ["submit"],
@@ -53,7 +55,17 @@ export default {
   data() {
     return {
       changed: false,
+      providerChanged: false,
     };
+  },
+
+  methods: {
+    handleChangeProvider(provider: AvailableProviders) {
+      this.providerChanged = true;
+      if (provider === "ollama") {
+        this.changed = true;
+      }
+    },
   },
 };
 </script>
@@ -66,6 +78,11 @@ export default {
   }
 
   .api-key-form {
+    margin-bottom: 0.8rem;
+  }
+
+  .api-info {
+    margin-top: 0;
     margin-bottom: 0.8rem;
   }
 }

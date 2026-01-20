@@ -11,9 +11,10 @@
     <div
       v-for="(error, index) in openAiCompatibleErrors"
       :key="index"
-      class="error-message"
+      class="alert alert-danger"
     >
-      {{ error }}
+      <span class="material-symbols-outlined">error_outline</span>
+      <span>{{ error }}</span>
     </div>
     <BaseInput
       :model-value="providers_openaiCompat_baseUrl"
@@ -21,10 +22,10 @@
       @change="handleChange($event, 'openaiCompat')"
     >
       <template #label>URL</template>
-      <template #helper
-        >Base URL for an API service that implements the OpenAI API format
-        (e.g., local LLMs, alternative providers).</template
-      >
+      <template #helper>
+        Base URL for an API service that implements the OpenAI API format (e.g.,
+        local LLMs, alternative providers).
+      </template>
     </BaseInput>
     <BaseInput
       type="password"
@@ -49,18 +50,21 @@
     <div
       v-for="(error, index) in ollamaErrors"
       :key="index"
-      class="error-message"
+      class="alert alert-danger"
     >
-      <template v-if="error.includes('[1]')">
-        Ollama is unreachable. It may not be running or CORS may be blocking the
-        request. Check out our
-        <ExternalLink
-          href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/#problem-fetching-ollama"
-        >
-          troubleshooting docs</ExternalLink
-        >.
-      </template>
-      <template v-else>{{ error }}</template>
+      <span class="material-symbols-outlined">error_outline</span>
+      <span>
+        <template v-if="error.includes('[1]')">
+          Ollama is unreachable. It may not be running or CORS may be blocking
+          the request. Check out our
+          <ExternalLink
+            href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/#problem-fetching-ollama"
+          >
+            troubleshooting docs</ExternalLink
+          >.
+        </template>
+        <template v-else>{{ error }}</template>
+      </span>
     </div>
     <BaseInput
       :model-value="providers_ollama_baseUrl"
@@ -183,7 +187,7 @@ h2 {
   }
 }
 
-.config-form::v-deep .form-group {
+.config-form :deep(.form-group) {
   display: grid;
   grid-template-columns: 1fr 3fr;
 
@@ -201,16 +205,5 @@ h2 {
     grid-column: 2;
     grid-row: 2;
   }
-}
-
-.error-message {
-  background-color: rgb(from var(--brand-danger) r g b / 20%);
-  border: 1px solid rgb(from var(--brand-danger) r g b / 100%);
-  color: var(--text-dark);
-  padding: 0.75rem 0.9rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  margin: 0.5rem;
-  text-align: left;
 }
 </style>

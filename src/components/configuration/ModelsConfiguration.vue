@@ -3,16 +3,61 @@
   <div class="models-content">
     <div class="models-header">
       <BaseInput v-model="filter" placeholder="Search models..." />
-      <select
-        v-model="filterByProvider"
-        :options="filterByProviderOptions"
-        class="filter-by-provider"
-      >
-        <option v-for="option in filterByProviderOptions" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
+      <div class="models-sub-header">
+        <select
+          v-model="filterByProvider"
+          :options="filterByProviderOptions"
+          class="filter-by-provider"
+        >
+          <option
+            v-for="option in filterByProviderOptions"
+            :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+        <button
+          @click="refreshModels"
+          v-show="supportsRuntimeModels"
+          class="btn btn-flat"
+          :disabled="syncingProviders.includes(filterByProvider)"
+        >
+          <span class="material-symbols-outlined">refresh</span>
+          Refresh models
+        </button>
+      </div>
     </div>
+    <template v-if="filterByProvider === 'openaiCompat'">
+      <div
+        v-for="(error, index) in openAiCompatibleErrors"
+        :key="index"
+        class="alert alert-danger"
+      >
+        <span class="material-symbols-outlined">error_outline</span>
+        <span>{{ error }}</span>
+      </div>
+    </template>
+    <template v-if="filterByProvider === 'ollama'">
+      <div
+        v-for="(error, index) in ollamaErrors"
+        :key="index"
+        class="alert alert-danger"
+      >
+        <span class="material-symbols-outlined">error_outline</span>
+        <span>
+          <template v-if="error.includes('[1]')">
+            Ollama is unreachable. It may not be running or CORS may be blocking
+            the request. Check out our
+            <ExternalLink
+              href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/#problem-fetching-ollama"
+            >
+              troubleshooting docs</ExternalLink
+            >.
+          </template>
+          <template v-else>{{ error }}</template>
+        </span>
+      </div>
+    </template>
     <p class="empty-state" v-if="filteredModels.length === 0">
       No models found
     </p>
@@ -55,16 +100,20 @@
 </template>
 
 <script lang="ts">
-import { AvailableProviders, providerConfigs } from "@/config";
+import {
+  AvailableProviders,
+  AvailableProvidersWithDynamicModels,
+  providerConfigs,
+} from "@/config";
 import Switch from "@/components/common/Switch.vue";
 import { Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
 import _ from "lodash";
-import { matchModel } from "@/utils";
+import { matchModel, providerSupportsRuntimeModels } from "@/utils";
 import BaseInput from "../common/BaseInput.vue";
-import Select from "primevue/select";
 import Popover from "primevue/popover";
+import ExternalLink from "../common/ExternalLink.vue";
 
 export default {
   name: "ModelsConfiguration",
@@ -72,19 +121,20 @@ export default {
   components: {
     Switch,
     BaseInput,
-    Select,
     Popover,
+    ExternalLink,
   },
 
   data() {
     return {
       filter: "",
-      filterByProvider: "all",
+      filterByProvider: "all" as "all" | AvailableProviders,
+      syncingProviders: [] as AvailableProvidersWithDynamicModels[],
     };
   },
 
   computed: {
-    ...mapState(useChatStore, ["models"]),
+    ...mapState(useChatStore, ["models", "errors"]),
     ...mapWritableState(useChatStore, ["model"]),
     ...mapState(useConfigurationStore, ["disabledModels"]),
     sortedModels() {
@@ -122,9 +172,32 @@ export default {
         })),
       ];
     },
+    supportsRuntimeModels() {
+      return providerSupportsRuntimeModels(this.filterByProvider);
+    },
+    // FIXME: Duplicated from ProvidersConfiguration
+    openAiCompatibleErrors() {
+      return this.errors
+        .filter(
+          (error) =>
+            error.providerId === "openaiCompat" &&
+            !error.message.includes("[2]"),
+        )
+        .map((error) => error.message);
+    },
+    // FIXME: Duplicated from ProvidersConfiguration
+    ollamaErrors() {
+      return this.errors
+        .filter(
+          (error) =>
+            error.providerId === "ollama" && !error.message.includes("[2]"),
+        )
+        .map((error) => error.message);
+    },
   },
 
   methods: {
+    ...mapActions(useChatStore, ["syncProvider"]),
     ...mapActions(useConfigurationStore, [
       "configure",
       "removeModel",
@@ -153,6 +226,18 @@ export default {
         this.$refs.disabledPopover!.show(event);
       });
     },
+    refreshModels() {
+      const filterByProvider = this.filterByProvider;
+      if (providerSupportsRuntimeModels(filterByProvider)) {
+        this.syncingProviders.push(filterByProvider);
+        this.syncProvider(filterByProvider).finally(() => {
+          this.syncingProviders.splice(
+            this.syncingProviders.indexOf(filterByProvider),
+            1,
+          );
+        });
+      }
+    },
   },
 };
 </script>
@@ -160,21 +245,19 @@ export default {
 <style scoped>
 .models-header {
   position: sticky;
-  top: 0;
+  top: -1px;
   background: var(--p-dialog-background);
   z-index: 1;
   padding-bottom: 0.4rem;
 }
 
+.models-sub-header {
+  display: flex;
+}
+
 .filter-by-provider {
   margin-inline: 0.5rem;
-  /* margin-top: 0.1rem; */
-  /* margin-bottom: 0.4rem; */
   width: auto;
-
-  .p-select-label {
-    font-size: 0.875rem;
-  }
 }
 
 .empty-state {
