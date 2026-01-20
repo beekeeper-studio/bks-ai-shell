@@ -60,8 +60,11 @@ export const defaultTemperature = 0.7;
 export type AvailableProviders = keyof typeof providerConfigs;
 
 export type AvailableProvidersWithDynamicModels = {
-  [K in keyof typeof providerConfigs]:
-    typeof providerConfigs[K]["dynamicModels"] extends true ? K : never
+  [K in keyof typeof providerConfigs]: 'supportsRuntimeModels' extends keyof typeof providerConfigs[K]
+    ? typeof providerConfigs[K]['supportsRuntimeModels'] extends true
+      ? K
+      : never
+    : never;
 }[keyof typeof providerConfigs];
 
 export type AvailableModels<T extends AvailableProviders | unknown = unknown> =
@@ -133,7 +136,7 @@ export const providerConfigs = {
         contextWindow: 200_000,
       } as const,
     ],
-    dynamicModels: false as const,
+    supportsRuntimeModels: false,
   },
   google: {
     displayName: "Google" as const,
@@ -167,7 +170,7 @@ export const providerConfigs = {
         contextWindow: 1_048_576,
       } as const,
     ],
-    dynamicModels: false as const,
+    supportsRuntimeModels: false,
   },
   openai: {
     displayName: "OpenAI" as const,
@@ -249,17 +252,19 @@ export const providerConfigs = {
         contextWindow: 200_000,
       } as const,
     ],
-    dynamicModels: false as const,
+    supportsRuntimeModels: false,
   },
   openaiCompat: {
     displayName: "OpenAI-Compatible" as const,
     models: [],
-    dynamicModels: true as const,
+    /** Models are fetched at runtime */
+    supportsRuntimeModels: true,
   },
   ollama: {
     displayName: "Ollama" as const,
     models: [],
-    dynamicModels: true as const,
+    /** Models are fetched at runtime */
+    supportsRuntimeModels: true,
   },
 };
 

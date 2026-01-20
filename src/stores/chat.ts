@@ -235,22 +235,30 @@ export const useChatStore = defineStore("chat", {
 
       this.syncProvider("openaiCompat");
       this.syncProvider("ollama");
-      getDefaultInstructions().then((instructions) => {
-        this.defaultInstructions = instructions;
-      }).catch(log.error);
-      getTables().then((tables) => {
-        this.entities = tables.map((table) => ({
-          name: table.name,
-          schema: table.schema,
-          entityType: "table",
-        }));
-      }).catch(log.error);
-      getAppVersion().then((version) => {
-        this.appVersion = version;
-      });
-      getConnectionInfo().then((info) => {
-        this.connectionInfo = info;
-      }).catch(log.error);
+      getDefaultInstructions()
+        .then((instructions) => {
+          this.defaultInstructions = instructions;
+        })
+        .catch(log.error);
+      getTables()
+        .then((tables) => {
+          this.entities = tables.map((table) => ({
+            name: table.name,
+            schema: table.schema,
+            entityType: "table",
+          }));
+        })
+        .catch(log.error);
+      getAppVersion()
+        .then((version) => {
+          this.appVersion = version;
+        })
+        .catch(log.error);
+      getConnectionInfo()
+        .then((info) => {
+          this.connectionInfo = info;
+        })
+        .catch(log.error);
     },
     /** List the models for a provider and store them in the internal data store. */
     async syncProvider(provider: AvailableProvidersWithDynamicModels) {
@@ -262,8 +270,30 @@ export const useChatStore = defineStore("chat", {
         if (errorIdx !== -1) {
           this.errors.splice(errorIdx, 1);
         }
-        const models = await createProvider(provider).listModels();
-        config.setModels(provider, models);
+
+        // Get old models before fetching new ones
+        const oldModels = config.getModelsByProvider(provider) || [];
+
+        // Fetch new models
+        const newModels = await createProvider(provider).listModels();
+
+        // Find which models are actually NEW (not in old list)
+        const newModelIds = newModels
+          .filter(
+            (newModel) => !oldModels.some((old) => old.id === newModel.id),
+          )
+          .map((m) => m.id);
+
+        // Update the model list first
+        await config.setModels(provider, newModels);
+
+        // Disable ONLY the new models
+        await config.disableModels(
+          newModelIds.map((modelId) => ({
+            modelId,
+            providerId: provider,
+          })),
+        );
       } catch (e) {
         if (
           provider === "ollama" &&

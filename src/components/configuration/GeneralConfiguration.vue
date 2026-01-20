@@ -6,6 +6,7 @@
     type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues."
     rows="4"
+    helperPosition="before-input"
   >
     <template #label>Custom Instructions</template>
     <template #helper>

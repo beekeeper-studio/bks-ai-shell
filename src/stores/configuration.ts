@@ -187,9 +187,35 @@ export const useConfigurationStore = defineStore("configuration", {
     },
 
     async disableModel(providerId: AvailableProviders, modelId: string) {
+      if (
+        this.disabledModels.find(
+          (m) => m.providerId === providerId && m.modelId === modelId,
+        )
+      ) {
+        return;
+      }
+      // clone this to avoid sending Proxy objects to the host
       const disabledModels = _.cloneDeep(this.disabledModels);
       disabledModels.push({ providerId, modelId });
       await this.configure("disabledModels", disabledModels);
+    },
+
+    async disableModels(
+      models: { providerId: AvailableProviders; modelId: string }[],
+    ) {
+      const map = new Map<string, (typeof models)[number]>();
+
+      for (const model of this.disabledModels) {
+        // clone this to avoid sending Proxy objects to the host
+        map.set(`${model.providerId}:${model.modelId}`, _.clone(model));
+      }
+
+      for (const model of models) {
+        // clone this to avoid sending Proxy objects to the host
+        map.set(`${model.providerId}:${model.modelId}`, _.clone(model));
+      }
+
+      await this.configure("disabledModels", [...map.values()]);
     },
 
     async enableModel(providerId: AvailableProviders, modelId: string) {
