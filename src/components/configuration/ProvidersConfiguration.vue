@@ -1,47 +1,76 @@
 <template>
+  <h2 id="providers-configuration-api-keys">Providers</h2>
   <form @submit.prevent class="config-form">
-    <h2 id="providers-configuration-api-keys">API Keys</h2>
     <ApiInfo />
     <api-key-form />
   </form>
 
   <form @submit.prevent class="config-form">
     <h3>OpenAI Compatible</h3>
-    <p class="description">
-      Connect to any service using OpenAI's API format.
-    </p>
-    <div v-for="(error, index) in openAiCompatibleErrors" :key="index" class="error-message">
-      {{ error }}
+    <p class="description">Connect to any service using OpenAI's API format.</p>
+    <div
+      v-for="(error, index) in openAiCompatibleErrors"
+      :key="index"
+      class="alert alert-danger"
+    >
+      <span class="material-symbols-outlined">error_outline</span>
+      <span>{{ error }}</span>
     </div>
-    <BaseInput :model-value="providers_openaiCompat_baseUrl"
-      @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)" @change="handleChange($event, 'openaiCompat')">
+    <BaseInput
+      :model-value="providers_openaiCompat_baseUrl"
+      @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)"
+      @change="handleChange($event, 'openaiCompat')"
+    >
       <template #label>URL</template>
-      <template #helper>Base URL for an API service that implements the OpenAI API format (e.g., local LLMs, alternative providers).</template>
+      <template #helper>
+        Base URL for an API service that implements the OpenAI API format (e.g.,
+        local LLMs, alternative providers).
+      </template>
     </BaseInput>
-    <BaseInput type="password" :model-value="providers_openaiCompat_apiKey"
-      @update:modelValue="configure('providers_openaiCompat_apiKey', $event)" @change="handleChange($event, 'openaiCompat')">
+    <BaseInput
+      type="password"
+      :model-value="providers_openaiCompat_apiKey"
+      @update:modelValue="configure('providers_openaiCompat_apiKey', $event)"
+      @change="handleChange($event, 'openaiCompat')"
+    >
       <template #label>API Key</template>
     </BaseInput>
-    <BaseInput type="textarea" :model-value="providers_openaiCompat_headers"
-      @update:modelValue="configure('providers_openaiCompat_headers', $event)" @change="handleChange($event, 'openaiCompat')">
+    <BaseInput
+      type="textarea"
+      :model-value="providers_openaiCompat_headers"
+      @update:modelValue="configure('providers_openaiCompat_headers', $event)"
+      @change="handleChange($event, 'openaiCompat')"
+    >
       <template #label>Headers</template>
     </BaseInput>
   </form>
 
   <form @submit.prevent class="config-form">
     <h3>Ollama</h3>
-    <div v-for="(error, index) in ollamaErrors" :key="index" class="error-message">
-      <template v-if="error.includes('[1]')">
-        Ollama is unreachable. It may not be running or CORS may be blocking
-        the request. Check out our
-        <ExternalLink
-          href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/#problem-fetching-ollama"
-        >troubleshooting docs</ExternalLink>.
-      </template>
-      <template v-else>{{ error }}</template>
+    <div
+      v-for="(error, index) in ollamaErrors"
+      :key="index"
+      class="alert alert-danger"
+    >
+      <span class="material-symbols-outlined">error_outline</span>
+      <span>
+        <template v-if="error.includes('[1]')">
+          Ollama is unreachable. It may not be running or CORS may be blocking
+          the request. Check out our
+          <ExternalLink
+            href="https://docs.beekeeperstudio.io/user_guide/sql-ai-shell/#problem-fetching-ollama"
+          >
+            troubleshooting docs</ExternalLink
+          >.
+        </template>
+        <template v-else>{{ error }}</template>
+      </span>
     </div>
-    <BaseInput :model-value="providers_ollama_baseUrl"
-      @update:modelValue="configure('providers_ollama_baseUrl', $event)" @change="handleChange($event, 'ollama')">
+    <BaseInput
+      :model-value="providers_ollama_baseUrl"
+      @update:modelValue="configure('providers_ollama_baseUrl', $event)"
+      @change="handleChange($event, 'ollama')"
+    >
       <template #label>URL</template>
       <template #helper>Ollama server URL.</template>
     </BaseInput>
@@ -80,10 +109,21 @@ export default {
     ]),
     ...mapState(useChatStore, ["errors"]),
     openAiCompatibleErrors() {
-      return this.errors.filter((error) => error.providerId === "openaiCompat" && !error.message.includes("[2]")).map((error) => error.message);
+      return this.errors
+        .filter(
+          (error) =>
+            error.providerId === "openaiCompat" &&
+            !error.message.includes("[2]"),
+        )
+        .map((error) => error.message);
     },
     ollamaErrors() {
-      return this.errors.filter((error) => error.providerId === "ollama" && !error.message.includes("[2]")).map((error) => error.message);
+      return this.errors
+        .filter(
+          (error) =>
+            error.providerId === "ollama" && !error.message.includes("[2]"),
+        )
+        .map((error) => error.message);
     },
   },
 
@@ -96,3 +136,74 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+h2 {
+  margin-top: 2rem;
+}
+
+.config-form {
+  .api-info {
+    margin-inline: 0.5rem;
+  }
+
+  .api-key-form {
+    gap: 0;
+  }
+
+  .description {
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    opacity: 0.7;
+  }
+
+  > .form-group {
+    label {
+      width: 7rem;
+      margin-top: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    .input-wrapper {
+      flex-grow: 1;
+    }
+  }
+
+  .toggle-form-area {
+    margin-top: 1rem;
+
+    .toggle-btn {
+      margin-left: -0.5rem;
+    }
+
+    .key-value-list-input label {
+      display: none;
+    }
+
+    h4 {
+      margin: 0;
+      font-weight: normal;
+    }
+  }
+}
+
+.config-form :deep(.form-group) {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+
+  label {
+    width: 7rem;
+    flex-shrink: 0;
+  }
+
+  .input-wrapper {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .helper {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+</style>

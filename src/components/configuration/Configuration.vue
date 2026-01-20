@@ -16,10 +16,8 @@
       </ul>
     </nav>
     <div class="content" :class="page">
-      <template v-if="page === 'models'">
-        <ModelsConfiguration />
-        <ProvidersConfiguration />
-      </template>
+      <ModelsConfiguration v-if="page === 'models'"/>
+      <ProvidersConfiguration v-if="page === 'providers'"/>
       <GeneralConfiguration v-if="page === 'general'" />
       <AboutConfiguration v-if="page === 'about'" />
     </div>
@@ -27,13 +25,8 @@
 </template>
 
 <script lang="ts">
-import { AvailableProviders, AvailableModels, providerConfigs } from "@/config";
-import { useChatStore } from "@/stores/chat";
-import { mapActions, mapState } from "pinia";
-import { useConfigurationStore } from "@/stores/configuration";
 import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.vue";
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
-import BaseInput from "../common/BaseInput.vue";
 import GeneralConfiguration from "./GeneralConfiguration.vue";
 import AboutConfiguration from "./AboutConfiguration.vue";
 import { PropType } from "vue";
@@ -49,6 +42,10 @@ const pages = [
     displayName: "Models",
   },
   {
+    id: "providers",
+    displayName: "Providers",
+  },
+  {
     id: "about",
     displayName: "About",
   },
@@ -62,7 +59,6 @@ export default {
   components: {
     ModelsConfiguration,
     ProvidersConfiguration,
-    BaseInput,
     GeneralConfiguration,
     AboutConfiguration,
     Dialog,
@@ -86,48 +82,12 @@ export default {
   },
 
   computed: {
-    ...mapState(useChatStore, ["models"]),
-    ...mapState(useConfigurationStore, ["disabledModels"]),
     pages: () => pages,
-    modelsByProvider(): {
-      providerId: AvailableProviders;
-      providerDisplayName: (typeof providerConfigs)[AvailableProviders]["displayName"];
-      models: ((typeof providerConfigs)[AvailableProviders]["models"][number] & {
-        enabled: boolean;
-      })[];
-    }[] {
-      return Object.keys(providerConfigs).map((key) => {
-        const providerId = key as AvailableProviders;
-        return {
-          providerId,
-          providerDisplayName: providerConfigs[providerId].displayName,
-          models: providerConfigs[providerId].models.map((model) => ({
-            ...model,
-            enabled: this.models.some((m) => m.id === model.id),
-          })) as any,
-        };
-      });
-    },
   },
 
   watch: {
     reactivePage() {
       this.page = this.reactivePage;
-    },
-  },
-
-  methods: {
-    ...mapActions(useConfigurationStore, ["configure"]),
-    toggleModel(model: AvailableModels["id"], checked?: boolean) {
-      if (checked === undefined) {
-        checked = !this.disabledModels.includes(model);
-      }
-      this.configure(
-        "disabledModels",
-        checked
-          ? this.disabledModels.filter((m) => m !== model)
-          : [...this.disabledModels, model],
-      );
     },
   },
 };

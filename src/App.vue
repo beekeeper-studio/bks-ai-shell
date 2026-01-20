@@ -7,9 +7,8 @@
     <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
     <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
-    <Dialog :visible="showOnboarding" :closable="false" :draggable="false">
-      <OnboardingScreen @submit="closeOnboardingScreen"
-        @open-provider-config="closeOnboardingScreenAndOpenProviderConfig" />
+    <Dialog modal :visible="showOnboarding" :closable="false" :draggable="false">
+      <OnboardingScreen @submit="closeOnboardingScreen" />
     </Dialog>
   </div>
 </template>
@@ -97,19 +96,9 @@ export default {
       this.page = "chat-interface";
       this.setInternal("isFirstTimeUser", false);
     },
-    async closeOnboardingScreenAndOpenProviderConfig() {
-      this.closeOnboardingScreen();
-      this.openModelsConfig();
-      await this.$nextTick();
-      const apiKeys = document.querySelector("#providers-configuration-api-keys");
-      apiKeys?.scrollIntoView();
-    },
-    openModelsConfig() {
+    handleManageModels() {
       this.configurationPage = "models";
       this.showConfiguration = true;
-    },
-    handleManageModels() {
-      this.openModelsConfig();
     },
     handleOpenConfiguration() {
       this.configurationPage = "general";
