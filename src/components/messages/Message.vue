@@ -14,6 +14,13 @@
             Show compact
           </summary>
           <div class="compact-result-content">
+            <span v-if="isEmptyUIMessage" class="result-placeholder">
+              {{
+                message.metadata?.compactStatus === "processing"
+                  ? "Processing..."
+                  : "Empty"
+              }}
+            </span>
             <template v-for="(part, index) of message.parts">
               <markdown
                 v-if="part.type === 'text'"
@@ -46,7 +53,9 @@
           "
         />
       </template>
-      <span v-if="isEmpty">Empty response</span>
+      <span v-if="isEmpty && !isCompactResult" class="empty-response">
+        Empty response
+      </span>
     </div>
     <div class="message-actions" v-if="status === 'ready'">
       <button
@@ -136,12 +145,11 @@ export default {
       }
       return text.trim();
     },
+    isEmptyUIMessage() {
+      return isEmptyUIMessage(this.message);
+    },
     isEmpty() {
-      return (
-        this.status === "ready" &&
-        isEmptyUIMessage(this.message) &&
-        !this.isCompactResult
-      );
+      return this.status === "ready" && this.isEmptyUIMessage;
     },
     isCompactResult() {
       return typeof this.message.metadata?.compactStatus === "string";
@@ -254,5 +262,11 @@ ul.metadata-content {
     padding-inline: 0.5rem;
     color: var(--text);
   }
+}
+
+.result-placeholder,
+.empty-response {
+  font-style: italic;
+  color: var(--text-muted);
 }
 </style>

@@ -113,11 +113,26 @@ export const useChatStore = defineStore("chat", {
         removable: false,
       }));
 
+      const mockModels = import.meta.env.MODE === "development"
+        ? providerConfigs.mock.models.map((m) => ({
+            ...m,
+            provider: "mock" as const,
+            providerDisplayName: providerConfigs.mock.displayName,
+            available: true,
+            enabled: !config.disabledModels.some(
+              (disabled) =>
+                m.id === disabled.modelId && disabled.providerId === "mock",
+            ),
+            removable: false,
+          }))
+        : [];
+
       return [
         ...openaiModels,
         ...anthropicModels,
         ...googleModels,
         ...userDefinedModels,
+        ...mockModels,
       ];
     },
     systemPrompt(state) {

@@ -5,6 +5,7 @@ import { OpenAICompatibleProvider } from "@/providers/OpenAICompatibleProvider";
 import { GoogleProvider } from "@/providers/GoogleProvider";
 import { useConfigurationStore } from "@/stores/configuration";
 import { OllamaProvider } from "./OllamaProvider";
+import { MockProvider } from "@/providers/MockProvider";
 import { parseHeaders } from "@/utils";
 import _ from "lodash";
 
@@ -40,6 +41,11 @@ export function createProvider(id: AvailableProviders)  {
         baseURL: configuration.providers_ollama_baseUrl,
         headers: parseHeaders(configuration.providers_ollama_headers),
       });
+    case "mock":
+      if (import.meta.env.MODE !== "development") {
+        throw new Error("Mock provider is only available in development mode");
+      }
+      return new MockProvider();
     default:
       throw new Error(`Provider ${id} does not exist.`);
   }
