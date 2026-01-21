@@ -270,24 +270,14 @@ export const providerConfigs = {
     displayName: "[DEV] Mock",
     models: [
       {
-        id: "mock-fast",
-        displayName: "[DEV] Mock fast",
-        contextWindow: 200_000,
+        id: "mock",
+        displayName: "[DEV] Mock",
+        contextWindow: 32_000,
       },
       {
-        id: "mock-slow",
-        displayName: "[DEV] Mock slow",
-        contextWindow: 200_000,
-      },
-      {
-        id: "mock-high-usage",
-        displayName: "[DEV] Mock high usage (85%)",
-        contextWindow: 200_000,
-      },
-      {
-        id: "mock-overflow",
-        displayName: "[DEV] Mock overflow (100%)",
-        contextWindow: 200_000,
+        id: "mock-compact",
+        displayName: "[DEV] Mock compact",
+        contextWindow: 64_000,
       },
     ],
     supportsRuntimeModels: false,
