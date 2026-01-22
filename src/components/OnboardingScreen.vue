@@ -62,7 +62,7 @@ export default {
   methods: {
     handleChangeProvider(provider: AvailableProviders) {
       this.providerChanged = true;
-      if (provider === "ollama") {
+      if (provider === "ollama" || provider === "mock") {
         this.changed = true;
       }
     },

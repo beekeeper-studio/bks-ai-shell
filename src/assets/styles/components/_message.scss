@@ -198,11 +198,6 @@
     font-weight: normal;
   }
 
-  .message-content.literally-empty {
-    font-style: italic;
-    --theme-text-message-system: var(--text-muted);
-  }
-
   [data-tool-state="input-streaming"] {
     &>.markdown code .hljs-comment::after {
       content: "";

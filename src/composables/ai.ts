@@ -1,43 +1,57 @@
 import { Chat } from "@ai-sdk/vue";
 import { computed, ComputedRef, ref } from "vue";
-import { tools } from "@/tools";
-import { DefaultChatTransport, ChatStatus, isToolUIPart } from "ai";
+import { ChatStatus, isToolUIPart } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
-import { FetchFunction } from "@ai-sdk/provider-utils";
 import { safeJSONStringify } from "@/utils";
-import { runQuery } from "@beekeeperstudio/plugin";
+import { log, runQuery } from "@beekeeperstudio/plugin";
 import { UIMessage } from "@/types";
-import { useChatStore } from "@/stores/chat";
 import { lastAssistantMessageIsCompleteWithApprovedResponses } from "@/utils/last-assistant-message-is-complete-with-approved-responses";
+import { ChatTransport } from "@/providers/ChatTransport";
+import { useChatStore } from "@/stores/chat";
+import compactPrompt from "../../instructions/compact.txt?raw";
 
 type AIOptions = {
   initialMessages: UIMessage[];
 };
 
-/** A wrapper class of AI SDK's Chat class. */
+/** A wrapper class of AI SDK's Chat class */
 class AIShellChat {
   readonly messages: ComputedRef<UIMessage[]>;
   readonly error: ComputedRef<Error | undefined>;
   readonly status: ComputedRef<ChatStatus>;
   readonly hasPendingApprovals: ComputedRef<boolean>;
+  readonly compacting = ref(false);
 
   /** Force the `status` if not `null` */
   private runningEditedQuery = ref<boolean>();
   private chat: Chat<UIMessage>;
+  /** Messages to be sent after compacting */
+  private pendingCompactMessages = ref<UIMessage[]>([]);
+  private aborted = ref(false);
+  private errorDuringCompaction = ref(false);
 
   constructor(options: AIOptions) {
-    this.fetch = this.fetch.bind(this);
-
     this.chat = new Chat<UIMessage>({
-      transport: new DefaultChatTransport({ fetch: this.fetch }),
+      transport: new ChatTransport(),
       messages: options.initialMessages,
       sendAutomaticallyWhen:
         lastAssistantMessageIsCompleteWithApprovedResponses,
+      onFinish: () => {
+        this.saveMessages();
+        this.fillTitle();
+      },
+      onError: (e) => {
+        if (this.chat.lastMessage?.metadata?.compactStatus === "processing") {
+          this.errorDuringCompaction.value = true;
+        }
+      },
     });
 
-    this.messages = computed(() => this.chat.messages);
+    this.messages = computed(() =>
+      this.chat.messages.concat(this.pendingCompactMessages.value),
+    );
     this.error = computed(() => this.chat.error);
     this.status = computed<ChatStatus>(() => {
       if (this.runningEditedQuery.value) {
@@ -54,27 +68,116 @@ class AIShellChat {
     );
   }
 
-  /** Pass `undefined` to trigger the API without sending the message */
-  async send(message: string | undefined) {
-    await this.chat.sendMessage(message ? { text: message } : undefined);
-    this.saveMessages();
-    this.fillTitle();
+  // Trigger API request without sending a message
+  async triggerRequest() {
+    this.aborted.value = false;
+    await this.chat.sendMessage();
+  }
+
+  async send(text: string) {
+    this.aborted.value = false;
+    await this.chat.sendMessage({ text });
   }
 
   async retry() {
+    this.aborted.value = false;
+    if (this.errorDuringCompaction.value) {
+      await this.continueCompacting();
+      return;
+    }
     await this.chat.regenerate();
   }
 
   async abort() {
+    this.aborted.value = true;
     await this.chat.stop();
-    this.saveMessages();
+  }
+
+  /**
+   * Request a compact message and remove all previous messages.
+   *
+   * @param followUpMessage - The followup message to be sent after the compact message.
+   **/
+  async compact(followUpMessage?: string) {
+    this.aborted.value = false;
+    this.errorDuringCompaction.value = false;
+
+    if (followUpMessage) {
+      this.pendingCompactMessages.value.push({
+        id: this.chat.generateId(),
+        role: "user",
+        parts: [{ type: "text", text: followUpMessage }],
+      });
+    }
+
+    // If the last message is an unfinished compact message, remove it
+    if (this.chat.lastMessage?.metadata?.compactStatus === "processing") {
+      // Two messages to remove:
+      // 1. The compact prompt
+      // 2. The compact result
+      this.chat.messages = this.chat.messages.slice(0, -2);
+    }
+
+    this.compacting.value = true;
+
+    await this.chat.sendMessage({
+      role: "user",
+      parts: [{ type: "text", text: compactPrompt }],
+      metadata: { isCompactPrompt: true },
+    }).finally(() => {
+      this.compacting.value = false;
+      if (this.aborted.value) {
+        this.errorDuringCompaction.value = true;
+      }
+    });
+
+    if (this.errorDuringCompaction.value) {
+      return;
+    }
+
+    await this.finishCompaction();
+  }
+
+  /** Call this to continue the compacting process if it fails. */
+  private async continueCompacting() {
+    this.aborted.value = false;
+    this.errorDuringCompaction.value = false;
+
+    this.compacting.value = true;
+
+    await this.chat.regenerate().finally(() => {
+      this.compacting.value = false;
+      if (this.aborted.value) {
+        this.errorDuringCompaction.value = true;
+      }
+    });
+
+    if (this.errorDuringCompaction.value) {
+      return;
+    }
+
+    await this.finishCompaction();
+  }
+
+  private async finishCompaction() {
+    this.chat.messages = [this.chat.messages[this.chat.messages.length - 1]];
+
+    if (this.pendingCompactMessages.value.length === 0) {
+      return;
+    }
+
+    this.chat.messages = [
+      ...this.chat.messages,
+      ...this.pendingCompactMessages.value,
+    ];
+
+    this.pendingCompactMessages.value = [];
+
+    await this.chat.sendMessage();
   }
 
   acceptPermission(approvalId: string) {
-    this.chat.addToolApprovalResponse({
-      id: approvalId,
-      approved: true,
-    });
+    this.chat.addToolApprovalResponse({ id: approvalId, approved: true });
   }
 
   /** After the user rejected the permission, they can provide a follow-up message.
@@ -204,7 +307,7 @@ class AIShellChat {
 
       this.runningEditedQuery.value = false;
 
-      this.send(undefined);
+      this.triggerRequest();
     }
   }
 
@@ -240,37 +343,12 @@ class AIShellChat {
     }
   }
 
-  /** Custom fetch function */
-  private async fetch(
-    url: Parameters<FetchFunction>[0],
-    fetchOptions: Parameters<FetchFunction>[1],
-  ) {
-    if (!fetchOptions) {
-      throw new Error("Fetch options are missing");
-    }
-
-    if (!fetchOptions.body) {
-      throw new Error("Fetch does not have a body");
-    }
-
-    const model = this.getModelOrThrow();
-    const m = JSON.parse(fetchOptions.body as string) as any;
-    const provider = createProvider(model.provider);
-    return provider.stream({
-      modelId: model.id,
-      messages: m.messages,
-      signal: fetchOptions.signal,
-      tools,
-      systemPrompt: useChatStore().systemPrompt,
-    });
-  }
-
   private getModelOrThrow() {
-    const model = useChatStore().model;
-    if (!model) {
-      throw new Error("Model is not set");
+    const chat = useChatStore();
+    if (!chat.model) {
+      throw new Error("No model selected");
     }
-    return model;
+    return chat.model;
   }
 
   private async saveMessages() {
@@ -320,5 +398,7 @@ export function useAI(options: AIOptions) {
     send: chat.send.bind(chat),
     retry: chat.retry.bind(chat),
     abort: chat.abort.bind(chat),
+    compact: chat.compact.bind(chat),
+    compacting: computed(() => chat.compacting.value),
   };
 }

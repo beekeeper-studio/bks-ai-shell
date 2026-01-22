@@ -7,7 +7,12 @@ import {
   streamText,
   ToolSet,
 } from "ai";
-import { AvailableModels, defaultTemperature } from "@/config";
+import {
+  AvailableModels,
+  AvailableProviders,
+  defaultTemperature,
+  ModelInfo,
+} from "@/config";
 import { UIMessage } from "@/types";
 import { z } from "zod/v3";
 import {
@@ -29,9 +34,11 @@ export type StreamOptions = {
   modelId: AvailableModels["id"];
   temperature?: number;
   systemPrompt?: string;
-}
+};
 
 export abstract class BaseProvider {
+  abstract get providerId(): AvailableProviders;
+
   abstract getModel(id: string): LanguageModel;
 
   getProviderOptions(): ProviderOptions | undefined {
@@ -39,24 +46,14 @@ export abstract class BaseProvider {
   }
 
   async stream(options: StreamOptions) {
+    const isCompactPrompt =
+      options.messages[options.messages.length - 1]?.metadata?.isCompactPrompt;
     const result = streamText({
       model: this.getModel(options.modelId),
-      messages: await convertToModelMessages<UIMessage>(options.messages, {
-        convertDataPart(part) {
-          if (part.type === "data-editedQuery") {
-            return {
-              type: "text",
-              text:
-                "Please run the following code instead:\n```\n" +
-                part.data.query +
-                "\n```",
-            };
-          }
-        },
-      }),
+      messages: await this.convertToModelMessages(options.messages),
       abortSignal: options.signal,
-      system: options.systemPrompt,
-      tools: options.tools,
+      system: isCompactPrompt ? undefined : options.systemPrompt,
+      tools: isCompactPrompt ? undefined : options.tools,
       stopWhen: stepCountIs(100),
       temperature: options.temperature ?? defaultTemperature,
       providerOptions: this.getProviderOptions(),
@@ -66,6 +63,23 @@ export abstract class BaseProvider {
       onError: (error) => {
         log.error(error);
         return this.getErrorMessage(error);
+      },
+      messageMetadata: ({ part }) => {
+        if (part.type === "start") {
+          return {
+            createdAt: Date.now(),
+            modelId: options.modelId,
+            providerId: this.providerId,
+            compactStatus: isCompactPrompt ? "processing" : undefined,
+          };
+        }
+
+        if (part.type === "finish") {
+          return {
+            usage: part.totalUsage,
+            compactStatus: isCompactPrompt ? "complete" : undefined,
+          };
+        }
       },
     });
   }
@@ -84,9 +98,7 @@ export abstract class BaseProvider {
     });
   }
 
-  abstract listModels(): Promise<
-    readonly { id: string; displayName: string }[]
-  >;
+  abstract listModels(): Promise<ModelInfo[]>;
 
   getErrorMessage(error: unknown) {
     if (NoSuchToolError.isInstance(error)) {
@@ -107,5 +119,21 @@ export abstract class BaseProvider {
       return `Model ${error.modelId} does not exist.`;
     }
     return  `An error occurred. (${error.message})`;
+  }
+
+  private async convertToModelMessages(messages: UIMessage[]) {
+    return await convertToModelMessages<UIMessage>(messages, {
+      convertDataPart(part) {
+        if (part.type === "data-editedQuery") {
+          return {
+            type: "text",
+            text:
+              "Please run the following code instead:\n```\n" +
+              part.data.query +
+              "\n```",
+          };
+        }
+      },
+    });
   }
 }

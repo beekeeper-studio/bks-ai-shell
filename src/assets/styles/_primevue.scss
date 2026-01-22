@@ -136,13 +136,12 @@
   // Popover
   --p-popover-gutter: 0.5rem;
   --p-popover-arrow-offset: 1rem;
-  --p-popover-background: color-mix(in srgb,
-      var(--theme-base) 6%,
-      var(--query-editor-bg));
-  --p-popover-color: var(--text);
+  --p-popover-background: var(--p-menu-background);
+  --p-popover-color: var(--p-menu-item-color);
   --p-popover-border-color: transparent;
-  --p-popover-border-radius: 8px;
+  --p-popover-border-radius: var(--p-menu-border-radius);
   --p-popover-box-shadow: 0 0 0.5rem var(--theme-bg);
+  --p-popover-shadow: 0 0 0.5rem var(--query-editor-bg);
   // -----------------------------------
 
   // Progress

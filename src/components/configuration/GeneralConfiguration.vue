@@ -36,12 +36,28 @@
   <BaseInput
     type="switch"
     :model-value="allowExecutionOfReadOnlyQueries"
-    @click="handleSwitchClick"
+    @click="
+      configure(
+        'allowExecutionOfReadOnlyQueries',
+        !allowExecutionOfReadOnlyQueries,
+      )
+    "
   >
-    <template #label> Always allow execution of read-only queries </template>
+    <template #label>Always allow execution of read-only queries</template>
     <template #helper>
       This will allow execution of read-only queries without asking for
       confirmation in all sessions.
+    </template>
+  </BaseInput>
+  <BaseInput
+    type="switch"
+    :model-value="enableAutoCompact"
+    @click="configure('enableAutoCompact', !enableAutoCompact)"
+  >
+    <template #label>Enable auto-compact (recommended)</template>
+    <template #helper>
+      When enabled, the conversation is automatically compacted to avoid hitting
+      the context limit.
     </template>
   </BaseInput>
 </template>
@@ -64,6 +80,7 @@ export default {
     ...mapState(useConfigurationStore, [
       "customInstructions",
       "allowExecutionOfReadOnlyQueries",
+      "enableAutoCompact",
     ]),
     ...mapGetters(useConfigurationStore, ["currentConnectionInstructions"]),
   },
@@ -73,12 +90,6 @@ export default {
       "configure",
       "configureCustomConnectionInstructions",
     ]),
-    handleSwitchClick() {
-      this.configure(
-        "allowExecutionOfReadOnlyQueries",
-        !this.allowExecutionOfReadOnlyQueries,
-      );
-    },
   },
 };
 </script>

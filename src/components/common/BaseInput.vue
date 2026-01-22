@@ -92,7 +92,9 @@ export default {
 
   emits: ["update:modelValue", "input", "change", "click"],
 
-  expose: ["focus"],
+  // FIXME: Strip this out for now cause vue-tsc isn't happy
+  // See https://github.com/vuejs/language-tools/issues/5069
+  // expose: ["focus"],
 
   methods: {
     emitInput(event: Event) {

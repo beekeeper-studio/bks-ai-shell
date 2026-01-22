@@ -4,6 +4,8 @@ import {
   ToolUIPart as AIToolUIPart,
 } from "ai";
 import { tools } from "./tools";
+import { AvailableModels, AvailableProviders } from "./config";
+import z from "zod";
 
 export type UIDataTypes = {
   /** Marks the original tool call that was edited by the user.
@@ -37,7 +39,31 @@ export type UIDataTypes = {
   };
 }
 
-export type UIMessage = AIUIMessage<unknown, UIDataTypes, InferUITools<typeof tools>>;
+export type UIMessage = AIUIMessage<MessageMetadata, UIDataTypes, InferUITools<typeof tools>>;
 
 export type ToolUIPart = AIToolUIPart<InferUITools<typeof tools>>;
 
+const usageSchema = z.object({
+  inputTokens: z.number().optional(),
+  outputTokens: z.number().optional(),
+  totalTokens: z.number().optional(),
+  reasoningTokens: z.number().optional(),
+  cachedInputTokens: z.number().optional(),
+});
+
+export const messageMetadataSchema = z.object({
+  createdAt: z.number().optional(),
+  providerId: z.custom<AvailableProviders>().optional(),
+  modelId: z.string().optional(),
+  usage: usageSchema.optional(),
+  compactStatus: z
+    .enum(["processing", "complete"])
+    .optional()
+    .describe("If it's defined, it's a compact message."),
+  isCompactPrompt: z
+    .boolean()
+    .optional()
+    .describe("Whether this is a compact prompt"),
+});
+
+export type MessageMetadata = z.infer<typeof messageMetadataSchema>;

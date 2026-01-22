@@ -113,11 +113,26 @@ export const useChatStore = defineStore("chat", {
         removable: false,
       }));
 
+      const mockModels = import.meta.env.MODE === "development"
+        ? providerConfigs.mock.models.map((m) => ({
+            ...m,
+            provider: "mock" as const,
+            providerDisplayName: providerConfigs.mock.displayName,
+            available: true,
+            enabled: !config.disabledModels.some(
+              (disabled) =>
+                m.id === disabled.modelId && disabled.providerId === "mock",
+            ),
+            removable: false,
+          }))
+        : [];
+
       return [
         ...openaiModels,
         ...anthropicModels,
         ...googleModels,
         ...userDefinedModels,
+        ...mockModels,
       ];
     },
     systemPrompt(state) {
@@ -185,6 +200,38 @@ export const useChatStore = defineStore("chat", {
     },
     supportOpenInQueryEditor(state) {
       return gt(state.appVersion, "5.3.0");
+    },
+    /**
+     * The context limit is the actual `contextWindow` - `outputTokens`.
+     * For most models, reserved `outputTokens` are 32K. If the `contextWindow`
+     * is less than 32K, we will reserve 25% of the `contextWindow` instead.
+     **/
+    contextLeftUntilAutoCompact(state): number {
+      if (typeof state.model?.contextWindow !== "number") {
+        return 100;
+      }
+
+      const totalTokens = useTabState().messages.findLast(
+        (m) =>
+          m.role === "assistant" &&
+          typeof m.metadata?.usage?.totalTokens === "number",
+      )?.metadata?.usage?.totalTokens;
+
+      if (typeof totalTokens !== "number") {
+        return 100;
+      }
+
+      // Reserve 32K tokens or 25% for output tokens
+      const outputTokens = Math.min(
+        32_000,
+        Math.floor(state.model.contextWindow * 0.25)
+      );
+      const contextLimit = state.model.contextWindow - outputTokens;
+      const contextUsage = totalTokens / contextLimit;
+      return (1 - contextUsage) * 100;
+    },
+    contextOverflow(): boolean {
+      return this.contextLeftUntilAutoCompact <= 0;
     },
   },
   actions: {
