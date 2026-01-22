@@ -19,7 +19,7 @@
     overflow: auto;
     position: relative;
 
-    >.header {
+    > .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -59,13 +59,12 @@
   }
 
   &.empty-chat {
-
     .scroll-container,
     .chat-input-container-container {
       flex-grow: 1;
     }
 
-    .scroll-container>.header {
+    .scroll-container > .header {
       margin-bottom: auto;
     }
 
@@ -73,6 +72,10 @@
       text-align: center;
       margin-bottom: 1rem;
       max-width: 32rem;
+
+      h1 {
+        color: var(--text-dark);
+      }
 
       p {
         color: var(--text);
@@ -113,7 +116,11 @@
     justify-content: center;
 
     &:hover {
-      background-color: color-mix(in srgb, var(--theme-base) 10%, var(--query-editor-bg));
+      background-color: color-mix(
+        in srgb,
+        var(--theme-base) 10%,
+        var(--query-editor-bg)
+      );
     }
 
     .material-symbols-outlined {
@@ -131,7 +138,7 @@
   display: flex;
   flex-direction: column;
 
-  >.spinner {
+  > .spinner {
     padding-inline: 1.8rem;
   }
 }
@@ -171,7 +178,6 @@
     font-size: 0.865rem;
 
     code {
-
       &::selection,
       *::selection {
         background-color: var(--bks-text-editor-selected-bg-color);
@@ -200,7 +206,11 @@
     border: 1px solid var(--border-color);
     border-radius: 8px;
     white-space: normal;
-    --header-bg-color: color-mix(in srgb, var(--theme-base) 5%, var(--query-editor-bg));
+    --header-bg-color: color-mix(
+      in srgb,
+      var(--theme-base) 5%,
+      var(--query-editor-bg)
+    );
 
     .lang {
       padding-inline: 0.5rem;
@@ -239,7 +249,11 @@
 
         &:disabled {
           opacity: 1;
-          color: color-mix(in srgb, var(--theme-base) 50%, var(--query-editor-bg));
+          color: color-mix(
+            in srgb,
+            var(--theme-base) 50%,
+            var(--query-editor-bg)
+          );
         }
 
         .material-symbols-outlined {
@@ -254,7 +268,7 @@
         }
       }
 
-      [data-action=open-in-query-editor] .title-popup {
+      [data-action="open-in-query-editor"] .title-popup {
         max-width: 10rem;
 
         @media (min-width: 840px) {
@@ -422,7 +436,8 @@
     justify-content: center;
     min-width: 0;
 
-    .accept-icon, .reject-icon {
+    .accept-icon,
+    .reject-icon {
       font-size: 1.2em;
     }
 
@@ -448,7 +463,8 @@
   background-color: color-mix(
     in srgb,
     var(--theme-base) 5%,
-    var(--query-editor-bg));
+    var(--query-editor-bg)
+  );
   border: 1px solid var(--border-color);
   border-radius: 8px;
   display: flex;
@@ -466,7 +482,8 @@
       background-color: color-mix(
         in srgb,
         var(--theme-base) 5%,
-        var(--query-editor-bg));
+        var(--query-editor-bg)
+      );
       border-color: transparent;
 
       &:focus-visible {
@@ -548,7 +565,8 @@
   table-layout: auto;
 
   &.preview-table {
-    th, td {
+    th,
+    td {
       max-width: 200px;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -599,7 +617,7 @@
 }
 
 @media (min-width: 900px) {
-  .chat-container .scroll-container>.header {
+  .chat-container .scroll-container > .header {
     background-color: transparent;
   }
 
