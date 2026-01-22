@@ -251,7 +251,7 @@ export const useConfigurationStore = defineStore("configuration", {
       const connection = useChatStore().connectionInfo;
       const connectionId = connection.id;
       const workspaceId = connection.workspaceId;
-      const connectionInstructions = _.clone(this.customConnectionInstructions);
+      const connectionInstructions = _.cloneDeep(this.customConnectionInstructions);
       const idx = connectionInstructions.findIndex(
         (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
       );
