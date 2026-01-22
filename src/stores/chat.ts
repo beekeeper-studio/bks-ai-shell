@@ -127,7 +127,7 @@ export const useChatStore = defineStore("chat", {
         "\n" +
         config.customInstructions +
         "\n" +
-        config.currentLocalInstructions
+        config.currentConnectionInstructions
       ).trim();
     },
     // FIXME move this to UI Kit?

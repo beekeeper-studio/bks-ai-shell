@@ -35,8 +35,9 @@ type Configurable = {
   customInstructions: string;
   /** Append custom instructions to the default system instructions.
    * It's applied based on the connection ID */
-  customLocalInstructions: {
-    connectionId: string;
+  customConnectionInstructions: {
+    workspaceId: number;
+    connectionId: number;
     instructions: string;
   }[];
   allowExecutionOfReadOnlyQueries: boolean;
@@ -76,7 +77,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
 const defaultConfiguration: ConfigurationState = {
   // ==== GENERAL ====
   customInstructions: "",
-  customLocalInstructions: [],
+  customConnectionInstructions: [],
   allowExecutionOfReadOnlyQueries: false,
   summarization: true,
 
@@ -142,12 +143,14 @@ export const useConfigurationStore = defineStore("configuration", {
       });
     },
 
-    currentLocalInstructions(state): string {
+    currentConnectionInstructions(state): string {
       const connection = useChatStore().connectionInfo;
-      const localInstructions = state.customLocalInstructions.find(
-        (i) => i.connectionId === `${connection.workspaceId}:${connection.id}`,
+      const connectionInstructions = state.customConnectionInstructions.find(
+        (i) =>
+          i.connectionId === connection.id &&
+          i.workspaceId === connection.workspaceId,
       );
-      return localInstructions?.instructions || "";
+      return connectionInstructions?.instructions || "";
     },
   },
 
@@ -244,19 +247,31 @@ export const useConfigurationStore = defineStore("configuration", {
       await this.configure("disabledModels", disabledModels);
     },
 
-    async setCustomLocalInstructions(instructions: string) {
+    async configureCustomConnectionInstructions(instructions: string) {
       const connection = useChatStore().connectionInfo;
-      const connectionId = `${connection.workspaceId}:${connection.id}`;
-      const localInstructions = _.clone(this.customLocalInstructions);
-      const idx = localInstructions.findIndex(
-        (i) => i.connectionId === connectionId,
+      const connectionId = connection.id;
+      const workspaceId = connection.workspaceId;
+      const connectionInstructions = _.clone(this.customConnectionInstructions);
+      const idx = connectionInstructions.findIndex(
+        (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
       );
       if (idx === -1) {
-        localInstructions.push({ connectionId, instructions });
+        connectionInstructions.push({
+          connectionId,
+          workspaceId,
+          instructions,
+        });
       } else {
-        localInstructions[idx] = { connectionId, instructions };
+        connectionInstructions[idx] = {
+          connectionId,
+          workspaceId,
+          instructions,
+        };
       }
-      await this.configure("customLocalInstructions", localInstructions);
+      await this.configure(
+        "customConnectionInstructions",
+        connectionInstructions,
+      );
     },
   },
 });

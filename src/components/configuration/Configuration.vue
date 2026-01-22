@@ -16,9 +16,9 @@
       </ul>
     </nav>
     <div class="content" :class="page">
+      <GeneralConfiguration v-if="page === 'general'" />
       <ModelsConfiguration v-if="page === 'models'"/>
       <ProvidersConfiguration v-if="page === 'providers'"/>
-      <GeneralConfiguration v-if="page === 'general'" />
       <AboutConfiguration v-if="page === 'about'" />
     </div>
   </Dialog>

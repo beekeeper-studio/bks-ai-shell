@@ -1,46 +1,6 @@
 <template>
   <h2>General</h2>
   <BaseInput
-    :model-value="customInstructions"
-    @change="configure('customInstructions', $event.target.value)"
-    type="textarea"
-    placeholder="E.g. Before running a query, analyze it for any potential issues."
-    rows="4"
-  >
-    <template #label>
-      Custom Instructions <span style="color: var(--text-muted)">(Global)</span>
-    </template>
-    <template #helper
-      >Custom instructions will be appended to the
-      <ExternalLink
-        href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions"
-        >default instructions</ExternalLink
-      >
-      and included with every message you send as a system prompt. These
-      instructions will be applied globally to all connections.</template
-    >
-  </BaseInput>
-  <BaseInput
-    :model-value="currentLocalInstructions"
-    @change="setCustomLocalInstructions($event.target.value)"
-    type="textarea"
-    placeholder="E.g. The structure of this database is ..."
-    rows="4"
-  >
-    <template #label>
-      Custom Instructions <span style="color: var(--text-muted)">(Local)</span>
-    </template>
-    <template #helper
-      >Custom instructions will be appended to the
-      <ExternalLink
-        href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions"
-        >default instructions</ExternalLink
-      >
-      and included with every message you send as a system prompt. These
-      instructions will be applied to the current connection.</template
-    >
-  </BaseInput>
-  <BaseInput
     type="switch"
     :model-value="allowExecutionOfReadOnlyQueries"
     @click="handleSwitchClick"
@@ -50,6 +10,39 @@
       This will allow execution of read-only queries without asking for
       confirmation in all sessions.
     </template>
+  </BaseInput>
+  <h3>Custom Instructions</h3>
+  <p>
+    Use custom instructions to provide additional context to the AI. These
+    instructions are added on top of the
+    <ExternalLink
+      href="https://github.com/beekeeper-studio/bks-ai-shell/blob/main/instructions"
+      >default instructions<span
+        style="font-size: 1em"
+        class="material-symbols-outlined"
+        >arrow_outward</span
+      ></ExternalLink
+    >.
+  </p>
+  <BaseInput
+    :model-value="customInstructions"
+    @change="configure('customInstructions', $event.target.value)"
+    type="textarea"
+    placeholder="E.g. Before running a query, analyze it for any potential issues."
+    rows="4"
+  >
+    <template #label>All Connections</template>
+    <template #helper>Used in every conversation.</template>
+  </BaseInput>
+  <BaseInput
+    :model-value="currentConnectionInstructions"
+    @change="configureCustomConnectionInstructions($event.target.value)"
+    type="textarea"
+    placeholder="E.g. This database contains tables for user management and analytics."
+    rows="4"
+  >
+    <template #label>This Connection Only</template>
+    <template #helper>Used only for this connection.</template>
   </BaseInput>
 </template>
 
@@ -72,13 +65,13 @@ export default {
       "customInstructions",
       "allowExecutionOfReadOnlyQueries",
     ]),
-    ...mapGetters(useConfigurationStore, ["currentLocalInstructions"]),
+    ...mapGetters(useConfigurationStore, ["currentConnectionInstructions"]),
   },
 
   methods: {
     ...mapActions(useConfigurationStore, [
       "configure",
-      "setCustomLocalInstructions",
+      "configureCustomConnectionInstructions",
     ]),
     handleSwitchClick() {
       this.configure(

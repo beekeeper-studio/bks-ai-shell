@@ -15,9 +15,11 @@
 }
 
 .configuration {
-  --config-bg-hover: color-mix(in srgb,
-      var(--theme-base) 3.5%,
-      var(--theme-bg));
+  --config-bg-hover: color-mix(
+    in srgb,
+    var(--theme-base) 3.5%,
+    var(--theme-bg)
+  );
 
   .p-dialog-content {
     padding-top: 1.75rem;
@@ -68,7 +70,6 @@
     }
   }
 
-
   .content {
     flex-grow: 1;
     min-width: 0;
@@ -76,7 +77,7 @@
 
     > :first-child {
       margin-top: 0;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.4rem;
     }
 
     h1,
@@ -89,8 +90,24 @@
       padding-inline: 0.5rem;
     }
 
+    h2 {
+      margin-bottom: 0;
+      font-size: 1.09375rem;
+    }
+
     h3 {
-      margin-block: 0.75rem;
+      margin-top: 1rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    h2,
+    h3 {
+      color: var(--text-dark);
+    }
+
+    p:not(.alert) {
+      font-size: 0.831rem;
     }
 
     .form-group {
