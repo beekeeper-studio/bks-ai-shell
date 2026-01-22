@@ -22,6 +22,7 @@ import {
   disabledModelsByDefault,
   providerConfigs,
 } from "@/config";
+import { useChatStore } from "./chat";
 
 type Model = {
   id: string;
@@ -32,6 +33,13 @@ type Configurable = {
   // ==== GENERAL ====
   /** Append custom instructions to the default system instructions. */
   customInstructions: string;
+  /** Append custom instructions to the default system instructions.
+   * It's applied based on the connection ID */
+  customConnectionInstructions: {
+    workspaceId: number;
+    connectionId: number;
+    instructions: string;
+  }[];
   allowExecutionOfReadOnlyQueries: boolean;
   /** TODO: Enable summarization. Not implemented yet. */
   summarization: boolean;
@@ -69,6 +77,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
 const defaultConfiguration: ConfigurationState = {
   // ==== GENERAL ====
   customInstructions: "",
+  customConnectionInstructions: [],
   allowExecutionOfReadOnlyQueries: false,
   summarization: true,
 
@@ -132,6 +141,16 @@ export const useConfigurationStore = defineStore("configuration", {
           )
           .map((model) => ({ ...model, providerId }));
       });
+    },
+
+    currentConnectionInstructions(state): string {
+      const connection = useChatStore().connectionInfo;
+      const connectionInstructions = state.customConnectionInstructions.find(
+        (i) =>
+          i.connectionId === connection.id &&
+          i.workspaceId === connection.workspaceId,
+      );
+      return connectionInstructions?.instructions || "";
     },
   },
 
@@ -226,6 +245,33 @@ export const useConfigurationStore = defineStore("configuration", {
         disabledModels.splice(idx, 1);
       }
       await this.configure("disabledModels", disabledModels);
+    },
+
+    async configureCustomConnectionInstructions(instructions: string) {
+      const connection = useChatStore().connectionInfo;
+      const connectionId = connection.id;
+      const workspaceId = connection.workspaceId;
+      const connectionInstructions = _.cloneDeep(this.customConnectionInstructions);
+      const idx = connectionInstructions.findIndex(
+        (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
+      );
+      if (idx === -1) {
+        connectionInstructions.push({
+          connectionId,
+          workspaceId,
+          instructions,
+        });
+      } else {
+        connectionInstructions[idx] = {
+          connectionId,
+          workspaceId,
+          instructions,
+        };
+      }
+      await this.configure(
+        "customConnectionInstructions",
+        connectionInstructions,
+      );
     },
   },
 });
