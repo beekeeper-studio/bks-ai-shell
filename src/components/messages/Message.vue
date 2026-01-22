@@ -77,12 +77,19 @@
         <Popover ref="metadataPopover">
           <ul class="metadata-content">
             <li>
-              <span>Token count</span>
+              <span>Token count*</span>
               <span>{{ metadata.totalTokens }}</span>
             </li>
-            <li>
+            <li class="metadata-model">
               <span>Model</span>
               <span>{{ metadata.model }}</span>
+            </li>
+            <li>
+              <span>Provider</span>
+              <span>{{ metadata.provider }}</span>
+            </li>
+            <li class="metadata-note">
+              *Token count represents the total tokens used to generate this message, as reported by the provider.
             </li>
           </ul>
         </Popover>
@@ -204,15 +211,13 @@ ul.metadata-content {
   margin: 0;
   padding: 0;
   list-style: none;
-  min-width: 12rem;
-  max-width: 42rem;
+  width: 18rem;
 
   li {
     padding: 0.25rem 0.5rem;
     display: flex;
     justify-content: space-between;
-    /* FIXME should be 0.9rem. But this should match the app font size for now. */
-    font-size: 12.6px;
+    font-size: 0.7875rem;
 
     span:first-child {
       color: var(--text-light);
@@ -220,6 +225,19 @@ ul.metadata-content {
 
     span:nth-child(2) {
       margin-left: 0.5rem;
+    }
+
+    &.metadata-model :nth-child(2) {
+      overflow-wrap: anywhere;
+    }
+
+    &.metadata-note {
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 0.25rem;
+      font-size: 11px;
+      color: var(--text-lighter);
+      line-height: 1.5;
     }
   }
 }
