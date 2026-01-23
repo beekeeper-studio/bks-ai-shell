@@ -84,7 +84,7 @@
     h2,
     h3,
     h4,
-    p:not(.helper),
+    p.description,
     li,
     .form-group {
       padding-inline: 0.5rem;
@@ -106,18 +106,28 @@
       color: var(--text-dark);
     }
 
-    p:not(.alert) {
-      font-size: 0.831rem;
+    p.description {
       margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+      color: var(--text-light);
     }
 
     .form-group {
       padding-block: 0.5rem;
-      border-radius: 8px;
+      border-radius: 6px;
+
+      &.switch .helper,
+      label {
+        padding-left: 0;
+      }
 
       &:hover {
         background-color: var(--config-bg-hover);
       }
+    }
+
+    .alert {
+      margin-inline: 0.5rem;
     }
   }
 }

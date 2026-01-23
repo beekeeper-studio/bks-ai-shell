@@ -77,7 +77,7 @@
         <Popover ref="metadataPopover">
           <ul class="metadata-content">
             <li>
-              <span>Token count*</span>
+              <span>Token count</span>
               <span>{{ metadata.totalTokens }}</span>
             </li>
             <li class="metadata-model">
@@ -89,7 +89,7 @@
               <span>{{ metadata.provider }}</span>
             </li>
             <li class="metadata-note">
-              *Token count represents the total tokens used to generate this message, as reported by the provider.
+              Token count represents the total tokens used to generate this message, as reported by the provider.
             </li>
           </ul>
         </Popover>

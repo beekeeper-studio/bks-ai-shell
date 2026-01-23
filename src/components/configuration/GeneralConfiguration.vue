@@ -1,7 +1,34 @@
 <template>
   <h2>General</h2>
+  <BaseInput
+    type="switch"
+    :model-value="allowExecutionOfReadOnlyQueries"
+    @click="
+      configure(
+        'allowExecutionOfReadOnlyQueries',
+        !allowExecutionOfReadOnlyQueries,
+      )
+    "
+  >
+    <template #label>Always allow execution of read-only queries</template>
+    <template #helper>
+      This will allow execution of read-only queries without asking for
+      confirmation in all sessions.
+    </template>
+  </BaseInput>
+  <BaseInput
+    type="switch"
+    :model-value="enableAutoCompact"
+    @click="configure('enableAutoCompact', !enableAutoCompact)"
+  >
+    <template #label>Enable auto-compact (recommended)</template>
+    <template #helper>
+      When enabled, the conversation is automatically compacted to avoid hitting
+      the context limit.
+    </template>
+  </BaseInput>
   <h3>Custom Instructions</h3>
-  <p>
+  <p class="description">
     Use custom instructions to provide additional context to the AI. These
     instructions are added on top of the
     <ExternalLink
@@ -32,33 +59,6 @@
   >
     <template #label>This Connection Only</template>
     <template #helper>Used only for this connection.</template>
-  </BaseInput>
-  <BaseInput
-    type="switch"
-    :model-value="allowExecutionOfReadOnlyQueries"
-    @click="
-      configure(
-        'allowExecutionOfReadOnlyQueries',
-        !allowExecutionOfReadOnlyQueries,
-      )
-    "
-  >
-    <template #label>Always allow execution of read-only queries</template>
-    <template #helper>
-      This will allow execution of read-only queries without asking for
-      confirmation in all sessions.
-    </template>
-  </BaseInput>
-  <BaseInput
-    type="switch"
-    :model-value="enableAutoCompact"
-    @click="configure('enableAutoCompact', !enableAutoCompact)"
-  >
-    <template #label>Enable auto-compact (recommended)</template>
-    <template #helper>
-      When enabled, the conversation is automatically compacted to avoid hitting
-      the context limit.
-    </template>
   </BaseInput>
 </template>
 

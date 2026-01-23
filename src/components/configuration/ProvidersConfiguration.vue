@@ -143,18 +143,8 @@ h2 {
 }
 
 .config-form {
-  .api-info {
-    margin-inline: 0.5rem;
-  }
-
   .api-key-form {
     gap: 0;
-  }
-
-  .description {
-    font-size: 0.85rem;
-    color: var(--text-dark);
-    opacity: 0.7;
   }
 
   > .form-group {
