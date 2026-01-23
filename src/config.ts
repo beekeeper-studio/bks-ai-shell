@@ -79,6 +79,16 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-3-pro-preview",
+        displayName: "gemini-3-pro-preview",
+        contextWindow: 1_048_576,
+      },
+      {
+        id: "gemini-3-flash-preview",
+        displayName: "gemini-3-flash-preview",
+        contextWindow: 1_048_576,
+      },
+      {
         id: "gemini-2.5-pro",
         displayName: "gemini-2.5-pro",
         contextWindow: 1_048_576,
@@ -93,8 +103,6 @@ export const providerConfigs = {
         displayName: "gemini-2.5-flash-lite",
         contextWindow: 1_048_576,
       },
-
-      // Deprecated models
       {
         id: "gemini-2.0-flash",
         displayName: "gemini-2.0-flash",
@@ -230,10 +238,14 @@ export const disabledModelsByDefault: {
 }[] = [
     // ===== Google =====
     // https://ai.google.dev/gemini-api/docs/deprecations
+
+    // Retirement date: March 31, 2026
     {
       providerId: "google" as const,
       modelId: "gemini-2.0-flash",
     },
+
+    // Retirement date: March 31, 2026
     {
       providerId: "google" as const,
       modelId: "gemini-2.0-flash-lite",
