@@ -30,7 +30,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
     const url = new URL("./models", this.options.baseURL);
 
     const res = await fetch(url.toString(), {
-      headers: this.options.headers,
+      headers: this.buildFetchHeaders(),
     });
     if (!res.ok) {
       throw new Error(`Failed to list models: ${res.statusText}`);
@@ -53,5 +53,16 @@ export class OpenAICompatibleProvider extends BaseProvider {
     } catch (e) {
       throw new Error(`Failed to list models: ${e}`);
     }
+  }
+
+  protected buildFetchHeaders() {
+    const headers = {};
+    if (this.options.apiKey) {
+      headers["Authorization"] = `Bearer ${this.options.apiKey}`;
+    }
+    return {
+      ...headers,
+      ...this.options.headers,
+    };
   }
 }
