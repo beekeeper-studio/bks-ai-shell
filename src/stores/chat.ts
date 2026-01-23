@@ -3,7 +3,6 @@ import {
   AvailableModels,
   AvailableProviders,
   AvailableProvidersWithDynamicModels,
-  getDefaultInstructions,
   providerConfigs,
 } from "@/config";
 import { useConfigurationStore } from "./configuration";
@@ -21,6 +20,7 @@ import {
 } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import gt from "semver/functions/gt";
+import { getDefaultInstructions } from "@/instructions";
 
 export type Model = AvailableModels & {
   provider: AvailableProviders;
