@@ -252,28 +252,10 @@ export const disabledModelsByDefault: {
     },
 
     // ===== OpenAI =====
+    // https://platform.openai.com/docs/deprecations
 
-    // FIXME: Can't use o3, o3-mini, and o4-mini because of this error when sending a message
-    // {
-    //   "error": {
-    //     "message": "Invalid schema for function 'get_tables': In context=(), 'required' is required to be supplied and to be an array including every key in properties. Missing 'schema'.",
-    //     "type": "invalid_request_error",
-    //     "param": "tools[0].function.parameters",
-    //     "code": "invalid_function_parameters"
-    //   }
-    // }
-    {
-      providerId: "openai" as const,
-      modelId: "o3",
-    },
-    {
-      providerId: "openai" as const,
-      modelId: "o3-mini",
-    },
-    {
-      providerId: "openai" as const,
-      modelId: "o4-mini",
-    },
+    //
+    //
 
     // ===== Anthropic =====
     // https://docs.claude.com/en/docs/about-claude/model-deprecations
