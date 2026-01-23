@@ -70,14 +70,14 @@ export abstract class BaseProvider {
             createdAt: Date.now(),
             modelId: options.modelId,
             providerId: this.providerId,
-            compactStatus: isCompactPrompt ? "processing" : undefined,
+            compactStatus: isCompactPrompt ? "processing" as const : undefined,
           };
         }
 
         if (part.type === "finish") {
           return {
             usage: part.totalUsage,
-            compactStatus: isCompactPrompt ? "complete" : undefined,
+            compactStatus: isCompactPrompt ? "complete" as const : undefined,
           };
         }
       },
