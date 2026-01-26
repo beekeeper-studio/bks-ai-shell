@@ -17,94 +17,16 @@ import {
   setData,
   setEncryptedData,
 } from "@beekeeperstudio/plugin";
-import {
-  AvailableProviders,
-  disabledModelsByDefault,
-  providerConfigs,
-} from "@/config";
+import { AvailableProviders, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
-
-type Model = {
-  id: string;
-  displayName: string;
-};
-
-type Configurable = {
-  // ==== GENERAL ====
-  /** Append custom instructions to the default system instructions. */
-  customInstructions: string;
-  /** Append custom instructions to the default system instructions.
-   * It's applied based on the connection ID */
-  customConnectionInstructions: {
-    workspaceId: number;
-    connectionId: number;
-    instructions: string;
-  }[];
-  allowExecutionOfReadOnlyQueries: boolean;
-  enableAutoCompact: boolean;
-
-  // ==== MODELS ====
-  /** List of disabled models by id. */
-  disabledModels: { providerId: AvailableProviders; modelId: string }[];
-  /** Models that are removed are not shown in the UI and cannot be enabled. */
-  removedModels: { providerId: AvailableProviders; modelId: string }[];
-  providers_openaiCompat_baseUrl: string;
-  providers_openaiCompat_headers: string;
-  providers_ollama_baseUrl: string;
-  providers_ollama_headers: string;
-} & {
-  // User defined models
-  [K in AvailableProviders as `providers_${K}_models`]: Model[];
-};
-
-type EncryptedConfigurable = {
-  "providers.openai.apiKey": string;
-  "providers.anthropic.apiKey": string;
-  "providers.google.apiKey": string;
-  providers_openaiCompat_apiKey: string;
-};
-
-type ConfigurationState = Configurable & EncryptedConfigurable;
-
-export type ConfigurationKey = keyof ConfigurationState;
-
-const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
-  "providers.openai.apiKey",
-  "providers.anthropic.apiKey",
-  "providers.google.apiKey",
-  "providers_openaiCompat_apiKey",
-];
-
-const defaultConfiguration: ConfigurationState = {
-  // ==== GENERAL ====
-  customInstructions: "",
-  customConnectionInstructions: [],
-  allowExecutionOfReadOnlyQueries: false,
-  enableAutoCompact: true,
-
-  // ==== MODELS ====
-  "providers.openai.apiKey": "",
-  "providers.anthropic.apiKey": "",
-  "providers.google.apiKey": "",
-  providers_openaiCompat_baseUrl: "",
-  providers_openaiCompat_apiKey: "",
-  providers_openaiCompat_headers: "",
-  providers_ollama_baseUrl: "http://localhost:11434",
-  providers_ollama_headers: "",
-  providers_openai_models: [],
-  providers_anthropic_models: [],
-  providers_google_models: [],
-  providers_openaiCompat_models: [],
-  providers_ollama_models: [],
-  disabledModels: disabledModelsByDefault,
-  removedModels: [],
-};
-
-function isEncryptedConfig(
-  config: string,
-): config is keyof EncryptedConfigurable {
-  return encryptedConfigKeys.includes(config as keyof EncryptedConfigurable);
-}
+import {
+  Configurable,
+  ConfigurationState,
+  defaultConfiguration,
+  encryptedConfigurableSchema,
+  isEncryptedConfig,
+  Model,
+} from "./configurationSchema";
 
 export const useConfigurationStore = defineStore("configuration", {
   state: (): ConfigurationState => {
@@ -113,7 +35,9 @@ export const useConfigurationStore = defineStore("configuration", {
 
   getters: {
     apiKeyExists(): boolean {
-      return encryptedConfigKeys.some((key) => this[key].trim() !== "");
+      return Object.keys(encryptedConfigurableSchema.shape).some(
+        (key) => this[key].trim() !== "",
+      );
     },
 
     getModelsByProvider: (state) => {
@@ -252,7 +176,9 @@ export const useConfigurationStore = defineStore("configuration", {
       const connection = useChatStore().connectionInfo;
       const connectionId = connection.id;
       const workspaceId = connection.workspaceId;
-      const connectionInstructions = _.cloneDeep(this.customConnectionInstructions);
+      const connectionInstructions = _.cloneDeep(
+        this.customConnectionInstructions,
+      );
       const idx = connectionInstructions.findIndex(
         (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
       );
