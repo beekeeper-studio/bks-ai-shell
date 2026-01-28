@@ -24,7 +24,6 @@
     align-items: stretch;
     display: grid;
 
-    &::after,
     textarea {
       width: auto;
       min-width: 1rem;
@@ -33,14 +32,8 @@
       font-size: 0.831rem;
       padding: 0.5rem 0.75rem;
       margin: 0;
-      resize: none;
+      resize: vertical;
       appearance: none;
-    }
-
-    &::after {
-      content: attr(data-value) " ";
-      visibility: hidden;
-      white-space: pre-wrap;
     }
   }
 

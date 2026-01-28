@@ -10,10 +10,7 @@
     >
       <slot name="helper"></slot>
     </p>
-    <div
-      class="input-wrapper"
-      :data-value="type === 'textarea' ? modelValue : ''"
-    >
+    <div class="input-wrapper">
       <textarea
         v-if="type === 'textarea'"
         v-bind="$attrs"

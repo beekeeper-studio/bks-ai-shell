@@ -63,17 +63,22 @@ const configurableSchema = z.object({
   providers_ollama_models: z.array(ModelSchema).default([]),
 });
 
-export const encryptedConfigurableSchema = z.object({
+const encryptedConfigurableSchema = z.object({
   "providers.openai.apiKey": z.string().default(""),
   "providers.anthropic.apiKey": z.string().default(""),
   "providers.google.apiKey": z.string().default(""),
   providers_openaiCompat_apiKey: z.string().default(""),
 });
 
+const workspaceConfigurableSchema = z.object({
+  workspaceConnectionInstructions: z.string().default(""),
+});
+
+export const encryptedConfigurableShape = encryptedConfigurableSchema.shape;
+
 export type Model = z.infer<typeof ModelSchema>;
 export type Configurable = z.infer<typeof configurableSchema>;
-export type ConfigurationState = z.infer<typeof configurableSchema> &
-  z.infer<typeof encryptedConfigurableSchema>;
+export type ConfigurationState = typeof defaultConfiguration;
 
 export function isEncryptedConfig(
   config: string,
@@ -81,7 +86,14 @@ export function isEncryptedConfig(
   return config in encryptedConfigurableSchema.shape;
 }
 
+export function isWorkspaceConfig(
+  config: string,
+): config is keyof z.infer<typeof workspaceConfigurableSchema> {
+  return config in workspaceConfigurableSchema.shape;
+}
+
 export const defaultConfiguration = {
   ...configurableSchema.parse({}),
   ...encryptedConfigurableSchema.parse({}),
+  ...workspaceConfigurableSchema.parse({}),
 };

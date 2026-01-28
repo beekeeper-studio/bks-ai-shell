@@ -17,6 +17,7 @@
     </nav>
     <div class="content" :class="page">
       <GeneralConfiguration v-if="page === 'general'" />
+      <InstructionsConfiguration v-if="page === 'instructions'"/>
       <ModelsConfiguration v-if="page === 'models'"/>
       <ProvidersConfiguration v-if="page === 'providers'"/>
       <AboutConfiguration v-if="page === 'about'" />
@@ -25,9 +26,10 @@
 </template>
 
 <script lang="ts">
+import GeneralConfiguration from "./GeneralConfiguration.vue";
+import InstructionsConfiguration from "./InstructionsConfiguration.vue";
 import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.vue";
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
-import GeneralConfiguration from "./GeneralConfiguration.vue";
 import AboutConfiguration from "./AboutConfiguration.vue";
 import { PropType } from "vue";
 import { Dialog } from "primevue";
@@ -36,6 +38,10 @@ const pages = [
   {
     id: "general",
     displayName: "General",
+  },
+  {
+    id: "instructions",
+    displayName: "Instructions",
   },
   {
     id: "models",
@@ -58,6 +64,7 @@ export default {
 
   components: {
     ModelsConfiguration,
+    InstructionsConfiguration,
     ProvidersConfiguration,
     GeneralConfiguration,
     AboutConfiguration,

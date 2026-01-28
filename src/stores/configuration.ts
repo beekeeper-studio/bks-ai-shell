@@ -7,15 +7,13 @@
  * FUTURE PLAN (probably):
  *
  * - Save configuration to .ini config files via Beekeeper Studio API
- *   instead of using setData?
+ *   instead of using appStorage?
  */
 import { defineStore } from "pinia";
 import _ from "lodash";
 import {
-  getData,
-  getEncryptedData,
-  setData,
-  setEncryptedData,
+  workspaceConnectionStorage,
+  appStorage,
 } from "@beekeeperstudio/plugin";
 import { AvailableProviders, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
@@ -23,8 +21,9 @@ import {
   Configurable,
   ConfigurationState,
   defaultConfiguration,
-  encryptedConfigurableSchema,
+  encryptedConfigurableShape,
   isEncryptedConfig,
+  isWorkspaceConfig,
   Model,
 } from "./configurationSchema";
 
@@ -35,7 +34,7 @@ export const useConfigurationStore = defineStore("configuration", {
 
   getters: {
     apiKeyExists(): boolean {
-      return Object.keys(encryptedConfigurableSchema.shape).some(
+      return Object.keys(encryptedConfigurableShape).some(
         (key) => this[key].trim() !== "",
       );
     },
@@ -83,9 +82,15 @@ export const useConfigurationStore = defineStore("configuration", {
     async sync() {
       const configuration: Partial<Configurable> = {};
       for (const key in defaultConfiguration) {
-        const value = isEncryptedConfig(key)
-          ? await getEncryptedData<Configurable>(key)
-          : await getData<Configurable>(key);
+        let value: unknown = null;
+
+        if (isWorkspaceConfig(key)) {
+          value = await workspaceConnectionStorage.getItem(key);
+        } else {
+          value = await appStorage.getItem<Configurable>(key, {
+            encrypted: isEncryptedConfig(key),
+          });
+        }
 
         if (value === null) {
           continue;
@@ -102,10 +107,12 @@ export const useConfigurationStore = defineStore("configuration", {
     ) {
       this.$patch({ [config]: value });
 
-      if (isEncryptedConfig(config)) {
-        await setEncryptedData(config, value);
+      if (isWorkspaceConfig(config)) {
+        await workspaceConnectionStorage.setItem(config, value);
       } else {
-        await setData(config, value);
+        await appStorage.setItem(config, value, {
+          encrypted: isEncryptedConfig(config),
+        });
       }
     },
 
