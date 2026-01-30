@@ -1,23 +1,48 @@
 <template>
   <div class="chat-input-container">
-    <BaseInput type="textarea" ref="input" v-model="input" @keydown.enter="handleEnterKey" @keydown.up="handleUpArrow"
-      @keydown.down="handleDownArrow" placeholder="Type your message here" rows="1" />
+    <Textarea
+      ref="input"
+      v-model="input"
+      placeholder="Type your message here"
+      rows="1"
+      auto-resize
+      @keydown.enter="handleEnterKey"
+      @keydown.up="handleUpArrow"
+      @keydown.down="handleDownArrow"
+    />
     <div class="actions" @click.self="focus()">
-      <div class="model-selection" :class="{ 'please-select-a-model': pleaseSelectAModel }"
-        @click="handleModelSelectionClick">
-        <Menu ref="menu" id="overlay_menu" :model="filteredModels" :popup="true">
+      <div
+        class="model-selection"
+        :class="{ 'please-select-a-model': pleaseSelectAModel }"
+        @click="handleModelSelectionClick"
+      >
+        <Menu
+          ref="menu"
+          id="overlay_menu"
+          :model="filteredModels"
+          :popup="true"
+        >
           <template #itemicon="{ item }">
-            <span class="material-symbols-outlined menu-icon">{{ item.icon }}</span>
+            <span class="material-symbols-outlined menu-icon">{{
+              item.icon
+            }}</span>
           </template>
         </Menu>
-        <button class="dropdown-trigger" @click="$refs.menu.toggle($event)">
+        <button
+          class="btn btn-small dropdown-trigger"
+          @click="$refs.menu.toggle($event)"
+        >
           {{ selectedModel ? selectedModel.displayName : "Select model" }}
         </button>
-        <div class="please-select-a-model-hint">
-          Please select a model
-        </div>
+        <div class="please-select-a-model-hint">Please select a model</div>
       </div>
-      <button v-if="!processing" @click="submit" class="submit-btn" :disabled="!input.trim()" test-id="submit">
+      <button
+        v-if="!processing"
+        @click="submit"
+        class="submit-btn"
+        :disabled="!input.trim()"
+        test-id="submit"
+      >
         <span class="material-symbols-outlined">send</span>
       </button>
       <button v-else @click="stop" class="stop-btn" />
@@ -27,7 +52,7 @@
 
 <script lang="ts">
 import { PropType } from "vue";
-import BaseInput from "./BaseInput.vue";
+import Textarea from "primevue/textarea";
 import { Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState } from "pinia";
 import { matchModel } from "@/utils";
@@ -41,7 +66,7 @@ const maxHistorySize = 50;
 
 export default defineComponent({
   components: {
-    BaseInput,
+    Textarea,
     Menu,
   },
 
@@ -83,23 +108,25 @@ export default defineComponent({
               label: model.displayName,
               icon: selected ? "check" : "",
               class: selected ? "selected" : "",
-              command: () => this.$emit('select-model', model),
+              command: () => this.$emit("select-model", model),
             });
           }
         }
         if (items.length === 0) {
-          return [{
-            label: "Manage models",
-            command: () => this.$emit('manage-models'),
-          }]
+          return [
+            {
+              label: "Manage models",
+              command: () => this.$emit("manage-models"),
+            },
+          ];
         }
         return [
           ...items,
           { separator: true },
           {
             label: "Manage models",
-            command: () => this.$emit('manage-models'),
-          }
+            command: () => this.$emit("manage-models"),
+          },
         ];
       },
     }),
@@ -118,8 +145,8 @@ export default defineComponent({
     matchModel,
 
     focus() {
-      const input = this.$refs.input as InstanceType<typeof BaseInput>;
-      input.focus();
+      const input = this.$refs.input as InstanceType<typeof Textarea>;
+      input.$el.focus();
     },
 
     submit() {
@@ -229,7 +256,10 @@ export default defineComponent({
 
       let newHistory = [...oldHistory];
 
-      if (oldHistory[oldHistory.length - 1] === input || input.startsWith(" ")) {
+      if (
+        oldHistory[oldHistory.length - 1] === input ||
+        input.startsWith(" ")
+      ) {
         this.resetHistory(newHistory);
         return;
       }
@@ -269,6 +299,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.chat-input-container {
+  --p-textarea-focus-border-color: transparent;
+}
+
 .actions {
   cursor: text;
 }

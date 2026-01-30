@@ -17,8 +17,16 @@
   // -----------------------------------
 
   // Toggle Button
-  --p-togglebutton-color: color-mix(in srgb, var(--theme-base) 60%, var(--theme-bg));
-  --p-togglebutton-background: color-mix(in srgb, var(--theme-base) 6%, var(--theme-bg));
+  --p-togglebutton-color: color-mix(
+    in srgb,
+    var(--theme-base) 60%,
+    var(--theme-bg)
+  );
+  --p-togglebutton-background: color-mix(
+    in srgb,
+    var(--theme-base) 6%,
+    var(--theme-bg)
+  );
   --p-togglebutton-padding: 0.25rem 0.25rem;
   --p-togglebutton-font-weight: 700;
   --p-togglebutton-border-radius: 8px;
@@ -36,16 +44,19 @@
   --p-togglebutton-content-padding: 0.1rem 0.75rem;
   --p-togglebutton-content-border-radius: 8px;
 
-  --p-togglebutton-content-checked-background: color-mix(in srgb,
-      var(--theme-base) 15%,
-      var(--theme-bg));
+  --p-togglebutton-content-checked-background: color-mix(
+    in srgb,
+    var(--theme-base) 15%,
+    var(--theme-bg)
+  );
   // -----------------------------------
 
   // Select
   --p-select-background: color-mix(
     in srgb,
     var(--theme-base) 6%,
-    var(--theme-bg));
+    var(--theme-bg)
+  );
   --p-select-color: var(--text-dark);
   --p-select-border-color: var(--border-color);
   --p-select-border-radius: 8px;
@@ -65,18 +76,36 @@
   --p-select-option-selected-color: var(--p-menu-item-focus-color);
   --p-select-option-selected-background: var(--p-menu-item-focus-background);
   --p-select-option-selected-focus-color: var(--p-menu-item-focus-color);
-  --p-select-option-selected-focus-background: var(--p-menu-item-focus-background);
+  --p-select-option-selected-focus-background: var(
+    --p-menu-item-focus-background
+  );
   --p-select-option-focus-background: var(--p-menu-item-focus-background);
   --p-select-option-focus-color: var(--p-menu-item-focus-color);
 
   --p-select-placeholder-color: var(--text-light);
   // -----------------------------------
 
+  // Textarea
+  --p-textarea-color: var(--text);
+  --p-textarea-padding-x: 0.75rem;
+  --p-textarea-padding-y: 0.5rem;
+  --p-textarea-border-radius: 4px;
+  --p-textarea-transition-duration: 0.15s;
+  --p-textarea-background: transparent;
+  --p-textarea-border-color: var(--border-color);
+  --p-textarea-placeholder-color: var(--text-light);
+  --p-textarea-hover-border-color: transparent;
+  --p-textarea-focus-border-color: var(--input-highlight);
+  // -----------------------------------
 
   // Dialog
   --p-dialog-background: var(--theme-bg);
   --p-dialog-border-radius: 8px;
-  --p-dialog-shadow: 0 0 0.5rem var(--query-editor-bg);
+  --p-dialog-shadow:
+    0 0 0 1px rgb(from black r g b / 0.06),
+    0 1px 3px 0 rgba(from black r g b / 0.12),
+    0 2px 1px -1px rgba(from black r g b / 0.08);
+
   --p-dialog-color: var(--text);
 
   --p-dialog-header-padding: 1.2rem 1.2rem 0.8rem;
@@ -92,9 +121,11 @@
   // Menu
   --p-menu-border-radius: 8px;
   --p-menu-color: var(--text);
-  --p-menu-background: color-mix(in srgb,
-      var(--theme-base) 6%,
-      var(--theme-bg));
+  --p-menu-background: color-mix(
+    in srgb,
+    var(--theme-base) 6%,
+    var(--theme-bg)
+  );
   --p-menu-shadow: 0 0 0.5rem var(--theme-bg);
 
   --p-menu-submenu-label-font-weight: normal;
@@ -104,15 +135,19 @@
   --p-menu-item-color: var(--text-dark);
   // --p-menu-item-padding: 0.482rem 0.8rem;
   --p-menu-item-padding: 0.2855rem 0.8rem;
-  --p-menu-item-focus-background: color-mix(in srgb,
-      var(--theme-base) 11%,
-      var(--theme-bg));
+  --p-menu-item-focus-background: color-mix(
+    in srgb,
+    var(--theme-base) 11%,
+    var(--theme-bg)
+  );
   --p-menu-item-focus-color: var(--theme-base);
   --p-menu-item-gap: 0.5rem;
 
-  --p-menu-separator-border-color: color-mix(in srgb,
-      var(--theme-base) 10%,
-      var(--theme-bg));
+  --p-menu-separator-border-color: color-mix(
+    in srgb,
+    var(--theme-base) 10%,
+    var(--theme-bg)
+  );
   // -----------------------------------
 
   // Context Menu -- pretty much the same as menu
@@ -121,7 +156,9 @@
   --p-contextmenu-background: var(--p-menu-background);
   --p-contextmenu-shadow: var(--p-menu-shadow);
 
-  --p-contextmenu-submenu-label-font-weight: var(--p-menu-submenu-label-font-weight);
+  --p-contextmenu-submenu-label-font-weight: var(
+    --p-menu-submenu-label-font-weight
+  );
 
   --p-contextmenu-item-padding: var(--p-menu-item-padding);
   --p-contextmenu-item-border-radius: var(--p-menu-item-border-radius);
@@ -130,7 +167,10 @@
   // -----------------------------------
 
   // Overlay
-  --p-mask-background: rgb(from var(--theme-bg) r g b / 0.3);
+  --p-mask-background: rgb(
+    from color-mix(in srgb, var(--theme-bg) 97%, black) r g b / 0.9
+  );
+
   // -----------------------------------
 
   // Popover
@@ -158,9 +198,9 @@
 
 .p-menu .p-menu-item,
 .p-contextmenu .p-contextmenu-item,
-.p-select-list, .p-select-option {
-  // FIXME should be 0.9rem. But this should match the app font size for now.
-  font-size: 12.6px;
+.p-select-list,
+.p-select-option {
+  font-size: 0.9rem;
 
   .menu-icon {
     font-size: 1.5em;

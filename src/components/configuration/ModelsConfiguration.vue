@@ -264,4 +264,8 @@ export default {
   margin-block: 0.5rem;
   color: var(--text);
 }
+
+.switch-label {
+  font-size: 0.831rem;
+}
 </style>

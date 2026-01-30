@@ -20,7 +20,7 @@ $btn-border-radius: 8px;
   display: inline-flex;
   align-items: center;
   font-size: 12px;
-  font-family: inherit;
+  font-family: var(--font-family);
   line-height: $input-height;
   height: $input-height;
   font-weight: 700;
@@ -87,7 +87,7 @@ $btn-border-radius: 8px;
   }
 
   >.material-symbols-outlined {
-    font-size: 1.5em;
+    font-size: 1.25em;
   }
 }
 
@@ -119,9 +119,68 @@ $btn-border-radius: 8px;
 
 .btn.btn-flat-2 {
   --btn-bg-color: var(--query-editor-bg);
-  --btn-text-color: color-mix(in srgb, var(--text-dark) 90%, var(--query-editor-bg));
+  --btn-text-color: color-mix(in srgb,
+      var(--text-dark) 90%,
+      var(--query-editor-bg));
   --btn-hover-bg-color: color-mix(in srgb,
       var(--theme-base) 10%,
       var(--query-editor-bg));
   --btn-hover-text-color: var(--text-dark);
+}
+
+.btn.btn-small {
+  font-size: 0.85rem;
+  padding: 0 0.65rem;
+  min-width: 0;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 6px;
+}
+
+.btn.btn-fab {
+  $fab-size: 26px;
+
+  height: $fab-size;
+  min-width: $fab-size;
+  width: $fab-size;
+  line-height: $fab-size;
+  border-radius: $fab-size;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  box-shadow: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.15s ease-in-out;
+
+  &:hover,
+  &:focus {
+    background: rgb(from var(--theme-base) r g b / 0.1);
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--text-dark);
+  }
+
+  &.btn-primary {
+    background: var(--theme-primary);
+
+    .material-icons {
+      color: rgb(from black r g b / 0.87);
+    }
+
+    &:hover,
+    &:focus {
+      background-color: hsl(from var(--theme-primary) h s calc(l + 8));
+
+      .material-icons {
+        color: rgb(from black r g b / 0.87)
+      }
+    }
+  }
 }
