@@ -14,6 +14,7 @@ import _ from "lodash";
 import {
   workspaceConnectionStorage,
   appStorage,
+  log,
 } from "@beekeeperstudio/plugin";
 import { AvailableProviders, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
@@ -27,9 +28,18 @@ import {
   Model,
 } from "./configurationSchema";
 
+type State = ConfigurationState & {
+  storeStatus: "idle" | "loading" | "error";
+  storeError: Error | null;
+};
+
 export const useConfigurationStore = defineStore("configuration", {
-  state: (): ConfigurationState => {
-    return defaultConfiguration;
+  state: (): State => {
+    return {
+      ...defaultConfiguration,
+      storeStatus: "idle",
+      storeError: null,
+    };
   },
 
   getters: {
@@ -80,26 +90,37 @@ export const useConfigurationStore = defineStore("configuration", {
 
   actions: {
     async sync() {
-      const configuration: Partial<Configurable> = {};
-      for (const key in defaultConfiguration) {
-        let value: unknown = null;
+      this.storeStatus = "loading";
+      this.storeError = null;
 
-        if (isWorkspaceConfig(key)) {
-          value = await workspaceConnectionStorage.getItem(key);
-        } else {
-          value = await appStorage.getItem<Configurable>(key, {
-            encrypted: isEncryptedConfig(key),
-          });
+      try {
+        const configuration: Partial<Configurable> = {};
+        for (const key in defaultConfiguration) {
+          let value: unknown = null;
+
+          if (isWorkspaceConfig(key)) {
+            value = await workspaceConnectionStorage.getItem(key);
+          } else {
+            value = await appStorage.getItem<Configurable>(key, {
+              encrypted: isEncryptedConfig(key),
+            });
+          }
+
+          if (value === null) {
+            continue;
+          }
+
+          configuration[key] = value;
         }
 
-        if (value === null) {
-          continue;
-        }
+        this.$patch(configuration);
 
-        configuration[key] = value;
+        this.storeStatus = "idle";
+      } catch (e) {
+        log.error("Failed to sync configuration" + e.toString());
+        this.storeStatus = "error";
+        this.storeError = e as Error;
       }
-
-      this.$patch(configuration);
     },
     async configure<T extends keyof ConfigurationState>(
       config: T,

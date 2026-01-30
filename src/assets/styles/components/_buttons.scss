@@ -125,3 +125,12 @@ $btn-border-radius: 8px;
       var(--query-editor-bg));
   --btn-hover-text-color: var(--text-dark);
 }
+
+.btn.btn-small {
+  font-size: 0.744rem; // FIXME should be 0.85rem
+  padding: 0.569rem; // FIXME should be 0.65rem
+  min-width: 0;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 6px;
+}

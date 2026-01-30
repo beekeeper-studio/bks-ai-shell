@@ -1,47 +1,62 @@
 <template>
-  <Dialog class="configuration" @update:visible="$emit('update:visible', $event)" :visible="visible" dismissable-mask
-    :show-header="false" modal>
+  <Dialog
+    modal
+    dismissable-mask
+    close-on-escape
+    class="configuration"
+    :visible="visible"
+    :show-header="false"
+    @update:visible="handleUpdateVisible"
+  >
     <nav>
       <ul>
         <li>
-          <button class="btn btn-flat nav-btn close-btn" @click="$emit('close')">
+          <button
+            class="btn btn-flat nav-btn close-btn"
+            @click="$emit('close')"
+          >
             <span class="material-symbols-outlined">close</span>
           </button>
         </li>
         <li v-for="{ id, displayName } in pages" :key="id">
-          <button class="btn btn-flat nav-btn" :class="{ active: page === id }" @click="page = id">
+          <button
+            class="btn btn-flat nav-btn"
+            :class="{ active: page === id }"
+            @click="page = id"
+          >
             {{ displayName }}
           </button>
         </li>
       </ul>
     </nav>
     <div class="content" :class="page">
-      <GeneralConfiguration v-if="page === 'general'" />
-      <InstructionsConfiguration v-if="page === 'instructions'"/>
-      <ModelsConfiguration v-if="page === 'models'"/>
-      <ProvidersConfiguration v-if="page === 'providers'"/>
-      <AboutConfiguration v-if="page === 'about'" />
+      <div v-if="storeStatus === 'loading'">Loading...</div>
+      <div v-else-if="storeStatus === 'error'">Error: {{ storeError }}</div>
+      <GeneralConfiguration
+        v-else-if="page === 'general'"
+        v-model:dirty="isDirty"
+      />
+      <ModelsConfiguration v-else-if="page === 'models'" />
+      <ProvidersConfiguration v-else-if="page === 'providers'" />
+      <AboutConfiguration v-else-if="page === 'about'" />
     </div>
   </Dialog>
 </template>
 
 <script lang="ts">
 import GeneralConfiguration from "./GeneralConfiguration.vue";
-import InstructionsConfiguration from "./InstructionsConfiguration.vue";
 import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.vue";
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
 import AboutConfiguration from "./AboutConfiguration.vue";
 import { PropType } from "vue";
 import { Dialog } from "primevue";
+import { mapState } from "pinia";
+import { useConfigurationStore } from "@/stores/configuration";
 
 const pages = [
   {
     id: "general",
     displayName: "General",
-  },
-  {
-    id: "instructions",
-    displayName: "Instructions",
   },
   {
     id: "models",
@@ -57,14 +72,13 @@ const pages = [
   },
 ] as const;
 
-export type PageId = typeof pages[number]["id"];
+export type PageId = (typeof pages)[number]["id"];
 
 export default {
   name: "Configuration",
 
   components: {
     ModelsConfiguration,
-    InstructionsConfiguration,
     ProvidersConfiguration,
     GeneralConfiguration,
     AboutConfiguration,
@@ -85,11 +99,13 @@ export default {
   data() {
     return {
       page: this.reactivePage,
+      isDirty: false,
     };
   },
 
   computed: {
     pages: () => pages,
+    ...mapState(useConfigurationStore, ["storeStatus", "storeError"]),
   },
 
   watch: {
@@ -97,5 +113,15 @@ export default {
       this.page = this.reactivePage;
     },
   },
+
+  methods: {
+    handleUpdateVisible(visible: boolean) {
+      if (!visible && this.isDirty) {
+        // Naah.. hmmmmm
+        return;
+      }
+      this.$emit("update:visible", visible);
+    }
+  }
 };
 </script>

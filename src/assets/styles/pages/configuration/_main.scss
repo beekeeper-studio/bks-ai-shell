@@ -17,7 +17,7 @@
 .configuration {
   --config-bg-hover: color-mix(
     in srgb,
-    var(--theme-base) 3.5%,
+    var(--theme-base) 2%,
     var(--theme-bg)
   );
 
@@ -51,6 +51,8 @@
     height: 1.75rem;
     justify-content: flex-start;
     background-color: transparent;
+    padding-inline: 0.75rem;
+    border-radius: 6px;
 
     &:hover {
       background-color: var(--config-bg-hover);
@@ -106,10 +108,15 @@
       color: var(--text-dark);
     }
 
+    hr {
+      margin-inline: 0.5rem;
+      border-color: var(--border-color);
+    }
+
     p.description {
       margin-bottom: 0.25rem;
-      font-size: 0.85rem;
-      color: var(--text-light);
+      font-size: 0.727rem; // FIXME should be 0.83rem
+      color: var(--text);
     }
 
     .form-group {
