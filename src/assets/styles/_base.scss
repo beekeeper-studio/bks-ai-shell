@@ -1,5 +1,6 @@
 :root {
   font-family: var(--font-family, "Roboto", Helvetica, Arial, sans-serif);
+  font-size: var(--font-size);
 }
 
 * {
@@ -7,7 +8,7 @@
 }
 
 body {
-  font-size: 14px;
+  font-size: 1rem;
   margin: 0;
   padding: 0;
   height: 100vh;
