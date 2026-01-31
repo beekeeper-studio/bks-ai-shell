@@ -47,10 +47,12 @@
 
   <BaseInput
     v-model="unsavedCustomInstructions"
+    ref="customInstructions"
     type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues."
     rows="4"
     :showActions="unsavedCustomInstructions !== customInstructions"
+    :showUnsavedError="showUnsavedError"
     @discard="unsavedCustomInstructions = customInstructions"
     @save="configure('customInstructions', unsavedCustomInstructions)"
   >
@@ -59,12 +61,14 @@
   </BaseInput>
   <BaseInput
     v-model="unsavedConnectionInstructions"
+    ref="connectionInstructions"
     type="textarea"
     placeholder="E.g. This database contains tables for user management and analytics."
     rows="4"
     :showActions="
       unsavedConnectionInstructions !== currentConnectionInstructions
     "
+    :showUnsavedError="showUnsavedError"
     @discard="unsavedConnectionInstructions = currentConnectionInstructions"
     @save="configureCustomConnectionInstructions(unsavedConnectionInstructions)"
   >
@@ -74,6 +78,7 @@
   <BaseInput
     v-if="workspaceInfo.type === 'cloud'"
     v-model="unsavedWorkspaceConnectionInstructions"
+    ref="workspaceConnectionInstructions"
     type="textarea"
     rows="4"
     :disabled="!workspaceInfo.isOwner"
@@ -85,6 +90,7 @@
     :showActions="
       unsavedWorkspaceConnectionInstructions !== workspaceConnectionInstructions
     "
+    :showUnsavedError="showUnsavedError"
     @discard="
       unsavedWorkspaceConnectionInstructions = workspaceConnectionInstructions
     "
@@ -119,6 +125,7 @@ import BaseInput from "@/components/common/BaseInput.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 import { useChatStore } from "@/stores/chat";
+import { RootBinding } from "@/plugins/appEvent";
 
 export default {
   name: "GeneralConfiguration",
@@ -128,10 +135,6 @@ export default {
     ExternalLink,
   },
 
-  props: {
-    dirty: Boolean,
-  },
-
   emits: ["update:dirty"],
 
   data() {
@@ -139,6 +142,7 @@ export default {
       unsavedCustomInstructions: "",
       unsavedConnectionInstructions: "",
       unsavedWorkspaceConnectionInstructions: "",
+      showUnsavedError: false,
     };
   },
 
@@ -151,20 +155,40 @@ export default {
       "workspaceConnectionInstructions",
     ]),
     ...mapGetters(useConfigurationStore, ["currentConnectionInstructions"]),
-    isDirty() {
-      return (
-        this.unsavedCustomInstructions !== this.customInstructions ||
-        this.unsavedConnectionInstructions !==
-          this.currentConnectionInstructions ||
-        this.unsavedWorkspaceConnectionInstructions !==
-          this.workspaceConnectionInstructions
-      );
+    rootBindings(): RootBinding[] {
+      return [
+        {
+          event: "dialogClosePrevented",
+          handler: () => {
+            this.dirtyRef?.focus();
+            this.dirtyRef?.$el.scrollIntoView({
+              behavior: "instant",
+            });
+            this.showUnsavedError = true;
+          },
+        },
+      ];
+    },
+    dirtyRef() {
+      if (this.unsavedCustomInstructions !== this.customInstructions) {
+        return this.$refs.customInstructions as InstanceType<typeof BaseInput>;
+      }
+      if (this.unsavedConnectionInstructions !== this.currentConnectionInstructions) {
+        return this.$refs.connectionInstructions as InstanceType<typeof BaseInput>;
+      }
+      if (this.unsavedWorkspaceConnectionInstructions !== this.workspaceConnectionInstructions) {
+        return this.$refs.workspaceConnectionInstructions as InstanceType<typeof BaseInput>;
+      }
+      return null;
     },
   },
 
   watch: {
-    dirty() {
-      this.$emit("update:dirty", this.isDirty);
+    dirtyRef() {
+      if (!this.dirtyRef) {
+        this.showUnsavedError = false;
+      }
+      this.$emit("update:dirty", !!this.dirtyRef);
     },
   },
 

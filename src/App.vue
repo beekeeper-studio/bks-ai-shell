@@ -6,7 +6,7 @@
     </div>
     <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" @manage-models="handleManageModels"
       @open-configuration="handleOpenConfiguration" />
-    <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
+    <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" />
     <Dialog modal :visible="showOnboarding" :closable="false" :draggable="false">
       <OnboardingScreen @submit="closeOnboardingScreen" />
     </Dialog>
@@ -41,7 +41,7 @@ export default {
     return {
       page: "starting" as Page,
       showOnboarding: false,
-      showConfiguration: false,
+      showConfiguration: true,
       error: "" as unknown,
       showLoading: false,
       apiKeysChanged: false,
@@ -103,9 +103,6 @@ export default {
     handleOpenConfiguration() {
       this.configurationPage = "general";
       this.showConfiguration = true;
-    },
-    closeConfiguration() {
-      this.showConfiguration = false;
     },
     // In Beekeeper Studio v5.3.3 and lower, the requests from plugins are
     // sometimes not responded due to a race condition.

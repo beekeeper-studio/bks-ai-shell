@@ -62,6 +62,10 @@
       <button class="btn btn-small btn-primary" @click="$emit('save')">
         Save
       </button>
+      <span class="unsaved-error" v-if="showUnsavedError">
+        <span class="material-symbols-outlined">info</span>
+        Unsaved changes
+      </span>
     </div>
   </div>
 </template>
@@ -95,6 +99,7 @@ export default {
     },
     /** If `showActions`, we'll show save and discard buttons. */
     showActions: Boolean,
+    showUnsavedError: Boolean,
   },
 
   emits: ["update:modelValue", "input", "change", "click", "save", "discard"],
@@ -137,6 +142,18 @@ export default {
   align-items: center;
   padding-top: 0.5rem;
   gap: 0.5rem;
+  font-size: 0.831rem;
+}
+
+.unsaved-error {
+  color: var(--brand-danger);
+  display: flex;
+  align-items: center;
+
+  .material-symbols-outlined {
+    font-size: 1em;
+    margin-right: 0.5ch;
+  }
 }
 
 label :deep(.material-symbols-outlined) {

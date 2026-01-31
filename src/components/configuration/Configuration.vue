@@ -6,14 +6,14 @@
     class="configuration"
     :visible="visible"
     :show-header="false"
-    @update:visible="handleUpdateVisible"
+    @update:visible="updateVisible"
   >
     <nav>
       <ul>
         <li>
           <button
             class="btn btn-flat nav-btn close-btn"
-            @click="$emit('close')"
+            @click="updateVisible(false)"
           >
             <span class="material-symbols-outlined">close</span>
           </button>
@@ -34,7 +34,7 @@
       <div v-else-if="storeStatus === 'error'">Error: {{ storeError }}</div>
       <GeneralConfiguration
         v-else-if="page === 'general'"
-        v-model:dirty="isDirty"
+        @update:dirty="isDirty = $event"
       />
       <ModelsConfiguration v-else-if="page === 'models'" />
       <ProvidersConfiguration v-else-if="page === 'providers'" />
@@ -115,9 +115,9 @@ export default {
   },
 
   methods: {
-    handleUpdateVisible(visible: boolean) {
+    updateVisible(visible: boolean) {
       if (!visible && this.isDirty) {
-        // Naah.. hmmmmm
+        this.trigger("dialogClosePrevented");
         return;
       }
       this.$emit("update:visible", visible);
