@@ -1,6 +1,5 @@
 @use "models";
 @use "general";
-@use "about";
 
 #configuration-popover {
   position: absolute;
@@ -17,7 +16,7 @@
 .configuration {
   --config-bg-hover: color-mix(
     in srgb,
-    var(--theme-base) 3.5%,
+    var(--theme-base) 2%,
     var(--theme-bg)
   );
 
@@ -48,9 +47,13 @@
     width: 100%;
     box-shadow: none;
     text-align: left;
-    height: 1.75rem;
     justify-content: flex-start;
     background-color: transparent;
+    font-weight: normal;
+    font-size: 0.831rem;
+    color: rgb(from var(--theme-base) r g b / 0.77);
+    padding-left: 0.75rem;
+    border-radius: 6px;
 
     &:hover {
       background-color: var(--config-bg-hover);
@@ -92,13 +95,13 @@
 
     h2 {
       margin-bottom: 0;
-      font-size: 1.09375rem;
+      font-size: 1.1rem;
     }
 
     h3 {
       margin-top: 1rem;
       margin-bottom: 0.75rem;
-      font-size: 0.875rem;
+      font-size: 0.831rem;
     }
 
     h2,
@@ -108,8 +111,13 @@
 
     p.description {
       margin-bottom: 0.25rem;
-      font-size: 0.85rem;
-      color: var(--text-light);
+      font-size: 0.831rem;
+    }
+
+    hr {
+      border-color: var(--border-color);
+      margin-inline: 0.5rem;
+      border-bottom: none;
     }
 
     .form-group {

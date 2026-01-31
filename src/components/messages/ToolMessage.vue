@@ -21,11 +21,11 @@
       <div v-if="toolCall.state === 'approval-requested'" class="tool-permission">
         Do you want to proceed?
         <div class="tool-permission-buttons">
-          <button class="btn btn-flat" @click="$emit('accept')">
+          <button class="btn btn-small btn-flat" @click="$emit('accept')">
             Yes
             <span class="material-symbols-outlined accept-icon"> check </span>
           </button>
-          <button class="btn btn-flat" @click="$emit('reject')">
+          <button class="btn btn-small btn-flat" @click="$emit('reject')">
             No
             <span class="material-symbols-outlined reject-icon"> close </span>
           </button>

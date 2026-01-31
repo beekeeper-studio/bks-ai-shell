@@ -1,15 +1,16 @@
 <template>
   <h2>About</h2>
-  <ul>
-    <li>AI Shell</li>
-    <li>Version {{ version }}</li>
-    <li>
-      <ExternalLink href="https://github.com/beekeeper-studio/bks-ai-shell" class="github-link">
-        View on GitHub
-      </ExternalLink>
-    </li>
-    <li>Beekeeper Studio Team</li>
-  </ul>
+  <p class="description">
+    AI Shell<br />
+    Version {{ version }}<br />
+    <ExternalLink
+      href="https://github.com/beekeeper-studio/bks-ai-shell"
+      class="github-link"
+    >
+      View on GitHub </ExternalLink
+    ><br />
+    Beekeeper Studio Team
+  </p>
 </template>
 
 <script lang="ts">
@@ -30,9 +31,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-ul {
-  margin-top: 0.75rem;
-}
-</style>

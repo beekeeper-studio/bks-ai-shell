@@ -1,5 +1,6 @@
 <template>
   <h2>General</h2>
+
   <BaseInput
     type="switch"
     :model-value="allowExecutionOfReadOnlyQueries"
@@ -27,6 +28,9 @@
       the context limit.
     </template>
   </BaseInput>
+
+  <hr />
+
   <h3>Custom Instructions</h3>
   <p class="description">
     Use custom instructions to provide additional context to the AI. These
