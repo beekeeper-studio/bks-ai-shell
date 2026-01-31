@@ -23,7 +23,7 @@ input, select, textarea {
   display: flex;
   height: 26px;
   padding: 0 0.75rem;
-  font-size: 0.727rem; // FIXME should be 0.831rem
+  font-size: 0.831rem;
   font-weight: normal;
   line-height: 26px;
   color: var(--text);
@@ -57,7 +57,6 @@ input, select, textarea {
 
 textarea {
   overflow: auto;
-  line-height: 1.2rem;
 }
 
 select {
