@@ -11,11 +11,7 @@
  */
 import { defineStore } from "pinia";
 import _ from "lodash";
-import {
-  workspaceConnectionStorage,
-  appStorage,
-  log,
-} from "@beekeeperstudio/plugin";
+import { cloudStorage, appStorage, log } from "@beekeeperstudio/plugin";
 import { AvailableProviders, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
 import {
@@ -24,7 +20,7 @@ import {
   defaultConfiguration,
   encryptedConfigurableShape,
   isEncryptedConfig,
-  isWorkspaceConfig,
+  isCloudConfig,
   Model,
 } from "./configurationSchema";
 
@@ -98,8 +94,8 @@ export const useConfigurationStore = defineStore("configuration", {
         for (const key in defaultConfiguration) {
           let value: unknown = null;
 
-          if (isWorkspaceConfig(key)) {
-            value = await workspaceConnectionStorage.getItem(key);
+          if (isCloudConfig(key)) {
+            value = await cloudStorage.connection.getItem(key);
           } else {
             value = await appStorage.getItem<Configurable>(key, {
               encrypted: isEncryptedConfig(key),
@@ -128,8 +124,8 @@ export const useConfigurationStore = defineStore("configuration", {
     ) {
       this.$patch({ [config]: value });
 
-      if (isWorkspaceConfig(config)) {
-        await workspaceConnectionStorage.setItem(config, value);
+      if (isCloudConfig(config)) {
+        await cloudStorage.connection.setItem(config, value);
       } else {
         await appStorage.setItem(config, value, {
           encrypted: isEncryptedConfig(config),

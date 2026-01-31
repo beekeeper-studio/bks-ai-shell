@@ -70,8 +70,8 @@ const encryptedConfigurableSchema = z.object({
   providers_openaiCompat_apiKey: z.string().default(""),
 });
 
-const workspaceConfigurableSchema = z.object({
-  workspaceConnectionInstructions: z.string().default(""),
+const cloudConfigurableSchema = z.object({
+  cloudConnectionInstructions: z.string().default(""),
 });
 
 export const encryptedConfigurableShape = encryptedConfigurableSchema.shape;
@@ -86,14 +86,14 @@ export function isEncryptedConfig(
   return config in encryptedConfigurableSchema.shape;
 }
 
-export function isWorkspaceConfig(
+export function isCloudConfig(
   config: string,
-): config is keyof z.infer<typeof workspaceConfigurableSchema> {
-  return config in workspaceConfigurableSchema.shape;
+): config is keyof z.infer<typeof cloudConfigurableSchema> {
+  return config in cloudConfigurableSchema.shape;
 }
 
 export const defaultConfiguration = {
   ...configurableSchema.parse({}),
   ...encryptedConfigurableSchema.parse({}),
-  ...workspaceConfigurableSchema.parse({}),
+  ...cloudConfigurableSchema.parse({}),
 };

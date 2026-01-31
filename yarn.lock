@@ -370,10 +370,10 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@beekeeperstudio/plugin@^1.7.1-beta.0":
-  version "1.7.1-beta.0"
-  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.7.1-beta.0.tgz#409e3bb5ac3fa3bfcd9405d509cbef905084fa4d"
-  integrity sha512-mucEZV9DgmL1UN6Mr0apqcvxMwS8xzsDFfnfwEDpuPrQAGQRe2V84SGQpLliSzsLIqWjEojyV3dDiUcF8u3zWg==
+"@beekeeperstudio/plugin@^1.7.1-beta.2":
+  version "1.7.1-beta.2"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.7.1-beta.2.tgz#6f73ca4ccb1a0fef99f57df7fef7f39eb546f1ea"
+  integrity sha512-pEh8vWMB14ZQ/QIOBMjMZslDFNT1KHpM0/MeGcWSxMmblMV3foMc6LRoxHsbdH/TSlSUwk5Vx2iTx5L+IceUSQ==
 
 "@beekeeperstudio/ui-kit@0.3.1":
   version "0.3.1"

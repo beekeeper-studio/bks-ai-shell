@@ -41,7 +41,7 @@ export default {
     return {
       page: "starting" as Page,
       showOnboarding: false,
-      showConfiguration: true,
+      showConfiguration: false,
       error: "" as unknown,
       showLoading: false,
       apiKeysChanged: false,
