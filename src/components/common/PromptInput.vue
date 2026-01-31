@@ -93,6 +93,7 @@ export default defineComponent({
       inputIndex: inputHistory.length - 1,
       isAtBottom: true,
       pleaseSelectAModel: false,
+      resizeObserver: null as ResizeObserver | null,
     };
   },
 
@@ -294,6 +295,30 @@ export default defineComponent({
       const inputHistoryStr = localStorage.getItem(this.storageKey) || "[]";
       return JSON.parse(inputHistoryStr);
     },
+  },
+
+  mounted() {
+    this.$nextTick(() => {
+      const textarea = this.$refs.input.$el as HTMLTextAreaElement;
+      this.resizeObserver = new ResizeObserver(() => {
+        const maxHeight = document.body.offsetHeight * 0.3;
+        if (textarea.scrollHeight > maxHeight) {
+          textarea.style.maxHeight = `${maxHeight}px`;
+          textarea.style.overflowY = "auto";
+        } else {
+          textarea.style.maxHeight = "";
+          textarea.style.overflowY = "";
+        }
+      });
+      this.resizeObserver.observe(textarea);
+      this.resizeObserver.observe(document.body);
+    })
+  },
+
+  beforeDestroy() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   },
 });
 </script>
