@@ -368,5 +368,6 @@ export default {
   margin-top: 0.5rem;
   text-align: right;
   color: var(--text);
+  font-size: 0.9rem;
 }
 </style>
