@@ -325,6 +325,7 @@ export default defineComponent({
 
 <style scoped>
 .chat-input-container {
+  --p-textarea-hover-border-color: transparent;
   --p-textarea-focus-border-color: transparent;
 }
 

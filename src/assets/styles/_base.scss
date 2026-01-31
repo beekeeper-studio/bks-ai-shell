@@ -21,11 +21,9 @@ body {
 input, select, textarea {
   position: relative;
   display: flex;
-  height: 26px;
   padding: 0 0.75rem;
   font-size: 0.831rem;
   font-weight: normal;
-  line-height: 26px;
   color: var(--text);
   background: transparent;
   border-radius: 4px;
@@ -55,8 +53,15 @@ input, select, textarea {
   }
 }
 
+input, select {
+  height: 26px;
+  line-height: 26px;
+}
+
 textarea {
   overflow: auto;
+  line-height: 1.75;
+  padding-block: 0.25rem;
 }
 
 select {
