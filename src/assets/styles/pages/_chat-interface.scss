@@ -144,7 +144,6 @@
 }
 
 .message {
-  margin-inline: 0.6rem;
   border-radius: 16px;
   max-width: 80%;
   word-wrap: break-word;
@@ -157,7 +156,7 @@
 .message-content {
   display: flex;
   flex-direction: column;
-  padding: 0.55rem 0.9rem;
+  padding: 0.55rem 1.1rem;
   line-height: 1.4rem;
   white-space: pre-wrap;
 
@@ -175,7 +174,7 @@
     padding: 0.5rem;
     width: 100%;
     line-height: 1.07rem;
-    font-size: 0.865rem;
+    font-size: 0.875rem;
 
     code {
       &::selection,
@@ -319,6 +318,7 @@
   align-self: flex-end;
 
   .message-content {
+    margin-right: 0.2rem;
     border-radius: 1rem;
     background-color: var(--theme-bg-message-user);
     color: var(--text-dark);
@@ -342,11 +342,6 @@
   border-left: 2px solid var(--border-color);
   width: 100%;
   margin: 0.75em 0;
-
-  .accept-icon,
-  .reject-icon {
-    font-size: 1.2rem;
-  }
 }
 
 .message.error {
@@ -429,17 +424,7 @@
   margin-top: 0.5rem;
 
   button {
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-width: 0;
-
-    .accept-icon,
-    .reject-icon {
-      font-size: 1.2em;
-    }
 
     &:hover {
       .accept-icon {
@@ -471,29 +456,16 @@
   flex-direction: column;
   width: 100%;
 
-  .form-group {
-    flex: initial;
+  textarea {
     font-size: 0.9rem;
-    max-height: 30vh;
     line-height: 1.25rem;
     border-radius: 8px;
-
-    textarea {
-      background-color: color-mix(
-        in srgb,
-        var(--theme-base) 5%,
-        var(--query-editor-bg)
-      );
-      border-color: transparent;
-
-      &:focus-visible {
-        outline: none;
-      }
-    }
-
-    .input-wrapper {
-      overflow: auto;
-    }
+    background-color: color-mix(
+      in srgb,
+      var(--theme-base) 5%,
+      var(--query-editor-bg)
+    );
+    border-color: transparent;
   }
 
   .actions {
@@ -509,6 +481,7 @@
       border-radius: 0.3rem;
       background-color: transparent;
       color: var(--text-dark);
+      font-weight: normal;
 
       &:hover {
         background-color: rgb(from var(--theme-base) r g b / 5%);
@@ -586,13 +559,13 @@
 
   th {
     font-weight: 600;
-    font-size: 0.68rem;
-    line-height: 1.7rem;
+    font-size: 0.77rem;
+    line-height: 2.285rem;
   }
 
   td {
-    font-size: 0.75rem;
-    line-height: 1.875rem;
+    font-size: 0.85rem;
+    line-height: 2.143rem;
   }
 
   .remaining-rows td {

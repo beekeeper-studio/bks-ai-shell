@@ -1,6 +1,5 @@
 @use "models";
 @use "general";
-@use "about";
 
 #configuration-popover {
   position: absolute;
@@ -48,9 +47,11 @@
     width: 100%;
     box-shadow: none;
     text-align: left;
-    height: 1.75rem;
     justify-content: flex-start;
     background-color: transparent;
+    font-weight: normal;
+    font-size: 0.831rem;
+    color: rgb(from var(--theme-base) r g b / 0.77);
     padding-inline: 0.75rem;
     border-radius: 6px;
 
@@ -94,13 +95,13 @@
 
     h2 {
       margin-bottom: 0;
-      font-size: 1.09375rem;
+      font-size: 1.1rem;
     }
 
     h3 {
       margin-top: 1rem;
       margin-bottom: 0.75rem;
-      font-size: 0.875rem;
+      font-size: 0.831rem;
     }
 
     h2,
@@ -108,15 +109,15 @@
       color: var(--text-dark);
     }
 
-    hr {
-      margin-inline: 0.5rem;
-      border-color: var(--border-color);
-    }
-
     p.description {
       margin-bottom: 0.25rem;
-      font-size: 0.727rem; // FIXME should be 0.83rem
-      color: var(--text);
+      font-size: 0.831rem;
+    }
+
+    hr {
+      border-color: var(--border-color);
+      margin-inline: 0.5rem;
+      border-bottom: none;
     }
 
     .form-group {

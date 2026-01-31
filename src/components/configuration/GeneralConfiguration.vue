@@ -31,7 +31,7 @@
 
   <hr />
 
-  <h3>Instructions</h3>
+  <h3>Custom Instructions</h3>
   <p class="description">
     Use custom instructions to provide additional context to the AI. These
     instructions are added on top of the

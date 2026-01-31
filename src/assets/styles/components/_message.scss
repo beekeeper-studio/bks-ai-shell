@@ -74,16 +74,12 @@
     margin-top: 0.5rem;
 
     .btn {
-      min-width: 0;
-      padding: 0;
-      width: 1.75rem;
-      height: 1.75rem;
       border: none;
       border-radius: 9999px;
       box-shadow: none;
 
       .material-symbols-outlined {
-        font-size: 1rem;
+        font-size: 1.14286rem;
       }
     }
 
@@ -110,7 +106,7 @@
     }
 
     .message-actions {
-      padding-left: 0.4rem;
+      padding-inline: 1.1rem;
     }
 
     .tool {

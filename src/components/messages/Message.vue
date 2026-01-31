@@ -59,7 +59,7 @@
     </div>
     <div class="message-actions" v-if="status === 'ready'">
       <button
-        class="btn btn-flat-2 copy-btn"
+        class="btn btn-fab btn-flat-2 copy-btn"
         :class="{ copied }"
         @click="handleCopyClick"
       >
@@ -68,7 +68,7 @@
       </button>
       <template v-if="message.role === 'assistant' && metadata">
         <button
-          class="btn btn-flat-2"
+          class="btn btn-fab btn-flat-2"
           @click="$refs.metadataPopover!.toggle($event)"
           title="Metadata"
         >
@@ -212,12 +212,15 @@ ul.metadata-content {
   padding: 0;
   list-style: none;
   width: 18rem;
+  font-size: 0.9rem;
 
   li {
-    padding: 0.25rem 0.5rem;
+    min-height: 28px;
+    padding: 0 0.8rem;
+    display: flex;
+    align-items: center;
     display: flex;
     justify-content: space-between;
-    font-size: 0.7875rem;
 
     span:first-child {
       color: var(--text-light);
@@ -232,12 +235,10 @@ ul.metadata-content {
     }
 
     &.metadata-note {
-      padding-top: 0.5rem;
       border-top: 1px solid var(--border-color);
-      margin-top: 0.25rem;
-      font-size: 11px;
       color: var(--text-lighter);
-      line-height: 1.5;
+      padding-block: 0.25rem;
+      font-size: 0.831rem;
     }
   }
 }
@@ -252,7 +253,7 @@ ul.metadata-content {
   }
 
   summary {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     height: 2rem;
     display: flex;
     align-items: center;
@@ -279,6 +280,10 @@ ul.metadata-content {
     padding-block: 1rem;
     padding-inline: 0.5rem;
     color: var(--text);
+
+    &:deep(.markdown) {
+      font-size: 0.9rem;
+    }
   }
 }
 

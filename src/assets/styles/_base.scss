@@ -1,5 +1,6 @@
 :root {
   font-family: var(--font-family, "Roboto", Helvetica, Arial, sans-serif);
+  font-size: var(--font-size);
 }
 
 * {
@@ -7,7 +8,7 @@
 }
 
 body {
-  font-size: 14px;
+  font-size: 1rem;
   margin: 0;
   padding: 0;
   height: 100vh;
@@ -33,7 +34,7 @@ input, select, textarea {
   box-shadow: none;
   width: 100%;
   transition: border-color 0.15s ease-in-out;
-  font-family: inherit;
+  font-family: var(--font-family);
 
   &:focus, &:focus-visible {
     border-color: var(--input-highlight);
