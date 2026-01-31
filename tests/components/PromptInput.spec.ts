@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
+import PrimeVue from "primevue/config";
 import PromptInput from "../../src/components/common/PromptInput.vue";
 
 // Mock the stores before importing the component
@@ -28,7 +29,7 @@ function buildPromptInput() {
       },
     },
     global: {
-      plugins: [pinia],
+      plugins: [pinia, PrimeVue],
     },
   });
 
