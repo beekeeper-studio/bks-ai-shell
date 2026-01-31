@@ -44,25 +44,78 @@
       ></ExternalLink
     >.
   </p>
+
   <BaseInput
-    :model-value="customInstructions"
-    @change="configure('customInstructions', $event.target.value)"
+    v-model="unsavedCustomInstructions"
+    ref="customInstructions"
     type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues."
     rows="4"
+    :showActions="unsavedCustomInstructions !== customInstructions"
+    :showUnsavedError="showUnsavedError"
+    @discard="unsavedCustomInstructions = customInstructions"
+    @save="configure('customInstructions', unsavedCustomInstructions)"
   >
-    <template #label>All Connections</template>
-    <template #helper>Used in every conversation.</template>
+    <template #label>Global</template>
+    <template #helper>Used in every conversation</template>
   </BaseInput>
   <BaseInput
-    :model-value="currentConnectionInstructions"
-    @change="configureCustomConnectionInstructions($event.target.value)"
+    v-model="unsavedConnectionInstructions"
+    ref="connectionInstructions"
     type="textarea"
     placeholder="E.g. This database contains tables for user management and analytics."
     rows="4"
+    :showActions="
+      unsavedConnectionInstructions !== currentConnectionInstructions
+    "
+    :showUnsavedError="showUnsavedError"
+    @discard="unsavedConnectionInstructions = currentConnectionInstructions"
+    @save="configureCustomConnectionInstructions(unsavedConnectionInstructions)"
   >
-    <template #label>This Connection Only</template>
-    <template #helper>Used only for this connection.</template>
+    <template #label>This connection only</template>
+    <template #helper>Used only for this connection</template>
+  </BaseInput>
+  <BaseInput
+    v-if="workspaceInfo.type === 'cloud'"
+    v-model="unsavedWorkspaceConnectionInstructions"
+    ref="workspaceConnectionInstructions"
+    type="textarea"
+    rows="4"
+    :disabled="!workspaceInfo.isOwner"
+    :placeholder="
+      workspaceInfo.isOwner
+        ? 'E.g. This database contains tables for user management and analytics.'
+        : ''
+    "
+    :showActions="
+      unsavedWorkspaceConnectionInstructions !== workspaceConnectionInstructions
+    "
+    :showUnsavedError="showUnsavedError"
+    @discard="
+      unsavedWorkspaceConnectionInstructions = workspaceConnectionInstructions
+    "
+    @save="
+      configure(
+        'workspaceConnectionInstructions',
+        unsavedWorkspaceConnectionInstructions,
+      )
+    "
+    :data-empty="unsavedWorkspaceConnectionInstructions.length === 0"
+  >
+    <template #label>
+      Workspace connection
+      <span
+        v-if="!workspaceInfo.isOwner"
+        class="material-symbols-outlined"
+        title="Admin access required to edit this field"
+      >
+        lock
+      </span>
+    </template>
+    <template #helper
+      >Used only for this connection and managed by the workspace
+      owner</template
+    >
   </BaseInput>
 </template>
 
@@ -71,6 +124,8 @@ import { mapActions, mapGetters, mapState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import ExternalLink from "@/components/common/ExternalLink.vue";
+import { useChatStore } from "@/stores/chat";
+import { RootBinding } from "@/plugins/appEvent";
 
 export default {
   name: "GeneralConfiguration",
@@ -80,13 +135,61 @@ export default {
     ExternalLink,
   },
 
+  emits: ["update:dirty"],
+
+  data() {
+    return {
+      unsavedCustomInstructions: "",
+      unsavedConnectionInstructions: "",
+      unsavedWorkspaceConnectionInstructions: "",
+      showUnsavedError: false,
+    };
+  },
+
   computed: {
+    ...mapState(useChatStore, ["workspaceInfo"]),
     ...mapState(useConfigurationStore, [
-      "customInstructions",
       "allowExecutionOfReadOnlyQueries",
       "enableAutoCompact",
+      "customInstructions",
+      "workspaceConnectionInstructions",
     ]),
     ...mapGetters(useConfigurationStore, ["currentConnectionInstructions"]),
+    rootBindings(): RootBinding[] {
+      return [
+        {
+          event: "dialogClosePrevented",
+          handler: () => {
+            this.dirtyRef?.focus();
+            this.dirtyRef?.$el.scrollIntoView({
+              behavior: "instant",
+            });
+            this.showUnsavedError = true;
+          },
+        },
+      ];
+    },
+    dirtyRef() {
+      if (this.unsavedCustomInstructions !== this.customInstructions) {
+        return this.$refs.customInstructions as InstanceType<typeof BaseInput>;
+      }
+      if (this.unsavedConnectionInstructions !== this.currentConnectionInstructions) {
+        return this.$refs.connectionInstructions as InstanceType<typeof BaseInput>;
+      }
+      if (this.unsavedWorkspaceConnectionInstructions !== this.workspaceConnectionInstructions) {
+        return this.$refs.workspaceConnectionInstructions as InstanceType<typeof BaseInput>;
+      }
+      return null;
+    },
+  },
+
+  watch: {
+    dirtyRef() {
+      if (!this.dirtyRef) {
+        this.showUnsavedError = false;
+      }
+      this.$emit("update:dirty", !!this.dirtyRef);
+    },
   },
 
   methods: {
@@ -95,5 +198,25 @@ export default {
       "configureCustomConnectionInstructions",
     ]),
   },
+
+  mounted() {
+    this.unsavedCustomInstructions = this.customInstructions;
+    this.unsavedConnectionInstructions = this.currentConnectionInstructions;
+    this.unsavedWorkspaceConnectionInstructions =
+      this.workspaceConnectionInstructions;
+  },
 };
 </script>
+
+<style scoped>
+:deep(.input-wrapper):has([data-empty=true])::after {
+  content: "No instructions set";
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.727rem; /* FIXME should be 0.831rem */
+  font-style: italic;
+  color: var(--text-muted);
+}
+</style>

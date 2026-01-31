@@ -6,6 +6,7 @@ export type AppEvent = keyof AppEventHandlers;
 export interface AppEventHandlers {
   showResultTable: (queryResults: QueryResult[]) => void;
   showedResultTable: (queryResults: QueryResult[]) => void;
+  dialogClosePrevented: () => void;
 }
 
 export interface RootBinding {

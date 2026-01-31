@@ -7,113 +7,42 @@
  * FUTURE PLAN (probably):
  *
  * - Save configuration to .ini config files via Beekeeper Studio API
- *   instead of using setData?
+ *   instead of using appStorage?
  */
 import { defineStore } from "pinia";
 import _ from "lodash";
-import {
-  getData,
-  getEncryptedData,
-  setData,
-  setEncryptedData,
-} from "@beekeeperstudio/plugin";
-import {
-  AvailableProviders,
-  disabledModelsByDefault,
-  providerConfigs,
-} from "@/config";
+import { cloudStorage, appStorage, log } from "@beekeeperstudio/plugin";
+import { AvailableProviders, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
+import {
+  Configurable,
+  ConfigurationState,
+  defaultConfiguration,
+  encryptedConfigurableShape,
+  isEncryptedConfig,
+  isCloudConfig,
+  Model,
+} from "./configurationSchema";
 
-type Model = {
-  id: string;
-  displayName: string;
+type State = ConfigurationState & {
+  storeStatus: "idle" | "loading" | "error";
+  storeError: Error | null;
 };
-
-type Configurable = {
-  // ==== GENERAL ====
-  /** Append custom instructions to the default system instructions. */
-  customInstructions: string;
-  /** Append custom instructions to the default system instructions.
-   * It's applied based on the connection ID */
-  customConnectionInstructions: {
-    workspaceId: number;
-    connectionId: number;
-    instructions: string;
-  }[];
-  allowExecutionOfReadOnlyQueries: boolean;
-  enableAutoCompact: boolean;
-
-  // ==== MODELS ====
-  /** List of disabled models by id. */
-  disabledModels: { providerId: AvailableProviders; modelId: string }[];
-  /** Models that are removed are not shown in the UI and cannot be enabled. */
-  removedModels: { providerId: AvailableProviders; modelId: string }[];
-  providers_openaiCompat_baseUrl: string;
-  providers_openaiCompat_headers: string;
-  providers_ollama_baseUrl: string;
-  providers_ollama_headers: string;
-} & {
-  // User defined models
-  [K in AvailableProviders as `providers_${K}_models`]: Model[];
-};
-
-type EncryptedConfigurable = {
-  "providers.openai.apiKey": string;
-  "providers.anthropic.apiKey": string;
-  "providers.google.apiKey": string;
-  providers_openaiCompat_apiKey: string;
-};
-
-type ConfigurationState = Configurable & EncryptedConfigurable;
-
-export type ConfigurationKey = keyof ConfigurationState;
-
-const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
-  "providers.openai.apiKey",
-  "providers.anthropic.apiKey",
-  "providers.google.apiKey",
-  "providers_openaiCompat_apiKey",
-];
-
-const defaultConfiguration: ConfigurationState = {
-  // ==== GENERAL ====
-  customInstructions: "",
-  customConnectionInstructions: [],
-  allowExecutionOfReadOnlyQueries: false,
-  enableAutoCompact: true,
-
-  // ==== MODELS ====
-  "providers.openai.apiKey": "",
-  "providers.anthropic.apiKey": "",
-  "providers.google.apiKey": "",
-  providers_openaiCompat_baseUrl: "",
-  providers_openaiCompat_apiKey: "",
-  providers_openaiCompat_headers: "",
-  providers_ollama_baseUrl: "http://localhost:11434",
-  providers_ollama_headers: "",
-  providers_openai_models: [],
-  providers_anthropic_models: [],
-  providers_google_models: [],
-  providers_openaiCompat_models: [],
-  providers_ollama_models: [],
-  disabledModels: disabledModelsByDefault,
-  removedModels: [],
-};
-
-function isEncryptedConfig(
-  config: string,
-): config is keyof EncryptedConfigurable {
-  return encryptedConfigKeys.includes(config as keyof EncryptedConfigurable);
-}
 
 export const useConfigurationStore = defineStore("configuration", {
-  state: (): ConfigurationState => {
-    return defaultConfiguration;
+  state: (): State => {
+    return {
+      ...defaultConfiguration,
+      storeStatus: "idle",
+      storeError: null,
+    };
   },
 
   getters: {
     apiKeyExists(): boolean {
-      return encryptedConfigKeys.some((key) => this[key].trim() !== "");
+      return Object.keys(encryptedConfigurableShape).some(
+        (key) => this[key].trim() !== "",
+      );
     },
 
     getModelsByProvider: (state) => {
@@ -157,20 +86,37 @@ export const useConfigurationStore = defineStore("configuration", {
 
   actions: {
     async sync() {
-      const configuration: Partial<Configurable> = {};
-      for (const key in defaultConfiguration) {
-        const value = isEncryptedConfig(key)
-          ? await getEncryptedData<Configurable>(key)
-          : await getData<Configurable>(key);
+      this.storeStatus = "loading";
+      this.storeError = null;
 
-        if (value === null) {
-          continue;
+      try {
+        const configuration: Partial<Configurable> = {};
+        for (const key in defaultConfiguration) {
+          let value: unknown = null;
+
+          if (isCloudConfig(key)) {
+            value = await cloudStorage.connection.getItem(key);
+          } else {
+            value = await appStorage.getItem<Configurable>(key, {
+              encrypted: isEncryptedConfig(key),
+            });
+          }
+
+          if (value === null) {
+            continue;
+          }
+
+          configuration[key] = value;
         }
 
-        configuration[key] = value;
-      }
+        this.$patch(configuration);
 
-      this.$patch(configuration);
+        this.storeStatus = "idle";
+      } catch (e) {
+        log.error("Failed to sync configuration" + e.toString());
+        this.storeStatus = "error";
+        this.storeError = e as Error;
+      }
     },
     async configure<T extends keyof ConfigurationState>(
       config: T,
@@ -178,10 +124,12 @@ export const useConfigurationStore = defineStore("configuration", {
     ) {
       this.$patch({ [config]: value });
 
-      if (isEncryptedConfig(config)) {
-        await setEncryptedData(config, value);
+      if (isCloudConfig(config)) {
+        await cloudStorage.connection.setItem(config, value);
       } else {
-        await setData(config, value);
+        await appStorage.setItem(config, value, {
+          encrypted: isEncryptedConfig(config),
+        });
       }
     },
 
@@ -252,7 +200,9 @@ export const useConfigurationStore = defineStore("configuration", {
       const connection = useChatStore().connectionInfo;
       const connectionId = connection.id;
       const workspaceId = connection.workspaceId;
-      const connectionInstructions = _.cloneDeep(this.customConnectionInstructions);
+      const connectionInstructions = _.cloneDeep(
+        this.customConnectionInstructions,
+      );
       const idx = connectionInstructions.findIndex(
         (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
       );

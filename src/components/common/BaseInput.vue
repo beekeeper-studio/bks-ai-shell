@@ -55,6 +55,18 @@
     >
       <slot name="helper"></slot>
     </p>
+    <div class="actions" v-if="showActions">
+      <button class="btn btn-small btn-flat" @click="$emit('discard')">
+        Discard
+      </button>
+      <button class="btn btn-small btn-primary" @click="$emit('save')">
+        Save
+      </button>
+      <span class="unsaved-error" v-if="showUnsavedError">
+        <span class="material-symbols-outlined">info</span>
+        Unsaved changes
+      </span>
+    </div>
   </div>
 </template>
 
@@ -85,9 +97,12 @@ export default {
       type: String as PropType<"before-input" | "after-input">,
       default: "after-input",
     },
+    /** If `showActions`, we'll show save and discard buttons. */
+    showActions: Boolean,
+    showUnsavedError: Boolean,
   },
 
-  emits: ["update:modelValue", "input", "change", "click"],
+  emits: ["update:modelValue", "input", "change", "click", "save", "discard"],
 
   // FIXME: Strip this out for now cause vue-tsc isn't happy
   // See https://github.com/vuejs/language-tools/issues/5069
@@ -117,8 +132,28 @@ export default {
 [data-position="before-input"] {
   margin-bottom: 0.5rem;
 }
+
 .form-group:not(.switch) [data-position="after-input"] {
   margin-top: 0.35rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  padding-top: 0.5rem;
+  gap: 0.5rem;
+  font-size: 0.831rem;
+}
+
+.unsaved-error {
+  color: var(--brand-danger);
+  display: flex;
+  align-items: center;
+
+  .material-symbols-outlined {
+    font-size: 1em;
+    margin-right: 0.5ch;
+  }
 }
 
 label :deep(.material-symbols-outlined) {

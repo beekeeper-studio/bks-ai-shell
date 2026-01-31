@@ -16,7 +16,9 @@ import {
   getAppVersion,
   getConnectionInfo,
   getTables,
+  getWorkspaceInfo,
   log,
+  WorkspaceInfo,
 } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import gt from "semver/functions/gt";
@@ -38,6 +40,7 @@ type ChatState = {
   defaultInstructions: string;
   entities: Entity[];
   connectionInfo: ConnectionInfo;
+  workspaceInfo: WorkspaceInfo;
   appVersion: Awaited<ReturnType<typeof getAppVersion>>;
 };
 
@@ -58,6 +61,12 @@ export const useChatStore = defineStore("chat", {
       readOnlyMode: true,
     },
     appVersion: "900.0.0",
+    workspaceInfo: {
+      id: -1,
+      name: "",
+      type: "local",
+      isOwner: false,
+    },
   }),
   getters: {
     models() {
@@ -137,13 +146,19 @@ export const useChatStore = defineStore("chat", {
     },
     systemPrompt(state) {
       const config = useConfigurationStore();
-      return (
+
+      let prompt =
         state.defaultInstructions +
         "\n" +
         config.customInstructions +
         "\n" +
-        config.currentConnectionInstructions
-      ).trim();
+        config.currentConnectionInstructions;
+
+      if (this.workspaceInfo.type === "cloud") {
+        prompt += "\n" + config.workspaceConnectionInstructions;
+      }
+
+      return prompt.trim();
     },
     // FIXME move this to UI Kit?
     formatterDialect(state) {
@@ -274,6 +289,11 @@ export const useChatStore = defineStore("chat", {
       getConnectionInfo()
         .then((info) => {
           this.connectionInfo = info;
+        })
+        .catch(log.error);
+      getWorkspaceInfo()
+        .then((info) => {
+          this.workspaceInfo = info;
         })
         .catch(log.error);
     },
