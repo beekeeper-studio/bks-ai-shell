@@ -10,10 +10,7 @@
     >
       <slot name="helper"></slot>
     </p>
-    <div
-      class="input-wrapper"
-      :data-value="type === 'textarea' ? modelValue : ''"
-    >
+    <div class="input-wrapper">
       <textarea
         v-if="type === 'textarea'"
         v-bind="$attrs"
@@ -122,5 +119,14 @@ export default {
 }
 .form-group:not(.switch) [data-position="after-input"] {
   margin-top: 0.35rem;
+}
+
+label :deep(.material-symbols-outlined) {
+  padding-left: 0.25em;
+  font-size: 1em;
+}
+
+.input-wrapper {
+  position: relative;
 }
 </style>

@@ -49,3 +49,7 @@
 .alert-success {
   color: hsl(from var(--brand-success) h s calc(l + 5));
 }
+
+::placeholder {
+  color: var(--text-hint);
+}
