@@ -1,34 +1,7 @@
 {
-  "compilerOptions": {
-    "useDefineForClassFields": true,
-    "module": "esnext",
-    "target": "esnext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "preserve",
-    "sourceMap": true,
-
-    /* Type Checking */
-    "strict": true,
-    "noImplicitAny": false,
-    "strictNullChecks": true,
-
-    /* Additional Features */
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/vue-shims.d.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

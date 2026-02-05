@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { resolve } from "path";
 import bks from "@beekeeperstudio/vite-plugin";
-import vueDevTools from 'vite-plugin-vue-devtools'
+import path from "path";
+import vueDevTools from "vite-plugin-vue-devtools";
 
+// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue({
@@ -20,7 +21,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
