@@ -1,7 +1,7 @@
 {
   "id": "bks-ai-shell",
   "name": "AI Shell",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "minAppVersion": "5.4.0",
   "description": "Ask AI to analyze your database and generate SQL queries.",
   "author": {
@@ -25,6 +25,7 @@
       {
         "command": "new-tab-dropdown-item",
         "name": "Add AI Shell",
+        "description": "Open a new AI Shell tab.",
         "view": "bks-ai-shell",
         "placement": "newTabDropdown"
       }
