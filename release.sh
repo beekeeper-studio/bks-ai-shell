@@ -33,10 +33,40 @@ if [[ "$LOCAL" != "$REMOTE" ]]; then
   exit 1
 fi
 
-# Get current version from package.json
-CURRENT_VERSION=$(jq -r '.version' package.json)
+# Function to compare semver (returns 0 if $1 > $2, 1 if equal, 2 if $1 < $2)
+semver_compare() {
+  if [[ "$1" == "$2" ]]; then
+    return 1
+  fi
+  local IFS=.
+  local i ver1=($1) ver2=($2)
+  for ((i=0; i<3; i++)); do
+    if ((ver1[i] > ver2[i])); then
+      return 0
+    elif ((ver1[i] < ver2[i])); then
+      return 2
+    fi
+  done
+  return 1
+}
 
-echo "Current version: $CURRENT_VERSION"
+# Get current versions
+PKG_VERSION=$(jq -r '.version' package.json)
+MANIFEST_VERSION=$(jq -r '.version' manifest.json)
+
+# Check versions and pick the greater one if mismatched
+if [[ "$PKG_VERSION" != "$MANIFEST_VERSION" ]]; then
+  if semver_compare "$PKG_VERSION" "$MANIFEST_VERSION"; then
+    CURRENT_VERSION="$PKG_VERSION"
+  else
+    CURRENT_VERSION="$MANIFEST_VERSION"
+  fi
+  echo "Version mismatch: package.json ($PKG_VERSION) != manifest.json ($MANIFEST_VERSION)"
+  echo "Using greater version: $CURRENT_VERSION"
+else
+  CURRENT_VERSION="$PKG_VERSION"
+  echo "Current version: $CURRENT_VERSION"
+fi
 
 # Parse version components
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
@@ -45,19 +75,22 @@ IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 NEXT_PATCH="$MAJOR.$MINOR.$((PATCH + 1))"
 
 # Prompt for new version
-echo "Enter new version (or press Enter for $NEXT_PATCH):"
-read -r INPUT
+while true; do
+  echo "Enter new version (or press Enter for $NEXT_PATCH):"
+  read -r INPUT
 
-# Determine new version
-if [[ -z "$INPUT" ]]; then
-  NEW_VERSION="$NEXT_PATCH"
-elif [[ "$INPUT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  NEW_VERSION="$INPUT"
-else
-  echo "Invalid version: $INPUT"
-  echo "Please enter a semver like X.Y.Z"
-  exit 1
-fi
+  if [[ -z "$INPUT" ]]; then
+    NEW_VERSION="$NEXT_PATCH"
+    break
+  elif [[ ! "$INPUT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "Invalid version: $INPUT. Please enter a semver like X.Y.Z"
+  elif ! semver_compare "$INPUT" "$CURRENT_VERSION"; then
+    echo "Version $INPUT must be greater than $CURRENT_VERSION"
+  else
+    NEW_VERSION="$INPUT"
+    break
+  fi
+done
 
 echo "New version: $NEW_VERSION"
 
