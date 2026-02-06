@@ -1,0 +1,47 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*' # Run on any tag that starts with v (e.g., v1.0.0)
+
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Get tag version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Update package version
+        run: |
+          yarn version --new-version $VERSION --no-git-tag-version
+
+      - name: Build package
+        run: yarn build
+
+      - name: Publish package
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
