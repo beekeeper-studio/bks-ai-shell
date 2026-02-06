@@ -1,12 +1,12 @@
 import { Chat } from "@ai-sdk/vue";
-import { computed, ComputedRef, ref } from "vue";
-import { ChatStatus, isToolUIPart } from "ai";
+import { computed, type ComputedRef, ref } from "vue";
+import { type ChatStatus, isToolUIPart } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
 import { safeJSONStringify } from "@/utils";
-import { log, runQuery } from "@beekeeperstudio/plugin";
-import { UIMessage } from "@/types";
+import { runQuery } from "@beekeeperstudio/plugin";
+import type { UIMessage } from "@/types";
 import { lastAssistantMessageIsCompleteWithApprovedResponses } from "@/utils/last-assistant-message-is-complete-with-approved-responses";
 import { ChatTransport } from "@/providers/ChatTransport";
 import { useChatStore } from "@/stores/chat";
@@ -42,7 +42,7 @@ class AIShellChat {
         this.saveMessages();
         this.fillTitle();
       },
-      onError: (e) => {
+      onError: () => {
         if (this.chat.lastMessage?.metadata?.compactStatus === "processing") {
           this.errorDuringCompaction.value = true;
         }
@@ -160,7 +160,9 @@ class AIShellChat {
   }
 
   private async finishCompaction() {
-    this.chat.messages = [this.chat.messages[this.chat.messages.length - 1]];
+    const lastMessage = this.chat.messages[this.chat.messages.length - 1];
+    if (!lastMessage) return;
+    this.chat.messages = [lastMessage];
 
     if (this.pendingCompactMessages.value.length === 0) {
       return;
@@ -334,11 +336,12 @@ class AIShellChat {
         output: safeJSONStringify(await runQuery(query)),
       };
     } catch (e) {
+      const error = e as Error | undefined;
       return {
         state: "output-error" as const,
         toolCallId,
         tool: "tool-run_query" as const,
-        errorText: e?.message || e.toString() || "Unknown error",
+        errorText: error?.message || String(e) || "Unknown error",
       };
     }
   }
@@ -378,7 +381,7 @@ class AIShellChat {
       }),
       prompt,
     });
-    await useTabState().setTabTitle(res.object.title);
+    await useTabState().setTabTitle((res.object as { title: string }).title);
   }
 }
 

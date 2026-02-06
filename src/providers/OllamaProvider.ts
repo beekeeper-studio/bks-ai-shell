@@ -1,4 +1,4 @@
-import { AvailableProviders } from "@/config";
+import type { AvailableProviders } from "@/config";
 import { OpenAICompatibleProvider } from "./OpenAICompatibleProvider";
 
 export class OllamaProvider extends OpenAICompatibleProvider {
@@ -6,16 +6,14 @@ export class OllamaProvider extends OpenAICompatibleProvider {
     options: {
       baseURL: string;
       headers: Record<string, string>;
-      apiKey: string;
     },
   ) {
-    super(options);
-    this.options = {
+    super({
       ...options,
-      apiKey: options.apiKey || "fake-key",
+      apiKey: "fake-key",
       baseURL: new URL(options.baseURL).toString() + "v1/",
       name: "ollama",
-    };
+    });
   }
 
   get providerId(): AvailableProviders {

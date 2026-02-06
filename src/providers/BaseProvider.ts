@@ -2,18 +2,18 @@ import { log } from "@beekeeperstudio/plugin";
 import {
   convertToModelMessages,
   generateObject,
-  LanguageModel,
+  type LanguageModel,
   stepCountIs,
   streamText,
-  ToolSet,
+  type ToolSet,
 } from "ai";
-import {
+import type {
   AvailableModels,
   AvailableProviders,
-  defaultTemperature,
   ModelInfo,
 } from "@/config";
-import { UIMessage } from "@/types";
+import { defaultTemperature } from "@/config";
+import type { UIMessage } from "@/types";
 import { z } from "zod/v3";
 import {
   APICallError,
@@ -23,7 +23,7 @@ import {
   NoSuchToolError,
   // ToolExecutionError,
 } from "ai";
-import { ProviderOptions } from "@ai-sdk/provider-utils";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export type Messages = UIMessage[];
 
@@ -61,7 +61,7 @@ export abstract class BaseProvider {
     return result.toUIMessageStreamResponse({
       originalMessages: options.messages,
       onError: (error) => {
-        log.error(error);
+        log.error(error as Error);
         return this.getErrorMessage(error);
       },
       messageMetadata: ({ part }) => {
@@ -90,7 +90,7 @@ export abstract class BaseProvider {
     prompt: string;
     temperature?: number;
   }) {
-    return await generateObject<OBJECT>({
+    return await generateObject({
       model: this.getModel(options.modelId),
       schema: options.schema,
       prompt: options.prompt,
@@ -100,15 +100,15 @@ export abstract class BaseProvider {
 
   abstract listModels(): Promise<ModelInfo[]>;
 
-  getErrorMessage(error: unknown) {
+  getErrorMessage(error: any) {
     if (NoSuchToolError.isInstance(error)) {
       return "The model tried to call a unknown tool.";
     // } else if (InvalidToolArgumentsError.isInstance(error)) {
     //   return "The model called a tool with invalid arguments.";
     } else if (APICallError.isInstance(error)) {
       if (
-        error.data?.error?.code === "invalid_api_key" ||
-        error.data?.error?.message === "invalid x-api-key"
+        (error.data as any)?.error?.code === "invalid_api_key" ||
+        (error.data as any)?.error?.message === "invalid x-api-key"
       ) {
         return `The API key is invalid.`;
       }
@@ -118,7 +118,7 @@ export abstract class BaseProvider {
     } else if (NoSuchModelError.isInstance(error)) {
       return `Model ${error.modelId} does not exist.`;
     }
-    return  `An error occurred. (${error.message})`;
+    return  `An error occurred. (${error?.message ?? "Unknown error"})`;
   }
 
   private async convertToModelMessages(messages: UIMessage[]) {

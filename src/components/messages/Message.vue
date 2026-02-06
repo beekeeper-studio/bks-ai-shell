@@ -7,7 +7,7 @@
       <div class="compact-result" v-if="isCompactResult">
         <details
           :open="showCompactResult"
-          @toggle="showCompactResult = $event.target.open"
+          @toggle="showCompactResult = ($event.target as HTMLDetailsElement)?.open ?? false"
         >
           <summary>
             <span class="material-symbols-outlined">keyboard_arrow_right</span>
@@ -39,7 +39,7 @@
           <markdown v-else :content="part.text" />
         </template>
         <tool-message
-          v-else-if="isToolUIPart(part)"
+          v-else-if="isStaticToolUIPart(part)"
           :message="message"
           :toolCall="part"
           :disableToolEdit="disableToolEdit"
@@ -69,7 +69,7 @@
       <template v-if="message.role === 'assistant' && metadata">
         <button
           class="btn btn-fab btn-flat-2"
-          @click="$refs.metadataPopover!.toggle($event)"
+          @click="($refs.metadataPopover as PopoverInstance).toggle($event)"
           title="Metadata"
         >
           <span class="material-symbols-outlined">info</span>
@@ -99,15 +99,17 @@
 </template>
 
 <script lang="ts">
-import { PropType } from "vue";
-import { isToolUIPart } from "ai";
+import type { PropType } from "vue";
+import { isStaticToolUIPart } from "ai";
 import Markdown from "@/components/messages/Markdown.vue";
 import ToolMessage from "@/components/messages/ToolMessage.vue";
 import { clipboard } from "@beekeeperstudio/plugin";
 import { isEmptyUIMessage } from "@/utils";
-import { UIMessage } from "@/types";
+import type { UIMessage } from "@/types";
 import Popover from "primevue/popover";
 import { providerConfigs } from "@/config";
+
+type PopoverInstance = InstanceType<typeof Popover>;
 
 export default {
   name: "Message",
@@ -194,7 +196,7 @@ export default {
   },
 
   methods: {
-    isToolUIPart,
+    isStaticToolUIPart,
     async handleCopyClick() {
       await clipboard.writeText(this.text);
       this.copied = true;

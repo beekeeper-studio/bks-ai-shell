@@ -41,7 +41,7 @@
 import ApiKeyForm from "@/components/ApiKeyForm.vue";
 import ApiInfo from "@/components/configuration/ApiInfo.vue";
 import ExternalLink from "@/components/common/ExternalLink.vue";
-import { AvailableProviders } from "@/config";
+import type { AvailableProviders } from "@/config";
 
 export default {
   emits: ["submit"],

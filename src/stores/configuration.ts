@@ -17,11 +17,8 @@ import {
   setData,
   setEncryptedData,
 } from "@beekeeperstudio/plugin";
-import {
-  AvailableProviders,
-  disabledModelsByDefault,
-  providerConfigs,
-} from "@/config";
+import type { AvailableProviders } from "@/config";
+import { disabledModelsByDefault, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
 
 type Model = {
@@ -96,6 +93,7 @@ const defaultConfiguration: ConfigurationState = {
   providers_google_models: [],
   providers_openaiCompat_models: [],
   providers_ollama_models: [],
+  providers_mock_models: [],
   disabledModels: disabledModelsByDefault,
   removedModels: [],
 };
@@ -157,11 +155,11 @@ export const useConfigurationStore = defineStore("configuration", {
 
   actions: {
     async sync() {
-      const configuration: Partial<Configurable> = {};
+      const configuration: Record<string, unknown> = {};
       for (const key in defaultConfiguration) {
         const value = isEncryptedConfig(key)
-          ? await getEncryptedData<Configurable>(key)
-          : await getData<Configurable>(key);
+          ? await getEncryptedData(key)
+          : await getData(key);
 
         if (value === null) {
           continue;

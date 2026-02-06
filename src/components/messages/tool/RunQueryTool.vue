@@ -73,14 +73,14 @@
 </template>
 
 <script lang="ts">
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import hljs from "highlight.js";
 import { mapGetters } from "pinia";
 import { useChatStore } from "@/stores/chat";
 import RunQueryResult from "@/components/messages/tool/RunQueryResult.vue";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import { clipboard, getColumns, openTab } from "@beekeeperstudio/plugin";
-import { ToolUIPart } from "@/types";
+import type { ToolUIPart } from "@/types";
 
 type RunQueryPart = Extract<ToolUIPart, { type: "tool-run_query" }>;
 
@@ -131,7 +131,7 @@ export default {
       }
 
       try {
-        return JSON.parse(this.output);
+        return JSON.parse(this.output ?? "");
       } catch (e) {
         return null;
       }
@@ -180,7 +180,7 @@ export default {
         1000,
       );
     },
-    handleQueryEditorInitialized(event) {
+    handleQueryEditorInitialized(event: CustomEvent<{ editor: { view: any; focus: () => void } }>) {
       this.$nextTick(() => {
         event.detail.editor.view.dispatch({
           selection: {
@@ -193,11 +193,11 @@ export default {
     },
     async columnsGetter(entityName: string) {
       const info = entityName.split(".");
-      let table = info[0];
+      let table = info[0] ?? "";
       let schema: string | undefined = undefined;
       if (info.length === 2) {
         schema = info[0];
-        table = info[1];
+        table = info[1] ?? "";
       }
       return getColumns(table, schema)
         .then((columns) => columns.map((c) => c.name));

@@ -1,5 +1,5 @@
-import { expandTableResult, QueryResult } from "@beekeeperstudio/plugin";
-import { Plugin, App } from "vue";
+import { expandTableResult, type QueryResult } from "@beekeeperstudio/plugin";
+import type { Plugin, App } from "vue";
 
 export type AppEvent = keyof AppEventHandlers;
 
@@ -30,18 +30,19 @@ export function createAppEvent(): Plugin {
     ...args
   ) => {
     if (events[event]) {
+      // @ts-expect-error ts please stop the screaming idk what's wrong
       events[event].forEach((handler) => handler(...args));
     }
   };
 
-  function on(event: string, handler: RootBinding["handler"]) {
+  function on(event: AppEvent, handler: RootBinding["handler"]) {
     if (!events[event]) {
       events[event] = [];
     }
     events[event].push(handler);
   }
 
-  function off(event: string, handler: RootBinding["handler"]) {
+  function off(event: AppEvent, handler: RootBinding["handler"]) {
     if (events[event]) {
       const idx = events[event].indexOf(handler);
       if (idx > -1) {
@@ -64,7 +65,7 @@ export function createAppEvent(): Plugin {
             console.error("rootBindings must be an array");
           }
 
-          this.rootBindings.forEach(({ event, handler }) => {
+          (this.rootBindings as RootBinding[]).forEach(({ event, handler }: RootBinding) => {
             on(event, handler);
           });
         },
@@ -77,7 +78,7 @@ export function createAppEvent(): Plugin {
             console.error("rootBindings must be an array");
           }
 
-          this.rootBindings.forEach(({ event, handler }) => {
+          (this.rootBindings as RootBinding[]).forEach(({ event, handler }: RootBinding) => {
             off(event, handler);
           });
         },

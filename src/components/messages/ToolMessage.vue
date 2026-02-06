@@ -47,11 +47,11 @@
 </template>
 
 <script lang="ts">
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import { safeJSONStringify } from "@/utils";
 import { isErrorContent, parseErrorContent } from "@/utils";
 import _ from "lodash";
-import { ToolUIPart, UIMessage } from "@/types";
+import type { ToolUIPart, UIMessage } from "@/types";
 import RunQueryTool from "@/components/messages/tool/RunQueryTool.vue";
 
 export default {

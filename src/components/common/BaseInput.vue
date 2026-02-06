@@ -17,7 +17,7 @@
         :id="id"
         :disabled="disabled"
         :placeholder="placeholder"
-        :value="modelValue"
+        :value="modelValue as string | undefined"
         @input="emitInput"
         @change="emitChange"
         ref="focusable"
@@ -29,7 +29,7 @@
         :id="id"
         :disabled="disabled"
         role="switch"
-        :aria-checked="modelValue"
+        :aria-checked="!!modelValue"
         @click="handleClick"
         ref="focusable"
       >
@@ -61,7 +61,7 @@
 <script lang="ts">
 /** A generic input/textarea component. Autoresize is enabled by default
 for textarea. */
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import _ from "lodash";
 
 export default {

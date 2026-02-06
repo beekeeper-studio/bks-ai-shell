@@ -1,5 +1,7 @@
-import { ComponentCustomProperties } from 'vue'
-import { AppEvent, AppEventHandlers } from './plugins/appEvent'
+import type { ComponentCustomProperties } from 'vue'
+import type { AppEvent, AppEventHandlers } from './plugins/appEvent'
+import type { openExternal } from '@beekeeperstudio/plugin';
+import type pluralize from "pluralize";
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
@@ -7,6 +9,8 @@ declare module "@vue/runtime-core" {
       event: T,
       ...args: Parameters<AppEventHandlers[T]>
     ) => void;
+    $pluralize: typeof pluralize;
+    $openExternal: typeof openExternal;
   }
 }
 

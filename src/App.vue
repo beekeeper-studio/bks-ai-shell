@@ -21,7 +21,7 @@ import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
 import Configuration, {
-  PageId as ConfigurationPageId,
+  type PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
 import { getData, log } from "@beekeeperstudio/plugin";
@@ -70,7 +70,7 @@ export default {
     } catch (e) {
       this.showConfiguration = true;
       this.error = e;
-      log.error(e);
+      log.error(e as Error);
     } finally {
       clearTimeout(loadingTimer);
     }

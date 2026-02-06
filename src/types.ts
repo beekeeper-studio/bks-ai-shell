@@ -1,10 +1,10 @@
-import {
+import type {
   UIMessage as AIUIMessage,
   InferUITools,
   ToolUIPart as AIToolUIPart,
 } from "ai";
 import { tools } from "./tools";
-import { AvailableModels, AvailableProviders } from "./config";
+import type { AvailableProviders } from "./config";
 import z from "zod";
 
 export type UIDataTypes = {

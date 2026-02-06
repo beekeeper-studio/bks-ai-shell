@@ -50,24 +50,24 @@
 </template>
 
 <script lang="ts">
-import { PropType } from "vue";
-import { RunQueryResponse } from "@beekeeperstudio/plugin";
+import type { PropType } from "vue";
+import type { QueryResult } from "@beekeeperstudio/plugin";
 
 const TABLE_MAX_ROWS = 5;
 
 export default {
   props: {
     data: {
-      type: Object as PropType<RunQueryResponse['result']>,
+      type: Object as PropType<{ results: QueryResult[] }>,
       required: true,
     },
   },
   computed: {
     columns() {
-      return this.data.results?.[0].fields || [];
+      return this.data.results[0]?.fields || [];
     },
     rows() {
-      return this.data.results?.[0].rows || [];
+      return this.data.results[0]?.rows || [];
     },
     limitedRows() {
       return this.rows.slice(0, TABLE_MAX_ROWS);

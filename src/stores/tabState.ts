@@ -14,10 +14,10 @@
 import { getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
 import type { UIMessage } from "@/types";
 import { defineStore } from "pinia";
-import { StoredMessage } from "@langchain/core/messages";
+import type { StoredMessage } from "@langchain/core/messages";
 import { mapLangChainStoredMessagesToAISdkMessages } from "@/utils/langchainToAISdk";
 import _ from "lodash";
-import { mapV4MessagesToV5Messages, MessageV4 } from "@/utils/aiSdkV5Migration";
+import { mapV4MessagesToV5Messages, type MessageV4 } from "@/utils/aiSdkV5Migration";
 
 type Old_TabState = {
   messages: StoredMessage[];
@@ -53,9 +53,9 @@ export const useTabState = defineStore("tabState", {
       if (state) {
         if (isV1TabState(state)) {
           const v4Messages = mapLangChainStoredMessagesToAISdkMessages(state.messages);
-          this.messages = mapV4MessagesToV5Messages(v4Messages);
+          this.messages = mapV4MessagesToV5Messages(v4Messages) as UIMessage[];
         } else if (state.version === "2"){
-          this.messages = mapV4MessagesToV5Messages(state.messages as MessageV4[]);
+          this.messages = mapV4MessagesToV5Messages(state.messages as MessageV4[]) as UIMessage[];
         } else {
           this.messages = state.messages;
         }

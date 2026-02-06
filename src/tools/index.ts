@@ -19,7 +19,7 @@ export const get_tables = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e?.message || e.toString() || "Unknown error",
+        message: (e as Error)?.message || String(e) || "Unknown error",
       });
     }
   },
@@ -44,7 +44,7 @@ export const get_columns = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e?.message || e.toString() || "Unknown error",
+        message: (e as Error)?.message || String(e) || "Unknown error",
       });
     }
   },
@@ -70,7 +70,7 @@ export const run_query = tool({
     } catch (e) {
       return safeJSONStringify({
         type: "error",
-        message: e?.message || e.toString() || "Unknown error",
+        message: (e as Error)?.message || String(e) || "Unknown error",
       });
     }
   },

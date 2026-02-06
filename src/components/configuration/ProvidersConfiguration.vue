@@ -84,7 +84,7 @@ import BaseInput from "@/components/common/BaseInput.vue";
 import ToggleFormArea from "../common/ToggleFormArea.vue";
 import { useConfigurationStore } from "@/stores/configuration";
 import { mapState, mapActions } from "pinia";
-import { AvailableProvidersWithDynamicModels } from "@/config";
+import type { AvailableProvidersWithDynamicModels } from "@/config";
 import { useChatStore } from "@/stores/chat";
 import ExternalLink from "../common/ExternalLink.vue";
 

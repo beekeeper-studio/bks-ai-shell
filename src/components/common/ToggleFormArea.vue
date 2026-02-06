@@ -6,7 +6,12 @@
       </button>
       <slot name="header" />
     </div>
-    <transition @before-enter="beforeEnter" @enter="enter" @before-leave="beforeLeave" @leave="leave">
+    <transition
+      @before-enter="beforeEnter"
+      @enter="(el, done) => enter(el as HTMLElement, done)"
+      @before-leave="(el) => beforeLeave(el as HTMLElement)"
+      @leave="(el, done) => leave(el as HTMLElement, done)"
+    >
       <div class="body" v-if="toggleContent">
         <slot />
       </div>
@@ -39,11 +44,12 @@ export default {
     },
   },
   methods: {
-    beforeEnter(el) {
-      el.style.height = "0";
-      el.style.opacity = "0"; // Set initial opacity
+    beforeEnter(el: Element) {
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.height = "0";
+      htmlEl.style.opacity = "0"; // Set initial opacity
     },
-    enter(el, done) {
+    enter(el: HTMLElement, done: () => void) {
       // get height
       const height = el.scrollHeight + "px";
 
@@ -55,16 +61,16 @@ export default {
       el.style.opacity = "1"; // Fade in
 
       // cleanup after animation
-      el.addEventListener("transitionend", (...args) => {
+      el.addEventListener("transitionend", () => {
         el.style.height = "auto";
-        done(...args);
+        done();
       });
     },
-    beforeLeave(el) {
+    beforeLeave(el: HTMLElement) {
       el.style.height = el.scrollHeight + "px";
       el.style.opacity = "1"; // Set initial opacity
     },
-    leave(el, done) {
+    leave(el: HTMLElement, done: () => void) {
       el.style.height = "0";
       el.style.opacity = "0"; // Fade out
 

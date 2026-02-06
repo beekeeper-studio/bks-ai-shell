@@ -96,7 +96,7 @@
 <script lang="ts">
 import { mapActions } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
-import { AvailableProviders, providerConfigs } from "@/config";
+import { type AvailableProviders, providerConfigs } from "@/config";
 import BaseInput from "./common/BaseInput.vue";
 import ExternalLink from "./common/ExternalLink.vue";
 
@@ -135,8 +135,8 @@ export default {
       return providerConfigs;
     },
     dropdownOptions() {
-      return Object.keys(providerConfigs).map((provider) => ({
-        label: this.providerConfigs[provider].displayName,
+      return (Object.keys(providerConfigs) as AvailableProviders[]).map((provider) => ({
+        label: providerConfigs[provider].displayName,
         value: provider,
       }));
     },

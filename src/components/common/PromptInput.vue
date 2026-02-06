@@ -30,7 +30,7 @@
         </Menu>
         <button
           class="btn btn-small dropdown-trigger"
-          @click="$refs.menu.toggle($event)"
+          @click="($refs.menu as MenuInstance).toggle($event)"
         >
           {{ selectedModel ? selectedModel.displayName : "Select model" }}
         </button>
@@ -51,9 +51,9 @@
 </template>
 
 <script lang="ts">
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import Textarea from "primevue/textarea";
-import { Model, useChatStore } from "@/stores/chat";
+import { type Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState } from "pinia";
 import { matchModel } from "@/utils";
 import { useInternalDataStore } from "@/stores/internalData";
@@ -62,7 +62,14 @@ import Menu from "primevue/menu";
 import type { MenuItem } from "primevue/menuitem";
 import { defineComponent } from "vue";
 
+type MenuInstance = InstanceType<typeof Menu>;
+
 const maxHistorySize = 50;
+
+function loadInputHistory(storageKey: string): string[] {
+  const inputHistoryStr = localStorage.getItem(storageKey) || "[]";
+  return JSON.parse(inputHistoryStr);
+}
 
 export default defineComponent({
   components: {
@@ -86,7 +93,7 @@ export default defineComponent({
   },
 
   data() {
-    const inputHistory: string[] = this.loadInputHistory();
+    const inputHistory: string[] = loadInputHistory(this.storageKey);
     inputHistory.push("");
     return {
       inputHistory,
@@ -98,42 +105,41 @@ export default defineComponent({
   },
 
   computed: {
-    ...mapState(useChatStore, {
-      filteredModels(store): MenuItem[] {
-        const items: MenuItem[] = [];
-        for (const model of store.models) {
-          if (model.enabled) {
-            const selected = model.id === this.selectedModel?.id;
-            items.push({
-              value: model.id,
-              label: model.displayName,
-              icon: selected ? "check" : "",
-              class: selected ? "selected" : "",
-              command: () => this.$emit("select-model", model),
-            });
-          }
+    ...mapState(useChatStore, ["models"]),
+    filteredModels(): MenuItem[] {
+      const items: MenuItem[] = [];
+      for (const model of this.models) {
+        if (model.enabled) {
+          const selected = model.id === this.selectedModel?.id;
+          items.push({
+            value: model.id,
+            label: model.displayName,
+            icon: selected ? "check" : "",
+            class: selected ? "selected" : "",
+            command: () => this.$emit("select-model", model),
+          });
         }
-        if (items.length === 0) {
-          return [
-            {
-              label: "Manage models",
-              command: () => this.$emit("manage-models"),
-            },
-          ];
-        }
+      }
+      if (items.length === 0) {
         return [
-          ...items,
-          { separator: true },
           {
             label: "Manage models",
             command: () => this.$emit("manage-models"),
           },
         ];
-      },
-    }),
+      }
+      return [
+        ...items,
+        { separator: true },
+        {
+          label: "Manage models",
+          command: () => this.$emit("manage-models"),
+        },
+      ];
+    },
     input: {
-      get() {
-        return this.inputHistory[this.inputIndex];
+      get(): string {
+        return this.inputHistory[this.inputIndex] ?? "";
       },
       set(value: string) {
         this.inputHistory[this.inputIndex] = value;
@@ -146,8 +152,10 @@ export default defineComponent({
     matchModel,
 
     focus() {
-      const input = this.$refs.input as InstanceType<typeof Textarea>;
-      input.$el.focus();
+      const input = this.$refs.input as any;
+      if (input) {
+        input.$el?.focus();
+      }
     },
 
     submit() {
@@ -253,7 +261,7 @@ export default defineComponent({
     },
 
     addToHistory(input: string) {
-      const oldHistory = this.loadInputHistory();
+      const oldHistory = loadInputHistory(this.storageKey);
 
       let newHistory = [...oldHistory];
 
@@ -290,16 +298,13 @@ export default defineComponent({
         this.inputIndex = this.inputHistory.length - 1;
       }
     },
-
-    loadInputHistory(): string[] {
-      const inputHistoryStr = localStorage.getItem(this.storageKey) || "[]";
-      return JSON.parse(inputHistoryStr);
-    },
   },
 
   mounted() {
     this.$nextTick(() => {
-      const textarea = this.$refs.input.$el as HTMLTextAreaElement;
+      const input = this.$refs.input as any;
+      if (!input) return;
+      const textarea = input.$el as HTMLTextAreaElement;
       this.resizeObserver = new ResizeObserver(() => {
         const maxHeight = document.body.offsetHeight * 0.3;
         if (textarea.scrollHeight > maxHeight) {

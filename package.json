@@ -8,7 +8,7 @@
   "styles": "dist/style.css",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vue-tsc -b & vite build",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run"
@@ -26,6 +26,7 @@
     "@material-symbols/font-400": "^0.31.2",
     "@pdanpdan/vue-keyboard-trap": "^1.2.0",
     "@types/lodash": "^4.17.16",
+    "@types/pluralize": "^0.0.33",
     "@types/semver": "^7.7.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vitest/browser": "^3.2.4",

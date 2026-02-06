@@ -121,14 +121,14 @@
 
 <script lang="ts">
 import { useAI } from "@/composables/ai";
-import { useChatStore, Model } from "@/stores/chat";
+import { useChatStore, type Model } from "@/stores/chat";
 import _ from "lodash";
 import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import type { UIMessage } from "@/types";
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import { mapActions, mapGetters, mapWritableState } from "pinia";
-import { RootBinding } from "@/plugins/appEvent";
+import type { RootBinding } from "@/plugins/appEvent";
 import { useInternalDataStore } from "@/stores/internalData";
 import BaseInput from "@/components/common/BaseInput.vue";
 import PromptInput from "@/components/common/PromptInput.vue";
@@ -321,17 +321,17 @@ export default {
     },
 
     scrollToBottom(options?: { smooth?: boolean }) {
-      if (!this.$refs.scrollContainerRef) {
+      const container = this.$refs.scrollContainerRef as HTMLElement | undefined;
+      if (!container) {
         return;
       }
       if (options?.smooth) {
-        this.$refs.scrollContainerRef.scrollTo({
-          top: this.$refs.scrollContainerRef.scrollHeight,
+        container.scrollTo({
+          top: container.scrollHeight,
           behavior: "smooth",
         });
       } else {
-        this.$refs.scrollContainerRef.scrollTop =
-          this.$refs.scrollContainerRef.scrollHeight;
+        container.scrollTop = container.scrollHeight;
       }
     },
 

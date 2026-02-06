@@ -39,13 +39,12 @@ export async function getDefaultInstructions() {
 
 function getCurrentDateFormatted() {
   const now = new Date();
-  const options = {
+  return now.toLocaleDateString(undefined, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  };
-  return now.toLocaleDateString(undefined, options);
+  });
 }
 
 function getReadOnlyModeInstructions(readOnly: boolean) {

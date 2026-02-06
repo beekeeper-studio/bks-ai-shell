@@ -1,4 +1,4 @@
-import { AvailableProviders, ModelInfo } from "@/config";
+import type { AvailableProviders, ModelInfo } from "@/config";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
@@ -8,6 +8,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
       baseURL: string;
       headers: Record<string, string>;
       apiKey: string;
+      name?: string;
     },
   ) {
     super();
@@ -55,8 +56,8 @@ export class OpenAICompatibleProvider extends BaseProvider {
     }
   }
 
-  protected buildFetchHeaders() {
-    const headers = {};
+  protected buildFetchHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
     if (this.options.apiKey) {
       headers["Authorization"] = `Bearer ${this.options.apiKey}`;
     }

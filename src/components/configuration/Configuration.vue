@@ -29,7 +29,7 @@ import ModelsConfiguration from "@/components/configuration/ModelsConfiguration.
 import ProvidersConfiguration from "@/components/configuration/ProvidersConfiguration.vue";
 import GeneralConfiguration from "./GeneralConfiguration.vue";
 import AboutConfiguration from "./AboutConfiguration.vue";
-import { PropType } from "vue";
+import type { PropType } from "vue";
 import { Dialog } from "primevue";
 
 const pages = [

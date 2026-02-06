@@ -1,10 +1,10 @@
 import { defineStore } from "pinia";
-import {
+import type {
   AvailableModels,
   AvailableProviders,
   AvailableProvidersWithDynamicModels,
-  providerConfigs,
 } from "@/config";
+import { providerConfigs } from "@/config";
 import { useConfigurationStore } from "./configuration";
 import { useInternalDataStore } from "./internalData";
 import { useTabState } from "./tabState";
@@ -12,7 +12,7 @@ import { createProvider } from "@/providers";
 import _ from "lodash";
 import { ProviderSyncError } from "@/utils/ProviderSyncError";
 import {
-  ConnectionInfo,
+  type ConnectionInfo,
   getAppVersion,
   getConnectionInfo,
   getTables,
@@ -161,7 +161,7 @@ export const useChatStore = defineStore("chat", {
     },
     // FIXME move this to UI Kit?
     identifierDialect(state) {
-      const mappings = {
+      const mappings: Record<string, string> = {
         sqlserver: "mssql",
         sqlite: "sqlite",
         cockroachdb: "psql",
@@ -243,10 +243,11 @@ export const useChatStore = defineStore("chat", {
       await internal.sync();
       await tabState.sync();
 
-      this.model =
+      this.model = (
         this.models.find(
           (m) => m.id === internal.lastUsedModelId && m.enabled,
-        ) || this.models.find((m) => m.enabled);
+        ) || this.models.find((m) => m.enabled)
+      ) as Model | undefined;
 
       internal.lastUsedModelId = this.model?.id;
 
@@ -325,8 +326,9 @@ export const useChatStore = defineStore("chat", {
           );
         } else {
           console.error(e);
+          const error = e as Error | undefined;
           this.errors.push(
-            new ProviderSyncError(e.message, {
+            new ProviderSyncError(error?.message ?? "Unknown error", {
               providerId: provider,
               cause: e,
             }),

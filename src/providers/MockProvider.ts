@@ -1,6 +1,7 @@
 import { BaseProvider } from "./BaseProvider";
-import { AvailableProviders, ModelInfo, providerConfigs } from "@/config";
-import { LanguageModel } from "ai";
+import type { AvailableProviders, ModelInfo } from "@/config";
+import { providerConfigs } from "@/config";
+import type { LanguageModel } from "ai";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 
 export class MockProvider extends BaseProvider {
@@ -146,6 +147,7 @@ export class MockProvider extends BaseProvider {
   }
 
   async listModels(): Promise<ModelInfo[]> {
+    // @ts-expect-error
     return providerConfigs.mock.models;
   }
 }

@@ -1,15 +1,20 @@
 import {
-  AIMessage,
-  HumanMessage,
+  type AIMessage,
+  type HumanMessage,
   isAIMessage,
   isHumanMessage,
   isToolMessage,
   mapStoredMessagesToChatMessages,
-  StoredMessage,
-  ToolMessage,
+  type StoredMessage,
+  type ToolMessage,
 } from "@langchain/core/messages";
-import { CreateMessage, Message, ToolResult } from "ai";
+
 import _ from "lodash";
+
+// Old AI SDK types - using any for migration compatibility
+type CreateMessage = any;
+type Message = any;
+type ToolResult = { result?: any };
 
 /**
  * View State v1 contains messages from LangChain with the following versions:
@@ -121,13 +126,13 @@ export function mapLangChainStoredMessagesToAISdkMessages(
         continue;
       }
 
-      let toolResult: ToolResult<string, any, any> | undefined = undefined;
+      let toolResult: ToolResult | undefined = undefined;
       for (const part of assistantMessage.parts) {
         if (
           part.type === "tool-invocation" &&
           part.toolInvocation.toolCallId === message.tool_call_id
         ) {
-          toolResult = part.toolInvocation as ToolResult<string, any, any>;
+          toolResult = part.toolInvocation as ToolResult;
           break;
         }
       }

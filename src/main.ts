@@ -1,7 +1,7 @@
 import { getAppInfo, log } from "@beekeeperstudio/plugin";
 // FIXME move this to Beekeeper Studio as injected script
 window.addEventListener("error", (e) => {
-  log.error(e);
+  log.error(e.error ?? e.message);
 });
 window.addEventListener("unhandledrejection", (e) => {
   log.error(e.reason);

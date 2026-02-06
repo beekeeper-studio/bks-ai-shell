@@ -1,6 +1,6 @@
 import { DefaultChatTransport } from "ai";
-import { UIMessage, SendOptions } from "@/types";
-import { FetchFunction } from "@ai-sdk/provider-utils";
+import type { UIMessage } from "@/types";
+import type { FetchFunction } from "@ai-sdk/provider-utils";
 import { tools } from "@/tools";
 import { createProvider } from ".";
 import { useChatStore } from "@/stores/chat";
@@ -31,7 +31,7 @@ export class ChatTransport extends DefaultChatTransport<UIMessage> {
     return provider.stream({
       modelId: chat.model.id,
       messages: m.messages,
-      signal: fetchOptions.signal,
+      signal: fetchOptions.signal ?? undefined,
       tools,
       systemPrompt: chat.systemPrompt,
     });

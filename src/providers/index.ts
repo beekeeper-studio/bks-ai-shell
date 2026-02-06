@@ -1,4 +1,4 @@
-import { AvailableProviders } from "@/config";
+import type { AvailableProviders } from "@/config";
 import { AnthropicProvider } from "@/providers/AnthropicProvider";
 import { OpenAIProvider } from "@/providers/OpenAIProvider";
 import { OpenAICompatibleProvider } from "@/providers/OpenAICompatibleProvider";

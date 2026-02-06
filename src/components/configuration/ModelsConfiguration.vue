@@ -20,7 +20,7 @@
           @click="refreshModels"
           v-show="supportsRuntimeModels"
           class="btn btn-flat"
-          :disabled="syncingProviders.includes(filterByProvider)"
+          :disabled="disableRefreshModelsBtn"
         >
           <span class="material-symbols-outlined">refresh</span>
           Refresh models
@@ -80,13 +80,13 @@
           {{ model.displayName }}
           <Switch
             :model-value="model.enabled"
-            @change="toggle(model, $event)"
+            @change="toggle(model as Model, $event)"
             :disabled="!model.available"
           />
         </label>
         <button
           class="btn delete-btn"
-          @click.prevent="remove(model)"
+          @click.prevent="remove(model as Model)"
           v-if="model.removable"
         >
           <span class="material-symbols-outlined">delete</span>
@@ -101,12 +101,12 @@
 
 <script lang="ts">
 import {
-  AvailableProviders,
-  AvailableProvidersWithDynamicModels,
+  type AvailableProviders,
+  type AvailableProvidersWithDynamicModels,
   providerConfigs,
 } from "@/config";
 import Switch from "@/components/common/Switch.vue";
-import { Model, useChatStore } from "@/stores/chat";
+import { type Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useConfigurationStore } from "@/stores/configuration";
 import _ from "lodash";
@@ -175,6 +175,12 @@ export default {
     supportsRuntimeModels() {
       return providerSupportsRuntimeModels(this.filterByProvider);
     },
+    disableRefreshModelsBtn() {
+      return (
+        this.filterByProvider !== "all" &&
+        this.syncingProviders.includes(this.filterByProvider as AvailableProvidersWithDynamicModels)
+      );
+    },
     // FIXME: Duplicated from ProvidersConfiguration
     openAiCompatibleErrors() {
       return this.errors
@@ -208,12 +214,12 @@ export default {
       if (checked) {
         this.enableModel(model.provider, model.id);
         if (!this.model) {
-          this.model = model;
+          this.model = model as Model;
         }
       } else {
         this.disableModel(model.provider, model.id);
         if (matchModel(model, this.model)) {
-          this.model = this.models.find((m) => m.enabled);
+          this.model = this.models.find((m) => m.enabled) as Model | undefined;
         }
       }
     },
@@ -221,9 +227,10 @@ export default {
       this.removeModel(model.provider, model.id);
     },
     showDisabledPopover(event: MouseEvent) {
-      this.$refs.disabledPopover!.hide();
+      const popover = this.$refs.disabledPopover as InstanceType<typeof Popover>;
+      popover.hide();
       this.$nextTick(() => {
-        this.$refs.disabledPopover!.show(event);
+        popover.show(event);
       });
     },
     refreshModels() {

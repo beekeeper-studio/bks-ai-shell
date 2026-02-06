@@ -1,12 +1,12 @@
-import { UIMessage } from "ai";
-import { Model } from "./stores/chat";
+import type { UIMessage } from "ai";
+import type { Model } from "./stores/chat";
 import _ from "lodash";
 import { identify } from "sql-query-identifier";
-import {
+import type {
   AvailableProviders,
   AvailableProvidersWithDynamicModels,
-  providerConfigs,
 } from "./config";
+import { providerConfigs } from "./config";
 
 /** It's safe cause we hope it doesn't throw any errors, hopefully. */
 export function safeJSONStringify(value: any, ...args: any): string {
@@ -35,7 +35,7 @@ export function parseErrorContent(content: string) {
 
 export function isErrorContent(str: unknown): str is string {
   try {
-    return JSON.parse(str)?.type === "error";
+    return JSON.parse(str as string)?.type === "error";
   } catch (e) {
     return false;
   }
@@ -58,7 +58,7 @@ export function isAbortError(error: unknown) {
 }
 
 export function parseHeaders(text: string): Record<string, string> {
-  const headers = {};
+  const headers: Record<string, string> = {};
   const lines = text.split("\n");
 
   for (let line of lines) {
@@ -66,7 +66,7 @@ export function parseHeaders(text: string): Record<string, string> {
     if (!line || !line.includes(":")) continue;
 
     const [key, ...rest] = line.split(":");
-    const trimmedKey = key.trim();
+    const trimmedKey = key?.trim() ?? "";
     const value = rest.join(":").trim();
 
     if (trimmedKey) {
