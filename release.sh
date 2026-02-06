@@ -2,6 +2,37 @@
 
 set -e
 
+# Spinner function
+spin() {
+  local pid=$1
+  local msg=$2
+  local spinchars='|/-\'
+  local i=0
+  while kill -0 "$pid" 2>/dev/null; do
+    printf "\r%s %c" "$msg" "${spinchars:i++%4:1}"
+    sleep 0.1
+  done
+  printf "\r%s done\n" "$msg"
+}
+
+# Fetch latest from remote
+git fetch &>/dev/null &
+spin $! "Fetching from remote..."
+
+# Check if branch is behind remote
+LOCAL=$(git rev-parse @)
+REMOTE=$(git rev-parse @{u})
+BASE=$(git merge-base @ @{u})
+
+if [[ "$LOCAL" != "$REMOTE" ]]; then
+  if [[ "$LOCAL" == "$BASE" ]]; then
+    echo "Your branch is behind the remote. Please pull the latest changes first."
+  else
+    echo "Your branch has diverged from the remote. Please resolve this first."
+  fi
+  exit 1
+fi
+
 # Get current version from package.json
 CURRENT_VERSION=$(jq -r '.version' package.json)
 
