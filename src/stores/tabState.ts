@@ -14,7 +14,7 @@
 import { getViewState, setTabTitle, setViewState } from "@beekeeperstudio/plugin";
 import type { UIMessage } from "@/types";
 import { defineStore } from "pinia";
-import type { StoredMessage } from "@langchain/core/messages";
+import type { StoredMessage } from "@/vendor/langchain";
 import { mapLangChainStoredMessagesToAISdkMessages } from "@/utils/langchainToAISdk";
 import _ from "lodash";
 import { mapV4MessagesToV5Messages, type MessageV4 } from "@/utils/aiSdkV5Migration";

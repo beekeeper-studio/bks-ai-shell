@@ -7,7 +7,7 @@ import {
   mapStoredMessagesToChatMessages,
   type StoredMessage,
   type ToolMessage,
-} from "@langchain/core/messages";
+} from "@/vendor/langchain";
 
 import _ from "lodash";
 
@@ -85,10 +85,11 @@ export function mapLangChainStoredMessagesToAISdkMessages(
         const parts: CreateMessage["parts"] = [];
         for (const complex of message.content) {
           if (complex.type === "text") {
-            parts.push({ type: "text", text: complex.text });
+            parts.push({ type: "text", text: (complex as { type: "text"; text: string }).text });
           } else if (complex.type === "tool_use") {
+            const toolUseContent = complex as { type: "tool_use"; id: string; name: string; input: Record<string, any> };
             const toolCall = message.tool_calls?.find(
-              (t) => t.id === complex.id,
+              (t) => t.id === toolUseContent.id,
             );
             if (!toolCall) {
               console.warn("Tool call not found", complex, message);
