@@ -163,7 +163,12 @@ export default {
       );
     },
     filterByProviderOptions() {
-      const providers = Object.keys(providerConfigs) as AvailableProviders[];
+      const providers = (
+        Object.keys(providerConfigs) as AvailableProviders[]
+      ).filter(
+        (provider) =>
+          import.meta.env.MODE === "development" || provider !== "mock",
+      );
       return [
         { label: "All providers", value: "all" },
         ...providers.map((provider) => ({
