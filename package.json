@@ -1,6 +1,6 @@
 {
   "name": "@beekeeperstudio/bks-ai-shell",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "A Beekeeper Studio plugin for analyzing database and generate queries",
   "license": "GPL-3.0",
   "repository": {
