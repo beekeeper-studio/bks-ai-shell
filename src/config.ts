@@ -27,6 +27,11 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: "claude-opus-4-6",
+        displayName: "claude-opus-4-6",
+        contextWindow: 200_000,
+      },
+      {
         id: "claude-opus-4-5-20251101",
         displayName: "claude-opus-4-5",
         contextWindow: 200_000,

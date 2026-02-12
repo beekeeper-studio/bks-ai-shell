@@ -332,6 +332,7 @@ export default defineComponent({
 .chat-input-container {
   --p-textarea-hover-border-color: transparent;
   --p-textarea-focus-border-color: transparent;
+  padding-top: 0.25rem;
 }
 
 .actions {
