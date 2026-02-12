@@ -37,7 +37,7 @@
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
     "ai": "^6.0.28",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^20.0.2",
     "highlight.js": "^11.11.1",
     "langchain": "^0.3.19",
     "lodash": "^4.17.21",
