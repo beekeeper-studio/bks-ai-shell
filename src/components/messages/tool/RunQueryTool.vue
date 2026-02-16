@@ -62,8 +62,8 @@
         </button>
       </div>
     </div>
-    <div class="tool-error error" v-if="error" v-text="error" />
-    <div class="tool-error error" v-else-if="state === 'approval-responded' && approval && !approval.approved">
+    <div class="tool-error error" v-if="error && error !== 'User rejected'" v-text="error" />
+    <div class="tool-error error" v-else-if="(state === 'approval-responded' || state === 'output-error') && approval && !approval.approved">
       User rejected tool call
     </div>
     <div class="tool-result" v-else-if="state === 'output-available'">

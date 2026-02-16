@@ -47,7 +47,7 @@
                 : 'ready'
             "
             @accept-permission="acceptPermission"
-            @reject-permission="handleRejectPermission"
+            @reject-permission="rejectPermission"
           />
         </template>
         <div class="message error" v-if="isUnexpectedError">
@@ -298,7 +298,7 @@ export default {
       this.noModelError = false;
 
       if (this.hasPendingApprovals) {
-        this.rejectAllPendingApprovals();
+        await this.rejectAllPendingApprovals();
       }
 
       if (this.contextOverflow) {
@@ -338,22 +338,6 @@ export default {
     selectModel(model: Model) {
       this.setInternal("lastUsedModelId", model.id);
       this.model = model;
-    },
-
-    handleRejectPermission(options: {
-      toolCallId: string;
-      approvalId: string;
-      editedQuery?: string;
-    }) {
-      if (options.editedQuery) {
-        this.rejectPermission({
-          toolCallId: options.toolCallId,
-          approvalId: options.approvalId,
-          editedQuery: options.editedQuery,
-        });
-      } else {
-        this.rejectPermission(options.approvalId);
-      }
     },
   },
 };

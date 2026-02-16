@@ -24,6 +24,13 @@ class AIShellChat {
   readonly hasPendingApprovals: ComputedRef<boolean>;
   readonly compacting = ref(false);
 
+  private readonly pendingApprovalIds: ComputedRef<
+    {
+      toolCallId: string;
+      approvalId: string;
+    }[]
+  >;
+
   /** Force the `status` if not `null` */
   private runningEditedQuery = ref<boolean>();
   private chat: Chat<UIMessage>;
@@ -59,12 +66,23 @@ class AIShellChat {
       }
       return this.chat.status;
     });
-    this.hasPendingApprovals = computed(() =>
-      this.messages.value.some((message) =>
-        message.parts.some(
-          (part) => isToolUIPart(part) && part.state === "approval-requested",
-        ),
-      ),
+    this.pendingApprovalIds = computed(() => {
+      const tools: { toolCallId: string; approvalId: string }[] = [];
+      for (const message of this.chat.messages) {
+        for (const part of message.parts) {
+          if (isToolUIPart(part) && part.state === "approval-requested") {
+            tools.push({
+              toolCallId: part.toolCallId,
+              approvalId: part.approval.id,
+            });
+          }
+        }
+      }
+      return tools;
+    });
+
+    this.hasPendingApprovals = computed(
+      () => this.pendingApprovalIds.value.length > 0,
     );
   }
 
@@ -178,8 +196,8 @@ class AIShellChat {
     await this.chat.sendMessage();
   }
 
-  acceptPermission(approvalId: string) {
-    this.chat.addToolApprovalResponse({ id: approvalId, approved: true });
+  async acceptPermission(approvalId: string) {
+    await this.chat.addToolApprovalResponse({ id: approvalId, approved: true });
   }
 
   /** After the user rejected the permission, they can provide a follow-up message.
@@ -188,24 +206,26 @@ class AIShellChat {
    * @param options.toolCallId - The tool call ID (for edited query flow)
    * @param options.editedQuery - The edited query / code that the user provided.
    **/
-  async rejectPermission(
-    options:
-      | string
-      | {
-        approvalId: string;
-        toolCallId: string;
-        editedQuery: string;
-      },
-  ) {
-    let approvalId = typeof options === "string" ? options : options.approvalId;
-
-    this.chat.addToolApprovalResponse({
-      id: approvalId,
+  async rejectPermission(options: {
+    approvalId: string;
+    toolCallId: string;
+    editedQuery?: string;
+  }) {
+    await this.chat.addToolApprovalResponse({
+      id: options.approvalId,
       approved: false,
+      reason: "User rejected",
     });
 
-    // Send followup message if the user edited the tool call
-    if (typeof options === "object") {
+    await this.chat.addToolOutput({
+      toolCallId: options.toolCallId,
+      tool: "run_query",
+      state: "output-error",
+      errorText: "User rejected",
+    });
+
+    if (options.editedQuery) {
+      // Send followup message if the user edited the tool call
       const assistantMessageId = this.chat.generateId();
       const replacementToolCallId = this.chat.generateId();
 
@@ -309,22 +329,14 @@ class AIShellChat {
 
       this.runningEditedQuery.value = false;
 
-      this.triggerRequest();
+      await this.triggerRequest();
     }
   }
 
-  rejectAllPendingApprovals() {
-    this.messages.value.forEach((message) => {
-      message.parts.forEach((part) => {
-        if (
-          isToolUIPart(part) &&
-          part.state === "approval-requested" &&
-          part.approval
-        ) {
-          this.rejectPermission(part.approval.id);
-        }
-      });
-    });
+  async rejectAllPendingApprovals() {
+    for (const approval of this.pendingApprovalIds.value) {
+      await this.rejectPermission(approval);
+    }
   }
 
   private async createRunQueryToolOutput(toolCallId: string, query: string) {
