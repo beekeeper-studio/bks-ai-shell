@@ -27,9 +27,19 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: 'claude-opus-4-7',
+        displayName: 'claude-opus-4-7',
+        contextWindow: 1_000_000,
+      },
+      {
+        id: "claude-sonnet-4-6",
+        displayName: "claude-sonnet-4-6",
+        contextWindow: 1_000_000,
+      },
+      {
         id: "claude-opus-4-6",
         displayName: "claude-opus-4-6",
-        contextWindow: 200_000,
+        contextWindow: 1_000_000,
       },
       {
         id: "claude-opus-4-5-20251101",
@@ -61,21 +71,6 @@ export const providerConfigs = {
         displayName: "claude-sonnet-4",
         contextWindow: 200_000,
       },
-      {
-        id: "claude-3-5-haiku-20241022",
-        displayName: "claude-haiku-3-5",
-        contextWindow: 200_000,
-      },
-      {
-        id: "claude-3-haiku-20240307",
-        displayName: "claude-3-haiku",
-        contextWindow: 200_000,
-      },
-      {
-        id: "claude-3-7-sonnet-20250219",
-        displayName: "claude-sonnet-3-7",
-        contextWindow: 200_000,
-      },
     ],
     supportsRuntimeModels: false,
   },
@@ -83,11 +78,6 @@ export const providerConfigs = {
     displayName: "Google",
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
-      {
-        id: "gemini-3-pro-preview",
-        displayName: "gemini-3-pro-preview",
-        contextWindow: 1_048_576,
-      },
       {
         id: "gemini-3-flash-preview",
         displayName: "gemini-3-flash-preview",
@@ -125,6 +115,21 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
     models: [
+      {
+        id: "gpt-5.4",
+        displayName: "gpt-5.4",
+        contextWindow: 1_000_000,
+      },
+      {
+        id: "gpt-5.4-mini",
+        displayName: "gpt-5.4-mini",
+        contextWindow: 400_000,
+      },
+      {
+        id: "gpt-5.4-nano",
+        displayName: "gpt-5.4-nano",
+        contextWindow: 400_000,
+      },
       {
         id: "gpt-5.2-pro-2025-12-11",
         displayName: "gpt-5.2-pro",
@@ -244,13 +249,19 @@ export const disabledModelsByDefault: {
     // ===== Google =====
     // https://ai.google.dev/gemini-api/docs/deprecations
 
-    // Retirement date: March 31, 2026
+    // Retirement date: June 17, 2026
+    {
+      providerId: "google" as const,
+      modelId: "gemini-2.5-pro",
+    },
+
+    // Retirement date: June 1, 2026
     {
       providerId: "google" as const,
       modelId: "gemini-2.0-flash",
     },
 
-    // Retirement date: March 31, 2026
+    // Retirement date: June 1, 2026
     {
       providerId: "google" as const,
       modelId: "gemini-2.0-flash-lite",
@@ -265,15 +276,15 @@ export const disabledModelsByDefault: {
     // ===== Anthropic =====
     // https://docs.claude.com/en/docs/about-claude/model-deprecations
 
-    // Retirement date: February 19, 2026
+    // Retirement date: June 15, 2026
     {
       providerId: "anthropic" as const,
-      modelId: "claude-3-7-sonnet-20250219",
+      modelId: "claude-opus-4-20250514",
     },
 
-    // Retirement date: February 19, 2026
+    // Retirement date: June 15, 2026
     {
       providerId: "anthropic" as const,
-      modelId: "claude-3-5-haiku-20241022",
+      modelId: "claude-sonnet-4-20250514",
     },
   ];
