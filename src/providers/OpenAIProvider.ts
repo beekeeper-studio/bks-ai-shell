@@ -1,6 +1,6 @@
 import type { AvailableProviders, ModelInfo } from "@/config";
 import { providerConfigs } from "@/config";
-import { BaseProvider, type StreamOptions } from "@/providers/BaseProvider";
+import { BaseProvider } from "@/providers/BaseProvider";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod/v3";
 
