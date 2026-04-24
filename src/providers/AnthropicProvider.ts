@@ -1,6 +1,6 @@
 import type { AvailableProviders, ModelInfo } from "@/config";
 import { providerConfigs } from "@/config";
-import { BaseProvider } from "@/providers/BaseProvider";
+import { BaseProvider, type StreamOptions } from "@/providers/BaseProvider";
 import { createAnthropic } from "@ai-sdk/anthropic";
 
 export class AnthropicProvider extends BaseProvider {
@@ -10,6 +10,13 @@ export class AnthropicProvider extends BaseProvider {
 
   get providerId(): AvailableProviders {
     return "anthropic";
+  }
+
+  stream(options: StreamOptions) {
+    const model = providerConfigs.anthropic.models.find(
+      (m) => m.id === options.modelId,
+    );
+    return super.stream({ ...options, temperature: model?.temperature });
   }
 
   getModel(id: string) {
