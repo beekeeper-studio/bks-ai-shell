@@ -19,14 +19,6 @@ export class OpenAIProvider extends BaseProvider {
     }).languageModel(id);
   }
 
-  stream(options: StreamOptions) {
-    if (options.modelId.startsWith("gpt-5")) {
-      // Can't set temperature for gpt-5
-      return super.stream({ ...options, temperature: 1 });
-    }
-    return super.stream(options);
-  }
-
   async generateObject<OBJECT>(options: {
     modelId: string;
     schema: z.Schema<OBJECT, z.ZodTypeDef, any>;
