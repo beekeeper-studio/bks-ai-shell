@@ -12,7 +12,7 @@ import type {
   AvailableProviders,
   ModelInfo,
 } from "@/config";
-import { defaultTemperature } from "@/config";
+import { defaultTemperature, providerConfigs } from "@/config";
 import type { UIMessage } from "@/types";
 import { z } from "zod/v3";
 import {
@@ -48,6 +48,9 @@ export abstract class BaseProvider {
   async stream(options: StreamOptions) {
     const isCompactPrompt =
       options.messages[options.messages.length - 1]?.metadata?.isCompactPrompt;
+    const config = providerConfigs[this.providerId]
+      .models
+      .find((m) => m.id === options.modelId);
     const result = streamText({
       model: this.getModel(options.modelId),
       messages: await this.convertToModelMessages(options.messages),
@@ -55,7 +58,7 @@ export abstract class BaseProvider {
       system: isCompactPrompt ? undefined : options.systemPrompt,
       tools: isCompactPrompt ? undefined : options.tools,
       stopWhen: stepCountIs(100),
-      temperature: options.temperature ?? defaultTemperature,
+      temperature: options.temperature ?? config?.temperature ?? defaultTemperature,
       providerOptions: this.getProviderOptions(),
     });
     return result.toUIMessageStreamResponse({

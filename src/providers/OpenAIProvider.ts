@@ -1,6 +1,6 @@
 import type { AvailableProviders, ModelInfo } from "@/config";
 import { providerConfigs } from "@/config";
-import { BaseProvider, type StreamOptions } from "@/providers/BaseProvider";
+import { BaseProvider } from "@/providers/BaseProvider";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod/v3";
 
@@ -17,14 +17,6 @@ export class OpenAIProvider extends BaseProvider {
     return createOpenAI({
       apiKey: this.options.apiKey,
     }).languageModel(id);
-  }
-
-  stream(options: StreamOptions) {
-    if (options.modelId.startsWith("gpt-5")) {
-      // Can't set temperature for gpt-5
-      return super.stream({ ...options, temperature: 1 });
-    }
-    return super.stream(options);
   }
 
   async generateObject<OBJECT>(options: {

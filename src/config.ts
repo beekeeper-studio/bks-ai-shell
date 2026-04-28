@@ -27,54 +27,58 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: 'claude-opus-4-7',
+        displayName: 'claude-opus-4-7',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
+        id: "claude-sonnet-4-6",
+        displayName: "claude-sonnet-4-6",
+        contextWindow: 1_000_000,
+        temperature: defaultTemperature,
+      },
+      {
         id: "claude-opus-4-6",
         displayName: "claude-opus-4-6",
-        contextWindow: 200_000,
+        contextWindow: 1_000_000,
+        temperature: defaultTemperature,
       },
       {
         id: "claude-opus-4-5-20251101",
         displayName: "claude-opus-4-5",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "claude-sonnet-4-5-20250929",
         displayName: "claude-sonnet-4-5",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "claude-haiku-4-5-20251001",
         displayName: "claude-haiku-4-5",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "claude-opus-4-1",
         displayName: "claude-opus-4-1",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "claude-opus-4-20250514",
         displayName: "claude-opus-4",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "claude-sonnet-4-20250514",
         displayName: "claude-sonnet-4",
         contextWindow: 200_000,
-      },
-      {
-        id: "claude-3-5-haiku-20241022",
-        displayName: "claude-haiku-3-5",
-        contextWindow: 200_000,
-      },
-      {
-        id: "claude-3-haiku-20240307",
-        displayName: "claude-3-haiku",
-        contextWindow: 200_000,
-      },
-      {
-        id: "claude-3-7-sonnet-20250219",
-        displayName: "claude-sonnet-3-7",
-        contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
     ],
     supportsRuntimeModels: false,
@@ -84,39 +88,40 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
-        id: "gemini-3-pro-preview",
-        displayName: "gemini-3-pro-preview",
-        contextWindow: 1_048_576,
-      },
-      {
         id: "gemini-3-flash-preview",
         displayName: "gemini-3-flash-preview",
         contextWindow: 1_048_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gemini-2.5-pro",
         displayName: "gemini-2.5-pro",
         contextWindow: 1_048_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gemini-2.5-flash",
         displayName: "gemini-2.5-flash",
         contextWindow: 1_048_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gemini-2.5-flash-lite",
         displayName: "gemini-2.5-flash-lite",
         contextWindow: 1_048_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gemini-2.0-flash",
         displayName: "gemini-2.0-flash",
         contextWindow: 1_048_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gemini-2.0-flash-lite",
         displayName: "gemini-2.0-flash-lite",
         contextWindow: 1_048_576,
+        temperature: defaultTemperature,
       },
     ],
     supportsRuntimeModels: false,
@@ -126,79 +131,112 @@ export const providerConfigs = {
     /** @link https://platform.openai.com/docs/models */
     models: [
       {
+        id: "gpt-5.4",
+        displayName: "gpt-5.4",
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-5.4-mini",
+        displayName: "gpt-5.4-mini",
+        contextWindow: 400_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-5.4-nano",
+        displayName: "gpt-5.4-nano",
+        contextWindow: 400_000,
+        temperature: 1,
+      },
+      {
         id: "gpt-5.2-pro-2025-12-11",
         displayName: "gpt-5.2-pro",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-5.2-2025-12-11",
         displayName: "gpt-5.2",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-5.1",
         displayName: "gpt-5.1",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-5",
         displayName: "gpt-5",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-5-pro-2025-10-06",
         displayName: "gpt-5-pro",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-5-mini",
         displayName: "gpt-5-mini",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-5-nano",
         displayName: "gpt-5-nano",
         contextWindow: 400_000,
+        temperature: 1,
       },
       {
         id: "gpt-4.1",
         displayName: "gpt-4.1",
         contextWindow: 1_047_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gpt-4.1-mini",
         displayName: "gpt-4.1-mini",
         contextWindow: 1_047_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gpt-4.1-nano",
         displayName: "gpt-4.1-nano",
         contextWindow: 1_047_576,
+        temperature: defaultTemperature,
       },
       {
         id: "gpt-4o",
         displayName: "gpt-4o",
         contextWindow: 128_000,
+        temperature: defaultTemperature,
       },
       {
         id: "gpt-4o-mini",
         displayName: "gpt-4o-mini",
         contextWindow: 128_000,
+        temperature: defaultTemperature,
       },
       {
         id: "o3",
         displayName: "o3",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "o3-mini",
         displayName: "o3-mini",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
       {
         id: "o4-mini",
         displayName: "o4-mini",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
       },
     ],
     supportsRuntimeModels: false,
@@ -222,11 +260,13 @@ export const providerConfigs = {
         id: "mock",
         displayName: "[DEV] Mock",
         contextWindow: 32_000,
+        temperature: defaultTemperature,
       },
       {
         id: "mock-compact",
         displayName: "[DEV] Mock compact",
         contextWindow: 64_000,
+        temperature: defaultTemperature,
       },
     ],
     supportsRuntimeModels: false,
@@ -244,13 +284,19 @@ export const disabledModelsByDefault: {
     // ===== Google =====
     // https://ai.google.dev/gemini-api/docs/deprecations
 
-    // Retirement date: March 31, 2026
+    // Retirement date: June 17, 2026
+    {
+      providerId: "google" as const,
+      modelId: "gemini-2.5-pro",
+    },
+
+    // Retirement date: June 1, 2026
     {
       providerId: "google" as const,
       modelId: "gemini-2.0-flash",
     },
 
-    // Retirement date: March 31, 2026
+    // Retirement date: June 1, 2026
     {
       providerId: "google" as const,
       modelId: "gemini-2.0-flash-lite",
@@ -265,15 +311,15 @@ export const disabledModelsByDefault: {
     // ===== Anthropic =====
     // https://docs.claude.com/en/docs/about-claude/model-deprecations
 
-    // Retirement date: February 19, 2026
+    // Retirement date: June 15, 2026
     {
       providerId: "anthropic" as const,
-      modelId: "claude-3-7-sonnet-20250219",
+      modelId: "claude-opus-4-20250514",
     },
 
-    // Retirement date: February 19, 2026
+    // Retirement date: June 15, 2026
     {
       providerId: "anthropic" as const,
-      modelId: "claude-3-5-haiku-20241022",
+      modelId: "claude-sonnet-4-20250514",
     },
   ];
