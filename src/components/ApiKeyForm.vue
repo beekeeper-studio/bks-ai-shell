@@ -135,7 +135,9 @@ export default {
       return providerConfigs;
     },
     dropdownOptions() {
-      return (Object.keys(providerConfigs) as AvailableProviders[]).map((provider) => ({
+      return (Object.keys(providerConfigs) as AvailableProviders[])
+        .filter((provider) => provider !== "mock")
+        .map((provider) => ({
         label: providerConfigs[provider].displayName,
         value: provider,
       }));
