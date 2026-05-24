@@ -6,6 +6,43 @@
   </form>
 
   <form @submit.prevent class="config-form">
+    <h3>DeepSeek</h3>
+    <p class="description">Connect to DeepSeek with first-party AI SDK support.</p>
+    <div
+      v-for="(error, index) in deepseekErrors"
+      :key="index"
+      class="alert alert-danger"
+    >
+      <span class="material-symbols-outlined">error_outline</span>
+      <span>{{ error }}</span>
+    </div>
+    <BaseInput
+      :model-value="providers_deepseek_baseUrl"
+      @update:modelValue="configure('providers_deepseek_baseUrl', $event)"
+      @change="handleChange($event, 'deepseek')"
+    >
+      <template #label>URL</template>
+      <template #helper>DeepSeek API base URL.</template>
+    </BaseInput>
+    <BaseInput
+      type="password"
+      :model-value="providers_deepseek_apiKey"
+      @update:modelValue="configure('providers_deepseek_apiKey', $event)"
+      @change="handleChange($event, 'deepseek')"
+    >
+      <template #label>API Key</template>
+    </BaseInput>
+    <BaseInput
+      type="textarea"
+      :model-value="providers_deepseek_headers"
+      @update:modelValue="configure('providers_deepseek_headers', $event)"
+      @change="handleChange($event, 'deepseek')"
+    >
+      <template #label>Headers</template>
+    </BaseInput>
+  </form>
+
+  <form @submit.prevent class="config-form">
     <h3>OpenAI Compatible</h3>
     <p class="description">Connect to any service using OpenAI's API format.</p>
     <div
@@ -101,6 +138,9 @@ export default {
 
   computed: {
     ...mapState(useConfigurationStore, [
+      "providers_deepseek_baseUrl",
+      "providers_deepseek_apiKey",
+      "providers_deepseek_headers",
       "providers_openaiCompat_baseUrl",
       "providers_openaiCompat_apiKey",
       "providers_openaiCompat_headers",
@@ -108,6 +148,14 @@ export default {
       "providers_ollama_headers",
     ]),
     ...mapState(useChatStore, ["errors"]),
+    deepseekErrors() {
+      return this.errors
+        .filter(
+          (error) =>
+            error.providerId === "deepseek" && !error.message.includes("[2]"),
+        )
+        .map((error) => error.message);
+    },
     openAiCompatibleErrors() {
       return this.errors
         .filter(

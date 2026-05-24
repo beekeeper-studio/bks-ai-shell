@@ -241,6 +241,12 @@ export const providerConfigs = {
     ],
     supportsRuntimeModels: false,
   },
+  deepseek: {
+    displayName: "DeepSeek",
+    models: [],
+    /** Models are fetched at runtime */
+    supportsRuntimeModels: true,
+  },
   openaiCompat: {
     displayName: "OpenAI-Compatible",
     models: [],

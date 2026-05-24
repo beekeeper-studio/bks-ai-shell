@@ -1,5 +1,6 @@
 import type { AvailableProviders } from "@/config";
 import { AnthropicProvider } from "@/providers/AnthropicProvider";
+import { DeepSeekProvider } from "@/providers/DeepSeekProvider";
 import { OpenAIProvider } from "@/providers/OpenAIProvider";
 import { OpenAICompatibleProvider } from "@/providers/OpenAICompatibleProvider";
 import { GoogleProvider } from "@/providers/GoogleProvider";
@@ -23,6 +24,18 @@ export function createProvider(id: AvailableProviders)  {
     case "google":
       return new GoogleProvider({
         apiKey: configuration["providers.google.apiKey"],
+      });
+    case "deepseek":
+      if (_.isEmpty(configuration.providers_deepseek_baseUrl)) {
+        throw new Error("Missing API base URL [2]");
+      }
+      if (_.isEmpty(configuration.providers_deepseek_apiKey)) {
+        throw new Error("Missing API key [2]");
+      }
+      return new DeepSeekProvider({
+        baseURL: configuration.providers_deepseek_baseUrl,
+        apiKey: configuration.providers_deepseek_apiKey,
+        headers: parseHeaders(configuration.providers_deepseek_headers),
       });
     case "openaiCompat":
       if (_.isEmpty(configuration.providers_openaiCompat_baseUrl)) {
@@ -50,4 +63,3 @@ export function createProvider(id: AvailableProviders)  {
       throw new Error(`Provider ${id} does not exist.`);
   }
 }
-

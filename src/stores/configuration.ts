@@ -45,6 +45,8 @@ type Configurable = {
   disabledModels: { providerId: AvailableProviders; modelId: string }[];
   /** Models that are removed are not shown in the UI and cannot be enabled. */
   removedModels: { providerId: AvailableProviders; modelId: string }[];
+  providers_deepseek_baseUrl: string;
+  providers_deepseek_headers: string;
   providers_openaiCompat_baseUrl: string;
   providers_openaiCompat_headers: string;
   providers_ollama_baseUrl: string;
@@ -58,6 +60,7 @@ type EncryptedConfigurable = {
   "providers.openai.apiKey": string;
   "providers.anthropic.apiKey": string;
   "providers.google.apiKey": string;
+  providers_deepseek_apiKey: string;
   providers_openaiCompat_apiKey: string;
 };
 
@@ -69,6 +72,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
   "providers.openai.apiKey",
   "providers.anthropic.apiKey",
   "providers.google.apiKey",
+  "providers_deepseek_apiKey",
   "providers_openaiCompat_apiKey",
 ];
 
@@ -83,6 +87,9 @@ const defaultConfiguration: ConfigurationState = {
   "providers.openai.apiKey": "",
   "providers.anthropic.apiKey": "",
   "providers.google.apiKey": "",
+  providers_deepseek_baseUrl: "https://api.deepseek.com",
+  providers_deepseek_apiKey: "",
+  providers_deepseek_headers: "",
   providers_openaiCompat_baseUrl: "",
   providers_openaiCompat_apiKey: "",
   providers_openaiCompat_headers: "",
@@ -91,6 +98,7 @@ const defaultConfiguration: ConfigurationState = {
   providers_openai_models: [],
   providers_anthropic_models: [],
   providers_google_models: [],
+  providers_deepseek_models: [],
   providers_openaiCompat_models: [],
   providers_ollama_models: [],
   providers_mock_models: [],

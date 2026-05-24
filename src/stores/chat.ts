@@ -252,6 +252,9 @@ export const useChatStore = defineStore("chat", {
       internal.lastUsedModelId = this.model?.id;
 
       this.syncProvider("openaiCompat");
+      if (config.providers_deepseek_apiKey) {
+        this.syncProvider("deepseek");
+      }
       this.syncProvider("ollama");
       getDefaultInstructions()
         .then((instructions) => {

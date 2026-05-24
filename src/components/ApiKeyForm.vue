@@ -82,6 +82,24 @@
         <template #label>Custom Headers</template>
       </BaseInput>
     </template>
+    <template v-if="selectedProvider === 'deepseek'">
+      <BaseInput v-model="deepseekBaseUrl">
+        <template #label>Base URL</template>
+        <template #helper>DeepSeek API base URL.</template>
+      </BaseInput>
+      <BaseInput v-model="deepseekApiKey" type="password">
+        <template #label>API Key</template>
+        <template #helper>
+          Get your
+          <ExternalLink href="https://platform.deepseek.com/api_keys">
+            API Key here.
+          </ExternalLink>
+        </template>
+      </BaseInput>
+      <BaseInput v-model="deepseekHeaders" type="textarea">
+        <template #label>Custom Headers</template>
+      </BaseInput>
+    </template>
     <template v-if="selectedProvider === 'ollama'">
       <BaseInput v-model="ollamaBaseUrl">
         <template #label>Ollama Base URL</template>
@@ -124,6 +142,9 @@ export default {
       googleApiKey: config["providers.google.apiKey"],
       ollamaBaseUrl: config.providers_ollama_baseUrl,
       ollamaHeaders: config.providers_ollama_headers,
+      deepseekBaseUrl: config.providers_deepseek_baseUrl,
+      deepseekApiKey: config.providers_deepseek_apiKey,
+      deepseekHeaders: config.providers_deepseek_headers,
       openaiCompatBaseUrl: config.providers_openaiCompat_baseUrl,
       openaiCompatApiKey: config.providers_openaiCompat_apiKey,
       openaiCompatHeaders: config.providers_openaiCompat_headers,
@@ -161,6 +182,18 @@ export default {
     },
     ollamaHeaders() {
       this.configure("providers_ollama_headers", this.ollamaHeaders);
+      this.$emit("change");
+    },
+    deepseekBaseUrl() {
+      this.configure("providers_deepseek_baseUrl", this.deepseekBaseUrl);
+      this.$emit("change");
+    },
+    deepseekApiKey() {
+      this.configure("providers_deepseek_apiKey", this.deepseekApiKey);
+      this.$emit("change");
+    },
+    deepseekHeaders() {
+      this.configure("providers_deepseek_headers", this.deepseekHeaders);
       this.$emit("change");
     },
     openaiCompatBaseUrl() {
