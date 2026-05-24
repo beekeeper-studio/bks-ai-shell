@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^3.0.9",
+    "@ai-sdk/deepseek": "^2.0.35",
     "@ai-sdk/google": "^3.0.6",
     "@ai-sdk/openai": "^3.0.8",
     "@ai-sdk/openai-compatible": "^2.0.4",
