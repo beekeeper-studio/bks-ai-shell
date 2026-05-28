@@ -67,6 +67,22 @@
         </ExternalLink>
       </template>
     </BaseInput>
+    <BaseInput
+      v-if="!dropdownBased || selectedProvider === 'deepseek'"
+      type="password"
+      placeholder="sk-..."
+      v-model="deepseekApiKey"
+    >
+      <template #label>
+        {{ dropdownBased ? "API Key" : providerConfigs["deepseek"].displayName }}
+      </template>
+      <template #helper>
+        Get your
+        <ExternalLink href="https://platform.deepseek.com/api_keys">
+          API Key here.
+        </ExternalLink>
+      </template>
+    </BaseInput>
     <template v-if="selectedProvider === 'openaiCompat'">
       <BaseInput v-model="openaiCompatBaseUrl">
         <template #label>Base URL</template>
@@ -122,6 +138,7 @@ export default {
       openaiApiKey: config["providers.openai.apiKey"],
       anthropicApiKey: config["providers.anthropic.apiKey"],
       googleApiKey: config["providers.google.apiKey"],
+      deepseekApiKey: config["providers.deepseek.apiKey"],
       ollamaBaseUrl: config.providers_ollama_baseUrl,
       ollamaHeaders: config.providers_ollama_headers,
       openaiCompatBaseUrl: config.providers_openaiCompat_baseUrl,
@@ -155,6 +172,10 @@ export default {
     },
     googleApiKey() {
       this.configure("providers.google.apiKey", this.googleApiKey);
+      this.$emit("change");
+    },
+    deepseekApiKey() {
+      this.configure("providers.deepseek.apiKey", this.deepseekApiKey);
       this.$emit("change");
     },
     ollamaBaseUrl() {

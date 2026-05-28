@@ -98,6 +98,19 @@ export const useChatStore = defineStore("chat", {
           !config.disabledModels.some(
             (disabled) =>
               m.id === disabled.modelId && disabled.providerId === "google",
+        ),
+        removable: false,
+      }));
+      const deepseekModels = providerConfigs.deepseek.models.map((m) => ({
+        ...m,
+        provider: "deepseek" as const,
+        providerDisplayName: providerConfigs.deepseek.displayName,
+        available: !!config["providers.deepseek.apiKey"],
+        enabled:
+          !!config["providers.deepseek.apiKey"] &&
+          !config.disabledModels.some(
+            (disabled) =>
+              m.id === disabled.modelId && disabled.providerId === "deepseek",
           ),
         removable: false,
       }));
@@ -131,6 +144,7 @@ export const useChatStore = defineStore("chat", {
         ...openaiModels,
         ...anthropicModels,
         ...googleModels,
+        ...deepseekModels,
         ...userDefinedModels,
         ...mockModels,
       ];

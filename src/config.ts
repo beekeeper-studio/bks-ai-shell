@@ -241,6 +241,25 @@ export const providerConfigs = {
     ],
     supportsRuntimeModels: false,
   },
+  deepseek: {
+    displayName: "DeepSeek",
+    /** @link https://api-docs.deepseek.com/api/list-models */
+    models: [
+      {
+        id: "deepseek-v4-flash",
+        displayName: "deepseek-v4-flash",
+        contextWindow: 1_000_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "deepseek-v4-pro",
+        displayName: "deepseek-v4-pro",
+        contextWindow: 1_000_000,
+        temperature: defaultTemperature,
+      },
+    ],
+    supportsRuntimeModels: false,
+  },
   openaiCompat: {
     displayName: "OpenAI-Compatible",
     models: [],
