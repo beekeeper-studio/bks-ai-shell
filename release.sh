@@ -2,6 +2,21 @@
 
 set -e
 
+# Releases can only be cut from the main branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$CURRENT_BRANCH" != "main" ]]; then
+  echo "🚫 You're on '$CURRENT_BRANCH'. Releases must be made from the main branch, so switch to main and try again."
+  exit 1
+fi
+
+# Releases must go to the official repository, not a fork
+EXPECTED_ORIGIN="beekeeper-studio/bks-ai-shell"
+ORIGIN_URL=$(git remote get-url origin 2>/dev/null || true)
+if [[ "$ORIGIN_URL" != *"$EXPECTED_ORIGIN"* ]]; then
+  echo "🚫 Your 'origin' points to '$ORIGIN_URL'. Releases must be published to the official repository ($EXPECTED_ORIGIN), so update your origin and try again."
+  exit 1
+fi
+
 # Spinner function
 spin() {
   local pid=$1
@@ -15,9 +30,9 @@ spin() {
   printf "\r%s done\n" "$msg"
 }
 
-# Fetch latest from remote
+# Sync with remote so we release from the latest code
 git fetch &>/dev/null &
-spin $! "Fetching from remote..."
+spin $! "Syncing with remote..."
 
 # Check if branch is behind remote
 LOCAL=$(git rev-parse @)
@@ -26,9 +41,9 @@ BASE=$(git merge-base @ @{u})
 
 if [[ "$LOCAL" != "$REMOTE" ]]; then
   if [[ "$LOCAL" == "$BASE" ]]; then
-    echo "Your branch is behind the remote. Please pull the latest changes first."
+    echo "⚠️  Your branch is behind the remote. Please pull the latest changes first."
   else
-    echo "Your branch has diverged from the remote. Please resolve this first."
+    echo "⚠️  Your branch has diverged from the remote. Please resolve this first."
   fi
   exit 1
 fi
@@ -94,23 +109,22 @@ done
 
 echo "New version: $NEW_VERSION"
 
-# Update package.json
+# Update package.json and manifest.json
 jq --arg v "$NEW_VERSION" '.version = $v' package.json > package.json.tmp && mv package.json.tmp package.json
-
-# Update manifest.json
 jq --arg v "$NEW_VERSION" '.version = $v' manifest.json > manifest.json.tmp && mv manifest.json.tmp manifest.json
 
-echo "Updated package.json and manifest.json to version $NEW_VERSION"
+echo "📝 Set the project to version $NEW_VERSION"
 
-# Git operations
+# Commit and tag the new version
 git add package.json manifest.json
 git commit -m "chore: bump version to $NEW_VERSION"
 git tag "v$NEW_VERSION"
 
-echo "Created commit and tag v$NEW_VERSION"
+echo "💾 Recorded version $NEW_VERSION locally"
 
 # Push commit and tag
 git push && git push origin "v$NEW_VERSION"
 
-echo "Pushed commit and tag to remote"
-echo "Done! Version bumped to $NEW_VERSION"
+echo "🚀 Pushed commit and tag v$NEW_VERSION to remote"
+echo "✅ Done! GitHub will build the release and create it as a draft."
+echo "👉 To publish for real, open the draft release on GitHub and mark it as ready to publish."
