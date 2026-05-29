@@ -4,6 +4,7 @@ import { DeepSeekProvider } from "@/providers/DeepSeekProvider";
 import { OpenAIProvider } from "@/providers/OpenAIProvider";
 import { OpenAICompatibleProvider } from "@/providers/OpenAICompatibleProvider";
 import { GoogleProvider } from "@/providers/GoogleProvider";
+import { ZaiProvider } from "@/providers/ZaiProvider";
 import { useConfigurationStore } from "@/stores/configuration";
 import { OllamaProvider } from "./OllamaProvider";
 import { MockProvider } from "@/providers/MockProvider";
@@ -24,6 +25,10 @@ export function createProvider(id: AvailableProviders)  {
     case "google":
       return new GoogleProvider({
         apiKey: configuration["providers.google.apiKey"],
+      });
+    case "zai":
+      return new ZaiProvider({
+        apiKey: configuration["providers.zai.apiKey"],
       });
     case "deepseek":
       return new DeepSeekProvider({

@@ -114,6 +114,19 @@ export const useChatStore = defineStore("chat", {
           ),
         removable: false,
       }));
+      const zaiModels = providerConfigs.zai.models.map((m) => ({
+        ...m,
+        provider: "zai" as const,
+        providerDisplayName: providerConfigs.zai.displayName,
+        available: !!config["providers.zai.apiKey"],
+        enabled:
+          !!config["providers.zai.apiKey"] &&
+          !config.disabledModels.some(
+            (disabled) =>
+              m.id === disabled.modelId && disabled.providerId === "zai",
+          ),
+        removable: false,
+      }));
       const userDefinedModels = config.models.map((m) => ({
         ...m,
         provider: m.providerId,
@@ -144,6 +157,7 @@ export const useChatStore = defineStore("chat", {
         ...openaiModels,
         ...anthropicModels,
         ...googleModels,
+        ...zaiModels,
         ...deepseekModels,
         ...userDefinedModels,
         ...mockModels,

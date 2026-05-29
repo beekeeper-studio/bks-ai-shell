@@ -68,6 +68,22 @@
       </template>
     </BaseInput>
     <BaseInput
+      v-if="!dropdownBased || selectedProvider === 'zai'"
+      type="password"
+      placeholder="sk-..."
+      v-model="zaiApiKey"
+    >
+      <template #label>
+        {{ dropdownBased ? "API Key" : providerConfigs["zai"].displayName }}
+      </template>
+      <template #helper>
+        Get your
+        <ExternalLink href="https://z.ai/manage-apikey/apikey-list">
+          API Key here.
+        </ExternalLink>
+      </template>
+    </BaseInput>
+    <BaseInput
       v-if="!dropdownBased || selectedProvider === 'deepseek'"
       type="password"
       placeholder="sk-..."
@@ -138,6 +154,7 @@ export default {
       openaiApiKey: config["providers.openai.apiKey"],
       anthropicApiKey: config["providers.anthropic.apiKey"],
       googleApiKey: config["providers.google.apiKey"],
+      zaiApiKey: config["providers.zai.apiKey"],
       deepseekApiKey: config["providers.deepseek.apiKey"],
       ollamaBaseUrl: config.providers_ollama_baseUrl,
       ollamaHeaders: config.providers_ollama_headers,
@@ -172,6 +189,10 @@ export default {
     },
     googleApiKey() {
       this.configure("providers.google.apiKey", this.googleApiKey);
+      this.$emit("change");
+    },
+    zaiApiKey() {
+      this.configure("providers.zai.apiKey", this.zaiApiKey);
       this.$emit("change");
     },
     deepseekApiKey() {

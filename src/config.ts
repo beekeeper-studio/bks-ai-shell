@@ -150,6 +150,55 @@ export const providerConfigs = {
     ],
     supportsRuntimeModels: false,
   },
+  zai: {
+    displayName: "Z.AI (GLM)",
+    /** @link https://docs.z.ai/devpack/overview */
+    models: [
+      {
+        id: "glm-5.1",
+        displayName: "glm-5.1",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "glm-5",
+        displayName: "glm-5",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "glm-5-turbo",
+        displayName: "glm-5-turbo",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "glm-4.7",
+        displayName: "glm-4.7",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "glm-4.7-flashx",
+        displayName: "glm-4.7-flashx",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "glm-4.7-flash",
+        displayName: "glm-4.7-flash",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "glm-4.5-air",
+        displayName: "glm-4.5-air",
+        contextWindow: 128_000,
+        temperature: defaultTemperature,
+      },
+    ],
+    supportsRuntimeModels: false,
+  },
   openai: {
     displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
