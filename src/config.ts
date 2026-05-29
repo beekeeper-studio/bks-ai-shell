@@ -88,8 +88,32 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-3.5-flash",
+        displayName: "gemini-3.5-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.1-pro-preview",
+        displayName: "gemini-3.1-pro-preview",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-3-flash-preview",
         displayName: "gemini-3-flash-preview",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.1-flash-lite",
+        displayName: "gemini-3.1-flash-lite",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.1-flash-lite-preview",
+        displayName: "gemini-3.1-flash-lite-preview",
         contextWindow: 1_048_576,
         temperature: defaultTemperature,
       },
