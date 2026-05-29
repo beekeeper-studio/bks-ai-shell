@@ -377,7 +377,7 @@ class AIShellChat {
     }
     const model = this.getModelOrThrow();
     let prompt =
-      "Name this conversation in less than 30 characters or 6 words.\n```";
+      "Name this conversation in less than 30 characters or 6 words. Return JSON only.\n```";
     this.messages.value.forEach((m) => {
       m.parts.forEach((p) => {
         if (p.type === "text") {

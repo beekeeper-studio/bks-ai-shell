@@ -12,6 +12,9 @@ export class OpenAICompatibleProvider extends BaseProvider {
     },
   ) {
     super();
+    this.options.baseURL = this.options.baseURL.endsWith("/")
+      ? this.options.baseURL
+      : this.options.baseURL + "/";
   }
 
   get providerId(): AvailableProviders {
@@ -28,7 +31,7 @@ export class OpenAICompatibleProvider extends BaseProvider {
   }
 
   async listModels(): Promise<ModelInfo[]> {
-    const url = new URL("./models", this.options.baseURL);
+    const url = new URL("models", this.options.baseURL);
 
     const res = await fetch(url.toString(), {
       headers: this.buildFetchHeaders(),

@@ -10,6 +10,14 @@
     "@ai-sdk/provider" "3.0.2"
     "@ai-sdk/provider-utils" "4.0.4"
 
+"@ai-sdk/deepseek@^2.0.35":
+  version "2.0.35"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/deepseek/-/deepseek-2.0.35.tgz#3644e0c13d9756328d658497844d4a73a1c30629"
+  integrity sha512-9DhYurbAvcurOEGN6u2myYDybrrzGfcrkG8hwmFjwTrePW6KCMggm0YxP7e8RkLYcQKqCEMgFlyEB4BM6EmiKg==
+  dependencies:
+    "@ai-sdk/provider" "3.0.10"
+    "@ai-sdk/provider-utils" "4.0.27"
+
 "@ai-sdk/gateway@3.0.11":
   version "3.0.11"
   resolved "https://registry.yarnpkg.com/@ai-sdk/gateway/-/gateway-3.0.11.tgz#e34dd3e239f97b4ee0965407c3792eb06b9cbf2b"
@@ -43,6 +51,15 @@
     "@ai-sdk/provider" "3.0.2"
     "@ai-sdk/provider-utils" "4.0.4"
 
+"@ai-sdk/provider-utils@4.0.27", "@ai-sdk/provider-utils@^4.0.6":
+  version "4.0.27"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-4.0.27.tgz#d2183685768626bcf1c968b7d73ea2b974da59b9"
+  integrity sha512-ubkAJ+xODouwtmN1tYlvTPphH1hPOBfZaEQe8U7skGvFAnIRs9PPpsq57bC2+Ky/MB4yzhd6YOsxTAx9sGpazw==
+  dependencies:
+    "@ai-sdk/provider" "3.0.10"
+    "@standard-schema/spec" "^1.1.0"
+    eventsource-parser "^3.0.8"
+
 "@ai-sdk/provider-utils@4.0.4":
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-4.0.4.tgz#b2f5af446f152be64124725677a900be615c8766"
@@ -60,15 +77,6 @@
     "@ai-sdk/provider" "2.0.0"
     "@standard-schema/spec" "^1.0.0"
     eventsource-parser "^3.0.5"
-
-"@ai-sdk/provider-utils@^4.0.6":
-  version "4.0.27"
-  resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-4.0.27.tgz#d2183685768626bcf1c968b7d73ea2b974da59b9"
-  integrity sha512-ubkAJ+xODouwtmN1tYlvTPphH1hPOBfZaEQe8U7skGvFAnIRs9PPpsq57bC2+Ky/MB4yzhd6YOsxTAx9sGpazw==
-  dependencies:
-    "@ai-sdk/provider" "3.0.10"
-    "@standard-schema/spec" "^1.1.0"
-    eventsource-parser "^3.0.8"
 
 "@ai-sdk/provider@2.0.0", "@ai-sdk/provider@^2.0.0":
   version "2.0.0"

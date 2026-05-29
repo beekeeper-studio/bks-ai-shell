@@ -88,8 +88,32 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-3.5-flash",
+        displayName: "gemini-3.5-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.1-pro-preview",
+        displayName: "gemini-3.1-pro-preview",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-3-flash-preview",
         displayName: "gemini-3-flash-preview",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.1-flash-lite",
+        displayName: "gemini-3.1-flash-lite",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.1-flash-lite-preview",
+        displayName: "gemini-3.1-flash-lite-preview",
         contextWindow: 1_048_576,
         temperature: defaultTemperature,
       },
@@ -285,6 +309,25 @@ export const providerConfigs = {
         id: "o4-mini",
         displayName: "o4-mini",
         contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+    ],
+    supportsRuntimeModels: false,
+  },
+  deepseek: {
+    displayName: "DeepSeek",
+    /** @link https://api-docs.deepseek.com/api/list-models */
+    models: [
+      {
+        id: "deepseek-v4-flash",
+        displayName: "deepseek-v4-flash",
+        contextWindow: 1_000_000,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "deepseek-v4-pro",
+        displayName: "deepseek-v4-pro",
+        contextWindow: 1_000_000,
         temperature: defaultTemperature,
       },
     ],

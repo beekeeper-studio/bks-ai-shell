@@ -59,6 +59,7 @@ type EncryptedConfigurable = {
   "providers.anthropic.apiKey": string;
   "providers.google.apiKey": string;
   "providers.zai.apiKey": string;
+  "providers.deepseek.apiKey": string;
   providers_openaiCompat_apiKey: string;
 };
 
@@ -71,6 +72,7 @@ const encryptedConfigKeys: (keyof EncryptedConfigurable)[] = [
   "providers.anthropic.apiKey",
   "providers.google.apiKey",
   "providers.zai.apiKey",
+  "providers.deepseek.apiKey",
   "providers_openaiCompat_apiKey",
 ];
 
@@ -86,6 +88,7 @@ const defaultConfiguration: ConfigurationState = {
   "providers.anthropic.apiKey": "",
   "providers.google.apiKey": "",
   "providers.zai.apiKey": "",
+  "providers.deepseek.apiKey": "",
   providers_openaiCompat_baseUrl: "",
   providers_openaiCompat_apiKey: "",
   providers_openaiCompat_headers: "",
@@ -95,6 +98,7 @@ const defaultConfiguration: ConfigurationState = {
   providers_anthropic_models: [],
   providers_google_models: [],
   providers_zai_models: [],
+  providers_deepseek_models: [],
   providers_openaiCompat_models: [],
   providers_ollama_models: [],
   providers_mock_models: [],
