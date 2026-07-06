@@ -423,10 +423,10 @@
     ansi-to-html "^0.7.2"
     highlight.js "^11.11.1"
 
-"@beekeeperstudio/vite-plugin@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@beekeeperstudio/vite-plugin/-/vite-plugin-1.0.3.tgz#c04d7b3b8aef95ecab46a18b36ce7198955fc187"
-  integrity sha512-McDNe6mmpTWg3wjpYz5gEBMow488k9taMO+Zd09Eig1kqhWAMiOyau3T1tEX3RkV5waYKL4moIoWpn0ivQeAgA==
+"@beekeeperstudio/vite-plugin@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/vite-plugin/-/vite-plugin-1.1.0.tgz#fee9fe6949885ab357e42b824e431780ac21e3a4"
+  integrity sha512-01VNiNQ0w/HjxtRRlxCbDEbGz1ePV3BZOp+H7OeTXN2Lu5a+KFybDViPKwmh0bkajnHEL1k5Zhg/wc7xTiejbQ==
 
 "@codemirror/autocomplete@^6.0.0", "@codemirror/autocomplete@^6.18.4":
   version "6.20.0"
