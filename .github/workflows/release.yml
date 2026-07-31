@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '26.5.1'
           cache: 'yarn'
 
       - name: Install dependencies
