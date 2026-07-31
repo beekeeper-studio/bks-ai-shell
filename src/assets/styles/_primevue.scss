@@ -74,7 +74,7 @@
   --p-select-option-border-radius: var(--p-menu-item-border-radius);
 
   --p-select-option-selected-color: var(--p-menu-item-focus-color);
-  --p-select-option-selected-background: var(--p-menu-item-focus-background);
+  // --p-select-option-selected-background: var(--p-menu-item-focus-background);
   --p-select-option-selected-focus-color: var(--p-menu-item-focus-color);
   --p-select-option-selected-focus-background: var(
     --p-menu-item-focus-background
@@ -121,12 +121,8 @@
   // Menu
   --p-menu-border-radius: 8px;
   --p-menu-color: var(--text);
-  --p-menu-background: color-mix(
-    in srgb,
-    var(--theme-base) 6%,
-    var(--theme-bg)
-  );
-  --p-menu-shadow: 0 0 0.5rem var(--theme-bg);
+  --p-menu-background: var(--menu-bg);
+  --p-menu-shadow: var(--menu-shadow);
 
   --p-menu-submenu-label-font-weight: normal;
 
@@ -227,9 +223,9 @@
   overflow-y: auto;
 }
 
-.p-menu-item.selected {
-  background-color: var(--p-select-option-selected-background);
-}
+// .p-menu-item.selected {
+//   background-color: var(--p-select-option-selected-background);
+// }
 
 .p-dialog {
   max-width: 90vw;

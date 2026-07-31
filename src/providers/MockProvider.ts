@@ -77,6 +77,17 @@ export class MockProvider extends BaseProvider {
         const messageCount = Array.isArray(prompt) ? prompt.length : 0;
         const tokens = calculateTokens(messageCount);
 
+        // Echo the system prompt (db info) so we can verify it reaches the model
+        const systemMessage = Array.isArray(prompt)
+          ? prompt.find((m: any) => m.role === "system")
+          : undefined;
+        const dbInfo = systemMessage
+          ? "\n\n**Database info (from system prompt):**\n\n" +
+            "```\n" +
+            systemMessage.content +
+            "\n```"
+          : "\n\n_No system prompt received._";
+
         // Generate response text based on model type
         let responseText: string;
         if (id === "mock-compact") {
@@ -85,14 +96,16 @@ export class MockProvider extends BaseProvider {
             "**Context window:** 64K tokens\n\n" +
             "**Usage pattern:** Each message adds 30% to context usage\n\n" +
             "**Purpose:** Test auto-compact feature (warning after ~3 messages, overflow after ~4 messages)\n\n" +
-            "Use this model to verify context management and auto-compact behavior without API costs.";
+            "Use this model to verify context management and auto-compact behavior without API costs." +
+            dbInfo;
         } else {
           responseText =
             "This is **Mock** - a test model for development.\n\n" +
             "**Context window:** 32K tokens\n\n" +
             "**Usage pattern:** Normal low usage (~90 tokens per message)\n\n" +
             "**Purpose:** General testing and development without API costs\n\n" +
-            "Use this model for testing UI, features, and workflows. For testing auto-compact, use **Mock compact** instead.";
+            "Use this model for testing UI, features, and workflows. For testing auto-compact, use **Mock compact** instead." +
+            dbInfo;
         }
 
         // Split text into chunks for streaming (split by words, ~5-8 words per chunk)
