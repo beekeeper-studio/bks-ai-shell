@@ -46,8 +46,7 @@
           @accept="$emit('accept-permission', part.approval?.id)"
           @reject="
             $emit('reject-permission', {
-              toolCallId: part.toolCallId,
-              approvalId: part.approval?.id,
+              ...toolRejectPayload(part),
               ...$event,
             })
           "
@@ -197,6 +196,12 @@ export default {
 
   methods: {
     isStaticToolUIPart,
+    // Narrowing from the v-else-if is lost inside the reject handler, since
+    // referencing $event compiles it to a nested closure.
+    toolRejectPayload(part: UIMessage["parts"][number]) {
+      if (!isStaticToolUIPart(part)) return {};
+      return { toolCallId: part.toolCallId, approvalId: part.approval?.id };
+    },
     async handleCopyClick() {
       await clipboard.writeText(this.text);
       this.copied = true;
