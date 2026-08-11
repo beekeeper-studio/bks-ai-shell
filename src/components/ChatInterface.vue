@@ -148,12 +148,21 @@ export default {
     ExternalLink,
   },
 
-  emits: ["manage-models", "open-configuration"],
+  emits: ["manage-models", "open-configuration", "prompt-sent"],
 
   props: {
     initialMessages: {
       type: Array as PropType<UIMessage[]>,
       required: true,
+    },
+    /**
+     * A prompt this tab was opened with (see `utils/hostTask`). Sent as soon as
+     * a model is available, which may not be until the user has finished
+     * first-time setup — so this is watched rather than read once on mount.
+     */
+    pendingPrompt: {
+      type: String as PropType<string | null>,
+      default: null,
     },
   },
 
@@ -167,6 +176,7 @@ export default {
       showFullError: false,
       noModelError: false,
       sqlOrCode: "SQL",
+      sendingPendingPrompt: false,
     };
   },
 
@@ -242,6 +252,13 @@ export default {
   },
 
   watch: {
+    pendingPrompt() {
+      this.trySendPendingPrompt();
+    },
+    model() {
+      // A first-time user has no model until they finish setup.
+      this.trySendPendingPrompt();
+    },
     error() {
       if (this.error) {
         log.error(this.error);
@@ -283,10 +300,36 @@ export default {
     await this.$nextTick();
     this.scrollToBottom();
     (this.$refs.promptInput as InstanceType<typeof PromptInput>).focus();
+
+    // If the tab was opened with a task and a model is already configured, this
+    // fires now. Otherwise the `model` watcher picks it up after setup.
+    this.trySendPendingPrompt();
   },
 
   methods: {
     ...mapActions(useInternalDataStore, ["setInternal"]),
+
+    /**
+     * Send the prompt this tab was opened with, once there is a model to send
+     * it to. Announces the send before awaiting it so the task is marked
+     * consumed even if the request itself fails — a task that re-fires on every
+     * remount would be worse than one that fails once.
+     */
+    async trySendPendingPrompt() {
+      if (!this.pendingPrompt || this.sendingPendingPrompt || !this.model) {
+        return;
+      }
+
+      const prompt = this.pendingPrompt;
+      this.sendingPendingPrompt = true;
+      this.$emit("prompt-sent");
+
+      try {
+        await this.submit(prompt);
+      } finally {
+        this.sendingPendingPrompt = false;
+      }
+    },
 
     async submit(input: string) {
       if (!this.model) {

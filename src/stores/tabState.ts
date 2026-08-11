@@ -32,6 +32,17 @@ type TabState = {
   version: "2" | "3";
   messages: UIMessage[];
   conversationTitle: string;
+  /**
+   * Set once the task this tab was opened with (see `utils/hostTask`) has been
+   * sent.
+   *
+   * The host persists a tab's params and re-delivers them every time the view
+   * mounts, so without this a restart would re-run the task and re-bill the
+   * user's tokens. It lives in the tab state rather than being cleared host-side
+   * so a task survives first-time setup: it stays pending until it is genuinely
+   * sent.
+   */
+  taskConsumed?: boolean;
 };
 
 const currentTabVersion = "3";
@@ -45,6 +56,7 @@ export const useTabState = defineStore("tabState", {
     version: currentTabVersion,
     messages: [],
     conversationTitle: "",
+    taskConsumed: false,
   }),
 
   actions: {
@@ -60,6 +72,7 @@ export const useTabState = defineStore("tabState", {
           this.messages = state.messages;
         }
         this.conversationTitle = state.conversationTitle;
+        this.taskConsumed = !!state.taskConsumed;
       }
     },
     async setTabState(key: keyof TabState, value: TabState[keyof TabState]) {
@@ -68,7 +81,13 @@ export const useTabState = defineStore("tabState", {
         version: currentTabVersion,
         messages: _.cloneDeep(this.messages),
         conversationTitle: this.conversationTitle,
+        taskConsumed: this.taskConsumed,
       });
+    },
+    /** Record that this tab's host task has been sent. Do this before sending,
+     * so a failure can't turn into a loop of retries on every remount. */
+    async markTaskConsumed() {
+      await this.setTabState("taskConsumed", true);
     },
     async setTabTitle(title: string) {
       this.setTabState("conversationTitle", title);

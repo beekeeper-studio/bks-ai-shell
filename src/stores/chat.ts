@@ -263,13 +263,15 @@ export const useChatStore = defineStore("chat", {
     },
   },
   actions: {
-    async initialize() {
+    /**
+     * Pick the last used model, or the first enabled one.
+     *
+     * Called on startup, and again once onboarding finishes: `models` only
+     * becomes enabled after an API key is saved, so a first-time user would
+     * otherwise be left with no model selected and have to pick one by hand.
+     */
+    selectDefaultModel() {
       const internal = useInternalDataStore();
-      const config = useConfigurationStore();
-      const tabState = useTabState();
-      await config.sync();
-      await internal.sync();
-      await tabState.sync();
 
       this.model = (
         this.models.find(
@@ -278,6 +280,18 @@ export const useChatStore = defineStore("chat", {
       ) as Model | undefined;
 
       internal.lastUsedModelId = this.model?.id;
+
+      return this.model;
+    },
+    async initialize() {
+      const internal = useInternalDataStore();
+      const config = useConfigurationStore();
+      const tabState = useTabState();
+      await config.sync();
+      await internal.sync();
+      await tabState.sync();
+
+      this.selectDefaultModel();
 
       this.syncProvider("openaiCompat");
       this.syncProvider("ollama");

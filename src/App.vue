@@ -4,8 +4,9 @@
       <h1>AI Shell</h1>
       <div class="progress-bar"></div>
     </div>
-    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" @manage-models="handleManageModels"
-      @open-configuration="handleOpenConfiguration" />
+    <ChatInterface v-if="page === 'chat-interface'" :initialMessages="messages" :pendingPrompt="pendingPrompt"
+      @manage-models="handleManageModels" @open-configuration="handleOpenConfiguration"
+      @prompt-sent="handlePendingPromptSent" />
     <Configuration v-model:visible="showConfiguration" :reactivePage="configurationPage" @close="closeConfiguration" />
     <Dialog modal :visible="showOnboarding" :closable="false" :draggable="false">
       <OnboardingScreen @submit="closeOnboardingScreen" />
@@ -24,8 +25,9 @@ import Configuration, {
   type PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
-import { getData, log } from "@beekeeperstudio/plugin";
+import { getData, getViewContext, log } from "@beekeeperstudio/plugin";
 import { Dialog } from "primevue";
+import { composeHostTaskPrompt, parseHostTask } from "@/utils/hostTask";
 
 type Page = "starting" | "chat-interface";
 
@@ -46,6 +48,8 @@ export default {
       showLoading: false,
       apiKeysChanged: false,
       configurationPage: "general" as ConfigurationPageId,
+      /** The prompt for a host-provided task, held until it is actually sent. */
+      pendingPrompt: null as string | null,
     };
   },
 
@@ -60,6 +64,8 @@ export default {
     try {
       await this.initialize();
       await this.$nextTick();
+
+      await this.loadHostTask();
 
       if (this.isFirstTimeUser && !this.apiKeyExists) {
         this.showOnboarding = true;
@@ -77,7 +83,7 @@ export default {
   },
 
   computed: {
-    ...mapState(useTabState, ["messages"]),
+    ...mapState(useTabState, ["messages", "taskConsumed"]),
     ...mapState(useConfigurationStore, {
       openaiApiKey: "providers.openai.apiKey",
       anthropicApiKey: "providers.anthropic.apiKey",
@@ -90,11 +96,46 @@ export default {
   methods: {
     ...mapActions(useConfigurationStore, ["configure"]),
     ...mapActions(useInternalDataStore, ["setInternal"]),
-    ...mapActions(useChatStore, ["initialize"]),
+    ...mapActions(useChatStore, ["initialize", "selectDefaultModel"]),
+    ...mapActions(useTabState, ["markTaskConsumed"]),
+
+    /**
+     * Pick up the task this tab was opened with, if any.
+     *
+     * The host re-delivers a tab's params on every mount, so `taskConsumed`
+     * (persisted in the tab state) is what stops a restart re-running the task
+     * and re-billing the user's tokens. The prompt is only held here — it stays
+     * pending across first-time setup and is marked consumed at the point it is
+     * actually sent.
+     */
+    async loadHostTask() {
+      if (this.taskConsumed) {
+        return;
+      }
+
+      try {
+        const task = parseHostTask(await getViewContext());
+        if (task) {
+          this.pendingPrompt = composeHostTaskPrompt(task);
+        }
+      } catch (e) {
+        // An older host has no view context. Nothing to do.
+        log.error(e as Error);
+      }
+    },
+
+    handlePendingPromptSent() {
+      this.pendingPrompt = null;
+      this.markTaskConsumed();
+    },
+
     closeOnboardingScreen() {
       this.showOnboarding = false;
       this.page = "chat-interface";
       this.setInternal("isFirstTimeUser", false);
+      // Models only become enabled once an API key is saved, so nothing has
+      // been selected up to this point.
+      this.selectDefaultModel();
     },
     handleManageModels() {
       this.configurationPage = "models";

@@ -27,7 +27,7 @@
         "name": "Add AI Shell",
         "description": "Open a new AI Shell tab.",
         "view": "bks-ai-shell",
-        "placement": "newTabDropdown"
+        "placement": ["newTabDropdown", "menubar.tools"]
       }
     ]
   },
