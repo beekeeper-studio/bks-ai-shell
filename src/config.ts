@@ -33,6 +33,12 @@ export const providerConfigs = {
         temperature: 1,
       },
       {
+        id: 'claude-opus-5',
+        displayName: 'claude-opus-5',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
         id: 'claude-sonnet-5',
         displayName: 'claude-sonnet-5',
         contextWindow: 1_000_000,
@@ -47,12 +53,6 @@ export const providerConfigs = {
       {
         id: 'claude-opus-4-7',
         displayName: 'claude-opus-4-7',
-        contextWindow: 1_000_000,
-        temperature: 1,
-      },
-      {
-        id: 'claude-opus-4-6',
-        displayName: 'claude-opus-4-6',
         contextWindow: 1_000_000,
         temperature: 1,
       },
@@ -86,12 +86,6 @@ export const providerConfigs = {
         contextWindow: 200_000,
         temperature: defaultTemperature,
       },
-      {
-        id: "claude-opus-4-1", // Deprecated (see disabledModelsByDefault)
-        displayName: "claude-opus-4-1",
-        contextWindow: 200_000,
-        temperature: defaultTemperature,
-      },
     ],
     supportsRuntimeModels: false,
   },
@@ -100,8 +94,20 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-3.6-flash",
+        displayName: "gemini-3.6-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-3.5-flash",
         displayName: "gemini-3.5-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
+        id: "gemini-3.5-flash-lite",
+        displayName: "gemini-3.5-flash-lite",
         contextWindow: 1_048_576,
         temperature: defaultTemperature,
       },
@@ -203,6 +209,24 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
     models: [
+      {
+        id: "gpt-5.6-sol",
+        displayName: "gpt-5.6-sol",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-5.6-terra",
+        displayName: "gpt-5.6-terra",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-5.6-luna",
+        displayName: "gpt-5.6-luna",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
       {
         id: "gpt-5.5-pro",
         displayName: "gpt-5.5-pro",
@@ -415,9 +439,6 @@ export const disabledModelsByDefault: {
     // ===== Anthropic =====
     // https://docs.claude.com/en/docs/about-claude/model-deprecations
 
-    // Retirement date: August 5, 2026
-    {
-      providerId: "anthropic" as const,
-      modelId: "claude-opus-4-1",
-    },
+    //
+    //
   ];
