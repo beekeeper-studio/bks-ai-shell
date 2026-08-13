@@ -4,6 +4,10 @@ import { createPinia, setActivePinia } from "pinia";
 import PrimeVue from "primevue/config";
 import PromptInput from "../../src/components/common/PromptInput.vue";
 
+// Node's own `localStorage` global shadows happy-dom's, so vitest never
+// copies the working one onto globalThis.
+Object.defineProperty(globalThis, "localStorage", { value: new Storage() });
+
 // Mock the stores before importing the component
 vi.mock("../../src/stores/chat", () => ({
   useChatStore: vi.fn(() => ({
