@@ -229,13 +229,15 @@ export default {
       const hasToolError = errorStr.includes("bad request");
       return isOllama && hasToolError;
     },
-    initialPrompt(){
+    initialPrompt(): string {
+      const params = this.viewContext?.params;
       if (
         this.viewContext?.command === "new-tab-dropdown-item" &&
-        "message" in this.viewContext?.params &&
+        params &&
+        "message" in params &&
         this.initialMessages.length === 0
       ) {
-        return this.viewContext.params.message;
+        return params.message as string;
       }
       return "";
     },

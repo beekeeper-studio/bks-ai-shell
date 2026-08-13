@@ -19,7 +19,7 @@ import {
   getTables,
   getViewContext,
   log,
-  type ViewContext,
+  type PluginViewContext,
 } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import gt from "semver/functions/gt";
@@ -42,7 +42,7 @@ type ChatState = {
   entities: Entity[];
   connectionInfo: ConnectionInfo;
   appVersion: Awaited<ReturnType<typeof getAppVersion>>;
-  viewContext?: Raw<ViewContext>;
+  viewContext?: Raw<PluginViewContext>;
 };
 
 // the first argument is a unique id of the store across your application
