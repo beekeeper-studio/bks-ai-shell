@@ -96,6 +96,7 @@
       <PromptInput
         ref="promptInput"
         storage-key="inputHistory"
+        :initialValue="initialPrompt"
         :processing="processing"
         :selected-model="model"
         @select-model="selectModel"
@@ -127,7 +128,7 @@ import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import type { UIMessage } from "@/types";
 import type { PropType } from "vue";
-import { mapActions, mapGetters, mapWritableState } from "pinia";
+import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
 import type { RootBinding } from "@/plugins/appEvent";
 import { useInternalDataStore } from "@/stores/internalData";
 import BaseInput from "@/components/common/BaseInput.vue";
@@ -177,6 +178,9 @@ export default {
       "contextOverflow",
       "contextLeftUntilAutoCompact",
     ]),
+    ...mapState(useChatStore, [
+      "viewContext",
+    ]),
     ...mapWritableState(useChatStore, ["model"]),
     processing() {
       if (this.hasPendingApprovals) return false;
@@ -224,6 +228,16 @@ export default {
       const isOllama = this.model.provider === "ollama";
       const hasToolError = errorStr.includes("bad request");
       return isOllama && hasToolError;
+    },
+    initialPrompt(){
+      if (
+        this.viewContext?.command === "new-tab-dropdown-item" &&
+        "message" in this.viewContext?.params &&
+        this.initialMessages.length === 0
+      ) {
+        return this.viewContext.params.message;
+      }
+      return "";
     },
 
     rootBindings(): RootBinding[] {

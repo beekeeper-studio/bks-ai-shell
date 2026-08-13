@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { markRaw, type Raw } from "vue";
 import type {
   AvailableModels,
   AvailableProviders,
@@ -16,7 +17,9 @@ import {
   getAppVersion,
   getConnectionInfo,
   getTables,
+  getViewContext,
   log,
+  type ViewContext,
 } from "@beekeeperstudio/plugin";
 import type { Entity } from "@beekeeperstudio/ui-kit";
 import gt from "semver/functions/gt";
@@ -39,6 +42,7 @@ type ChatState = {
   entities: Entity[];
   connectionInfo: ConnectionInfo;
   appVersion: Awaited<ReturnType<typeof getAppVersion>>;
+  viewContext?: Raw<ViewContext>;
 };
 
 // the first argument is a unique id of the store across your application
@@ -58,6 +62,7 @@ export const useChatStore = defineStore("chat", {
       readOnlyMode: true,
     },
     appVersion: "900.0.0",
+    viewContext: undefined,
   }),
   getters: {
     models() {
@@ -270,6 +275,8 @@ export const useChatStore = defineStore("chat", {
       await config.sync();
       await internal.sync();
       await tabState.sync();
+
+      this.viewContext = markRaw(await getViewContext());
 
       this.model = (
         this.models.find(

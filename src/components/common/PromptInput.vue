@@ -90,11 +90,12 @@ export default defineComponent({
       required: true,
     },
     selectedModel: Object as PropType<Model>,
+    initialValue: String,
   },
 
   data() {
     const inputHistory: string[] = loadInputHistory(this.storageKey);
-    inputHistory.push("");
+    inputHistory.push(this.initialValue ?? "");
     return {
       inputHistory,
       inputIndex: inputHistory.length - 1,
