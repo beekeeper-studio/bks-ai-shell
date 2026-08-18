@@ -94,6 +94,12 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-3.7-flash",
+        displayName: "gemini-3.7-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-3.6-flash",
         displayName: "gemini-3.6-flash",
         contextWindow: 1_048_576,
@@ -416,18 +422,6 @@ export const disabledModelsByDefault: {
     {
       providerId: "google" as const,
       modelId: "gemini-2.5-pro",
-    },
-
-    // Retirement date: June 1, 2026
-    {
-      providerId: "google" as const,
-      modelId: "gemini-2.0-flash",
-    },
-
-    // Retirement date: June 1, 2026
-    {
-      providerId: "google" as const,
-      modelId: "gemini-2.0-flash-lite",
     },
 
     // ===== OpenAI =====
