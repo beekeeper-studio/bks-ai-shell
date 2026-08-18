@@ -418,22 +418,10 @@ export const disabledModelsByDefault: {
     // ===== Google =====
     // https://ai.google.dev/gemini-api/docs/deprecations
 
-    // Retirement date: June 17, 2026
+    // Legacy since June 17, 2025; no shutdown date announced as of this writing
     {
       providerId: "google" as const,
       modelId: "gemini-2.5-pro",
-    },
-
-    // Retirement date: June 1, 2026
-    {
-      providerId: "google" as const,
-      modelId: "gemini-2.0-flash",
-    },
-
-    // Retirement date: June 1, 2026
-    {
-      providerId: "google" as const,
-      modelId: "gemini-2.0-flash-lite",
     },
 
     // ===== OpenAI =====
