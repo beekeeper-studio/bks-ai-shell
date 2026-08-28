@@ -27,9 +27,11 @@ import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
 import { createAppEvent } from "@/plugins/appEvent";
+import { InputContextMenu } from "@/plugins/inputContextMenu";
 import { VueKeyboardTrapDirectivePlugin } from "@pdanpdan/vue-keyboard-trap";
 import PrimeVue from "primevue/config";
 import "@beekeeperstudio/ui-kit/sql-text-editor";
+import "@beekeeperstudio/ui-kit/context-menu";
 
 setDebugComms(false);
 
@@ -73,6 +75,7 @@ const appEvent = createAppEvent();
 app.use(pinia);
 app.use(appEvent);
 app.use(VueKeyboardTrapDirectivePlugin, {});
+app.use(InputContextMenu);
 app.use(PrimeVue);
 app.config.globalProperties.$pluralize = pluralize;
 app.config.globalProperties.$openExternal = openExternal;
