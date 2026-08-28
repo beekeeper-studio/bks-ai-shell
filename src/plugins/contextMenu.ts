@@ -8,22 +8,27 @@ import { clipboard } from "@beekeeperstudio/plugin";
 
 type TextInput = HTMLInputElement | HTMLTextAreaElement;
 
+export interface OpenMenuOptions {
+  event: Event;
+  options: MenuItem[];
+}
+
+export function openMenu({ event, options }: OpenMenuOptions) {
+  const menu = document.createElement("bks-context-menu") as ContextMenuElement;
+  menu.event = event;
+  menu.options = options;
+  menu.addEventListener("bks-destroyed", () => {
+    menu.remove();
+  });
+  document.body.appendChild(menu);
+}
+
 const divider: DividerItem = { type: "divider", id: "divider" };
 
-const textInputTypes = [
-  "text",
-  "password",
-  "email",
-  "url",
-  "tel",
-  "search",
-  "number",
-];
-
 /** Adds a cut/copy/paste context menu to every text input in the app. */
-export const InputContextMenu: Plugin = {
+export const ContextMenu: Plugin = {
   install(app) {
-    const menu = new ContextMenu();
+    const menu = new InputContextMenu();
     app.mixin({
       mounted() {
         document.addEventListener("contextmenu", menu.handle);
@@ -32,13 +37,24 @@ export const InputContextMenu: Plugin = {
         document.removeEventListener("contextmenu", menu.handle);
       },
     });
+    app.config.globalProperties.$bks = { openMenu };
   },
 };
 
-class ContextMenu {
+class InputContextMenu {
   constructor() {
     this.handle = this.handle.bind(this);
   }
+
+  static targetTypes = [
+    "text",
+    "password",
+    "email",
+    "url",
+    "tel",
+    "search",
+    "number",
+  ];
 
   handle(event: Event) {
     if (event.defaultPrevented) {
@@ -64,76 +80,67 @@ class ContextMenu {
     const editable = this.isEditable(target);
     const hasSelection = this.hasSelectedText(target);
 
-    this.openMenu(event, [
-      {
-        label: "Undo",
-        handler: () => document.execCommand("undo"),
-        disabled: !editable,
-        shortcut: "Control+Z",
-      },
-      {
-        label: "Redo",
-        handler: () => document.execCommand("redo"),
-        disabled: !editable,
-        shortcut: "Control+Shift+Z",
-      },
-      divider,
-      {
-        label: "Cut",
-        handler: async () => {
-          const selection = this.selectionOf(target);
-          if (!selection.text) {
-            return;
-          }
-          await clipboard.writeText(selection.text);
-          this.replaceSelection(target, "");
+    openMenu({
+      event,
+      options: [
+        {
+          label: "Undo",
+          handler: () => document.execCommand("undo"),
+          disabled: !editable,
+          shortcut: "Control+Z",
         },
-        disabled: !hasSelection || !editable,
-        shortcut: "Control+X",
-      },
-      {
-        label: "Copy",
-        handler: async () => {
-          const selection = this.selectionOf(target);
-          if (!selection.text) {
-            return;
-          }
-          await clipboard.writeText(selection.text);
+        {
+          label: "Redo",
+          handler: () => document.execCommand("redo"),
+          disabled: !editable,
+          shortcut: "Control+Shift+Z",
         },
-        disabled: !hasSelection,
-        shortcut: "Control+C",
-      },
-      {
-        label: "Paste",
-        handler: async () => {
-          const text = await clipboard.readText();
-          if (!text) {
-            return;
-          }
-          this.replaceSelection(target, text);
+        divider,
+        {
+          label: "Cut",
+          handler: async () => {
+            const selection = this.selectionOf(target);
+            if (!selection.text) {
+              return;
+            }
+            await clipboard.writeText(selection.text);
+            this.replaceSelection(target, "");
+          },
+          disabled: !hasSelection || !editable,
+          shortcut: "Control+X",
         },
-        disabled: !editable,
-        shortcut: "Control+V",
-      },
-      divider,
-      {
-        label: "Select All",
-        handler: () => target.select(),
-        shortcut: "Control+A",
-      },
-    ]);
-  }
-
-  private openMenu(event: Event, options: MenuItem[]) {
-    const menu = document.createElement(
-      "bks-context-menu",
-    ) as ContextMenuElement;
-    menu.event = event;
-    menu.options = options;
-    menu.addEventListener("bks-destroyed", () => {
-      menu.remove();
+        {
+          label: "Copy",
+          handler: async () => {
+            const selection = this.selectionOf(target);
+            if (!selection.text) {
+              return;
+            }
+            await clipboard.writeText(selection.text);
+          },
+          disabled: !hasSelection,
+          shortcut: "Control+C",
+        },
+        {
+          label: "Paste",
+          handler: async () => {
+            const text = await clipboard.readText();
+            if (!text) {
+              return;
+            }
+            this.replaceSelection(target, text);
+          },
+          disabled: !editable,
+          shortcut: "Control+V",
+        },
+        divider,
+        {
+          label: "Select All",
+          handler: () => target.select(),
+          shortcut: "Control+A",
+        },
+      ],
     });
-    document.body.appendChild(menu);
   }
 
   private isTextInput(target: EventTarget | null): target is TextInput {
@@ -141,7 +148,7 @@ class ContextMenu {
       return true;
     }
     if (target instanceof HTMLInputElement) {
-      return textInputTypes.includes(target.type);
+      return InputContextMenu.targetTypes.includes(target.type);
     }
     return false;
   }
