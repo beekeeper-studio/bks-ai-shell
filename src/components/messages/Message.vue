@@ -204,13 +204,26 @@ export default {
       return { toolCallId: part.toolCallId, approvalId: part.approval?.id };
     },
     handleContextMenu(event: MouseEvent) {
+      const selection = window.getSelection();
+
+      if (!selection || selection.isCollapsed) {
+        return;
+      }
+
+      if (!this.$el.contains(selection.anchorNode)) {
+        return;
+      }
+
+      // The selection is gone by the time the handler runs
+      const selectedText = selection.toString();
+
       event.preventDefault();
       this.$bks.openMenu({
         event,
-        options: [
+        items: [
           {
             label: "Copy",
-            handler: () => clipboard.writeText(this.text),
+            handler: () => clipboard.writeText(selectedText),
           },
         ],
       });

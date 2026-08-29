@@ -1,7 +1,10 @@
 <template>
   <div class="run-query-result">
     <template v-if="rows.length > 0">
-      <div class="preview-table-container table-container">
+      <div
+        class="preview-table-container table-container"
+        @contextmenu="handleContextMenu"
+      >
         <table class="preview-table">
           <thead>
             <tr>
@@ -35,7 +38,7 @@
       </div>
       <button
         class="btn view-more-btn"
-        @click.prevent="handleViewMoreClick"
+        @click.prevent="viewMore"
       >
         <div class="label">View more</div>
         <span class="material-symbols-outlined open-icon">
@@ -78,8 +81,14 @@ export default {
   },
 
   methods: {
-    handleViewMoreClick() {
+    viewMore() {
       this.trigger("showResultTable", this.data.results)
+    },
+    handleContextMenu(event: MouseEvent) {
+      this.$bks.openMenu({
+        event,
+        items: [{ label: "View more", handler: this.viewMore }],
+      });
     },
   },
 };

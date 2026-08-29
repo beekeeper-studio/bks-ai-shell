@@ -10,43 +10,47 @@ type TextInput = HTMLInputElement | HTMLTextAreaElement;
 
 export interface OpenMenuOptions {
   event: Event;
-  options: MenuItem[];
+  items: MenuItem[];
 }
 
-export function openMenu({ event, options }: OpenMenuOptions) {
-  const menu = document.createElement("bks-context-menu") as ContextMenuElement;
-  menu.event = event;
-  menu.options = options;
-  menu.addEventListener("bks-destroyed", () => {
-    menu.remove();
-  });
-  document.body.appendChild(menu);
-}
+class ContextMenuManager {
+  items: MenuItem[] = [];
 
-const divider: DividerItem = { type: "divider", id: "divider" };
+  flushItems(event: Event) {
+    event.preventDefault();
 
-/** Adds a cut/copy/paste context menu to every text input in the app. */
-export const ContextMenu: Plugin = {
-  install(app) {
-    const menu = new InputContextMenu();
-    app.mixin({
-      mounted() {
-        document.addEventListener("contextmenu", menu.handle);
-      },
-      unmounted() {
-        document.removeEventListener("contextmenu", menu.handle);
-      },
+    const target = event.target;
+    const items = this.items;
+
+    this.items = [];
+
+    if (this.isTextInput(target)) {
+      if (items.length > 0) {
+        items.unshift(divider, ...this.getDefaultItems(target));
+      } else {
+        items.unshift(...this.getDefaultItems(target));
+      }
+    }
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const element = document.createElement(
+      "bks-context-menu",
+    ) as ContextMenuElement;
+
+    element.event = event;
+    element.options = items;
+
+    element.addEventListener("bks-destroyed", () => {
+      element.remove();
     });
-    app.config.globalProperties.$bks = { openMenu };
-  },
-};
 
-class InputContextMenu {
-  constructor() {
-    this.handle = this.handle.bind(this);
+    document.body.appendChild(element);
   }
 
-  static targetTypes = [
+  static inputTypes = [
     "text",
     "password",
     "email",
@@ -56,23 +60,7 @@ class InputContextMenu {
     "number",
   ];
 
-  handle(event: Event) {
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    const target = event.target;
-
-    if (!this.isTextInput(target)) {
-      return;
-    }
-
-    if (target.dataset?.disableContextMenu) {
-      return;
-    }
-
-    event.preventDefault();
-
+  private getDefaultItems(target: TextInput) {
     if (!target.disabled) {
       target.focus(); // clipboard and undo/redo act on the focused field
     }
@@ -80,67 +68,64 @@ class InputContextMenu {
     const editable = this.isEditable(target);
     const hasSelection = this.hasSelectedText(target);
 
-    openMenu({
-      event,
-      options: [
-        {
-          label: "Undo",
-          handler: () => document.execCommand("undo"),
-          disabled: !editable,
-          shortcut: "Control+Z",
+    return [
+      {
+        label: "Undo",
+        handler: () => document.execCommand("undo"),
+        disabled: !editable,
+        shortcut: "Control+Z",
+      },
+      {
+        label: "Redo",
+        handler: () => document.execCommand("redo"),
+        disabled: !editable,
+        shortcut: "Control+Shift+Z",
+      },
+      divider,
+      {
+        label: "Cut",
+        handler: async () => {
+          const selection = this.selectionOf(target);
+          if (!selection.text) {
+            return;
+          }
+          await clipboard.writeText(selection.text);
+          this.replaceSelection(target, "");
         },
-        {
-          label: "Redo",
-          handler: () => document.execCommand("redo"),
-          disabled: !editable,
-          shortcut: "Control+Shift+Z",
+        disabled: !hasSelection || !editable,
+        shortcut: "Control+X",
+      },
+      {
+        label: "Copy",
+        handler: async () => {
+          const selection = this.selectionOf(target);
+          if (!selection.text) {
+            return;
+          }
+          await clipboard.writeText(selection.text);
         },
-        divider,
-        {
-          label: "Cut",
-          handler: async () => {
-            const selection = this.selectionOf(target);
-            if (!selection.text) {
-              return;
-            }
-            await clipboard.writeText(selection.text);
-            this.replaceSelection(target, "");
-          },
-          disabled: !hasSelection || !editable,
-          shortcut: "Control+X",
+        disabled: !hasSelection,
+        shortcut: "Control+C",
+      },
+      {
+        label: "Paste",
+        handler: async () => {
+          const text = await clipboard.readText();
+          if (!text) {
+            return;
+          }
+          this.replaceSelection(target, text);
         },
-        {
-          label: "Copy",
-          handler: async () => {
-            const selection = this.selectionOf(target);
-            if (!selection.text) {
-              return;
-            }
-            await clipboard.writeText(selection.text);
-          },
-          disabled: !hasSelection,
-          shortcut: "Control+C",
-        },
-        {
-          label: "Paste",
-          handler: async () => {
-            const text = await clipboard.readText();
-            if (!text) {
-              return;
-            }
-            this.replaceSelection(target, text);
-          },
-          disabled: !editable,
-          shortcut: "Control+V",
-        },
-        divider,
-        {
-          label: "Select All",
-          handler: () => target.select(),
-          shortcut: "Control+A",
-        },
-      ],
-    });
+        disabled: !editable,
+        shortcut: "Control+V",
+      },
+      divider,
+      {
+        label: "Select All",
+        handler: () => target.select(),
+        shortcut: "Control+A",
+      },
+    ];
   }
 
   private isTextInput(target: EventTarget | null): target is TextInput {
@@ -148,7 +133,7 @@ class InputContextMenu {
       return true;
     }
     if (target instanceof HTMLInputElement) {
-      return InputContextMenu.targetTypes.includes(target.type);
+      return ContextMenuManager.inputTypes.includes(target.type);
     }
     return false;
   }
@@ -188,3 +173,25 @@ class InputContextMenu {
     target.dispatchEvent(new Event("input", { bubbles: true }));
   }
 }
+
+const contextMenu = new ContextMenuManager();
+
+const divider: DividerItem = { type: "divider", id: "divider" };
+
+/** Adds a cut/copy/paste context menu to every text input in the app. */
+export const ContextMenu: Plugin = {
+  install(app) {
+    document.addEventListener("contextmenu", (event) => {
+      contextMenu.flushItems(event);
+    });
+    app.config.globalProperties.$bks = {
+      openMenu({ event, items }: OpenMenuOptions) {
+        contextMenu.items.unshift(...items);
+
+        if (event.cancelBubble) {
+          contextMenu.flushItems(event);
+        }
+      },
+    };
+  },
+};

@@ -2,7 +2,7 @@ import type { ComponentCustomProperties } from 'vue'
 import type { AppEvent, AppEventHandlers } from './plugins/appEvent'
 import type { openExternal } from '@beekeeperstudio/plugin';
 import type pluralize from "pluralize";
-import type { openMenu } from './plugins/contextMenu';
+import type { OpenMenuOptions } from './plugins/contextMenu';
 
 declare module "@vue/runtime-core" {
   interface ComponentCustomProperties {
@@ -12,7 +12,7 @@ declare module "@vue/runtime-core" {
     ) => void;
     $pluralize: typeof pluralize;
     $openExternal: typeof openExternal;
-    $bks: { openMenu: typeof openMenu };
+    $bks: { openMenu: (options: OpenMenuOptions) => void };
   }
 }
 
