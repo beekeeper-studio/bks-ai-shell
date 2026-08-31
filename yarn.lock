@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@ai-sdk/anthropic@^4":
+"@ai-sdk/anthropic@^4.0.46":
   version "4.0.46"
   resolved "https://registry.yarnpkg.com/@ai-sdk/anthropic/-/anthropic-4.0.46.tgz#a8b3184bda057b39a445344c2eb25f2cf40d3d3c"
   integrity sha512-/q/wWLArkavQHeOYdv8kZyJRTuasTRwrzoAnvUaY0sHx/BGDYDWW9ENn7lu/H5iUeYId6NhtYAVv+TlqHpp9Cg==
@@ -10,7 +10,7 @@
     "@ai-sdk/provider" "4.0.9"
     "@ai-sdk/provider-utils" "5.0.34"
 
-"@ai-sdk/deepseek@^3":
+"@ai-sdk/deepseek@^3.0.37":
   version "3.0.37"
   resolved "https://registry.yarnpkg.com/@ai-sdk/deepseek/-/deepseek-3.0.37.tgz#3239c893d2d996034768fee70ed2daa158a73b3e"
   integrity sha512-5KDzH6DFrnJfw0KM/1OHsO+HLaKqHVC3mB3FQVknou6CpUPEMrThsK5BeAi893NCuucJxQkvpQwShl+55P23Vw==
@@ -27,7 +27,7 @@
     "@ai-sdk/provider-utils" "5.0.34"
     "@vercel/oidc" "3.2.0"
 
-"@ai-sdk/google@^4":
+"@ai-sdk/google@^4.0.58":
   version "4.0.58"
   resolved "https://registry.yarnpkg.com/@ai-sdk/google/-/google-4.0.58.tgz#698eaedbd5c3a385c771d537c6c15e336be21fa1"
   integrity sha512-4xd28cAErn/aO0yoG95qwPO7QvoBlSKw7UeQuxivbTwFCSjA5hy/OrMEM4adPLPoPrnTi4PXFVzNesNBtKHI0Q==
@@ -35,7 +35,7 @@
     "@ai-sdk/provider" "4.0.9"
     "@ai-sdk/provider-utils" "5.0.34"
 
-"@ai-sdk/openai-compatible@^3":
+"@ai-sdk/openai-compatible@^3.0.41":
   version "3.0.41"
   resolved "https://registry.yarnpkg.com/@ai-sdk/openai-compatible/-/openai-compatible-3.0.41.tgz#b7b780b699b28cca850c48d229749918c77bf53f"
   integrity sha512-djOLRg4WOq5EINvWLfw2dniO14vBrf0iMRs/aXAQqsp4a67Wi49aMpZuvC7C7L3VpL43rnFzS1fWw7T6vpzgUQ==
@@ -43,7 +43,7 @@
     "@ai-sdk/provider" "4.0.9"
     "@ai-sdk/provider-utils" "5.0.34"
 
-"@ai-sdk/openai@^4":
+"@ai-sdk/openai@^4.0.52":
   version "4.0.52"
   resolved "https://registry.yarnpkg.com/@ai-sdk/openai/-/openai-4.0.52.tgz#dbe2b0f4ee28cba1750f8f7761134d1d40afe96e"
   integrity sha512-I44DlHmBe8Sv5HVOaxAQEX3IbeG8Voz78z9abg6QJtWpL/oz42/ytGNWGAJPvKOJ9jFQ4ofalySFviUCRQk9MA==
@@ -85,7 +85,7 @@
   dependencies:
     json-schema "^0.4.0"
 
-"@ai-sdk/vue@^4":
+"@ai-sdk/vue@^4.0.85":
   version "4.0.85"
   resolved "https://registry.yarnpkg.com/@ai-sdk/vue/-/vue-4.0.85.tgz#55116b9714a2d3984ce102b9c2ae5ca9966eaee1"
   integrity sha512-/qE9YO86F+A8gGrxyHG7To+iIki/LHaY0Q4CygVLEUCOKFIp2J32KvRWr+he0OMdyYrRAZXvrKk7/891CRUF1A==
@@ -1410,7 +1410,7 @@ abbrev@^2.0.0:
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-2.0.0.tgz#cf59829b8b4f03f89dda2771cb7f3653828c89bf"
   integrity sha512-6/mh1E2u2YgEsCHdY0Yx5oW+61gZU+1vXaoiHHrpKeuRNNgFvS+/jrwHiQhB5apAf5oB7UB7E19ol2R2LKH8hQ==
 
-ai@7.0.85, ai@^7:
+ai@7.0.85, ai@^7.0.85:
   version "7.0.85"
   resolved "https://registry.yarnpkg.com/ai/-/ai-7.0.85.tgz#d830b6e391dbc663433a8b6e6d38689a0f457fe8"
   integrity sha512-HVtPz0qLbTUad+QBnWWReIUmwk+U4PcRENMx+9PsHGVoinoc5CLDiVjNR+VBXTKOSaNgce8kSU/Rtbb4kjZsSw==
@@ -2092,7 +2092,7 @@ ohash@^2.0.11:
   resolved "https://registry.yarnpkg.com/ohash/-/ohash-2.0.11.tgz#60b11e8cff62ca9dee88d13747a5baa145f5900b"
   integrity sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==
 
-ollama-ai-provider-v2@^4:
+ollama-ai-provider-v2@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/ollama-ai-provider-v2/-/ollama-ai-provider-v2-4.0.1.tgz#c31f16f7b7d09a879290fc74452b4cd4b680166e"
   integrity sha512-JHw/Knt4kOTSwQ0oqorbdgzukK6iE73U3MPUyOuCEBpAQGAzm80CQDwyaXMwF80yFjY21RY9qfzkoLyPFFts/w==
@@ -2740,7 +2740,7 @@ yallist@^3.0.2:
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-3.1.1.tgz#dbb7daf9bfd8bac9ab45ebf602b8cbad0d5d08fd"
   integrity sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==
 
-zhipu-ai-provider@^0.4:
+zhipu-ai-provider@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/zhipu-ai-provider/-/zhipu-ai-provider-0.4.0.tgz#13dd4f852804b271cb2822ee6d20af04d0097a9b"
   integrity sha512-yEUCjk8gQGvf/eP0nDOwxjOVPwVFSbH5f+0U9F+RXRFeHjd0bQbwBn9CvveGoYwg52m3fcHSrG3yFHNbFwPm2g==
