@@ -38,10 +38,11 @@
           <template v-if="message.role === 'user'">{{ part.text }}</template>
           <markdown v-else :content="part.text" />
         </template>
+        <!-- The AI SDK mutates tool parts in place, so pass a fresh copy or the tool never redraws as it progresses. -->
         <tool-message
           v-else-if="isStaticToolUIPart(part)"
           :message="message"
-          :toolCall="part"
+          :toolCall="{ ...part }"
           :disableToolEdit="disableToolEdit"
           @accept="$emit('accept-permission', part.approval?.id)"
           @reject="
