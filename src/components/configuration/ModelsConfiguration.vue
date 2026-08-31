@@ -1,32 +1,32 @@
 <template>
   <h2>Models</h2>
-  <div class="models-content">
-    <div class="models-header">
-      <BaseInput v-model="filter" placeholder="Search models..." />
-      <div class="models-sub-header">
-        <select
-          v-model="filterByProvider"
-          :options="filterByProviderOptions"
-          class="filter-by-provider"
+  <div class="models-header">
+    <BaseInput v-model="filter" placeholder="Search models..." />
+    <div class="models-sub-header">
+      <select
+        v-model="filterByProvider"
+        :options="filterByProviderOptions"
+        class="filter-by-provider"
+      >
+        <option
+          v-for="option in filterByProviderOptions"
+          :value="option.value"
         >
-          <option
-            v-for="option in filterByProviderOptions"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </option>
-        </select>
-        <button
-          @click="refreshModels"
-          v-show="supportsRuntimeModels"
-          class="btn btn-flat"
-          :disabled="disableRefreshModelsBtn"
-        >
-          <span class="material-symbols-outlined">refresh</span>
-          Refresh models
-        </button>
-      </div>
+          {{ option.label }}
+        </option>
+      </select>
+      <button
+        @click="refreshModels"
+        v-show="supportsRuntimeModels"
+        class="btn btn-flat"
+        :disabled="disableRefreshModelsBtn"
+      >
+        <span class="material-symbols-outlined">refresh</span>
+        Refresh models
+      </button>
     </div>
+  </div>
+  <div class="models-content">
     <template v-if="filterByProvider === 'openaiCompat'">
       <div
         v-for="(error, index) in openAiCompatibleErrors"
@@ -257,7 +257,7 @@ export default {
 <style scoped>
 .models-header {
   position: sticky;
-  top: -1px;
+  top: calc(var(--config-padding-top) + var(--config-heading-height));
   background: var(--p-dialog-background);
   z-index: 1;
   padding-bottom: 0.4rem;
