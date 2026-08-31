@@ -2,7 +2,7 @@ import { BaseProvider } from "./BaseProvider";
 import type { AvailableProviders, ModelInfo } from "@/config";
 import { providerConfigs } from "@/config";
 import type { LanguageModel } from "ai";
-import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
+import { MockLanguageModelV4, simulateReadableStream } from "ai/test";
 
 export class MockProvider extends BaseProvider {
   get providerId(): AvailableProviders {
@@ -36,7 +36,7 @@ export class MockProvider extends BaseProvider {
       return { inputTokens: baseInputTokens, outputTokens: baseOutputTokens };
     };
 
-    const baseModel = new MockLanguageModelV3({
+    const baseModel = new MockLanguageModelV4({
       modelId: id,
       provider: this.providerId,
       doGenerate: async ({ prompt }: { prompt: any }) => {

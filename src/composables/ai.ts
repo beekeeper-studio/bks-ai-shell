@@ -386,14 +386,14 @@ class AIShellChat {
       });
     });
     prompt += "\n```";
-    const res = await createProvider(model.provider).generateObject({
+    const { title } = await createProvider(model.provider).generateObject({
       modelId: model.id,
       schema: z.object({
         title: z.string().describe("The title of the conversation"),
       }),
       prompt,
     });
-    await useTabState().setTabTitle((res.object as { title: string }).title);
+    await useTabState().setTabTitle(title);
   }
 }
 
