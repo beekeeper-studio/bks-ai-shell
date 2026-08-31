@@ -39,6 +39,7 @@ type Configurable = {
   }[];
   allowExecutionOfReadOnlyQueries: boolean;
   enableAutoCompact: boolean;
+  enableAutoTitle: boolean;
 
   // ==== MODELS ====
   /** List of disabled models by id. */
@@ -82,6 +83,7 @@ const defaultConfiguration: ConfigurationState = {
   customConnectionInstructions: [],
   allowExecutionOfReadOnlyQueries: false,
   enableAutoCompact: true,
+  enableAutoTitle: true,
 
   // ==== MODELS ====
   "providers.openai.apiKey": "",

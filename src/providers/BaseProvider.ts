@@ -8,7 +8,6 @@ import {
   type ToolSet,
   toUIMessageStream,
   createUIMessageStreamResponse,
-  Output,
 } from "ai";
 import type {
   AvailableModels,
@@ -17,7 +16,6 @@ import type {
 } from "@/config";
 import { defaultTemperature, providerConfigs } from "@/config";
 import type { UIMessage } from "@/types";
-import { z } from "zod/v3";
 import {
   APICallError,
   // InvalidToolArgumentsError,
@@ -29,6 +27,11 @@ import {
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export type Messages = UIMessage[];
+
+export type ModelOptions = {
+  /** Whether the model is allowed to think before answering. Defaults to true. */
+  reasoning?: boolean;
+};
 
 export type StreamOptions = {
   messages: Messages;
@@ -42,7 +45,7 @@ export type StreamOptions = {
 export abstract class BaseProvider {
   abstract get providerId(): AvailableProviders;
 
-  abstract getModel(id: string): LanguageModel;
+  abstract getModel(id: string, options?: ModelOptions): LanguageModel;
 
   getProviderOptions(): ProviderOptions | undefined {
     return undefined;
@@ -93,19 +96,26 @@ export abstract class BaseProvider {
     });
   }
 
-  async generateObject<OBJECT>(options: {
+  async generateTitle(options: {
     modelId: string;
-    schema: z.Schema<OBJECT, z.ZodTypeDef, any>;
-    prompt: string;
-    temperature?: number;
-  }): Promise<OBJECT> {
+    messages: Messages;
+  }): Promise<string> {
+    const conversation = options.messages
+      .flatMap((m) => m.parts)
+      .filter((p) => p.type === "text")
+      .map((p) => p.text)
+      .join(" ");
     const result = await generateText({
-      model: this.getModel(options.modelId),
-      output: Output.object({ schema: options.schema }),
-      prompt: options.prompt,
-      temperature: options.temperature,
+      model: this.getModel(options.modelId, { reasoning: false }),
+      reasoning: "none",
+      // Providers that ignore the reasoning setting still think before answering, so leave room for that.
+      maxOutputTokens: 512,
+      prompt:
+        "Name this conversation in less than 30 characters or 6 words. Reply with the name only.\n``` " +
+        conversation +
+        "\n```",
     });
-    return result.output;
+    return result.text.trim();
   }
 
   abstract listModels(): Promise<ModelInfo[]>;
