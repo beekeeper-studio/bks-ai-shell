@@ -27,6 +27,12 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: 'claude-fable-5-1',
+        displayName: 'claude-fable-5-1',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
         id: 'claude-fable-5',
         displayName: 'claude-fable-5',
         contextWindow: 1_000_000,
@@ -93,6 +99,12 @@ export const providerConfigs = {
     displayName: "Google",
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
+      {
+        id: "gemini-3.8-flash",
+        displayName: "gemini-3.8-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
       {
         id: "gemini-3.7-flash",
         displayName: "gemini-3.7-flash",
