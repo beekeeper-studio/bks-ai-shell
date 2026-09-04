@@ -228,6 +228,12 @@ export const providerConfigs = {
     /** @link https://platform.openai.com/docs/models */
     models: [
       {
+        id: "gpt-6-astra",
+        displayName: "gpt-6-astra",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
         id: "gpt-5.6-sol",
         displayName: "gpt-5.6-sol",
         contextWindow: 1_050_000,
