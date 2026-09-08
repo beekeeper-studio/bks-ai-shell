@@ -1,11 +1,14 @@
 import { log } from "@beekeeperstudio/plugin";
 import {
   convertToModelMessages,
-  generateObject,
+  generateText,
   type LanguageModel,
-  stepCountIs,
+  isStepCount,
   streamText,
   type ToolSet,
+  toUIMessageStream,
+  createUIMessageStreamResponse,
+  Output,
 } from "ai";
 import type {
   AvailableModels,
@@ -55,35 +58,38 @@ export abstract class BaseProvider {
       model: this.getModel(options.modelId),
       messages: await this.convertToModelMessages(options.messages),
       abortSignal: options.signal,
-      system: isCompactPrompt ? undefined : options.systemPrompt,
+      instructions: isCompactPrompt ? undefined : options.systemPrompt,
       tools: isCompactPrompt ? undefined : options.tools,
-      stopWhen: stepCountIs(100),
+      stopWhen: isStepCount(100),
       temperature: options.temperature ?? config?.temperature ?? defaultTemperature,
       providerOptions: this.getProviderOptions(),
     });
-    return result.toUIMessageStreamResponse({
-      originalMessages: options.messages,
-      onError: (error) => {
-        log.error(error as Error);
-        return this.getErrorMessage(error);
-      },
-      messageMetadata: ({ part }) => {
-        if (part.type === "start") {
-          return {
-            createdAt: Date.now(),
-            modelId: options.modelId,
-            providerId: this.providerId,
-            compactStatus: isCompactPrompt ? "processing" as const : undefined,
-          };
-        }
+    return createUIMessageStreamResponse({
+      stream: toUIMessageStream<ToolSet, UIMessage>({
+        stream: result.stream,
+        originalMessages: options.messages,
+        onError: (error) => {
+          log.error(error as Error);
+          return this.getErrorMessage(error);
+        },
+        messageMetadata: ({ part }) => {
+          if (part.type === "start") {
+            return {
+              createdAt: Date.now(),
+              modelId: options.modelId,
+              providerId: this.providerId,
+              compactStatus: isCompactPrompt ? "processing" as const : undefined,
+            };
+          }
 
-        if (part.type === "finish") {
-          return {
-            usage: part.totalUsage,
-            compactStatus: isCompactPrompt ? "complete" as const : undefined,
-          };
-        }
-      },
+          if (part.type === "finish") {
+            return {
+              usage: part.totalUsage,
+              compactStatus: isCompactPrompt ? "complete" as const : undefined,
+            };
+          }
+        },
+      }),
     });
   }
 
@@ -92,13 +98,14 @@ export abstract class BaseProvider {
     schema: z.Schema<OBJECT, z.ZodTypeDef, any>;
     prompt: string;
     temperature?: number;
-  }) {
-    return await generateObject({
+  }): Promise<OBJECT> {
+    const result = await generateText({
       model: this.getModel(options.modelId),
-      schema: options.schema,
+      output: Output.object({ schema: options.schema }),
       prompt: options.prompt,
       temperature: options.temperature,
     });
+    return result.output;
   }
 
   abstract listModels(): Promise<ModelInfo[]>;
