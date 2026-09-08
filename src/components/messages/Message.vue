@@ -2,6 +2,7 @@
   <div
     v-if="!message.metadata?.isCompactPrompt"
     :class="['message', message.role]"
+    @contextmenu="handleContextMenu"
   >
     <div class="message-content" :class="{ 'literally-empty': isEmpty }">
       <div class="compact-result" v-if="isCompactResult">
@@ -201,6 +202,31 @@ export default {
     toolRejectPayload(part: UIMessage["parts"][number]) {
       if (!isStaticToolUIPart(part)) return {};
       return { toolCallId: part.toolCallId, approvalId: part.approval?.id };
+    },
+    handleContextMenu(event: MouseEvent) {
+      const selection = window.getSelection();
+
+      if (!selection || selection.isCollapsed) {
+        return;
+      }
+
+      if (!this.$el.contains(selection.anchorNode)) {
+        return;
+      }
+
+      // The selection is gone by the time the handler runs
+      const selectedText = selection.toString();
+
+      event.preventDefault();
+      this.$bks.openMenu({
+        event,
+        items: [
+          {
+            label: "Copy",
+            handler: () => clipboard.writeText(selectedText),
+          },
+        ],
+      });
     },
     async handleCopyClick() {
       await clipboard.writeText(this.text);
