@@ -19,8 +19,10 @@
     var(--theme-bg)
   );
 
+  --config-heading-height: 2rem;
+  --config-padding-top: 1.75rem;
+
   .p-dialog-content {
-    padding-top: 1.75rem;
     display: flex;
     width: 40rem;
     max-width: 100%;
@@ -34,6 +36,7 @@
     position: sticky;
     top: 0;
     z-index: 1;
+    padding-top: var(--config-padding-top);
   }
 
   ul {
@@ -75,11 +78,10 @@
   .content {
     flex-grow: 1;
     min-width: 0;
-    overflow-y: scroll;
+    align-self: flex-start;
 
     > :first-child {
       margin-top: 0;
-      margin-bottom: 0.4rem;
     }
 
     h1,
@@ -93,7 +95,16 @@
     }
 
     h2 {
-      margin-bottom: 0;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      height: calc(var(--config-padding-top) + var(--config-heading-height));
+      padding-top: var(--config-padding-top);
+      margin-block: 0;
+      background-color: var(--p-dialog-background);
       font-size: 1.1rem;
     }
 
