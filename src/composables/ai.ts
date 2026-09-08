@@ -2,7 +2,7 @@ import { Chat } from "@ai-sdk/vue";
 import { computed, type ComputedRef, ref } from "vue";
 import { type ChatStatus, isToolUIPart } from "ai";
 import { useTabState } from "@/stores/tabState";
-import { z } from "zod/v3";
+import { useConfigurationStore } from "@/stores/configuration";
 import { createProvider } from "@/providers";
 import { safeJSONStringify } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
@@ -371,27 +371,17 @@ class AIShellChat {
   }
 
   private async fillTitle() {
+    if (!useConfigurationStore().enableAutoTitle) {
+      return;
+    }
     if (useTabState().conversationTitle) {
       // Skip generation if title is already set
       return;
     }
     const model = this.getModelOrThrow();
-    let prompt =
-      "Name this conversation in less than 30 characters or 6 words. Return JSON only.\n```";
-    this.messages.value.forEach((m) => {
-      m.parts.forEach((p) => {
-        if (p.type === "text") {
-          prompt += " " + p.text;
-        }
-      });
-    });
-    prompt += "\n```";
-    const { title } = await createProvider(model.provider).generateObject({
+    const title = await createProvider(model.provider).generateTitle({
       modelId: model.id,
-      schema: z.object({
-        title: z.string().describe("The title of the conversation"),
-      }),
-      prompt,
+      messages: this.messages.value,
     });
     await useTabState().setTabTitle(title);
   }

@@ -28,6 +28,16 @@
       the context limit.
     </template>
   </BaseInput>
+  <BaseInput
+    type="switch"
+    :model-value="enableAutoTitle"
+    @click="configure('enableAutoTitle', !enableAutoTitle)"
+  >
+    <template #label>Name conversations automatically</template>
+    <template #helper>
+      When enabled, the model names each conversation after the first response.
+    </template>
+  </BaseInput>
 
   <hr />
 
@@ -85,6 +95,7 @@ export default {
       "customInstructions",
       "allowExecutionOfReadOnlyQueries",
       "enableAutoCompact",
+      "enableAutoTitle",
     ]),
     ...mapGetters(useConfigurationStore, ["currentConnectionInstructions"]),
   },
