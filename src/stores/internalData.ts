@@ -11,7 +11,7 @@
 
 import { defineStore } from "pinia";
 import _ from "lodash";
-import { getData, setData } from "@beekeeperstudio/plugin";
+import { appStorage } from "@beekeeperstudio/plugin";
 
 type InternalData = {
   /** FIXME use Model type */
@@ -35,7 +35,7 @@ export const useInternalDataStore = defineStore("pluginData", {
     async sync() {
       const data: Record<string, unknown> = {};
       for (const key in defaultData) {
-        const value = await getData(prefixKey(key));
+        const value = await appStorage.getItem(prefixKey(key));
 
         if (value === null) {
           continue;
@@ -51,7 +51,7 @@ export const useInternalDataStore = defineStore("pluginData", {
       value: InternalData[T],
     ) {
       this.$patch({ [key]: value });
-      await setData(prefixKey(key), value);
+      await appStorage.setItem(prefixKey(key), value);
     },
   },
 });

@@ -11,12 +11,7 @@
  */
 import { defineStore } from "pinia";
 import _ from "lodash";
-import {
-  getData,
-  getEncryptedData,
-  setData,
-  setEncryptedData,
-} from "@beekeeperstudio/plugin";
+import { appStorage } from "@beekeeperstudio/plugin";
 import type { AvailableProviders } from "@/config";
 import { disabledModelsByDefault, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
@@ -165,9 +160,9 @@ export const useConfigurationStore = defineStore("configuration", {
     async sync() {
       const configuration: Record<string, unknown> = {};
       for (const key in defaultConfiguration) {
-        const value = isEncryptedConfig(key)
-          ? await getEncryptedData(key)
-          : await getData(key);
+        const value = await appStorage.getItem(key, {
+          encrypted: isEncryptedConfig(key),
+        });
 
         if (value === null) {
           continue;
@@ -184,11 +179,9 @@ export const useConfigurationStore = defineStore("configuration", {
     ) {
       this.$patch({ [config]: value });
 
-      if (isEncryptedConfig(config)) {
-        await setEncryptedData(config, value);
-      } else {
-        await setData(config, value);
-      }
+      await appStorage.setItem(config, value, {
+        encrypted: isEncryptedConfig(config),
+      });
     },
 
     async setModels(providerId: AvailableProviders, models: Model[]) {

@@ -24,7 +24,7 @@ import Configuration, {
   type PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
 import OnboardingScreen from "./components/OnboardingScreen.vue";
-import { getData, log } from "@beekeeperstudio/plugin";
+import { appStorage, log } from "@beekeeperstudio/plugin";
 import { Dialog } from "primevue";
 
 type Page = "starting" | "chat-interface";
@@ -129,10 +129,10 @@ export default {
         window.location.reload();
       }, reloadDelay);
       try {
-        await getData();
+        await appStorage.getItem("default");
       } catch (e) {
       } finally {
-        // Cancel reload if getData() succeeds or fails quickly
+        // Cancel reload if getItem() succeeds or fails quickly
         clearTimeout(reloadTimer);
       }
     },
