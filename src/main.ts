@@ -8,7 +8,6 @@ window.addEventListener("unhandledrejection", (e) => {
 });
 // -------------------
 
-import "typeface-roboto";
 import "./assets/styles/main.scss";
 import "@material-symbols/font-400/outlined.css";
 
