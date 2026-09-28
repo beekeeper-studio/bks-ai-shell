@@ -27,6 +27,18 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: 'claude-opus-5-5',
+        displayName: 'claude-opus-5-5',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
+        id: 'claude-fable-5-1',
+        displayName: 'claude-fable-5-1',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
         id: 'claude-fable-5',
         displayName: 'claude-fable-5',
         contextWindow: 1_000_000,
@@ -93,6 +105,12 @@ export const providerConfigs = {
     displayName: "Google",
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
+      {
+        id: "gemini-3.8-flash",
+        displayName: "gemini-3.8-flash",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
       {
         id: "gemini-3.7-flash",
         displayName: "gemini-3.7-flash",
@@ -215,6 +233,24 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
     models: [
+      {
+        id: "gpt-6-astra",
+        displayName: "gpt-6-astra",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-6-sol",
+        displayName: "gpt-6-sol",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-6-luna",
+        displayName: "gpt-6-luna",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
       {
         id: "gpt-5.6-sol",
         displayName: "gpt-5.6-sol",
