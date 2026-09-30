@@ -27,6 +27,12 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: 'claude-sonnet-5-5',
+        displayName: 'claude-sonnet-5-5',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
         id: 'claude-opus-5-5',
         displayName: 'claude-opus-5-5',
         contextWindow: 1_000_000,
@@ -233,6 +239,12 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
     models: [
+      {
+        id: "gpt-6.1-sol",
+        displayName: "gpt-6.1-sol",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
       {
         id: "gpt-6-astra",
         displayName: "gpt-6-astra",
