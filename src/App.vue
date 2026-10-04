@@ -16,7 +16,7 @@
 <script lang="ts">
 import ChatInterface from "./components/ChatInterface.vue";
 import { useChatStore } from "@/stores/chat";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useEncryptedSettingsStore } from "@/stores/settings";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
 import { mapState, mapActions, mapGetters } from "pinia";
@@ -78,17 +78,16 @@ export default {
 
   computed: {
     ...mapState(useTabState, ["messages"]),
-    ...mapState(useConfigurationStore, {
+    ...mapState(useEncryptedSettingsStore, {
       openaiApiKey: "providers.openai.apiKey",
       anthropicApiKey: "providers.anthropic.apiKey",
       googleApiKey: "providers.google.apiKey",
     }),
-    ...mapGetters(useConfigurationStore, ["apiKeyExists"]),
+    ...mapGetters(useEncryptedSettingsStore, ["apiKeyExists"]),
     ...mapGetters(useInternalDataStore, ["isFirstTimeUser"]),
   },
 
   methods: {
-    ...mapActions(useConfigurationStore, ["configure"]),
     ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initialize"]),
     closeOnboardingScreen() {

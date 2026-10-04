@@ -1,0 +1,237 @@
+/** Usage:
+ *
+ * 1. Call `sync()` on each settings store before reading its state.
+ * 2. Read the state by accessing it normally.
+ * 3. Update the state directly. Changes are saved automatically.
+ *
+ * FUTURE PLAN (probably):
+ *
+ * - Save configuration to .ini config files via Beekeeper Studio API
+ *   instead of using setData?
+ */
+import _ from "lodash";
+import type { AvailableProviders } from "@/config";
+import { disabledModelsByDefault, providerConfigs } from "@/config";
+import { useChatStore } from "./chat";
+import { defineAppStorageStore } from "./defineAppStorageStore";
+
+type Model = {
+  id: string;
+  displayName: string;
+};
+
+type ModelRef = {
+  providerId: AvailableProviders;
+  modelId: string;
+};
+
+export const useSettingsStore = defineAppStorageStore("settings", {
+  state() {
+    return {
+      // ==== GENERAL ====
+      /** Append custom instructions to the default system instructions. */
+      customInstructions: "",
+      /** Same as `customInstructions` but scoped to a connection */
+      customConnectionInstructions: [] as {
+        workspaceId: number;
+        connectionId: number;
+        instructions: string;
+      }[],
+      allowExecutionOfReadOnlyQueries: false,
+      enableAutoCompact: true,
+
+      // ==== MODELS ====
+      /** List of disabled models by id. */
+      disabledModels: _.cloneDeep(disabledModelsByDefault) as ModelRef[],
+      /** Models that are removed are not shown in the UI and cannot be enabled. */
+      removedModels: [] as ModelRef[],
+      providers_openaiCompat_baseUrl: "",
+      providers_openaiCompat_headers: "",
+      providers_ollama_baseUrl: "http://localhost:11434",
+      providers_ollama_headers: "",
+
+      // User defined models
+      providers_anthropic_models: [] as Model[],
+      providers_google_models: [] as Model[],
+      providers_zai_models: [] as Model[],
+      providers_openai_models: [] as Model[],
+      providers_deepseek_models: [] as Model[],
+      providers_openaiCompat_models: [] as Model[],
+      providers_ollama_models: [] as Model[],
+      providers_mock_models: [] as Model[],
+    };
+  },
+
+  getters: {
+    getModelsByProvider: (state) => {
+      return (provider: AvailableProviders) => {
+        return state[`providers_${provider}_models`];
+      };
+    },
+
+    /** Models that are not defined in the config. */
+    models(state): (Model & { providerId: AvailableProviders })[] {
+      const availableProviders = Object.keys(
+        providerConfigs,
+      ) as AvailableProviders[];
+      return availableProviders.flatMap((providerId) => {
+        const models = state[`providers_${providerId}_models`];
+        if (!models) {
+          return [];
+        }
+        // Filter out removed models
+        return models
+          .filter(
+            (model) =>
+              !state.removedModels.some(
+                (m) => m.modelId === model.id && m.providerId === providerId,
+              ),
+          )
+          .map((model) => ({ ...model, providerId }));
+      });
+    },
+
+    currentConnectionInstructions(state): string {
+      const connection = useChatStore().connectionInfo;
+      const connectionInstructions = state.customConnectionInstructions.find(
+        (i) =>
+          i.connectionId === connection.id &&
+          i.workspaceId === connection.workspaceId,
+      );
+      return connectionInstructions?.instructions || "";
+    },
+  },
+
+  actions: {
+    setModels(providerId: AvailableProviders, models: Model[]) {
+      this[`providers_${providerId}_models`] = models;
+    },
+
+    addModel(options: {
+      providerId: AvailableProviders;
+      modelId: string;
+      displayName: string;
+    }) {
+      const models = _.cloneDeep(this.getModelsByProvider(options.providerId));
+      models.push({ id: options.modelId, displayName: options.displayName });
+      this.setModels(options.providerId, models);
+    },
+
+    removeModel(providerId: AvailableProviders, modelId: string) {
+      const removedModels = _.cloneDeep(this.removedModels);
+      removedModels.push({ providerId, modelId });
+      this.removedModels = removedModels;
+    },
+
+    disableModel(providerId: AvailableProviders, modelId: string) {
+      if (
+        this.disabledModels.find(
+          (m) => m.providerId === providerId && m.modelId === modelId,
+        )
+      ) {
+        return;
+      }
+      // clone this to avoid sending Proxy objects to the host
+      const disabledModels = _.cloneDeep(this.disabledModels);
+      disabledModels.push({ providerId, modelId });
+      this.disabledModels = disabledModels;
+    },
+
+    disableModels(
+      models: { providerId: AvailableProviders; modelId: string }[],
+    ) {
+      const map = new Map<string, (typeof models)[number]>();
+
+      for (const model of this.disabledModels) {
+        // clone this to avoid sending Proxy objects to the host
+        map.set(`${model.providerId}:${model.modelId}`, _.clone(model));
+      }
+
+      for (const model of models) {
+        // clone this to avoid sending Proxy objects to the host
+        map.set(`${model.providerId}:${model.modelId}`, _.clone(model));
+      }
+
+      this.disabledModels = [...map.values()];
+    },
+
+    enableModel(providerId: AvailableProviders, modelId: string) {
+      const disabledModels = _.cloneDeep(this.disabledModels);
+      const idx = disabledModels.findIndex(
+        (m) => m.providerId === providerId && m.modelId === modelId,
+      );
+      if (idx !== -1) {
+        disabledModels.splice(idx, 1);
+      }
+      this.disabledModels = disabledModels;
+    },
+
+    configureCustomConnectionInstructions(instructions: string) {
+      const connection = useChatStore().connectionInfo;
+      const connectionId = connection.id;
+      const workspaceId = connection.workspaceId;
+      const connectionInstructions = _.cloneDeep(
+        this.customConnectionInstructions,
+      );
+      const idx = connectionInstructions.findIndex(
+        (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
+      );
+      if (idx === -1) {
+        connectionInstructions.push({
+          connectionId,
+          workspaceId,
+          instructions,
+        });
+      } else {
+        connectionInstructions[idx] = {
+          connectionId,
+          workspaceId,
+          instructions,
+        };
+      }
+      this.customConnectionInstructions = connectionInstructions;
+    },
+  },
+});
+
+export const useEncryptedSettingsStore = defineAppStorageStore(
+  "encryptedSettings",
+  {
+    encrypted: true,
+    state() {
+      return {
+        "providers.openai.apiKey": "",
+        "providers.anthropic.apiKey": "",
+        "providers.google.apiKey": "",
+        "providers.zai.apiKey": "",
+        "providers.deepseek.apiKey": "",
+        providers_openaiCompat_apiKey: "",
+      };
+    },
+    getters: {
+      apiKeyExists(state): boolean {
+        const apiKeys = [
+          state["providers.openai.apiKey"],
+          state["providers.anthropic.apiKey"],
+          state["providers.google.apiKey"],
+          state["providers.zai.apiKey"],
+          state["providers.deepseek.apiKey"],
+          state.providers_openaiCompat_apiKey,
+        ];
+        return apiKeys.some((apiKey) => apiKey.trim() !== "");
+      },
+    },
+  },
+);
+
+export const useConnectionSettingsStore = defineAppStorageStore(
+  "connectionSettings",
+  {
+    scope: "currentConnection",
+    state() {
+      return {
+        enableRunQuery: true,
+      };
+    },
+  },
+);

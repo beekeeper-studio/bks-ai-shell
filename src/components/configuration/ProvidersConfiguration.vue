@@ -17,8 +17,7 @@
       <span>{{ error }}</span>
     </div>
     <BaseInput
-      :model-value="providers_openaiCompat_baseUrl"
-      @update:modelValue="configure('providers_openaiCompat_baseUrl', $event)"
+      v-model="providers_openaiCompat_baseUrl"
       @change="handleChange($event, 'openaiCompat')"
     >
       <template #label>URL</template>
@@ -29,16 +28,14 @@
     </BaseInput>
     <BaseInput
       type="password"
-      :model-value="providers_openaiCompat_apiKey"
-      @update:modelValue="configure('providers_openaiCompat_apiKey', $event)"
+      v-model="providers_openaiCompat_apiKey"
       @change="handleChange($event, 'openaiCompat')"
     >
       <template #label>API Key</template>
     </BaseInput>
     <BaseInput
       type="textarea"
-      :model-value="providers_openaiCompat_headers"
-      @update:modelValue="configure('providers_openaiCompat_headers', $event)"
+      v-model="providers_openaiCompat_headers"
       @change="handleChange($event, 'openaiCompat')"
     >
       <template #label>Headers</template>
@@ -67,8 +64,7 @@
       </span>
     </div>
     <BaseInput
-      :model-value="providers_ollama_baseUrl"
-      @update:modelValue="configure('providers_ollama_baseUrl', $event)"
+      v-model="providers_ollama_baseUrl"
       @change="handleChange($event, 'ollama')"
     >
       <template #label>URL</template>
@@ -82,8 +78,11 @@ import ApiKeyForm from "@/components/ApiKeyForm.vue";
 import ApiInfo from "@/components/configuration/ApiInfo.vue";
 import BaseInput from "@/components/common/BaseInput.vue";
 import ToggleFormArea from "../common/ToggleFormArea.vue";
-import { useConfigurationStore } from "@/stores/configuration";
-import { mapState, mapActions } from "pinia";
+import {
+  useEncryptedSettingsStore,
+  useSettingsStore,
+} from "@/stores/settings";
+import { mapState, mapActions, mapWritableState } from "pinia";
 import type { AvailableProvidersWithDynamicModels } from "@/config";
 import { useChatStore } from "@/stores/chat";
 import ExternalLink from "../common/ExternalLink.vue";
@@ -100,12 +99,14 @@ export default {
   },
 
   computed: {
-    ...mapState(useConfigurationStore, [
+    ...mapWritableState(useSettingsStore, [
       "providers_openaiCompat_baseUrl",
-      "providers_openaiCompat_apiKey",
       "providers_openaiCompat_headers",
       "providers_ollama_baseUrl",
       "providers_ollama_headers",
+    ]),
+    ...mapWritableState(useEncryptedSettingsStore, [
+      "providers_openaiCompat_apiKey",
     ]),
     ...mapState(useChatStore, ["errors"]),
     openAiCompatibleErrors() {
@@ -128,7 +129,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(useConfigurationStore, ["configure"]),
     ...mapActions(useChatStore, ["syncProvider"]),
     handleChange(_event: Event, provider: AvailableProvidersWithDynamicModels) {
       this.syncProvider(provider);

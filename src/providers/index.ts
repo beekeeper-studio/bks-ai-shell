@@ -5,51 +5,55 @@ import { OpenAIProvider } from "@/providers/OpenAIProvider";
 import { OpenAICompatibleProvider } from "@/providers/OpenAICompatibleProvider";
 import { GoogleProvider } from "@/providers/GoogleProvider";
 import { ZaiProvider } from "@/providers/ZaiProvider";
-import { useConfigurationStore } from "@/stores/configuration";
+import {
+  useEncryptedSettingsStore,
+  useSettingsStore,
+} from "@/stores/settings";
 import { OllamaProvider } from "./OllamaProvider";
 import { MockProvider } from "@/providers/MockProvider";
 import { parseHeaders } from "@/utils";
 import _ from "lodash";
 
 export function createProvider(id: AvailableProviders)  {
-  const configuration = useConfigurationStore();
+  const settings = useSettingsStore();
+  const encryptedSettings = useEncryptedSettingsStore();
   switch (id) {
     case "anthropic":
       return new AnthropicProvider({
-        apiKey: configuration["providers.anthropic.apiKey"],
+        apiKey: encryptedSettings["providers.anthropic.apiKey"],
       });
     case "openai":
       return new OpenAIProvider({
-        apiKey: configuration["providers.openai.apiKey"],
+        apiKey: encryptedSettings["providers.openai.apiKey"],
       });
     case "google":
       return new GoogleProvider({
-        apiKey: configuration["providers.google.apiKey"],
+        apiKey: encryptedSettings["providers.google.apiKey"],
       });
     case "zai":
       return new ZaiProvider({
-        apiKey: configuration["providers.zai.apiKey"],
+        apiKey: encryptedSettings["providers.zai.apiKey"],
       });
     case "deepseek":
       return new DeepSeekProvider({
-        apiKey: configuration["providers.deepseek.apiKey"],
+        apiKey: encryptedSettings["providers.deepseek.apiKey"],
       });
     case "openaiCompat":
-      if (_.isEmpty(configuration.providers_openaiCompat_baseUrl)) {
+      if (_.isEmpty(settings.providers_openaiCompat_baseUrl)) {
         throw new Error("Missing API base URL [2]");
       }
       return new OpenAICompatibleProvider({
-        baseURL: configuration.providers_openaiCompat_baseUrl,
-        apiKey: configuration.providers_openaiCompat_apiKey,
-        headers: parseHeaders(configuration.providers_openaiCompat_headers),
+        baseURL: settings.providers_openaiCompat_baseUrl,
+        apiKey: encryptedSettings.providers_openaiCompat_apiKey,
+        headers: parseHeaders(settings.providers_openaiCompat_headers),
       });
     case "ollama":
-      if (_.isEmpty(configuration.providers_ollama_baseUrl)) {
+      if (_.isEmpty(settings.providers_ollama_baseUrl)) {
         throw new Error("Missing API base URL [2]");
       }
       return new OllamaProvider({
-        baseURL: configuration.providers_ollama_baseUrl,
-        headers: parseHeaders(configuration.providers_ollama_headers),
+        baseURL: settings.providers_ollama_baseUrl,
+        headers: parseHeaders(settings.providers_ollama_headers),
       });
     case "mock":
       if (import.meta.env.MODE !== "development") {

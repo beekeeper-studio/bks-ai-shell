@@ -136,7 +136,7 @@ import PromptInput from "@/components/common/PromptInput.vue";
 import { getConnectionInfo } from "@beekeeperstudio/plugin";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 import { log } from "@beekeeperstudio/plugin";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useSettingsStore } from "@/stores/settings";
 
 export default {
   name: "ChatInterface",
@@ -172,7 +172,7 @@ export default {
   },
 
   computed: {
-    ...mapGetters(useConfigurationStore, ["enableAutoCompact"]),
+    ...mapState(useSettingsStore, ["enableAutoCompact"]),
     ...mapGetters(useChatStore, [
       "systemPrompt",
       "contextOverflow",
