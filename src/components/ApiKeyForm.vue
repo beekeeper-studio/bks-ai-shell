@@ -127,10 +127,8 @@
 
 <script lang="ts">
 import { mapWritableState } from "pinia";
-import {
-  useEncryptedSettingsStore,
-  useSettingsStore,
-} from "@/stores/settings";
+import { useEncryptedSettingsStore } from "@/stores/encryptedSettings";
+import { useSettingsStore } from "@/stores/settings";
 import { type AvailableProviders, providerConfigs } from "@/config";
 import BaseInput from "./common/BaseInput.vue";
 import ExternalLink from "./common/ExternalLink.vue";

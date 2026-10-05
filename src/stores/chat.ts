@@ -6,16 +6,14 @@ import type {
   AvailableProvidersWithDynamicModels,
 } from "@/config";
 import { providerConfigs } from "@/config";
-import {
-  useConnectionSettingsStore,
-  useEncryptedSettingsStore,
-  useSettingsStore,
-} from "./settings";
+import { useEncryptedSettingsStore } from "./encryptedSettings";
+import { useSettingsStore } from "./settings";
 import { useInternalDataStore } from "./internalData";
 import { useTabState } from "./tabState";
 import { createProvider } from "@/providers";
 import _ from "lodash";
 import { ProviderSyncError } from "@/utils/ProviderSyncError";
+import { migrateLegacyStorage } from "@/utils/storageMigration";
 import {
   type ConnectionInfo,
   getAppVersion,
@@ -274,14 +272,14 @@ export const useChatStore = defineStore("chat", {
   },
   actions: {
     async initialize() {
+      await migrateLegacyStorage();
+
       const internal = useInternalDataStore();
       const settings = useSettingsStore();
       const encryptedSettings = useEncryptedSettingsStore();
-      const connectionSettings = useConnectionSettingsStore();
       const tabState = useTabState();
       await settings.sync();
       await encryptedSettings.sync();
-      await connectionSettings.sync();
       await internal.sync();
       await tabState.sync();
 

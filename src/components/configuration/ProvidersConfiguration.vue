@@ -78,10 +78,8 @@ import ApiKeyForm from "@/components/ApiKeyForm.vue";
 import ApiInfo from "@/components/configuration/ApiInfo.vue";
 import BaseInput from "@/components/common/BaseInput.vue";
 import ToggleFormArea from "../common/ToggleFormArea.vue";
-import {
-  useEncryptedSettingsStore,
-  useSettingsStore,
-} from "@/stores/settings";
+import { useEncryptedSettingsStore } from "@/stores/encryptedSettings";
+import { useSettingsStore } from "@/stores/settings";
 import { mapState, mapActions, mapWritableState } from "pinia";
 import type { AvailableProvidersWithDynamicModels } from "@/config";
 import { useChatStore } from "@/stores/chat";

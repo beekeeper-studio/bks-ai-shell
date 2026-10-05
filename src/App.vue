@@ -16,10 +16,10 @@
 <script lang="ts">
 import ChatInterface from "./components/ChatInterface.vue";
 import { useChatStore } from "@/stores/chat";
-import { useEncryptedSettingsStore } from "@/stores/settings";
+import { useEncryptedSettingsStore } from "@/stores/encryptedSettings";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
-import { mapState, mapActions, mapGetters } from "pinia";
+import { mapState, mapActions, mapGetters, mapWritableState } from "pinia";
 import Configuration, {
   type PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
@@ -84,16 +84,15 @@ export default {
       googleApiKey: "providers.google.apiKey",
     }),
     ...mapGetters(useEncryptedSettingsStore, ["apiKeyExists"]),
-    ...mapGetters(useInternalDataStore, ["isFirstTimeUser"]),
+    ...mapWritableState(useInternalDataStore, ["isFirstTimeUser"]),
   },
 
   methods: {
-    ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initialize"]),
     closeOnboardingScreen() {
       this.showOnboarding = false;
       this.page = "chat-interface";
-      this.setInternal("isFirstTimeUser", false);
+      this.isFirstTimeUser = false;
     },
     handleManageModels() {
       this.configurationPage = "models";
@@ -128,7 +127,7 @@ export default {
         window.location.reload();
       }, reloadDelay);
       try {
-        await appStorage.getItem("default");
+        await appStorage.get("default");
       } catch (e) {
       } finally {
         // Cancel reload if getItem() succeeds or fails quickly

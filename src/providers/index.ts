@@ -5,10 +5,8 @@ import { OpenAIProvider } from "@/providers/OpenAIProvider";
 import { OpenAICompatibleProvider } from "@/providers/OpenAICompatibleProvider";
 import { GoogleProvider } from "@/providers/GoogleProvider";
 import { ZaiProvider } from "@/providers/ZaiProvider";
-import {
-  useEncryptedSettingsStore,
-  useSettingsStore,
-} from "@/stores/settings";
+import { useEncryptedSettingsStore } from "@/stores/encryptedSettings";
+import { useSettingsStore } from "@/stores/settings";
 import { OllamaProvider } from "./OllamaProvider";
 import { MockProvider } from "@/providers/MockProvider";
 import { parseHeaders } from "@/utils";

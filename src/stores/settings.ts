@@ -13,7 +13,7 @@ import _ from "lodash";
 import type { AvailableProviders } from "@/config";
 import { disabledModelsByDefault, providerConfigs } from "@/config";
 import { useChatStore } from "./chat";
-import { defineAppStorageStore } from "./defineAppStorageStore";
+import { defineStore } from "pinia";
 
 type Model = {
   id: string;
@@ -25,7 +25,8 @@ type ModelRef = {
   modelId: string;
 };
 
-export const useSettingsStore = defineAppStorageStore("settings", {
+export const useSettingsStore = defineStore("settings", {
+  persist: true,
   state() {
     return {
       // ==== GENERAL ====
@@ -193,45 +194,3 @@ export const useSettingsStore = defineAppStorageStore("settings", {
     },
   },
 });
-
-export const useEncryptedSettingsStore = defineAppStorageStore(
-  "encryptedSettings",
-  {
-    encrypted: true,
-    state() {
-      return {
-        "providers.openai.apiKey": "",
-        "providers.anthropic.apiKey": "",
-        "providers.google.apiKey": "",
-        "providers.zai.apiKey": "",
-        "providers.deepseek.apiKey": "",
-        providers_openaiCompat_apiKey: "",
-      };
-    },
-    getters: {
-      apiKeyExists(state): boolean {
-        const apiKeys = [
-          state["providers.openai.apiKey"],
-          state["providers.anthropic.apiKey"],
-          state["providers.google.apiKey"],
-          state["providers.zai.apiKey"],
-          state["providers.deepseek.apiKey"],
-          state.providers_openaiCompat_apiKey,
-        ];
-        return apiKeys.some((apiKey) => apiKey.trim() !== "");
-      },
-    },
-  },
-);
-
-export const useConnectionSettingsStore = defineAppStorageStore(
-  "connectionSettings",
-  {
-    scope: "currentConnection",
-    state() {
-      return {
-        enableRunQuery: true,
-      };
-    },
-  },
-);

@@ -128,7 +128,7 @@ import Markdown from "@/components/messages/Markdown.vue";
 import Message from "@/components/messages/Message.vue";
 import type { UIMessage } from "@/types";
 import type { PropType } from "vue";
-import { mapActions, mapGetters, mapState, mapWritableState } from "pinia";
+import { mapGetters, mapState, mapWritableState } from "pinia";
 import type { RootBinding } from "@/plugins/appEvent";
 import { useInternalDataStore } from "@/stores/internalData";
 import BaseInput from "@/components/common/BaseInput.vue";
@@ -182,6 +182,7 @@ export default {
       "viewContext",
     ]),
     ...mapWritableState(useChatStore, ["model"]),
+    ...mapWritableState(useInternalDataStore, ["lastUsedModelId"]),
     processing() {
       if (this.hasPendingApprovals) return false;
       return this.status !== "ready" && this.status !== "error";
@@ -302,7 +303,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(useInternalDataStore, ["setInternal"]),
 
     async submit(input: string) {
       if (!this.model) {
@@ -352,7 +352,7 @@ export default {
     },
 
     selectModel(model: Model) {
-      this.setInternal("lastUsedModelId", model.id);
+      this.lastUsedModelId = model.id;
       this.model = model;
     },
   },
