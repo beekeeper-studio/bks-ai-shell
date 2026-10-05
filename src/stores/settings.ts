@@ -1,14 +1,3 @@
-/** Usage:
- *
- * 1. Call `sync()` on each settings store before reading its state.
- * 2. Read the state by accessing it normally.
- * 3. Update the state directly. Changes are saved automatically.
- *
- * FUTURE PLAN (probably):
- *
- * - Save configuration to .ini config files via Beekeeper Studio API
- *   instead of using setData?
- */
 import _ from "lodash";
 import type { AvailableProviders } from "@/config";
 import { disabledModelsByDefault, providerConfigs } from "@/config";
