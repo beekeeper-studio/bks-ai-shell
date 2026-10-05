@@ -141,7 +141,7 @@ export default {
     ExternalLink,
   },
 
-  emits: ["change", "changeProvider"],
+  emits: ["changeProvider"],
 
   props: {
     dropdownBased: Boolean,
@@ -182,36 +182,6 @@ export default {
   },
 
   watch: {
-    openaiApiKey() {
-      this.$emit("change");
-    },
-    anthropicApiKey() {
-      this.$emit("change");
-    },
-    googleApiKey() {
-      this.$emit("change");
-    },
-    zaiApiKey() {
-      this.$emit("change");
-    },
-    deepseekApiKey() {
-      this.$emit("change");
-    },
-    ollamaBaseUrl() {
-      this.$emit("change");
-    },
-    ollamaHeaders() {
-      this.$emit("change");
-    },
-    openaiCompatBaseUrl() {
-      this.$emit("change");
-    },
-    openaiCompatApiKey() {
-      this.$emit("change");
-    },
-    openaiCompatHeaders() {
-      this.$emit("change");
-    },
     selectedProvider() {
       this.$emit("changeProvider", this.selectedProvider);
     },

@@ -74,7 +74,6 @@
 </template>
 
 <script lang="ts">
-import ApiKeyForm from "@/components/ApiKeyForm.vue";
 import ApiInfo from "@/components/configuration/ApiInfo.vue";
 import BaseInput from "@/components/common/BaseInput.vue";
 import ToggleFormArea from "../common/ToggleFormArea.vue";
@@ -89,7 +88,6 @@ export default {
   name: "ProvidersConfiguration",
 
   components: {
-    ApiKeyForm,
     ApiInfo,
     BaseInput,
     ToggleFormArea,

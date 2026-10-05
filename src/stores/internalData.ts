@@ -8,7 +8,7 @@ export const useInternalDataStore = defineStore("pluginData", {
   state() {
     return {
       /** FIXME use Model type */
-      lastUsedModelId: undefined,
+      lastUsedModelId: undefined as string | undefined,
       isFirstTimeUser: true,
     };
   },

@@ -52,9 +52,10 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters, mapWritableState } from "pinia";
+import { mapWritableState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
 import { useSettingsStore } from "@/stores/settings";
+import { useConnectionSettingsStore } from "@/stores/connectionSettings";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 
 export default {
@@ -71,21 +72,7 @@ export default {
       "allowExecutionOfReadOnlyQueries",
       "enableAutoCompact",
     ]),
-    ...mapGetters(useSettingsStore, ["currentConnectionInstructions"]),
-    connectionInstructions: {
-      get(): string {
-        return this.currentConnectionInstructions;
-      },
-      set(instructions: string) {
-        this.configureCustomConnectionInstructions(instructions);
-      },
-    },
-  },
-
-  methods: {
-    ...mapActions(useSettingsStore, [
-      "configureCustomConnectionInstructions",
-    ]),
+    ...mapWritableState(useConnectionSettingsStore, ["connectionInstructions"]),
   },
 };
 </script>

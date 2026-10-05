@@ -1,6 +1,10 @@
 // This file moves settings that older versions saved one key each into one
 // object per store, which is how the `persist` Pinia plugin saves them.
-import { appStorage, AppStorage } from "@beekeeperstudio/plugin";
+import {
+  appStorage,
+  AppStorage,
+  getConnectionInfo,
+} from "@beekeeperstudio/plugin";
 
 /** Move values that older versions saved one key each into one object. */
 async function migrateLegacySettings() {
@@ -10,7 +14,6 @@ async function migrateLegacySettings() {
 
   const legacyKeys = [
     "customInstructions",
-    "customConnectionInstructions",
     "allowExecutionOfReadOnlyQueries",
     "enableAutoCompact",
     "disabledModels",
@@ -100,10 +103,42 @@ async function migrateLegacyInternalData() {
   await appStorage.set("pluginData", legacyState);
 }
 
+/**
+ * Older versions saved every connection's instructions in one global list.
+ * Only the current connection can be written, so each one moves when opened.
+ */
+async function migrateLegacyConnectionSettings() {
+  const storage = new AppStorage({ scope: "currentConnection" });
+  if ((await storage.get("connectionSettings")) !== null) {
+    return;
+  }
+
+  const legacyInstructions: {
+    workspaceId: number;
+    connectionId: number;
+    instructions: string;
+  }[] = (await appStorage.get("customConnectionInstructions")) ?? [];
+  const connection = await getConnectionInfo();
+  const legacyEntry = legacyInstructions.find(
+    (entry) =>
+      entry.connectionId === connection.id &&
+      entry.workspaceId === connection.workspaceId,
+  );
+
+  if (!legacyEntry) {
+    return;
+  }
+
+  await storage.set("connectionSettings", {
+    connectionInstructions: legacyEntry.instructions,
+  });
+}
+
 // TODO: Remove these migrations once users have had time to update past
 // the first release after v3.3.4, where storage moved to one key per store.
 export async function migrateLegacyStorage() {
   await migrateLegacySettings();
   await migrateLegacyEncryptedSettings();
   await migrateLegacyInternalData();
+  await migrateLegacyConnectionSettings();
 }

@@ -4,7 +4,8 @@ export const useConnectionSettingsStore = defineStore("connectionSettings", {
   persist: { scope: "currentConnection" },
   state() {
     return {
-      enableRunQuery: true,
+      /** Appended to the system instructions, for this connection only. */
+      connectionInstructions: "",
     };
   },
 });

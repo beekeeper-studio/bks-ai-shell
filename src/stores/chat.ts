@@ -6,6 +6,7 @@ import type {
   AvailableProvidersWithDynamicModels,
 } from "@/config";
 import { providerConfigs } from "@/config";
+import { useConnectionSettingsStore } from "./connectionSettings";
 import { useEncryptedSettingsStore } from "./encryptedSettings";
 import { useSettingsStore } from "./settings";
 import { useInternalDataStore } from "./internalData";
@@ -173,12 +174,13 @@ export const useChatStore = defineStore("chat", {
     },
     systemPrompt(state) {
       const settings = useSettingsStore();
+      const connectionSettings = useConnectionSettingsStore();
       return (
         state.defaultInstructions +
         "\n" +
         settings.customInstructions +
         "\n" +
-        settings.currentConnectionInstructions
+        connectionSettings.connectionInstructions
       ).trim();
     },
     // FIXME move this to UI Kit?
@@ -277,9 +279,11 @@ export const useChatStore = defineStore("chat", {
       const internal = useInternalDataStore();
       const settings = useSettingsStore();
       const encryptedSettings = useEncryptedSettingsStore();
+      const connectionSettings = useConnectionSettingsStore();
       const tabState = useTabState();
       await settings.sync();
       await encryptedSettings.sync();
+      await connectionSettings.sync();
       await internal.sync();
       await tabState.sync();
 

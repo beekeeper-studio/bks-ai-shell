@@ -1,7 +1,6 @@
 import _ from "lodash";
 import type { AvailableProviders } from "@/config";
 import { disabledModelsByDefault, providerConfigs } from "@/config";
-import { useChatStore } from "./chat";
 import { defineStore } from "pinia";
 
 type Model = {
@@ -21,12 +20,6 @@ export const useSettingsStore = defineStore("settings", {
       // ==== GENERAL ====
       /** Append custom instructions to the default system instructions. */
       customInstructions: "",
-      /** Same as `customInstructions` but scoped to a connection */
-      customConnectionInstructions: [] as {
-        workspaceId: number;
-        connectionId: number;
-        instructions: string;
-      }[],
       allowExecutionOfReadOnlyQueries: false,
       enableAutoCompact: true,
 
@@ -79,16 +72,6 @@ export const useSettingsStore = defineStore("settings", {
           )
           .map((model) => ({ ...model, providerId }));
       });
-    },
-
-    currentConnectionInstructions(state): string {
-      const connection = useChatStore().connectionInfo;
-      const connectionInstructions = state.customConnectionInstructions.find(
-        (i) =>
-          i.connectionId === connection.id &&
-          i.workspaceId === connection.workspaceId,
-      );
-      return connectionInstructions?.instructions || "";
     },
   },
 
@@ -154,32 +137,6 @@ export const useSettingsStore = defineStore("settings", {
         disabledModels.splice(idx, 1);
       }
       this.disabledModels = disabledModels;
-    },
-
-    configureCustomConnectionInstructions(instructions: string) {
-      const connection = useChatStore().connectionInfo;
-      const connectionId = connection.id;
-      const workspaceId = connection.workspaceId;
-      const connectionInstructions = _.cloneDeep(
-        this.customConnectionInstructions,
-      );
-      const idx = connectionInstructions.findIndex(
-        (i) => i.connectionId === connectionId && i.workspaceId === workspaceId,
-      );
-      if (idx === -1) {
-        connectionInstructions.push({
-          connectionId,
-          workspaceId,
-          instructions,
-        });
-      } else {
-        connectionInstructions[idx] = {
-          connectionId,
-          workspaceId,
-          instructions,
-        };
-      }
-      this.customConnectionInstructions = connectionInstructions;
     },
   },
 });
