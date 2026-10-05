@@ -1,5 +1,5 @@
-/** Global data that is used internally and unlike configration.ts,
- * anything in here should not be configurable by user. */
+/** Global data that is used internally. Unlike the settings stores,
+ * nothing in here should be configurable by the user. */
 
 import { defineStore } from "pinia";
 
