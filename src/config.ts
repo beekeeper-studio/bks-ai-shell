@@ -390,6 +390,12 @@ export const providerConfigs = {
         temperature: defaultTemperature,
       },
       {
+        id: "o3-pro",
+        displayName: "o3-pro",
+        contextWindow: 200_000,
+        temperature: defaultTemperature,
+      },
+      {
         id: "o3-mini",
         displayName: "o3-mini",
         contextWindow: 200_000,
