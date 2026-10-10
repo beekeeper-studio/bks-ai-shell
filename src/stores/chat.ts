@@ -4,6 +4,7 @@ import type {
   AvailableModels,
   AvailableProviders,
   AvailableProvidersWithDynamicModels,
+  ModelInfo,
 } from "@/config";
 import { providerConfigs } from "@/config";
 import { useConfigurationStore } from "./configuration";
@@ -25,13 +26,19 @@ import type { Entity } from "@beekeeperstudio/ui-kit";
 import gt from "semver/functions/gt";
 import { getDefaultInstructions } from "@/instructions";
 
-export type Model = AvailableModels & {
+export type Model = (AvailableModels | ModelInfo) & {
   provider: AvailableProviders;
   providerDisplayName: (typeof providerConfigs)[AvailableProviders]["displayName"];
   enabled: boolean;
   /** Available if the api key is set. */
   available: boolean;
   removable: boolean;
+};
+
+export type ModelProvider = {
+  id: AvailableProviders;
+  displayName: string;
+  models: Model[];
 };
 
 type ChatState = {
@@ -65,7 +72,7 @@ export const useChatStore = defineStore("chat", {
     viewContext: undefined,
   }),
   getters: {
-    models() {
+    providers(): ModelProvider[] {
       const config = useConfigurationStore();
       const openaiModels = providerConfigs.openai.models.map((m) => ({
         ...m,
@@ -159,14 +166,54 @@ export const useChatStore = defineStore("chat", {
         : [];
 
       return [
-        ...openaiModels,
-        ...anthropicModels,
-        ...googleModels,
-        ...zaiModels,
-        ...deepseekModels,
-        ...userDefinedModels,
-        ...mockModels,
+        {
+          id: "openai",
+          displayName: providerConfigs.openai.displayName,
+          models: openaiModels,
+        },
+        {
+          id: "anthropic",
+          displayName: providerConfigs.anthropic.displayName,
+          models: anthropicModels,
+        },
+        {
+          id: "google",
+          displayName: providerConfigs.google.displayName,
+          models: googleModels,
+        },
+        {
+          id: "zai",
+          displayName: providerConfigs.zai.displayName,
+          models: zaiModels,
+        },
+        {
+          id: "deepseek",
+          displayName: providerConfigs.deepseek.displayName,
+          models: deepseekModels,
+        },
+        {
+          id: "openaiCompat",
+          displayName: providerConfigs.openaiCompat.displayName,
+          models: userDefinedModels.filter(
+            (model) => model.provider === "openaiCompat",
+          ),
+        },
+        {
+          id: "ollama",
+          displayName: providerConfigs.ollama.displayName,
+          models: userDefinedModels.filter(
+            (model) => model.provider === "ollama",
+          ),
+        },
+        {
+          id: "mock",
+          displayName: providerConfigs.mock.displayName,
+          models: mockModels,
+        },
       ];
+    },
+    models(): Model[] {
+      return this.providers.flatMap((provider) => provider.models);
     },
     systemPrompt(state) {
       const config = useConfigurationStore();
