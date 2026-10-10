@@ -1,0 +1,4 @@
+[tools]
+node = "26"
+npm = "latest"
+yarn = "1"
