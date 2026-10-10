@@ -1,57 +1,15 @@
-/** Global data that is used internally and unlike configration.ts,
- * anything in here should not be configurable by user.
- *
- * Usage:
- *
- * 1. Call `sync()` if it hasn't been called yet.
- * 2. Read the state by accessing it normally.
- * 3. Please don't mutate the state directly. Use `setInternal()` or any setter
- *    so they are saved.
- */
+/** Global data that is used internally. Unlike the settings stores,
+ * nothing in here should be configurable by the user. */
 
 import { defineStore } from "pinia";
-import _ from "lodash";
-import { appStorage } from "@beekeeperstudio/plugin";
-
-type InternalData = {
-  /** FIXME use Model type */
-  lastUsedModelId?: string;
-  isFirstTimeUser: boolean;
-};
-
-const defaultData: InternalData = {
-  lastUsedModelId: undefined,
-  isFirstTimeUser: true,
-};
-
-const prefixKey = (key: string) => `internal.${key}`;
 
 export const useInternalDataStore = defineStore("pluginData", {
-  state: (): InternalData => {
-    return defaultData;
-  },
-
-  actions: {
-    async sync() {
-      const data: Record<string, unknown> = {};
-      for (const key in defaultData) {
-        const value = await appStorage.getItem(prefixKey(key));
-
-        if (value === null) {
-          continue;
-        }
-
-        data[key] = value;
-      }
-
-      this.$patch(data);
-    },
-    async setInternal<T extends keyof InternalData>(
-      key: T,
-      value: InternalData[T],
-    ) {
-      this.$patch({ [key]: value });
-      await appStorage.setItem(prefixKey(key), value);
-    },
+  persist: true,
+  state() {
+    return {
+      /** FIXME use Model type */
+      lastUsedModelId: undefined as string | undefined,
+      isFirstTimeUser: true,
+    };
   },
 });

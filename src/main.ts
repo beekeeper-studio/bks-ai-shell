@@ -27,6 +27,7 @@ import json from "highlight.js/lib/languages/json";
 import sql from "highlight.js/lib/languages/sql";
 import "@beekeeperstudio/plugin/dist/eventForwarder";
 import { createAppEvent } from "@/plugins/appEvent";
+import { persistPlugin } from "@/plugins/persist";
 import { VueKeyboardTrapDirectivePlugin } from "@pdanpdan/vue-keyboard-trap";
 import PrimeVue from "primevue/config";
 import "@beekeeperstudio/ui-kit/sql-text-editor";
@@ -69,6 +70,7 @@ if (import.meta.env.MODE === "development") {
 // Create and mount the Vue app
 const app = createApp(App);
 const pinia = createPinia();
+pinia.use(persistPlugin);
 const appEvent = createAppEvent();
 app.use(pinia);
 app.use(appEvent);

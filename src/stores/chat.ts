@@ -6,12 +6,15 @@ import type {
   AvailableProvidersWithDynamicModels,
 } from "@/config";
 import { providerConfigs } from "@/config";
-import { useConfigurationStore } from "./configuration";
+import { useConnectionSettingsStore } from "./connectionSettings";
+import { useEncryptedSettingsStore } from "./encryptedSettings";
+import { useSettingsStore } from "./settings";
 import { useInternalDataStore } from "./internalData";
 import { useTabState } from "./tabState";
 import { createProvider } from "@/providers";
 import _ from "lodash";
 import { ProviderSyncError } from "@/utils/ProviderSyncError";
+import { migrateLegacyStorage } from "@/utils/storageMigration";
 import {
   type ConnectionInfo,
   getAppVersion,
@@ -66,15 +69,16 @@ export const useChatStore = defineStore("chat", {
   }),
   getters: {
     models() {
-      const config = useConfigurationStore();
+      const settings = useSettingsStore();
+      const encryptedSettings = useEncryptedSettingsStore();
       const openaiModels = providerConfigs.openai.models.map((m) => ({
         ...m,
         provider: "openai" as const,
         providerDisplayName: providerConfigs.openai.displayName,
-        available: !!config["providers.openai.apiKey"],
+        available: !!encryptedSettings["providers.openai.apiKey"],
         enabled:
-          !!config["providers.openai.apiKey"] &&
-          !config.disabledModels.some(
+          !!encryptedSettings["providers.openai.apiKey"] &&
+          !settings.disabledModels.some(
             (disabled) =>
               m.id === disabled.modelId && disabled.providerId === "openai",
           ),
@@ -84,10 +88,10 @@ export const useChatStore = defineStore("chat", {
         ...m,
         provider: "anthropic" as const,
         providerDisplayName: providerConfigs.anthropic.displayName,
-        available: !!config["providers.anthropic.apiKey"],
+        available: !!encryptedSettings["providers.anthropic.apiKey"],
         enabled:
-          !!config["providers.anthropic.apiKey"] &&
-          !config.disabledModels.some(
+          !!encryptedSettings["providers.anthropic.apiKey"] &&
+          !settings.disabledModels.some(
             (disabled) =>
               m.id === disabled.modelId && disabled.providerId === "anthropic",
           ),
@@ -97,10 +101,10 @@ export const useChatStore = defineStore("chat", {
         ...m,
         provider: "google" as const,
         providerDisplayName: providerConfigs.google.displayName,
-        available: !!config["providers.google.apiKey"],
+        available: !!encryptedSettings["providers.google.apiKey"],
         enabled:
-          !!config["providers.google.apiKey"] &&
-          !config.disabledModels.some(
+          !!encryptedSettings["providers.google.apiKey"] &&
+          !settings.disabledModels.some(
             (disabled) =>
               m.id === disabled.modelId && disabled.providerId === "google",
         ),
@@ -110,10 +114,10 @@ export const useChatStore = defineStore("chat", {
         ...m,
         provider: "deepseek" as const,
         providerDisplayName: providerConfigs.deepseek.displayName,
-        available: !!config["providers.deepseek.apiKey"],
+        available: !!encryptedSettings["providers.deepseek.apiKey"],
         enabled:
-          !!config["providers.deepseek.apiKey"] &&
-          !config.disabledModels.some(
+          !!encryptedSettings["providers.deepseek.apiKey"] &&
+          !settings.disabledModels.some(
             (disabled) =>
               m.id === disabled.modelId && disabled.providerId === "deepseek",
           ),
@@ -123,21 +127,21 @@ export const useChatStore = defineStore("chat", {
         ...m,
         provider: "zai" as const,
         providerDisplayName: providerConfigs.zai.displayName,
-        available: !!config["providers.zai.apiKey"],
+        available: !!encryptedSettings["providers.zai.apiKey"],
         enabled:
-          !!config["providers.zai.apiKey"] &&
-          !config.disabledModels.some(
+          !!encryptedSettings["providers.zai.apiKey"] &&
+          !settings.disabledModels.some(
             (disabled) =>
               m.id === disabled.modelId && disabled.providerId === "zai",
           ),
         removable: false,
       }));
-      const userDefinedModels = config.models.map((m) => ({
+      const userDefinedModels = settings.models.map((m) => ({
         ...m,
         provider: m.providerId,
         providerDisplayName: providerConfigs[m.providerId].displayName,
         available: true,
-        enabled: !config.disabledModels.some(
+        enabled: !settings.disabledModels.some(
           (disabled) =>
             m.id === disabled.modelId && disabled.providerId === m.providerId,
         ),
@@ -150,7 +154,7 @@ export const useChatStore = defineStore("chat", {
             provider: "mock" as const,
             providerDisplayName: providerConfigs.mock.displayName,
             available: true,
-            enabled: !config.disabledModels.some(
+            enabled: !settings.disabledModels.some(
               (disabled) =>
                 m.id === disabled.modelId && disabled.providerId === "mock",
             ),
@@ -169,13 +173,14 @@ export const useChatStore = defineStore("chat", {
       ];
     },
     systemPrompt(state) {
-      const config = useConfigurationStore();
+      const settings = useSettingsStore();
+      const connectionSettings = useConnectionSettingsStore();
       return (
         state.defaultInstructions +
         "\n" +
-        config.customInstructions +
+        settings.customInstructions +
         "\n" +
-        config.currentConnectionInstructions
+        connectionSettings.connectionInstructions
       ).trim();
     },
     // FIXME move this to UI Kit?
@@ -269,10 +274,16 @@ export const useChatStore = defineStore("chat", {
   },
   actions: {
     async initialize() {
+      await migrateLegacyStorage();
+
       const internal = useInternalDataStore();
-      const config = useConfigurationStore();
+      const settings = useSettingsStore();
+      const encryptedSettings = useEncryptedSettingsStore();
+      const connectionSettings = useConnectionSettingsStore();
       const tabState = useTabState();
-      await config.sync();
+      await settings.sync();
+      await encryptedSettings.sync();
+      await connectionSettings.sync();
       await internal.sync();
       await tabState.sync();
 
@@ -315,7 +326,7 @@ export const useChatStore = defineStore("chat", {
     },
     /** List the models for a provider and store them in the internal data store. */
     async syncProvider(provider: AvailableProvidersWithDynamicModels) {
-      const config = useConfigurationStore();
+      const settings = useSettingsStore();
       try {
         const errorIdx = this.errors.findIndex(
           (e) => e.providerId === provider,
@@ -325,7 +336,7 @@ export const useChatStore = defineStore("chat", {
         }
 
         // Get old models before fetching new ones
-        const oldModels = config.getModelsByProvider(provider) || [];
+        const oldModels = settings.getModelsByProvider(provider) || [];
 
         // Fetch new models
         const newModels = await createProvider(provider).listModels();
@@ -338,10 +349,10 @@ export const useChatStore = defineStore("chat", {
           .map((m) => m.id);
 
         // Update the model list first
-        await config.setModels(provider, newModels);
+        settings.setModels(provider, newModels);
 
         // Disable ONLY the new models
-        await config.disableModels(
+        settings.disableModels(
           newModelIds.map((modelId) => ({
             modelId,
             providerId: provider,
@@ -369,7 +380,7 @@ export const useChatStore = defineStore("chat", {
             }),
           );
         }
-        config.setModels(provider, []);
+        settings.setModels(provider, []);
       }
     },
   },
