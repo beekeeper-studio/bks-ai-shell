@@ -30,6 +30,7 @@ import { createAppEvent } from "@/plugins/appEvent";
 import { VueKeyboardTrapDirectivePlugin } from "@pdanpdan/vue-keyboard-trap";
 import PrimeVue from "primevue/config";
 import "@beekeeperstudio/ui-kit/sql-text-editor";
+import "@beekeeperstudio/ui-kit/context-menu";
 
 setDebugComms(false);
 

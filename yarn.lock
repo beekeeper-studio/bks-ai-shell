@@ -394,10 +394,10 @@
   resolved "https://registry.yarnpkg.com/@beekeeperstudio/plugin/-/plugin-1.7.1.tgz#b468d9314cc1705b3b7e9a8387d898d5f1d44fb2"
   integrity sha512-+kQYmvi2gWnVvSvxtxqdNGKE0bupgBzAzpBoBxXlS3vIagD/dmo5vL4WTDPkMsyngzmZTQ6PkcC0Lc381YtJVA==
 
-"@beekeeperstudio/ui-kit@0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@beekeeperstudio/ui-kit/-/ui-kit-0.3.1.tgz#e4dd5fbcf07a50c63c196cdaeae73d7a47e99c25"
-  integrity sha512-AUCuaz2J1tmp/XQdswxJgOvoWPB3gYQ/j42vcW8JS4l3TzThLQFL6ueJ1kXDwXPICu0iY++kr0Kum1gQTMVNlQ==
+"@beekeeperstudio/ui-kit@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@beekeeperstudio/ui-kit/-/ui-kit-0.4.0.tgz#873776628a0ecdef50db33d5c5abbe9d996c716a"
+  integrity sha512-7HDXUX1Bu/on6cgN7ikPmVu6k0Cu8rjX+ZFMjtHd6qKLjOSXLWqfoOJhllGgZ1zisrjgb+fuKKnxw0x8M8pwTg==
   dependencies:
     "@codemirror/autocomplete" "^6.18.4"
     "@codemirror/commands" "^6.8.1"
@@ -407,16 +407,24 @@
     "@codemirror/lang-sql" "^6.8.0"
     "@codemirror/language" "^6.11.0"
     "@codemirror/lint" "^6.8.4"
+    "@codemirror/merge" "^6.12.1"
     "@codemirror/search" "^6.5.10"
     "@codemirror/state" "^6.5.2"
     "@codemirror/view" "^6.36.2"
     "@lezer/highlight" "^1.2.1"
-    "@marimo-team/codemirror-languageserver" "^1.15.13"
+    "@marimo-team/codemirror-languageserver" "^1.15.25"
+    "@open-rpc/client-js" "^1.8.1"
     "@replit/codemirror-emacs" "^6.1.0"
+    "@replit/codemirror-indentation-markers" "^6.5.3"
     "@replit/codemirror-vim" "^6.3.0"
     "@surrealdb/codemirror" "^1.0.0-beta.21"
+    "@types/tabulator-tables" "^6.3.4"
     ansi-to-html "^0.7.2"
     highlight.js "^11.11.1"
+    sql-formatter "15.7.3"
+    sql-query-identifier "^3.2.0"
+    tabulator-tables "^6.6.1"
+    vscode-languageserver-protocol "^3.17.5"
 
 "@beekeeperstudio/vite-plugin@^1.1.0":
   version "1.1.0"
@@ -527,6 +535,17 @@
     "@codemirror/state" "^6.0.0"
     "@codemirror/view" "^6.35.0"
     crelt "^1.0.5"
+
+"@codemirror/merge@^6.12.1":
+  version "6.12.2"
+  resolved "https://registry.yarnpkg.com/@codemirror/merge/-/merge-6.12.2.tgz#00870b0451b555189e6dd91317d1ff218f28b414"
+  integrity sha512-V8JvyAPjHbPupqP7BeMcsdsYCbyPij74jxIbaIJDORI+VZzW44zFmon8bF+oxGWvOKhcRmkiUMXd8MxHr3YA2w==
+  dependencies:
+    "@codemirror/language" "^6.0.0"
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.17.0"
+    "@lezer/highlight" "^1.0.0"
+    style-mod "^4.1.0"
 
 "@codemirror/search@^6.5.10":
   version "6.5.11"
@@ -687,10 +706,10 @@
   resolved "https://registry.yarnpkg.com/@marijn/find-cluster-break/-/find-cluster-break-1.0.2.tgz#775374306116d51c0c500b8c4face0f9a04752d8"
   integrity sha512-l0h88YhZFyKdXIFNfSWpyjStDjGHwZ/U7iobcK1cQQD8sejsONdQtTVU+1wVN1PBw40PiiHB1vA5S7VTfQiP9g==
 
-"@marimo-team/codemirror-languageserver@^1.15.13":
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/@marimo-team/codemirror-languageserver/-/codemirror-languageserver-1.16.0.tgz#c8f18010123df21e29a93515902c5a2a2fad0704"
-  integrity sha512-DIKGvEE/M/eTr+p/F6GjANBwAAv4bByptyNAlUYQHt16bV5CncktwAv3wdYe1LVADxR6ReugCRKCK3RYcaMmWw==
+"@marimo-team/codemirror-languageserver@^1.15.25":
+  version "1.16.12"
+  resolved "https://registry.yarnpkg.com/@marimo-team/codemirror-languageserver/-/codemirror-languageserver-1.16.12.tgz#fb0d50cde55cb7e0a25e9f4ca886f825aaf8d365"
+  integrity sha512-GZ6blOQYf5Xl5wlKl024gN4C4ZXv6BIS1/19fuFhuDh06TO24ueNUqlSA3S0Un8II9wvbqqAmYz/yFdSMiqeYw==
   dependencies:
     "@codemirror/autocomplete" "^6.18.4"
     "@codemirror/lint" "^6.8.4"
@@ -881,6 +900,11 @@
   resolved "https://registry.yarnpkg.com/@replit/codemirror-emacs/-/codemirror-emacs-6.1.0.tgz#662dffc3b354c47cbf930219f8cb75cfc9e7f6fe"
   integrity sha512-74DITnht6Cs6sHg02PQ169IKb1XgtyhI9sLD0JeOFco6Ds18PT+dkD8+DgXBDokne9UIFKsBbKPnpFRAz60/Lw==
 
+"@replit/codemirror-indentation-markers@^6.5.3":
+  version "6.5.3"
+  resolved "https://registry.yarnpkg.com/@replit/codemirror-indentation-markers/-/codemirror-indentation-markers-6.5.3.tgz#1cfe5c557c45dd7f2988cbee278f17607010591b"
+  integrity sha512-hL5Sfvw3C1vgg7GolLe/uxX5T3tmgOA3ZzqlMv47zjU1ON51pzNWiVbS22oh6crYhtVhv8b3gdXwoYp++2ilHw==
+
 "@replit/codemirror-vim@^6.3.0":
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/@replit/codemirror-vim/-/codemirror-vim-6.3.0.tgz#1bcde09f25bcb1c4f96d2cd50ea07f9f71fc9ec4"
@@ -1046,6 +1070,11 @@
   version "7.7.1"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.7.1.tgz#3ce3af1a5524ef327d2da9e4fd8b6d95c8d70528"
   integrity sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==
+
+"@types/tabulator-tables@^6.3.4":
+  version "6.3.6"
+  resolved "https://registry.yarnpkg.com/@types/tabulator-tables/-/tabulator-tables-6.3.6.tgz#945b95284839d56de99a5e1f96bd046ea6e6676a"
+  integrity sha512-H4xtYl8Dy/g4SrNnZx+oEK/N5+FLLEGTuU3MM7bpUUk3gtYy5aYqSjxQ1pqITnQ/PKHqV1aD4Zd5xels9AnPSA==
 
 "@types/whatwg-mimetype@^3.0.2":
   version "3.0.2"
@@ -1508,6 +1537,11 @@ ansis@^4.1.0:
   resolved "https://registry.yarnpkg.com/ansis/-/ansis-4.2.0.tgz#2e6e61c46b11726ac67f78785385618b9e658780"
   integrity sha512-HqZ5rWlFjGiV0tDm3UxxgNRqsOTniqoKZu0pIAfh7TZQMGuZK+hH0drySty0si0QXj1ieop4+SkSfPZBPPkHig==
 
+argparse@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/argparse/-/argparse-2.0.1.tgz#246f50f3ca78a3240f6c997e8a9bd1eac49e4b38"
+  integrity sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==
+
 balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
@@ -1594,6 +1628,11 @@ commander@^10.0.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-10.0.1.tgz#881ee46b4f77d1c1dccc5823433aa39b022cbe06"
   integrity sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==
 
+commander@^2.19.0:
+  version "2.20.3"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
+  integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
+
 compare-versions@^6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-6.1.1.tgz#7af3cc1099ba37d244b3145a9af5201b629148a9"
@@ -1672,6 +1711,11 @@ detect-libc@^2.0.3:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.1.2.tgz#689c5dcdc1900ef5583a4cb9f6d7b473742074ad"
   integrity sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==
+
+discontinuous-range@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/discontinuous-range/-/discontinuous-range-1.0.0.tgz#e38331f0844bba49b9a9cb71c771585aab1bc65a"
+  integrity sha512-c68LpLbO+7kP/b1Hr1qs8/BJ09F5khZGTxqxZuhzxpmwJKOgRFHJWIb9/KmqnqHhLdO55aOxFH/EGBvUQbL/RQ==
 
 eastasianwidth@^0.2.0:
   version "0.2.0"
@@ -2088,6 +2132,11 @@ mitt@^3.0.1:
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.1.tgz#ea36cf0cc30403601ae074c8f77b7092cdab36d1"
   integrity sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==
 
+moo@^0.5.0:
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/moo/-/moo-0.5.3.tgz#dfcdb40ff6f1a03c34af5df7f9717cecfa88c38c"
+  integrity sha512-m2fmM2dDm7GZQsY7KK2cme8agi+AAljILjQnof7p1ZMDe6dQ4bdnSMx0cPppudoeNv5hEFQirN6u+O4fDE0IWA==
+
 mrmime@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/mrmime/-/mrmime-2.0.1.tgz#bc3e87f7987853a54c9850eeb1f1078cd44adddc"
@@ -2107,6 +2156,16 @@ nanoid@^3.3.11, nanoid@^3.3.12:
   version "3.3.19"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.19.tgz#336d4aa4bcd4fb24d2cddede7ffeae40bec03f0a"
   integrity sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug==
+
+nearley@^2.20.1:
+  version "2.20.1"
+  resolved "https://registry.yarnpkg.com/nearley/-/nearley-2.20.1.tgz#246cd33eff0d012faf197ff6774d7ac78acdd474"
+  integrity sha512-+Mc8UaAebFzgV+KpI5n7DasuuQCHA89dmwm7JXw3TV43ukfNQ9DnBH3Mdb2g/I4Fdxc26pwimBWvjIw0UAILSQ==
+  dependencies:
+    commander "^2.19.0"
+    moo "^0.5.0"
+    railroad-diagrams "^1.0.0"
+    randexp "0.4.6"
 
 node-addon-api@^7.0.0:
   version "7.1.1"
@@ -2264,10 +2323,28 @@ proto-list@~1.2.1:
   resolved "https://registry.yarnpkg.com/proto-list/-/proto-list-1.2.4.tgz#212d5bfe1318306a420f6402b8e26ff39647a849"
   integrity sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==
 
+railroad-diagrams@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/railroad-diagrams/-/railroad-diagrams-1.0.0.tgz#eb7e6267548ddedfb899c1b90e57374559cddb7e"
+  integrity sha512-cz93DjNeLY0idrCNOH6PviZGRN9GJhsdm9hpn1YCS879fj4W+x5IFJhhkRZcwVgMmFF7R82UA/7Oh+R8lLZg6A==
+
+randexp@0.4.6:
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/randexp/-/randexp-0.4.6.tgz#e986ad5e5e31dae13ddd6f7b3019aa7c87f60ca3"
+  integrity sha512-80WNmd9DA0tmZrw9qQa62GPPWfuXJknrmVmLcxvq4uZBdYqb1wYoKTmnlGUchvVWe0XiLupYkBoXVOxz3C8DYQ==
+  dependencies:
+    discontinuous-range "1.0.0"
+    ret "~0.1.10"
+
 readdirp@^4.0.1:
   version "4.1.2"
   resolved "https://registry.yarnpkg.com/readdirp/-/readdirp-4.1.2.tgz#eb85801435fbf2a7ee58f19e0921b068fc69948d"
   integrity sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==
+
+ret@~0.1.10:
+  version "0.1.15"
+  resolved "https://registry.yarnpkg.com/ret/-/ret-0.1.15.tgz#b8a4825d5bdb1fc3f6f53c2bc33f81388681c7bc"
+  integrity sha512-TTlYpa+OL+vMMNG24xSlQGEJ3B/RzEfUlLct7b5G/ytav+wPrplCpVMFuwzXbkecJrb6IYo1iFb0S9v37754mg==
 
 rfdc@^1.4.1:
   version "1.4.1"
@@ -2370,10 +2447,23 @@ speakingurl@^14.0.1:
   resolved "https://registry.yarnpkg.com/speakingurl/-/speakingurl-14.0.1.tgz#f37ec8ddc4ab98e9600c1c9ec324a8c48d772a53"
   integrity sha512-1POYv7uv2gXoyGFpBCmpDVSNV74IfsWlDW216UPjbWufNf+bSU6GdbDsxdcxtfwb4xlI3yxzOTKClUosxARYrQ==
 
+sql-formatter@15.7.3:
+  version "15.7.3"
+  resolved "https://registry.yarnpkg.com/sql-formatter/-/sql-formatter-15.7.3.tgz#b62d7de5ca5b24ab6bdfb7568c11b5dcde74c114"
+  integrity sha512-5+zl9Nqg5aNjss0tb1G+StpC4dJKbjv3+g8CL/+V+00PfZop+2RKGyi53ScFl0dr+Dkx1LjmUO54Q3N7K3EtMw==
+  dependencies:
+    argparse "^2.0.1"
+    nearley "^2.20.1"
+
 sql-query-identifier@^2.8.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/sql-query-identifier/-/sql-query-identifier-2.8.0.tgz#af6e62594d784194b86c87bddc95e5f084223b47"
   integrity sha512-5cfaQCq80pRtLulP0nxw1j8W7m2ytUrbbQNrjszV26D8gTly7FUO3bWwMu6rwF3chY30Xv9Rb/CEzAQhDJ1YgA==
+
+sql-query-identifier@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/sql-query-identifier/-/sql-query-identifier-3.2.0.tgz#c2e184258da21b821d8404ece45892a8709b4f17"
+  integrity sha512-DUIx0pyyPYIJzFCuD5euzHOjj1n9BxTEkq8iXOHgOTd/RwuKsHUMhn0tb6pAwJR2rccy925Fhe4NaDDadIjTUQ==
 
 stackback@0.0.2:
   version "0.0.2"
@@ -2454,6 +2544,11 @@ swrv@^1.0.4:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/swrv/-/swrv-1.1.0.tgz#e3825e1e825893391e34fd5b924ba8e6122c14ce"
   integrity sha512-pjllRDr2s0iTwiE5Isvip51dZGR7GjLH1gCSVyE8bQnbAx6xackXsFdojau+1O5u98yHF5V73HQGOFxKUXO9gQ==
+
+tabulator-tables@^6.6.1:
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/tabulator-tables/-/tabulator-tables-6.6.1.tgz#190c45d3d5be2d30cd66bd426921f8cbcab0d531"
+  integrity sha512-8A77aN30vJS34w1P5h4HtgEajB7vX2v0AD1fXFIKxp6SxplpGGfKn0Y4ouY91+6gdGK8/quqXoCA2LkrhBVE3A==
 
 tinybench@^2.9.0:
   version "2.9.0"

@@ -1,0 +1,27 @@
+:root {
+  --bks-context-menu-bg-color: var(--p-menu-background);
+  --bks-context-menu-fg-color: var(--p-menu-color);
+  --bks-context-menu-item-fg-color: var(--p-menu-item-color);
+  --bks-context-menu-item-bg-color-hover: var(--p-menu-item-focus-background);
+  --bks-context-menu-divider-border-color: var(--p-menu-separator-border-color);
+}
+
+.BksContextMenu-list {
+  padding: var(--p-menu-list-padding);
+  border-radius: var(--p-menu-border-radius);
+  box-shadow: var(--p-menu-shadow);
+}
+
+.BksContextMenu-item {
+  padding: var(--p-menu-item-padding);
+  gap: var(--p-menu-item-gap);
+
+  &:hover {
+    color: var(--p-menu-item-focus-color);
+  }
+}
+
+.BksContextMenu-item-divider {
+  margin: 0.25rem 0;
+  padding: 0;
+}
