@@ -10,7 +10,8 @@ export default defineConfig({
     vue({
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag === "bks-sql-text-editor",
+          isCustomElement: (tag) =>
+            tag === "bks-sql-text-editor" || tag === "bks-context-menu",
         },
       },
     }),

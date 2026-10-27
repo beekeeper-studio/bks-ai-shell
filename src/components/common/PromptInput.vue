@@ -16,21 +16,15 @@
         :class="{ 'please-select-a-model': pleaseSelectAModel }"
         @click="handleModelSelectionClick"
       >
-        <Menu
-          ref="menu"
-          id="overlay_menu"
-          :model="filteredModels"
-          :popup="true"
-        >
-          <template #itemicon="{ item }">
-            <span class="material-symbols-outlined menu-icon">{{
-              item.icon
-            }}</span>
-          </template>
-        </Menu>
+        <bks-context-menu
+          v-if="menuEvent"
+          :options="menuOptions"
+          :event="menuEvent"
+          @bks-destroyed="menuEvent = null"
+        />
         <button
           class="btn btn-small dropdown-trigger"
-          @click="($refs.menu as MenuInstance).toggle($event)"
+          @click="menuEvent = $event"
         >
           {{ selectedModel ? selectedModel.displayName : "Select model" }}
         </button>
@@ -58,11 +52,8 @@ import { mapActions, mapState } from "pinia";
 import { matchModel } from "@/utils";
 import { useInternalDataStore } from "@/stores/internalData";
 import _ from "lodash";
-import Menu from "primevue/menu";
-import type { MenuItem } from "primevue/menuitem";
+import type { MenuItem } from "@beekeeperstudio/ui-kit";
 import { defineComponent } from "vue";
-
-type MenuInstance = InstanceType<typeof Menu>;
 
 const maxHistorySize = 50;
 
@@ -74,7 +65,6 @@ function loadInputHistory(storageKey: string): string[] {
 export default defineComponent({
   components: {
     Textarea,
-    Menu,
   },
 
   emits: ["submit", "stop", "manage-models", "select-model"],
@@ -101,40 +91,73 @@ export default defineComponent({
       inputIndex: inputHistory.length - 1,
       isAtBottom: true,
       pleaseSelectAModel: false,
+      menuEvent: null as MouseEvent | null,
       resizeObserver: null as ResizeObserver | null,
     };
   },
 
   computed: {
-    ...mapState(useChatStore, ["models"]),
-    filteredModels(): MenuItem[] {
-      const items: MenuItem[] = [];
-      for (const model of this.models) {
-        if (model.enabled) {
-          const selected = model.id === this.selectedModel?.id;
-          items.push({
-            value: model.id,
-            label: model.displayName,
-            icon: selected ? "check" : "",
-            class: selected ? "selected" : "",
-            command: () => this.$emit("select-model", model),
-          });
+    ...mapState(useChatStore, ["models", "providers"]),
+    latestModels(): Model[] {
+      const latestModels: Model[] = [];
+      for (const provider of this.providers) {
+        // Each provider's models are listed newest first in config.ts
+        const latestModel = provider.models.find((model) => model.enabled);
+        if (latestModel) {
+          latestModels.push(latestModel);
         }
       }
-      if (items.length === 0) {
+      return latestModels;
+    },
+    moreModels(): Model[] {
+      return this.models.filter(
+        (model) => model.enabled && !this.latestModels.includes(model),
+      );
+    },
+    latestModelItems(): MenuItem[] {
+      return this.latestModels.map((model) => ({
+        label: model.displayName,
+        icon: model.id === this.selectedModel?.id ? "check" : undefined,
+        handler: () => this.$emit("select-model", model),
+      }));
+    },
+    moreModelItems(): MenuItem[] {
+      return this.moreModels.map((model) => ({
+        label: model.displayName,
+        icon: model.id === this.selectedModel?.id ? "check" : undefined,
+        handler: () => this.$emit("select-model", model),
+      }));
+    },
+    menuOptions(): MenuItem[] {
+      if (this.models.length === 0) {
         return [
           {
             label: "Manage models",
-            command: () => this.$emit("manage-models"),
+            handler: () => this.$emit("manage-models"),
+          },
+        ];
+      }
+      if (this.moreModelItems.length > 0) {
+        return [
+          ...this.latestModelItems,
+          {
+            label: "More models",
+            items: this.moreModelItems,
+            handler: () => {},
+          },
+          { type: "divider", id: "divider" },
+          {
+            label: "Manage models",
+            handler: () => this.$emit("manage-models"),
           },
         ];
       }
       return [
-        ...items,
-        { separator: true },
+        ...this.latestModelItems,
+        { type: "divider", id: "divider" },
         {
           label: "Manage models",
-          command: () => this.$emit("manage-models"),
+          handler: () => this.$emit("manage-models"),
         },
       ];
     },
@@ -318,7 +341,7 @@ export default defineComponent({
       });
       this.resizeObserver.observe(textarea);
       this.resizeObserver.observe(document.body);
-    })
+    });
   },
 
   beforeDestroy() {
