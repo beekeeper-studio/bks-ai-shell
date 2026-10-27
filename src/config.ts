@@ -258,6 +258,12 @@ export const providerConfigs = {
         temperature: 1,
       },
       {
+        id: "gpt-6.1-terra",
+        displayName: "gpt-6.1-terra",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
         id: "gpt-6-astra",
         displayName: "gpt-6-astra",
         contextWindow: 1_050_000,
@@ -384,12 +390,6 @@ export const providerConfigs = {
         temperature: defaultTemperature,
       },
       {
-        id: "gpt-4.1-nano",
-        displayName: "gpt-4.1-nano",
-        contextWindow: 1_047_576,
-        temperature: defaultTemperature,
-      },
-      {
         id: "gpt-4o-mini",
         displayName: "gpt-4o-mini",
         contextWindow: 128_000,
@@ -404,18 +404,6 @@ export const providerConfigs = {
       {
         id: "o3-pro",
         displayName: "o3-pro",
-        contextWindow: 200_000,
-        temperature: defaultTemperature,
-      },
-      {
-        id: "o3-mini",
-        displayName: "o3-mini",
-        contextWindow: 200_000,
-        temperature: defaultTemperature,
-      },
-      {
-        id: "o4-mini",
-        displayName: "o4-mini",
         contextWindow: 200_000,
         temperature: defaultTemperature,
       },
