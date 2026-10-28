@@ -80,6 +80,10 @@ export default {
     placeholder: String,
     /** We add this to support v-model */
     modelValue: [String, Boolean],
+    modelModifiers: {
+      type: Object as PropType<{ lazy?: boolean }>,
+      default: () => ({}),
+    },
     disabled: Boolean,
     helperPosition: {
       type: String as PropType<"before-input" | "after-input">,
@@ -96,13 +100,25 @@ export default {
   methods: {
     emitInput(event: Event) {
       this.$emit("input", event);
-      this.$emit("update:modelValue", (event.target as HTMLInputElement).value);
+      if (!this.modelModifiers.lazy) {
+        this.$emit(
+          "update:modelValue",
+          (event.target as HTMLInputElement).value,
+        );
+      }
     },
     emitChange(event: Event) {
       this.$emit("change", event);
+      if (this.modelModifiers.lazy) {
+        this.$emit(
+          "update:modelValue",
+          (event.target as HTMLInputElement).value,
+        );
+      }
     },
     handleClick(event: MouseEvent) {
       this.$emit("click", event);
+      this.$emit("update:modelValue", !this.modelValue);
     },
     focus() {
       if (this.$refs.focusable) {

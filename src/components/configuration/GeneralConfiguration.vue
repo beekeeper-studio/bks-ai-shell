@@ -1,27 +1,14 @@
 <template>
   <h2>General</h2>
 
-  <BaseInput
-    type="switch"
-    :model-value="allowExecutionOfReadOnlyQueries"
-    @click="
-      configure(
-        'allowExecutionOfReadOnlyQueries',
-        !allowExecutionOfReadOnlyQueries,
-      )
-    "
-  >
+  <BaseInput type="switch" v-model="allowExecutionOfReadOnlyQueries">
     <template #label>Always allow execution of read-only queries</template>
     <template #helper>
       This will allow execution of read-only queries without asking for
       confirmation in all sessions.
     </template>
   </BaseInput>
-  <BaseInput
-    type="switch"
-    :model-value="enableAutoCompact"
-    @click="configure('enableAutoCompact', !enableAutoCompact)"
-  >
+  <BaseInput type="switch" v-model="enableAutoCompact">
     <template #label>Enable auto-compact (recommended)</template>
     <template #helper>
       When enabled, the conversation is automatically compacted to avoid hitting
@@ -45,8 +32,7 @@
     >.
   </p>
   <BaseInput
-    :model-value="customInstructions"
-    @change="configure('customInstructions', $event.target.value)"
+    v-model.lazy="customInstructions"
     type="textarea"
     placeholder="E.g. Before running a query, analyze it for any potential issues."
     rows="4"
@@ -55,8 +41,7 @@
     <template #helper>Used in every conversation.</template>
   </BaseInput>
   <BaseInput
-    :model-value="currentConnectionInstructions"
-    @change="configureCustomConnectionInstructions($event.target.value)"
+    v-model.lazy="connectionInstructions"
     type="textarea"
     placeholder="E.g. This database contains tables for user management and analytics."
     rows="4"
@@ -67,9 +52,10 @@
 </template>
 
 <script lang="ts">
-import { mapActions, mapGetters, mapState } from "pinia";
+import { mapWritableState } from "pinia";
 import BaseInput from "@/components/common/BaseInput.vue";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useSettingsStore } from "@/stores/settings";
+import { useConnectionSettingsStore } from "@/stores/connectionSettings";
 import ExternalLink from "@/components/common/ExternalLink.vue";
 
 export default {
@@ -81,19 +67,12 @@ export default {
   },
 
   computed: {
-    ...mapState(useConfigurationStore, [
+    ...mapWritableState(useSettingsStore, [
       "customInstructions",
       "allowExecutionOfReadOnlyQueries",
       "enableAutoCompact",
     ]),
-    ...mapGetters(useConfigurationStore, ["currentConnectionInstructions"]),
-  },
-
-  methods: {
-    ...mapActions(useConfigurationStore, [
-      "configure",
-      "configureCustomConnectionInstructions",
-    ]),
+    ...mapWritableState(useConnectionSettingsStore, ["connectionInstructions"]),
   },
 };
 </script>

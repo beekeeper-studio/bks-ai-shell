@@ -16,10 +16,10 @@
 <script lang="ts">
 import ChatInterface from "./components/ChatInterface.vue";
 import { useChatStore } from "@/stores/chat";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useEncryptedSettingsStore } from "@/stores/encryptedSettings";
 import { useInternalDataStore } from "@/stores/internalData";
 import { useTabState } from "@/stores/tabState";
-import { mapState, mapActions, mapGetters } from "pinia";
+import { mapState, mapActions, mapGetters, mapWritableState } from "pinia";
 import Configuration, {
   type PageId as ConfigurationPageId,
 } from "@/components/configuration/Configuration.vue";
@@ -78,23 +78,21 @@ export default {
 
   computed: {
     ...mapState(useTabState, ["messages"]),
-    ...mapState(useConfigurationStore, {
+    ...mapState(useEncryptedSettingsStore, {
       openaiApiKey: "providers.openai.apiKey",
       anthropicApiKey: "providers.anthropic.apiKey",
       googleApiKey: "providers.google.apiKey",
     }),
-    ...mapGetters(useConfigurationStore, ["apiKeyExists"]),
-    ...mapGetters(useInternalDataStore, ["isFirstTimeUser"]),
+    ...mapGetters(useEncryptedSettingsStore, ["apiKeyExists"]),
+    ...mapWritableState(useInternalDataStore, ["isFirstTimeUser"]),
   },
 
   methods: {
-    ...mapActions(useConfigurationStore, ["configure"]),
-    ...mapActions(useInternalDataStore, ["setInternal"]),
     ...mapActions(useChatStore, ["initialize"]),
     closeOnboardingScreen() {
       this.showOnboarding = false;
       this.page = "chat-interface";
-      this.setInternal("isFirstTimeUser", false);
+      this.isFirstTimeUser = false;
     },
     handleManageModels() {
       this.configurationPage = "models";
@@ -129,7 +127,7 @@ export default {
         window.location.reload();
       }, reloadDelay);
       try {
-        await appStorage.getItem("default");
+        await appStorage.get("default");
       } catch (e) {
       } finally {
         // Cancel reload if getItem() succeeds or fails quickly
