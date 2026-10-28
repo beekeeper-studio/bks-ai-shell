@@ -8,7 +8,6 @@ import {
   type ToolSet,
 } from "ai";
 import type {
-  AvailableModels,
   AvailableProviders,
   ModelInfo,
 } from "@/config";
@@ -31,7 +30,7 @@ export type StreamOptions = {
   messages: Messages;
   signal?: AbortSignal;
   tools: ToolSet;
-  modelId: AvailableModels["id"];
+  modelId: string;
   temperature?: number;
   systemPrompt?: string;
 };
