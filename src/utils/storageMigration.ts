@@ -1,10 +1,6 @@
 // This file moves settings that older versions saved one key each into one
 // object per store, which is how the `persist` Pinia plugin saves them.
-import {
-  appStorage,
-  AppStorage,
-  getConnectionInfo,
-} from "@beekeeperstudio/plugin";
+import { appStorage, getConnectionInfo } from "@beekeeperstudio/plugin";
 
 /** Move values that older versions saved one key each into one object. */
 async function migrateLegacySettings() {
@@ -49,8 +45,10 @@ async function migrateLegacySettings() {
 
 /** Move values that older versions saved one key each into one object. */
 async function migrateLegacyEncryptedSettings() {
-  const storage = new AppStorage({ encrypted: true });
-  if ((await storage.get("encryptedSettings")) !== null) {
+  const encryptedSettings = await appStorage.get("encryptedSettings", {
+    encrypted: true,
+  });
+  if (encryptedSettings !== null) {
     return;
   }
 
@@ -65,7 +63,7 @@ async function migrateLegacyEncryptedSettings() {
   const legacyState: Record<string, unknown> = {};
 
   for (const key of legacyKeys) {
-    const value = await storage.get(key);
+    const value = await appStorage.get(key);
     if (value !== null) {
       legacyState[key] = value;
     }
@@ -75,7 +73,7 @@ async function migrateLegacyEncryptedSettings() {
     return;
   }
 
-  await storage.set("encryptedSettings", legacyState);
+  await appStorage.set("encryptedSettings", legacyState);
 }
 
 /** Move values that older versions saved under `internal.*` into one object. */
@@ -108,8 +106,8 @@ async function migrateLegacyInternalData() {
  * Only the current connection can be written, so each one moves when opened.
  */
 async function migrateLegacyConnectionSettings() {
-  const storage = new AppStorage({ scope: "currentConnection" });
-  if ((await storage.get("connectionSettings")) !== null) {
+  const connectionSettings = await appStorage.get("connectionSettings");
+  if (connectionSettings !== null) {
     return;
   }
 
@@ -129,7 +127,7 @@ async function migrateLegacyConnectionSettings() {
     return;
   }
 
-  await storage.set("connectionSettings", {
+  await appStorage.set("connectionSettings", {
     connectionInstructions: legacyEntry.instructions,
   });
 }

@@ -1,12 +1,12 @@
 import type { PiniaPluginContext } from "pinia";
 import { watch } from "vue";
-import { AppStorage, log } from "@beekeeperstudio/plugin";
+import { appStorage, log } from "@beekeeperstudio/plugin";
 import type { AppStorageOptions } from "@beekeeperstudio/plugin";
 import _ from "lodash";
 
 declare module "pinia" {
   export interface DefineStoreOptionsBase<S, Store> {
-    /** Load the state from `AppStorage` and save every change back to it. */
+    /** Load the state from `appStorage` and save every change back to it. */
     persist?: true | AppStorageOptions;
   }
 
@@ -23,20 +23,29 @@ export function persistPlugin(context: PiniaPluginContext) {
     return;
   }
 
-  const storage = new AppStorage(persist === true ? {} : persist);
+  const storageOptions = persist === true ? {} : persist;
 
   return {
     async sync() {
-      const savedState = await storage.get(context.store.$id);
+      const savedState = await appStorage.get(
+        context.store.$id,
+        storageOptions,
+      );
       if (savedState !== null) {
-        context.store.$patch(savedState);
+        context.store.$patch(savedState as any);
       }
 
       watch(
         () => context.store.$state,
         (state) => {
-          // Clone so the host receives a plain object, not a reactive Proxy.
-          storage.set(context.store.$id, _.cloneDeep(state)).catch(log.error);
+          appStorage
+            .set(
+              context.store.$id,
+              // Clone so the host receives a plain object, not a reactive Proxy.
+              _.cloneDeep(state),
+              storageOptions,
+            )
+            .catch(log.error);
         },
         { deep: true },
       );
