@@ -48,9 +48,8 @@
 import type { PropType } from "vue";
 import Textarea from "primevue/textarea";
 import { type Model, useChatStore } from "@/stores/chat";
-import { mapActions, mapState } from "pinia";
+import { mapState } from "pinia";
 import { matchModel } from "@/utils";
-import { useInternalDataStore } from "@/stores/internalData";
 import _ from "lodash";
 import type { MenuItem } from "@beekeeperstudio/ui-kit";
 import { defineComponent } from "vue";
@@ -172,7 +171,6 @@ export default defineComponent({
   },
 
   methods: {
-    ...mapActions(useInternalDataStore, ["setInternal"]),
     matchModel,
 
     focus() {

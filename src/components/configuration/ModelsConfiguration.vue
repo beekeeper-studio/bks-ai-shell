@@ -108,7 +108,7 @@ import {
 import Switch from "@/components/common/Switch.vue";
 import { type Model, useChatStore } from "@/stores/chat";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useSettingsStore } from "@/stores/settings";
 import _ from "lodash";
 import { matchModel, providerSupportsRuntimeModels } from "@/utils";
 import BaseInput from "../common/BaseInput.vue";
@@ -136,7 +136,7 @@ export default {
   computed: {
     ...mapState(useChatStore, ["models", "errors"]),
     ...mapWritableState(useChatStore, ["model"]),
-    ...mapState(useConfigurationStore, ["disabledModels"]),
+    ...mapState(useSettingsStore, ["disabledModels"]),
     sortedModels() {
       // Enabled models first
       return this.models.sort((a, b) => {
@@ -209,8 +209,7 @@ export default {
 
   methods: {
     ...mapActions(useChatStore, ["syncProvider"]),
-    ...mapActions(useConfigurationStore, [
-      "configure",
+    ...mapActions(useSettingsStore, [
       "removeModel",
       "enableModel",
       "disableModel",

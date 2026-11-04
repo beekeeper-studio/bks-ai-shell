@@ -2,7 +2,7 @@ import { z } from "zod/v3";
 import { tool } from "ai";
 import { getColumns, getTables, runQuery } from "@beekeeperstudio/plugin";
 import { isReadQuery, safeJSONStringify } from "@/utils";
-import { useConfigurationStore } from "@/stores/configuration";
+import { useSettingsStore } from "@/stores/settings";
 
 export const get_tables = tool({
   description: "Get a list of all tables in the current database",
@@ -57,7 +57,7 @@ export const run_query = tool({
   }),
   needsApproval({ query }) {
     if (
-      useConfigurationStore().allowExecutionOfReadOnlyQueries &&
+      useSettingsStore().allowExecutionOfReadOnlyQueries &&
       isReadQuery(query)
     ) {
       return false;
