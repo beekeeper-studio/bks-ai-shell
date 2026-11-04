@@ -1,114 +1,116 @@
-:root {
-  font-family: var(--font-family, "Roboto", Helvetica, Arial, sans-serif);
-  font-size: var(--font-size);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  font-size: 1rem;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  overflow: hidden;
-  background-color: var(--query-editor-bg);
-  color: var(--text);
-}
-
-// Copied from Beekeeper Studio
-input, select, textarea {
-  position: relative;
-  display: flex;
-  padding: 0 0.75rem;
-  font-size: 0.831rem;
-  font-weight: normal;
-  color: var(--text);
-  background: transparent;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  outline: none;
-  box-shadow: none;
-  width: 100%;
-  transition: border-color 0.15s ease-in-out;
-  font-family: var(--font-family);
-
-  &:focus, &:focus-visible {
-    border-color: var(--input-highlight);
+@layer base {
+  :root {
+    font-family: var(--font-family, "Roboto", Helvetica, Arial, sans-serif);
+    font-size: var(--font-size);
   }
 
-  option {
-    background: hsl(from var(--theme-bg) h s calc(l + 3));
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-size: 1rem;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--query-editor-bg);
     color: var(--text);
-    &:checked,
-    &:hover {
-      color: white;
-      box-shadow: 0 0 10px 100px var(--brand-info) inset;
+  }
+
+  // Copied from Beekeeper Studio
+  input, select, textarea {
+    position: relative;
+    display: flex;
+    padding: 0 0.75rem;
+    font-size: 0.831rem;
+    font-weight: normal;
+    color: var(--text);
+    background: transparent;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    outline: none;
+    box-shadow: none;
+    width: 100%;
+    transition: border-color 0.15s ease-in-out;
+    font-family: var(--font-family);
+
+    &:focus, &:focus-visible {
+      border-color: var(--input-highlight);
     }
-    &:disabled, &:disabled:hover, &:disabled:focus {
-      background: transparent;
-      color: var(--text-lighter);
+
+    option {
+      background: hsl(from var(--theme-bg) h s calc(l + 3));
+      color: var(--text);
+      &:checked,
+      &:hover {
+        color: white;
+        box-shadow: 0 0 10px 100px var(--brand-info) inset;
+      }
+      &:disabled, &:disabled:hover, &:disabled:focus {
+        background: transparent;
+        color: var(--text-lighter);
+      }
     }
   }
-}
 
-input, select {
-  height: 26px;
-  line-height: 26px;
-}
-
-textarea {
-  overflow: auto;
-  line-height: 1.75;
-  padding-block: 0.25rem;
-  resize: vertical;
-}
-
-select {
-  -webkit-appearance: none;
-  appearance: none;
-  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='rgba(255,255,255, 0.87)'><polygon points='0,0 8,0 4,4'/></svg>") no-repeat scroll 98% 60% transparent ;
-  padding: 0 0.75rem;
-}
-
-ol, ul {
-  margin-inline: 0;
-  margin-block: -0.6rem;
-  padding-inline-start: 1rem;
-  line-height: 0.5rem;
-  li {
-    line-height: 1.4rem;
+  input, select {
+    height: 26px;
+    line-height: 26px;
   }
-}
 
-a {
-  color: var(--link-color);
-}
+  textarea {
+    overflow: auto;
+    line-height: 1.75;
+    padding-block: 0.25rem;
+    resize: vertical;
+  }
 
-p {
-  line-height: 1.5;
-}
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' fill='rgba(255,255,255, 0.87)'><polygon points='0,0 8,0 4,4'/></svg>") no-repeat scroll 98% 60% transparent ;
+    padding: 0 0.75rem;
+  }
 
-pre, code {
-  font-family: var(--font-family-mono, monospace);
-}
+  ol, ul {
+    margin-inline: 0;
+    margin-block: -0.6rem;
+    padding-inline-start: 1rem;
+    line-height: 0.5rem;
+    li {
+      line-height: 1.4rem;
+    }
+  }
 
-/* Make the scrollbar look better */
-::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
-}
+  a {
+    color: var(--link-color);
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--theme-scrollbar-track);
-}
+  p {
+    line-height: 1.5;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: var(--theme-scrollbar-thumb);
-  border-radius: 2px;
-}
+  pre, code {
+    font-family: var(--font-family-mono, monospace);
+  }
 
-:focus-visible {
-  outline: none;
+  /* Make the scrollbar look better */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--theme-scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--theme-scrollbar-thumb);
+    border-radius: 2px;
+  }
+
+  :focus-visible {
+    outline: none;
+  }
 }

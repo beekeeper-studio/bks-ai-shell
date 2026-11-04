@@ -1,3 +1,4 @@
+@use "sass:meta";
 @use "theme";
 @use "base";
 @use "layout";
@@ -7,7 +8,11 @@
 @use "sass:color";
 @use "primevue";
 
-@import "@beekeeperstudio/ui-kit/style.css" layer(ui-kit);
+@layer base, ui-kit;
+
+@layer ui-kit {
+  @include meta.load-css("@beekeeperstudio/ui-kit/style.css");
+}
 
 #app {
   height: 100%;
