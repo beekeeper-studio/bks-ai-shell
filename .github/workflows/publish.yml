@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: pnpm ci
 
-      # release.sh already bumps package.json to the tag version, so allow it to be unchanged
+      # bin/make-release.sh already bumps package.json to the tag version, so allow it to be unchanged
       - name: Update package version
         run: |
           pnpm version "$VERSION" --no-git-tag-version --allow-same-version
