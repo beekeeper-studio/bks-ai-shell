@@ -124,6 +124,12 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-4-neon",
+        displayName: "gemini-4-neon",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-4-hydrogen",
         displayName: "gemini-4-hydrogen",
         contextWindow: 1_048_576,
