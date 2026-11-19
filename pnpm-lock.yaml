@@ -23,6 +23,9 @@ importers:
       '@ai-sdk/openai-compatible':
         specifier: ^2.0.4
         version: 2.0.4(zod@4.1.8)
+      '@ai-sdk/provider-utils':
+        specifier: ^4.0.4
+        version: 4.0.27(zod@4.1.8)
       '@ai-sdk/vue':
         specifier: ^3.0.28
         version: 3.0.28(vue@3.5.39(typescript@6.0.3))(zod@4.1.8)
@@ -44,6 +47,9 @@ importers:
       '@types/lodash':
         specifier: ^4.17.16
         version: 4.17.16
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
       '@types/pluralize':
         specifier: ^0.0.33
         version: 0.0.33
