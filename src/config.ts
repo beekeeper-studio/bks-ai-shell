@@ -27,6 +27,12 @@ export const providerConfigs = {
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
     models: [
       {
+        id: 'claude-fable-5-2',
+        displayName: 'claude-fable-5-2',
+        contextWindow: 1_000_000,
+        temperature: 1,
+      },
+      {
         id: 'claude-haiku-5-5',
         displayName: 'claude-haiku-5-5',
         contextWindow: 1_000_000,
