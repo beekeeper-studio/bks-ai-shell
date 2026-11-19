@@ -118,6 +118,12 @@ export const providerConfigs = {
     /** @link https://ai.google.dev/gemini-api/docs/models */
     models: [
       {
+        id: "gemini-4-hydrogen",
+        displayName: "gemini-4-hydrogen",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-4-carbon",
         displayName: "gemini-4-carbon",
         contextWindow: 1_048_576,
@@ -257,6 +263,18 @@ export const providerConfigs = {
     displayName: "OpenAI",
     /** @link https://platform.openai.com/docs/models */
     models: [
+      {
+        id: "gpt-6.2-astra",
+        displayName: "gpt-6.2-astra",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
+      {
+        id: "gpt-6.2-sol",
+        displayName: "gpt-6.2-sol",
+        contextWindow: 1_050_000,
+        temperature: 1,
+      },
       {
         id: "gpt-6.1-sol",
         displayName: "gpt-6.1-sol",
