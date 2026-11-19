@@ -1,0 +1,4 @@
+ignoredOptionalDependencies:
+  - "@parcel/watcher"
+allowBuilds:
+  vue-demi: true
