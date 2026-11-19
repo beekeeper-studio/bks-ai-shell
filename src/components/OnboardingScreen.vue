@@ -17,10 +17,9 @@
         90s Walkthough Video
       </ExternalLink>
     </p>
-    <form @submit.prevent="$emit('submit')">
+    <form @submit.prevent="$emit('submit')" @input="handleInput">
       <ApiKeyForm
         dropdown-based
-        @change="changed = true"
         @change-provider="handleChangeProvider"
       />
       <ApiInfo v-if="providerChanged" />
@@ -60,6 +59,13 @@ export default {
   },
 
   methods: {
+    handleInput(event: Event) {
+      // Picking a provider is handled by handleChangeProvider.
+      if (event.target instanceof HTMLSelectElement) {
+        return;
+      }
+      this.changed = true;
+    },
     handleChangeProvider(provider: AvailableProviders) {
       this.providerChanged = true;
       if (provider === "ollama" || provider === "mock") {

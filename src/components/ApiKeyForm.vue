@@ -126,8 +126,9 @@
 </template>
 
 <script lang="ts">
-import { mapActions } from "pinia";
-import { useConfigurationStore } from "@/stores/configuration";
+import { mapWritableState } from "pinia";
+import { useEncryptedSettingsStore } from "@/stores/encryptedSettings";
+import { useSettingsStore } from "@/stores/settings";
 import { type AvailableProviders, providerConfigs } from "@/config";
 import BaseInput from "./common/BaseInput.vue";
 import ExternalLink from "./common/ExternalLink.vue";
@@ -140,31 +141,33 @@ export default {
     ExternalLink,
   },
 
-  emits: ["change", "changeProvider"],
+  emits: ["changeProvider"],
 
   props: {
     dropdownBased: Boolean,
   },
 
   data() {
-    const config = useConfigurationStore();
-
     return {
       selectedProvider: "" as AvailableProviders,
-      openaiApiKey: config["providers.openai.apiKey"],
-      anthropicApiKey: config["providers.anthropic.apiKey"],
-      googleApiKey: config["providers.google.apiKey"],
-      zaiApiKey: config["providers.zai.apiKey"],
-      deepseekApiKey: config["providers.deepseek.apiKey"],
-      ollamaBaseUrl: config.providers_ollama_baseUrl,
-      ollamaHeaders: config.providers_ollama_headers,
-      openaiCompatBaseUrl: config.providers_openaiCompat_baseUrl,
-      openaiCompatApiKey: config.providers_openaiCompat_apiKey,
-      openaiCompatHeaders: config.providers_openaiCompat_headers,
     };
   },
 
   computed: {
+    ...mapWritableState(useEncryptedSettingsStore, {
+      openaiApiKey: "providers.openai.apiKey",
+      anthropicApiKey: "providers.anthropic.apiKey",
+      googleApiKey: "providers.google.apiKey",
+      zaiApiKey: "providers.zai.apiKey",
+      deepseekApiKey: "providers.deepseek.apiKey",
+      openaiCompatApiKey: "providers_openaiCompat_apiKey",
+    }),
+    ...mapWritableState(useSettingsStore, {
+      ollamaBaseUrl: "providers_ollama_baseUrl",
+      ollamaHeaders: "providers_ollama_headers",
+      openaiCompatBaseUrl: "providers_openaiCompat_baseUrl",
+      openaiCompatHeaders: "providers_openaiCompat_headers",
+    }),
     providerConfigs() {
       return providerConfigs;
     },
@@ -179,59 +182,9 @@ export default {
   },
 
   watch: {
-    openaiApiKey() {
-      this.configure("providers.openai.apiKey", this.openaiApiKey);
-      this.$emit("change");
-    },
-    anthropicApiKey() {
-      this.configure("providers.anthropic.apiKey", this.anthropicApiKey);
-      this.$emit("change");
-    },
-    googleApiKey() {
-      this.configure("providers.google.apiKey", this.googleApiKey);
-      this.$emit("change");
-    },
-    zaiApiKey() {
-      this.configure("providers.zai.apiKey", this.zaiApiKey);
-      this.$emit("change");
-    },
-    deepseekApiKey() {
-      this.configure("providers.deepseek.apiKey", this.deepseekApiKey);
-      this.$emit("change");
-    },
-    ollamaBaseUrl() {
-      this.configure("providers_ollama_baseUrl", this.ollamaBaseUrl);
-      this.$emit("change");
-    },
-    ollamaHeaders() {
-      this.configure("providers_ollama_headers", this.ollamaHeaders);
-      this.$emit("change");
-    },
-    openaiCompatBaseUrl() {
-      this.configure(
-        "providers_openaiCompat_baseUrl",
-        this.openaiCompatBaseUrl,
-      );
-      this.$emit("change");
-    },
-    openaiCompatApiKey() {
-      this.configure("providers_openaiCompat_apiKey", this.openaiCompatApiKey);
-      this.$emit("change");
-    },
-    openaiCompatHeaders() {
-      this.configure(
-        "providers_openaiCompat_headers",
-        this.openaiCompatHeaders,
-      );
-      this.$emit("change");
-    },
     selectedProvider() {
       this.$emit("changeProvider", this.selectedProvider);
     },
-  },
-
-  methods: {
-    ...mapActions(useConfigurationStore, ["configure"]),
   },
 };
 </script>
