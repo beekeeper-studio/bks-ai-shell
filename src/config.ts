@@ -124,6 +124,12 @@ export const providerConfigs = {
         temperature: defaultTemperature,
       },
       {
+        id: "gemini-4-carbon",
+        displayName: "gemini-4-carbon",
+        contextWindow: 1_048_576,
+        temperature: defaultTemperature,
+      },
+      {
         id: "gemini-4-argon",
         displayName: "gemini-4-argon",
         contextWindow: 1_048_576,
