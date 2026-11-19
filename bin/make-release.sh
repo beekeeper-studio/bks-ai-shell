@@ -1,130 +1,140 @@
 #!/bin/bash
 
-set -e
+set -euo pipefail
 
-# Releases can only be cut from the main branch
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [[ "$CURRENT_BRANCH" != "main" ]]; then
-  echo "🚫 You're on '$CURRENT_BRANCH'. Releases must be made from the main branch, so switch to main and try again."
-  exit 1
-fi
+# Run from the repo root so the manifest and package paths resolve.
+cd "$(dirname "$0")/.."
 
-# Releases must go to the official repository, not a fork
-EXPECTED_ORIGIN="beekeeper-studio/bks-ai-shell"
-ORIGIN_URL=$(git remote get-url origin 2>/dev/null || true)
-if [[ "$ORIGIN_URL" != *"$EXPECTED_ORIGIN"* ]]; then
-  echo "🚫 Your 'origin' points to '$ORIGIN_URL'. Releases must be published to the official repository ($EXPECTED_ORIGIN), so update your origin and try again."
-  exit 1
-fi
+VERSION_FILES=(manifest.json package.json)
 
-# Spinner function
-spin() {
-  local pid=$1
-  local msg=$2
-  local spinchars='|/-\'
-  local i=0
-  while kill -0 "$pid" 2>/dev/null; do
-    printf "\r%s %c" "$msg" "${spinchars:i++%4:1}"
-    sleep 0.1
-  done
-  printf "\r%s done\n" "$msg"
+# Function to list the 5 most recent remote tags by date
+list_recent_remote_tags() {
+  echo "Fetching the 5 most recent remote tags by date:"
+  git ls-remote --tags origin | \
+    { grep -E 'refs/tags/v[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$' || true; } | \
+    while read -r hash ref; do
+      tag="${ref#refs/tags/}"
+      date=$(git log -1 --format='%ci' "$hash" 2>/dev/null || echo "unknown date")
+      echo "$tag $date"
+    done | sort -k2 -r | head -n 5
 }
 
-# Sync with remote so we release from the latest code
-git fetch &>/dev/null &
-spin $! "Syncing with remote..."
+# Function to get the next version in sequence
+guess_next_version() {
+  # Get the most recent tag
+  local latest_tag
+  latest_tag=$(git ls-remote --tags origin | \
+    { grep -Eo 'v[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?$' || true; } | \
+    sort -V | tail -n 1)
 
-# Check if branch is behind remote
-LOCAL=$(git rev-parse @)
-REMOTE=$(git rev-parse @{u})
-BASE=$(git merge-base @ @{u})
-
-if [[ "$LOCAL" != "$REMOTE" ]]; then
-  if [[ "$LOCAL" == "$BASE" ]]; then
-    echo "⚠️  Your branch is behind the remote. Please pull the latest changes first."
-  else
-    echo "⚠️  Your branch has diverged from the remote. Please resolve this first."
+  # No releases yet: the manifest holds the first version to ship
+  if [[ -z "$latest_tag" ]]; then
+    jq -r '.version' manifest.json
+    return
   fi
-  exit 1
-fi
 
-# Function to compare semver (returns 0 if $1 > $2, 1 if equal, 2 if $1 < $2)
-semver_compare() {
-  if [[ "$1" == "$2" ]]; then
-    return 1
-  fi
-  local IFS=.
-  local i ver1=($1) ver2=($2)
-  for ((i=0; i<3; i++)); do
-    if ((ver1[i] > ver2[i])); then
-      return 0
-    elif ((ver1[i] < ver2[i])); then
-      return 2
+  # Strip 'v' from the tag
+  latest_version="${latest_tag#v}"
+
+  if [[ "$latest_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)(-(alpha|beta)\.([0-9]+))?$ ]]; then
+    major="${BASH_REMATCH[1]}"
+    minor="${BASH_REMATCH[2]}"
+    patch="${BASH_REMATCH[3]}"
+    channel="${BASH_REMATCH[5]:-}"
+    channel_num="${BASH_REMATCH[6]:-}"
+
+    if [[ -n "$channel" ]]; then
+      # Increment the channel number for pre-releases
+      channel_num=$((channel_num + 1))
+      echo "$major.$minor.$patch-$channel.$channel_num"
+    else
+      # Increment the patch version for stable releases
+      patch=$((patch + 1))
+      echo "$major.$minor.$patch"
     fi
-  done
-  return 1
+  else
+    jq -r '.version' manifest.json
+  fi
 }
 
-# Get current versions
-PKG_VERSION=$(jq -r '.version' package.json)
-MANIFEST_VERSION=$(jq -r '.version' manifest.json)
-
-# Check versions and pick the greater one if mismatched
-if [[ "$PKG_VERSION" != "$MANIFEST_VERSION" ]]; then
-  if semver_compare "$PKG_VERSION" "$MANIFEST_VERSION"; then
-    CURRENT_VERSION="$PKG_VERSION"
+# Function to validate version format
+validate_version() {
+  if [[ "$1" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+(-[a-z]+\.[0-9]+)?)$ ]]; then
+    echo "${BASH_REMATCH[1]}"
   else
-    CURRENT_VERSION="$MANIFEST_VERSION"
+    echo "Error: Invalid version format. Expected x.x.x or x.x.x-channel.x" >&2
+    exit 1
   fi
-  echo "Version mismatch: package.json ($PKG_VERSION) != manifest.json ($MANIFEST_VERSION)"
-  echo "Using greater version: $CURRENT_VERSION"
-else
-  CURRENT_VERSION="$PKG_VERSION"
-  echo "Current version: $CURRENT_VERSION"
+}
+
+# Function to set the top-level version, keeping the file's formatting
+set_version() {
+  local file="$1" old_version="$2"
+  awk -v old="\"version\": \"$old_version\"" -v new="\"version\": \"$VERSION\"" '
+    !done && (i = index($0, old)) { $0 = substr($0, 1, i - 1) new substr($0, i + length(old)); done = 1 }
+    { print }
+  ' "$file" > "$file.tmp"
+
+  # Fall back to rewriting the file with jq if the text swap missed
+  if [[ "$(jq -r '.version' "$file.tmp")" != "$VERSION" ]]; then
+    jq ".version = \"$VERSION\"" "$file" > "$file.tmp"
+  fi
+  mv "$file.tmp" "$file"
+}
+
+# Step 1: List recent tags
+list_recent_remote_tags
+
+# Step 2: Prompt user for new version with a default guess
+default_version=$(guess_next_version)
+echo ""
+read -r -p "Enter the new version (default: $default_version): " INPUT_VERSION
+VERSION="${INPUT_VERSION:-$default_version}"
+
+# Step 3: Validate and clean the version
+VERSION=$(validate_version "$VERSION")
+NEW_TAG="v$VERSION"
+
+# Confirm with the user
+echo ""
+echo "This will:"
+echo "  - Update ${VERSION_FILES[*]} to version: $VERSION"
+echo "  - Push a new git tag: $NEW_TAG"
+read -r -p "Do you want to continue? (y/n): " CONFIRM
+
+if [[ "$CONFIRM" != "y" ]]; then
+  echo "Aborted."
+  exit 0
 fi
 
-# Parse version components
-IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-
-# Calculate next patch version
-NEXT_PATCH="$MAJOR.$MINOR.$((PATCH + 1))"
-
-# Prompt for new version
-while true; do
-  echo "Enter new version (or press Enter for $NEXT_PATCH):"
-  read -r INPUT
-
-  if [[ -z "$INPUT" ]]; then
-    NEW_VERSION="$NEXT_PATCH"
-    break
-  elif [[ ! "$INPUT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "Invalid version: $INPUT. Please enter a semver like X.Y.Z"
-  elif ! semver_compare "$INPUT" "$CURRENT_VERSION"; then
-    echo "Version $INPUT must be greater than $CURRENT_VERSION"
+# Step 4: Update manifest.json and package.json if necessary
+CHANGED_FILES=()
+for file in "${VERSION_FILES[@]}"; do
+  FILE_VERSION=$(jq -r '.version' "$file")
+  if [[ "$FILE_VERSION" == "$VERSION" ]]; then
+    echo "$file is already updated to version $VERSION."
   else
-    NEW_VERSION="$INPUT"
-    break
+    echo "Updating $file..."
+    set_version "$file" "$FILE_VERSION"
+    CHANGED_FILES+=("$file")
   fi
 done
 
-echo "New version: $NEW_VERSION"
+if [[ ${#CHANGED_FILES[@]} -gt 0 ]]; then
+  # Commit changes
+  echo "Committing changes..."
+  git add "${CHANGED_FILES[@]}"
+  git commit -m "chore: bump version to $VERSION"
+  git push
+fi
 
-# Update package.json and manifest.json
-jq --arg v "$NEW_VERSION" '.version = $v' package.json > package.json.tmp && mv package.json.tmp package.json
-jq --arg v "$NEW_VERSION" '.version = $v' manifest.json > manifest.json.tmp && mv manifest.json.tmp manifest.json
+# Step 5: Push tag
+if git tag | grep -q "^${NEW_TAG}\$"; then
+  echo "Tag $NEW_TAG already exists."
+else
+  echo "Creating and pushing tag $NEW_TAG..."
+  git tag "$NEW_TAG"
+  git push origin "$NEW_TAG"
+fi
 
-echo "📝 Set the project to version $NEW_VERSION"
-
-# Commit and tag the new version
-git add package.json manifest.json
-git commit -m "chore: bump version to $NEW_VERSION"
-git tag "v$NEW_VERSION"
-
-echo "💾 Recorded version $NEW_VERSION locally"
-
-# Push commit and tag
-git push && git push origin "v$NEW_VERSION"
-
-echo "🚀 Pushed commit and tag v$NEW_VERSION to remote"
-echo "✅ Done! GitHub will build the release and create it as a draft."
-echo "👉 To publish for real, open the draft release on GitHub and mark it as ready to publish."
+echo "Release process completed successfully."
