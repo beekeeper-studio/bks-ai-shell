@@ -18,18 +18,20 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@v5
 
-      - name: Get pnpm store directory
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      # Native modules in node_modules are built for one exact runner image.
+      - name: Compute runner image cache id
+        shell: bash
+        run: echo "RUNNER_IMAGE_ID=${ImageOS:-unknown}" >> "$GITHUB_ENV"
 
-      - name: Cache pnpm store
-        uses: actions/cache@v4
+      - name: Cache node_modules
+        id: cache-nm
+        uses: actions/cache@v5
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          path: node_modules
+          key: node-modules-${{ env.RUNNER_IMAGE_ID }}-${{ runner.arch }}-${{ hashFiles('mise.toml') }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
+        if: steps.cache-nm.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Run tests
