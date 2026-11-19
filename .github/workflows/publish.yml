@@ -17,11 +17,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '26.5.1'
-          registry-url: 'https://registry.npmjs.org'
+      # Installs the node and pnpm versions pinned in mise.toml
+      - name: Setup mise
+        uses: jdx/mise-action@v5
 
       # Ensure npm 11.5.1 or later is installed
       - name: Update npm
@@ -32,14 +30,25 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
+      # release.sh already bumps package.json to the tag version, so allow it to be unchanged
       - name: Update package version
         run: |
-          yarn version --new-version $VERSION --no-git-tag-version
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Build package
-        run: yarn build
+        run: pnpm build
+
+      # Same registry config actions/setup-node wrote via `registry-url`:
+      # OIDC trusted publishing first, with NPM_TOKEN as the fallback.
+      - name: Configure npm registry
+        run: |
+          echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/.npmrc" >> $GITHUB_ENV
+          cat > "$RUNNER_TEMP/.npmrc" <<'EOF'
+          //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
+          registry=https://registry.npmjs.org/
+          EOF
 
       - name: Publish package
         run: npm publish --access public
