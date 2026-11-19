@@ -3,7 +3,7 @@ import type { AppEvent, AppEventHandlers } from './plugins/appEvent'
 import type { openExternal } from '@beekeeperstudio/plugin';
 import type pluralize from "pluralize";
 
-declare module "@vue/runtime-core" {
+declare module "vue" {
   interface ComponentCustomProperties {
     trigger: <T extends AppEvent>(
       event: T,

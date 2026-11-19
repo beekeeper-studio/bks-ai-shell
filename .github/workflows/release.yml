@@ -44,17 +44,15 @@ jobs:
             exit 1
           fi
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '26.5.1'
-          cache: 'yarn'
+      # Installs the node and pnpm versions pinned in mise.toml
+      - name: Setup mise
+        uses: jdx/mise-action@v5
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm ci
 
       - name: Build
-        run: yarn build
+        run: pnpm build
 
       - name: Create zip archive
         id: create_zip

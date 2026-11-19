@@ -17,31 +17,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '26.5.1'
-          registry-url: 'https://registry.npmjs.org'
-
-      # Ensure npm 11.5.1 or later is installed
-      - name: Update npm
-        run: npm install -g npm@latest
+      # Installs the node and pnpm versions pinned in mise.toml
+      - name: Setup mise
+        uses: jdx/mise-action@v5
 
       - name: Get tag version
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: pnpm ci
 
+      # bin/make-release.sh already bumps package.json to the tag version, so allow it to be unchanged
       - name: Update package version
         run: |
-          yarn version --new-version $VERSION --no-git-tag-version
+          pnpm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Build package
-        run: yarn build
+        run: pnpm build
 
+      # --no-git-checks because the version bump above leaves the tree dirty
       - name: Publish package
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --access public --no-git-checks

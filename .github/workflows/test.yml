@@ -14,17 +14,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # Installs the node and pnpm versions pinned in mise.toml
+      - name: Setup mise
+        uses: jdx/mise-action@v5
+
+      # Native modules in node_modules are built for one exact runner image.
+      - name: Compute runner image cache id
+        shell: bash
+        run: echo "RUNNER_IMAGE_ID=${ImageOS:-unknown}" >> "$GITHUB_ENV"
+
+      - name: Cache node_modules
+        id: cache-nm
+        uses: actions/cache@v5
         with:
-          node-version: '26.5.1'
-          cache: 'yarn'
+          path: node_modules
+          key: node-modules-${{ env.RUNNER_IMAGE_ID }}-${{ runner.arch }}-${{ hashFiles('mise.toml') }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        if: steps.cache-nm.outputs.cache-hit != 'true'
+        run: pnpm ci
 
       - name: Run tests
-        run: yarn test:run
+        run: pnpm test:run
 
       - name: Build project
-        run: yarn build
+        run: pnpm build
