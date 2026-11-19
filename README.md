@@ -17,11 +17,12 @@ cd bks-ai-shell
 ln -s $(pwd) ~/.config/beekeeper-studio/plugins/bks-ai-shell
 # On Windows, replace $(pwd) with %cd%
 
-# Install dependencies
-yarn install
+# Install Node and pnpm (via mise), then dependencies
+mise install
+pnpm install
 
 # Start development
-yarn dev
+pnpm dev
 ```
 
 Finally, open Beekeeper Studio 5.3 or newer (or restart the app).
@@ -31,7 +32,7 @@ Finally, open Beekeeper Studio 5.3 or newer (or restart the app).
 Build the project for production:
 
 ```
-yarn build
+pnpm build
 ```
 
 ## Security Note
