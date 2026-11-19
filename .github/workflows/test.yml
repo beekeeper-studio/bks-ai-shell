@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cache-nm.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile
+        run: pnpm ci
 
       - name: Run tests
         run: pnpm test:run
