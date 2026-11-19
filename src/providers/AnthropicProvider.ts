@@ -15,7 +15,11 @@ export class AnthropicProvider extends BaseProvider {
   getModel(id: string) {
     return createAnthropic({
       apiKey: this.options.apiKey,
-      headers: { "anthropic-dangerous-direct-browser-access": "true" },
+      headers: {
+        "anthropic-dangerous-direct-browser-access": "true",
+        // Without this, newer models error because it is seeing blocks of the convo it has seen before
+        "anthropic-beta": "thinking-binding-controls-2026-08-01",
+      },
     }).languageModel(id);
   }
 

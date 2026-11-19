@@ -113,6 +113,27 @@ export function isEmptyUIMessage(message: UIMessage): boolean {
   return nonEmptyParts.length === 0;
 }
 
+/**
+ * Remove the reasoning (thinking) parts of a conversation.
+ *
+ * Providers sign each reasoning block against the conversation that produced
+ * it, so a block may only be replayed while the system prompt, the tool set and
+ * every preceding message are byte for byte identical. Compacting throws that
+ * conversation away, so the blocks that outlive it have to go with it. Text and
+ * tool calls are unaffected.
+ **/
+export function withoutReasoningParts<T extends UIMessage>(messages: T[]): T[] {
+  return messages.map((message) => {
+    if (!message.parts.some((part) => part.type === "reasoning")) {
+      return message;
+    }
+    return {
+      ...message,
+      parts: message.parts.filter((part) => part.type !== "reasoning"),
+    };
+  });
+}
+
 export function providerSupportsRuntimeModels(
   provider: string,
 ): provider is AvailableProvidersWithDynamicModels {

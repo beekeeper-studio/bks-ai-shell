@@ -4,7 +4,7 @@ import { type ChatStatus, isToolUIPart } from "ai";
 import { useTabState } from "@/stores/tabState";
 import { z } from "zod/v3";
 import { createProvider } from "@/providers";
-import { safeJSONStringify } from "@/utils";
+import { safeJSONStringify, withoutReasoningParts } from "@/utils";
 import { runQuery } from "@beekeeperstudio/plugin";
 import type { UIMessage } from "@/types";
 import { lastAssistantMessageIsCompleteWithApprovedResponses } from "@/utils/last-assistant-message-is-complete-with-approved-responses";
@@ -180,7 +180,10 @@ class AIShellChat {
   private async finishCompaction() {
     const lastMessage = this.chat.messages[this.chat.messages.length - 1];
     if (!lastMessage) return;
-    this.chat.messages = [lastMessage];
+    // The summary is all that survives, and its own reasoning was signed
+    // against the conversation we are about to throw away, so it can't be
+    // replayed in the compacted one.
+    this.chat.messages = withoutReasoningParts([lastMessage]);
 
     if (this.pendingCompactMessages.value.length === 0) {
       return;
