@@ -2,6 +2,7 @@ import type { AvailableProviders, ModelInfo } from "@/config";
 import { providerConfigs } from "@/config";
 import { BaseProvider } from "@/providers/BaseProvider";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export class AnthropicProvider extends BaseProvider {
   constructor(private options: { apiKey: string }) {
@@ -17,6 +18,15 @@ export class AnthropicProvider extends BaseProvider {
       apiKey: this.options.apiKey,
       headers: { "anthropic-dangerous-direct-browser-access": "true" },
     }).languageModel(id);
+  }
+
+  getProviderOptions(): ProviderOptions {
+    return {
+      anthropic: {
+        // A conversation whose earlier turns or system prompt changed should lose stale thinking, not fail.
+        thinking: { blockBinding: { prefixMismatchBehavior: "drop_block" } },
+      },
+    };
   }
 
   async listModels(): Promise<ModelInfo[]> {
