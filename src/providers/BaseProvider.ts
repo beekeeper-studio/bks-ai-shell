@@ -54,8 +54,10 @@ export abstract class BaseProvider {
       model: this.getModel(options.modelId),
       messages: await this.convertToModelMessages(options.messages),
       abortSignal: options.signal,
-      system: isCompactPrompt ? undefined : options.systemPrompt,
-      tools: isCompactPrompt ? undefined : options.tools,
+      system: options.systemPrompt,
+      // The tools stay declared so the history matches what Claude signed, but compacting must not call them.
+      tools: options.tools,
+      toolChoice: isCompactPrompt ? "none" : undefined,
       stopWhen: stepCountIs(100),
       temperature: options.temperature ?? config?.temperature ?? defaultTemperature,
       providerOptions: this.getProviderOptions(),
