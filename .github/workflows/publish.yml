@@ -21,36 +21,21 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@v5
 
-      # Ensure npm 11.5.1 or later is installed
-      - name: Update npm
-        run: npm install -g npm@latest
-
       - name: Get tag version
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm ci
 
       # release.sh already bumps package.json to the tag version, so allow it to be unchanged
       - name: Update package version
         run: |
-          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          pnpm version "$VERSION" --no-git-tag-version --allow-same-version
 
       - name: Build package
         run: pnpm build
 
-      # Same registry config actions/setup-node wrote via `registry-url`:
-      # OIDC trusted publishing first, with NPM_TOKEN as the fallback.
-      - name: Configure npm registry
-        run: |
-          echo "NPM_CONFIG_USERCONFIG=$RUNNER_TEMP/.npmrc" >> $GITHUB_ENV
-          cat > "$RUNNER_TEMP/.npmrc" <<'EOF'
-          //registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}
-          registry=https://registry.npmjs.org/
-          EOF
-
+      # --no-git-checks because the version bump above leaves the tree dirty
       - name: Publish package
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: pnpm publish --access public --no-git-checks
