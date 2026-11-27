@@ -40,7 +40,7 @@ export abstract class BaseProvider {
 
   abstract getModel(id: string): LanguageModel;
 
-  getProviderOptions(): ProviderOptions | undefined {
+  getProviderOptions(_modelId: string): ProviderOptions | undefined {
     return undefined;
   }
 
@@ -60,7 +60,7 @@ export abstract class BaseProvider {
       toolChoice: isCompactPrompt ? "none" : undefined,
       stopWhen: stepCountIs(100),
       temperature: options.temperature ?? config?.temperature ?? defaultTemperature,
-      providerOptions: this.getProviderOptions(),
+      providerOptions: this.getProviderOptions(options.modelId),
     });
     return result.toUIMessageStreamResponse({
       originalMessages: options.messages,

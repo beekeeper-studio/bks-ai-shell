@@ -20,11 +20,19 @@ export class AnthropicProvider extends BaseProvider {
     }).languageModel(id);
   }
 
-  getProviderOptions(): ProviderOptions {
+  getProviderOptions(modelId: string): ProviderOptions | undefined {
+    const model = providerConfigs.anthropic.models.find((m) => m.id === modelId);
+
+    if (!model?.adaptiveThinking) {
+      return undefined;
+    }
+
     return {
       anthropic: {
-        // A conversation whose earlier turns or system prompt changed should lose stale thinking, not fail.
-        thinking: { blockBinding: { prefixMismatchBehavior: "drop_block" } },
+        thinking: {
+          type: "adaptive",
+          blockBinding: { prefixMismatchBehavior: "drop_block" },
+        },
       },
     };
   }

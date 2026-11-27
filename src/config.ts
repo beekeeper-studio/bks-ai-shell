@@ -25,96 +25,115 @@ export const providerConfigs = {
   anthropic: {
     displayName: "Anthropic",
     /** @link https://docs.anthropic.com/en/docs/about-claude/models/overview */
+    /**
+     * `adaptiveThinking` marks the models that think by default. Those are the
+     * only ones we send a thinking config for - see AnthropicProvider.
+     */
     models: [
       {
         id: 'claude-fable-5-2',
         displayName: 'claude-fable-5-2',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-haiku-5-5',
         displayName: 'claude-haiku-5-5',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-sonnet-5-5',
         displayName: 'claude-sonnet-5-5',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-opus-5-5',
         displayName: 'claude-opus-5-5',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-fable-5-1',
         displayName: 'claude-fable-5-1',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-fable-5',
         displayName: 'claude-fable-5',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-opus-5',
         displayName: 'claude-opus-5',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-sonnet-5',
         displayName: 'claude-sonnet-5',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: true,
       },
       {
         id: 'claude-opus-4-8',
         displayName: 'claude-opus-4-8',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: false,
       },
       {
         id: 'claude-opus-4-7',
         displayName: 'claude-opus-4-7',
         contextWindow: 1_000_000,
         temperature: 1,
+        adaptiveThinking: false,
       },
       {
         id: "claude-sonnet-4-6",
         displayName: "claude-sonnet-4-6",
         contextWindow: 1_000_000,
         temperature: defaultTemperature,
+        adaptiveThinking: false,
       },
       {
         id: "claude-opus-4-6",
         displayName: "claude-opus-4-6",
         contextWindow: 1_000_000,
         temperature: defaultTemperature,
+        adaptiveThinking: false,
       },
       {
         id: "claude-opus-4-5-20251101",
         displayName: "claude-opus-4-5",
         contextWindow: 200_000,
         temperature: defaultTemperature,
+        adaptiveThinking: false,
       },
       {
         id: "claude-sonnet-4-5-20250929",
         displayName: "claude-sonnet-4-5",
         contextWindow: 200_000,
         temperature: defaultTemperature,
+        adaptiveThinking: false,
       },
       {
         id: "claude-haiku-4-5-20251001",
         displayName: "claude-haiku-4-5",
         contextWindow: 200_000,
         temperature: defaultTemperature,
+        adaptiveThinking: false,
       },
     ],
     supportsRuntimeModels: false,
